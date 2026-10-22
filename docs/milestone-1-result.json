@@ -1,0 +1,62 @@
+{
+  "run": {
+    "id": "6e6963f7-bd55-4cf1-83b6-97df465fc1aa",
+    "seed": 42,
+    "status": "complete",
+    "sim_time": 43200,
+    "duration": 43200,
+    "wall_seconds": 600.0,
+    "created_at": "2026-10-22T03:49:37.272829+00:00",
+    "error": null,
+    "llm_calls": 3,
+    "llm_reserved_tokens": 9000,
+    "llm_tokens": 518,
+    "llm_reserved_usd": 0.018000000000000002,
+    "llm_cost_usd": 0.00045699999999999994
+  },
+  "metrics": {
+    "orders": 247,
+    "delivered": 247,
+    "pending": 0,
+    "active": 0,
+    "unserved": 0,
+    "on_time": 247,
+    "delivery_cost_eur": 453.2256210318918,
+    "overdue": 0,
+    "on_time_pct": 100.0,
+    "cost_per_delivery_eur": 1.83
+  },
+  "queue": {
+    "done": 996
+  },
+  "complaint_outcomes": [
+    {
+      "id": "C-12000",
+      "status": "resolved",
+      "source": "llm",
+      "requested_refund_eur": 5.0,
+      "approved_refund_eur": 0.0
+    },
+    {
+      "id": "C-21600",
+      "status": "awaiting_approval",
+      "source": "llm",
+      "requested_refund_eur": 500.0,
+      "approved_refund_eur": 0.0
+    },
+    {
+      "id": "C-2700",
+      "status": "resolved",
+      "source": "llm",
+      "requested_refund_eur": 0.0,
+      "approved_refund_eur": 0.0
+    },
+    {
+      "id": "C-36000",
+      "status": "awaiting_approval",
+      "source": "budget_exhausted",
+      "requested_refund_eur": 0.0,
+      "approved_refund_eur": 0.0
+    }
+  ]
+}
