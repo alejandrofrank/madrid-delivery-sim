@@ -1,5 +1,12 @@
 # Status
 
+2026-10-23: Local-first decision applied. Forty tests pass, including immutable
+dated history, missing-day validation, distinct store-source binding and local
+settings that ignore old cloud credentials. The local sample has 2,008 observations
+from five Bakiano sources on October 14-22; October 23 is explicitly missing.
+Private rows remain in ignored `data/local/bakiano/`. GCP deployment is deferred.
+See `docs/LOCAL-DATA.md` and the counts-only coverage receipt.
+
 2026-10-23: M2 first slice implemented locally: catalogue adapter, fictional city,
 transactional inventory, last-unit race, real subprocess crash recovery, delayed
 supply and checkpoint inspector at `/lab`. Verified 25 tests, Ruff, mypy and Chrome

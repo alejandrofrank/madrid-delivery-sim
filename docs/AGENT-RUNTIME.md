@@ -1,8 +1,9 @@
-# Agent foundation and GCP deployment decision
+# Local agent foundation and optional GCP portability
 
-Research date: 2026-10-23. Proposed architecture, not a deployed GCP implementation.
-The M2 inventory slice remains a deterministic local worker. This decision is a
-prerequisite before multiplying reasoning roles or adding cloud infrastructure.
+Decision updated: 2026-10-23. All execution and development are local for now.
+Polish the local lab and shared agent factory before considering an optional GCP
+adapter. Default demos require no deployments, provider calls, cloud credentials or
+cloud services. The M2 inventory slice remains a deterministic local worker.
 
 ## What an agent is in this project
 
@@ -18,11 +19,11 @@ durability, memory isolation, approvals or cost enforcement. A deterministic pol
 and an ADK reasoning policy should both fit the same event and tool contracts, so
 the experiment can measure whether model judgment helps.
 
-## Current Google options and choice
+## Researched Google options (not a deployment choice)
 
 | Option | Documented capability | Project judgment |
 | --- | --- | --- |
-| ADK on Cloud Run | Open-source agent framework with local and cloud deployment. Cloud Run has services for request-driven work, worker pools for continuous queue consumers and jobs for finite tasks. | Preferred foundation: explicit control over our queue contract, portable offline execution and one shared container image. Use jobs for finite demos/evaluation; choose worker pools for persistent pull consumers or authenticated services for bounded event requests. |
+| ADK on Cloud Run | Open-source agent framework with local and cloud deployment. Cloud Run has services for request-driven work, worker pools for continuous queue consumers and jobs for finite tasks. | Deferred portability candidate after local acceptance. Research suggests explicit control over our queue contract and a shared image; jobs, worker pools and services are possible future adapters, not current implementation requirements. |
 | Managed Agent Runtime | Managed agent deployment, scaling, security and framework integration. Current docs place it under Gemini Enterprise Agent Platform; ReasoningEngine remains an API resource name for compatibility. | Keep as a deployment adapter option when managed operations justify it. It does not replace business transactions, queue semantics or our scoped memory experiment. |
 | Managed Agents API | Config-driven autonomous agents in sandbox environments; currently Preview with restrictions on confidential data and production use. | Evaluate only on synthetic fixtures if useful. Do not send private Bakiano exports there under the current documented restrictions. |
 | ADK Agent Config | YAML-based role/workflow assembly; currently documented as experimental. | Use our own small validated role contract and a Python factory over pinned ADK APIs. Do not make experimental YAML semantics our durable application or authorization contract. |
@@ -33,8 +34,8 @@ Sources: [ADK overview](https://docs.cloud.google.com/gemini-enterprise-agent-pl
 [Managed Agents API and restrictions](https://docs.cloud.google.com/gemini-enterprise-agent-platform/build/managed-agents),
 [experimental Agent Config](https://adk.dev/agents/config/).
 
-This is a fit-for-purpose recommendation, not a claim that one framework is universally
-state of the art. Benchmark the same role/tools against a rules-only baseline.
+These links preserve research, not a selected deployment or a dependency of the local
+lab. Benchmark the same role/tools against a rules-only baseline locally.
 Pin a tested ADK/SDK version and model version in implementation; do not use a moving
 latest alias in scored runs. Verify regional availability, quotas and pricing before
 deploying. No cloud resources or paid model calls were created by this research.
@@ -62,7 +63,10 @@ config/agents/
 config/topologies/    # reporting/approval routes, separate from role behavior
 ```
 
-These paths describe the intended building block; they are not yet implemented.
+These paths describe the intended local building block; they are not yet implemented.
+Build and validate one shared factory locally, with deterministic policies and scripted
+model adapters. ADK is optional behind these contracts; default demos make no provider
+calls. Cloud packaging and a GCP adapter remain deferred until the local lab is polished.
 Copy a role configuration and soul file, not the worker implementation. Instantiate
 inventory roles with store-specific scope. Configuration is developer-controlled,
 immutable during a run, validated at startup and hashed into every decision record.
@@ -104,6 +108,16 @@ Example inventory soul:
 > before making a promise. Separate confirmed units from expected receipts. Prefer
 > deterministic tools for stock arithmetic. Propose alternatives only within verified
 > compatibility and customer consent. Escalate requests outside your store or authority.
+
+## Local sample data
+
+Target ten daily Bakiano sample dates: 2026-10-14 through 2026-10-23 inclusive.
+October 13 through October 23 inclusive would be eleven dates. Keep dated snapshots
+local, with source identity, actual observation timestamps, provenance and hashes.
+Only label a date observed when authentic source data establishes it; list missing
+days explicitly. Never invent historical prices or relabel a current observation as
+a past one. Synthetic fallback rows must be clearly marked and cannot fill an
+observed-history claim.
 
 ## Isolation and data leakage
 
@@ -172,17 +186,21 @@ Before adding more reasoning roles:
 1. Build a strict role schema, fixed tool registry and factory with no-LLM default.
 2. Run the existing inventory slice through that shared worker without changing its
    outcomes; add two store scopes and prove cross-store denial outside prompts.
-3. Add a pinned ADK adapter with scripted/fake-model tests, then one explicitly
-   budgeted real-provider smoke test when deploying the cloud path.
+3. Add optional reasoning adapters using scripted/fake-model tests locally; keep
+   the default factory and demo free of provider calls and cloud dependencies.
 4. Test prompt changes cannot grant tools, memory access, spending or approvals;
    test direct handoff is unavailable and all messages retain lineage.
 5. Replace the in-process controller with durable ownership and checkpoints. Kill
-   controller and worker separately and demonstrate recovery from both.
-6. Prepare GCP infrastructure as code with one image and role-specific deployments,
-   identities, database access, secrets, trace configuration and resource caps.
-7. Verify a small synthetic cloud run, record actual costs, then enable only the
-   minimum Bakiano projections required by approved role scopes.
+   controller and worker separately and demonstrate local recovery from both.
+6. Polish local setup, sample provenance, controls, inspection and repeatable evidence
+   before opening any cloud work. Verify the ten-date sample coverage and explicit
+   missing-day manifest without fabricating historical observations.
 
-The initial cloud deployment should be a bounded smoke experiment, not an always-on
-fleet by default. Infrastructure caps and billing alerts supplement application
-budgets; they are not hard per-agent model-spend enforcement.
+## Deferred optional GCP adapter
+
+Only after the local acceptance gates pass, reconsider a GCP adapter against the
+research above. Infrastructure as code, deployments, workload identities, cloud
+secrets, provider smoke tests and cost checks are future work requiring a separate
+explicit decision. Preserve the shared factory and event/tool contracts so a later
+adapter does not fork business behavior. No deployment or provider call is part of
+the current local development plan or default demo.

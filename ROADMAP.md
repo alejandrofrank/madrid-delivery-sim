@@ -10,12 +10,19 @@ Milestone 1 is complete: Madrid street graph, deterministic dispatch/couriers, d
 
 The next version combines Bakiano catalogue snapshots with a fictional city, synthetic inventory, three supermarkets, two retail stores, suppliers, customers and a delivery company. Preserve Madrid as a regression scenario. Keep this repository separate from Bakiano, connected through a versioned read-only adapter.
 
+All execution and development are local for now. Prioritize a polished local lab,
+shared role factory, inspectable evidence and reproducible sample data. Default demos
+require no deployments, provider calls, cloud credentials or cloud services. GCP
+portability is optional future work after local acceptance, not a milestone blocker.
+
 ## World and data contract
 
 - Start with 300-500 source listings across five stores, overlapping grocery categories and a small bulky/high-value retail assortment. Select vendors after checking snapshot quality and category overlap.
 - Import product names, observed prices, categories, brands and available normalized attributes. Preserve source listing identity, observation date, currency, units and unknown fields. Similar names do not establish cross-store product equivalence.
 - Generate all stock, supplier schedules, demand, physical attributes and operating behavior. Label each field imported, curated or simulated. Bakiano catalogue observations do not establish actual inventory or sales.
 - Preserve observed USD prices. Choose one simulation currency; any conversion needs a frozen rate and provenance. Configure approval thresholds in that currency.
+- Target ten dated local Bakiano sample snapshots for 2026-10-14 through 2026-10-23 inclusive; October 13 through October 23 inclusive is eleven dates. Preserve authentic observation dates and provenance, list unavailable days explicitly, and never fabricate historical prices or backdate current observations. Clearly marked synthetic fixtures do not establish historical coverage.
+- Local package acquired: 2,008 observations from Gama, Central Madeirense, Plazas, Daka and EPA for October 14-22. October 23 is missing at extraction time. See [local sample policy](docs/LOCAL-DATA.md) and [counts-only receipt](docs/bakiano-sample-coverage.json). Source rows stay outside Git and image builds.
 - Freeze catalogue snapshots with hashes/schema versions. Ordinary runs use local fixtures, with no cloud or paid-model dependency. Confirm redistribution rights before publishing Bakiano-derived rows; provide synthetic equivalents if needed.
 - Generate a connected directed fictional road graph with neighborhoods, five stores, depot, suppliers, fuel/charging facilities and bottlenecks with alternate routes. Version generation parameters and graph hashes.
 - Edges have distance, travel time, mode access and capacity. Start with deterministic traffic time bands and incident multipliers; road-capacity queues can follow later.
@@ -103,13 +110,18 @@ Score correctness separately from performance:
 
 ### Shared agent foundation prerequisite
 
-Before multiplying reasoning roles or deploying to GCP, implement the reusable
-role-configured runtime in [the agent foundation decision](docs/AGENT-RUNTIME.md).
-Research on 2026-10-23 recommends pinned ADK behind our event/tool contracts, with
-Cloud Run deployment adapters and independently enforced role identities/scopes.
-Role prompts/souls customize behavior; they cannot grant access or raise budgets.
-Include durable controller recovery and no-LLM tests before a bounded cloud smoke run.
-This prerequisite refines M3/M6; the current M2 worker remains local/deterministic.
+Before multiplying reasoning roles, implement and validate the reusable local
+role-configured factory in [the agent foundation decision](docs/AGENT-RUNTIME.md).
+Use the same event/tool contracts, independently enforced scopes and deterministic
+no-LLM default for each role. Role prompts/souls customize behavior; they cannot
+grant access or raise budgets. Add scripted adapter tests and durable controller
+recovery locally. This prerequisite refines M3/M6; the current M2 worker remains
+local/deterministic.
+
+The 2026-10-23 ADK/GCP source links are retained as research, not a deployment choice.
+Defer any GCP adapter, infrastructure preparation, deployment or provider smoke test
+until local workflows, sample provenance, controls and repeatable evidence are polished.
+Optional later portability must reuse the shared factory rather than fork behavior.
 
 ### M2: Bakiano adapter, fictional city and inventory foundation
 
