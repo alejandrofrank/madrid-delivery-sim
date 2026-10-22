@@ -3,7 +3,8 @@
 import json
 from collections.abc import AsyncIterator, Awaitable, Callable
 from contextlib import asynccontextmanager
-from typing import Any
+from pathlib import Path
+from typing import Any, Literal
 from uuid import UUID
 
 from fastapi import BackgroundTasks, FastAPI, HTTPException, Request
@@ -13,6 +14,7 @@ from pydantic import BaseModel, Field
 from starlette.responses import Response
 
 from delivery.db import connect
+from delivery.lab import create_lab, export_slice, lab_snapshot
 from delivery.simulation import Simulation, create_run, initialize, snapshot
 from delivery.world import DATA, World
 
@@ -27,6 +29,60 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
 
 
 app = FastAPI(title="Madrid Delivery Sim", lifespan=lifespan)
+
+
+class StartLab(BaseModel):
+    seed: int = Field(default=42, ge=0, le=2**31 - 1)
+    catalogue: Literal["fixture", "bakiano-local"] = "fixture"
+    playback_seconds: int = Field(default=15, ge=0, le=120)
+
+
+@app.get("/lab")
+def lab_page() -> FileResponse:
+    return FileResponse("web/lab.html")
+
+
+@app.get("/api/lab/catalogues")
+def lab_catalogues() -> dict[str, bool]:
+    return {"fixture": True, "bakiano-local": Path("artifacts/daka-snapshot.json").is_file()}
+
+
+@app.get("/api/lab/state")
+def inventory_state(run: UUID | None = None) -> dict[str, Any]:
+    return lab_snapshot(str(run) if run else None)
+
+
+def lab_background(run: str, seconds: int) -> None:
+    try:
+        export_slice(run, seconds)
+    except Exception:
+        # run_slice persists a sanitized failure type; never expose provider/config details.
+        pass
+
+
+@app.post("/api/lab/runs", status_code=202)
+def start_lab(body: StartLab, tasks: BackgroundTasks) -> dict[str, str]:
+    path = (
+        Path("data/lab-catalogue.json")
+        if body.catalogue == "fixture"
+        else Path("artifacts/daka-snapshot.json")
+    )
+    if not path.is_file():
+        raise HTTPException(404, "Import a local Bakiano snapshot first")
+    try:
+        run = create_lab(seed=body.seed, catalogue_path=path)
+    except ValueError:
+        raise HTTPException(422, "Invalid catalogue snapshot") from None
+    tasks.add_task(lab_background, run, body.playback_seconds)
+    return {"id": run}
+
+
+@app.get("/api/lab/runs/{run}/evidence")
+def lab_evidence(run: UUID) -> FileResponse:
+    path = Path(f"artifacts/lab-{run}.json")
+    if not path.is_file():
+        raise HTTPException(404, "Evidence is available after the scenario completes")
+    return FileResponse(path, media_type="application/json", filename=path.name)
 
 
 @app.middleware("http")

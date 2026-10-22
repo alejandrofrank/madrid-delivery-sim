@@ -8,6 +8,32 @@ Milestone 1 includes 18 bike, moto, and van couriers across Chamberí, Retiro, a
 
 ## Run locally
 
+### M2 inventory slice
+
+The fictional-city inventory lab is at **http://localhost:8010/lab** after starting
+the stack. It uses three supermarkets, two retail stores and synthetic stock.
+Start the last-unit scenario to inspect a real worker-process crash, lease recovery,
+competing baskets, reservation expiry and delayed replenishment. Checkpoint selection
+and downloadable JSON retain the evidence. This slice makes no model calls.
+
+```sh
+docker compose exec -T app delivery lab-demo
+```
+
+The default five-product fixture is entirely synthetic. To import a local Bakiano
+collector CSV with verified USD prices (not raw mislabeled bolivares):
+
+```sh
+delivery import-catalogue PATH_TO_EXPORT.csv artifacts/daka-snapshot.json --source daka --domain retail --confirmed-usd --limit 10
+delivery lab-demo --catalogue artifacts/daka-snapshot.json
+```
+
+Run those import commands in the host virtual environment, or mount the source
+export into the container explicitly. Existing output snapshots are never overwritten.
+Imported data stays in ignored `artifacts/`; the UI offers it when that snapshot exists.
+Prices retain their observed dates; catalogue listings do not establish real stock.
+See [M2 validation](docs/M2-VALIDATION.md) for guarantees and current limits.
+
 Requires Docker with Compose v2.24+ and GNU Make. On Windows, run Make from WSL with Docker Desktop integration enabled. Docker supplies Python and all application dependencies. Ports bind only to localhost: app **8010**, Postgres **55432**, Redis **56379**.
 
 ```sh

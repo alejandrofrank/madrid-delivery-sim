@@ -22,10 +22,14 @@ jobs:
         run: docker compose exec -T app delivery demo --wall-seconds 0
       - name: Verify demo invariants
         run: python scripts/verify_demo.py
+      - name: Inventory race, delayed supply and real worker crash
+        run: docker compose exec -T app delivery lab-demo
       - uses: actions/upload-artifact@v4
         with:
           name: simulation-results
-          path: artifacts/run-*.json
+          path: |
+            artifacts/run-*.json
+            artifacts/lab-*.json
       - name: Stop services
         if: always()
         run: docker compose down

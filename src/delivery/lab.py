@@ -1,5 +1,6 @@
 """Fictional-city inventory lab, isolated from the Madrid delivery fixture."""
 
+import json
 import os
 import subprocess
 import sys
@@ -26,6 +27,9 @@ def create_lab(
     city = fake_city(seed)
     run = str(uuid4())
     selected = f"{catalogue.products[0].source}:{catalogue.products[0].listing_id}"
+    selected_store = next(
+        s["id"] for s in city["stores"] if s["kind"] == catalogue.products[0].domain
+    )
     with connect(url) as conn:
         conn.execute(
             "INSERT INTO runs(id,seed,duration,wall_seconds) VALUES (%s,%s,900,0)", (run, seed)
@@ -42,6 +46,8 @@ def create_lab(
         )
         for store in city["stores"]:
             for product in catalogue.products:
+                if store["kind"] != product.domain:
+                    continue
                 sku = f"{product.source}:{product.listing_id}"
                 count = 1 if sku == selected else 10
                 conn.execute(
@@ -61,14 +67,15 @@ def create_lab(
                 )
         conn.execute(
             """INSERT INTO lab_shipments(run_id,id,store,sku,quantity,expected_sim)
-                     VALUES (%s,'supply-1','store-1',%s,5,300)""",
-            (run, selected),
+                     VALUES (%s,'supply-1',%s,%s,5,300)""",
+            (run, selected_store, selected),
         )
     return run
 
 
 def lab_snapshot(run: str | None = None, url: str | None = None) -> dict[str, Any]:
     with connect(url) as conn:
+        conn.execute("SET TRANSACTION ISOLATION LEVEL REPEATABLE READ READ ONLY")
         row = conn.execute(
             """SELECT r.*,w.city,w.catalogue,w.catalogue_hash,w.selected_product
             FROM runs r JOIN lab_worlds w ON w.run_id=r.id
@@ -101,6 +108,11 @@ def lab_snapshot(run: str | None = None, url: str | None = None) -> dict[str, An
             "catalogue": row["catalogue"],
             "catalogue_hash": row["catalogue_hash"],
             "selected_product": row["selected_product"],
+            "selected_store": next(
+                s["id"]
+                for s in row["city"]["stores"]
+                if s["kind"] == row["catalogue"]["products"][0].get("domain", "supermarket")
+            ),
             "stock": stock,
             "baskets": rows("lab_baskets", "id"),
             "shipments": rows("lab_shipments", "id"),
@@ -121,9 +133,14 @@ def lab_snapshot(run: str | None = None, url: str | None = None) -> dict[str, An
 def prepare_slice(run: str, url: str | None = None) -> None:
     with connect(url) as conn:
         world = conn.execute(
-            "SELECT selected_product FROM lab_worlds WHERE run_id=%s", (run,)
+            "SELECT selected_product,city,catalogue FROM lab_worlds WHERE run_id=%s", (run,)
         ).fetchone()
         assert world
+        store = next(
+            s["id"]
+            for s in world["city"]["stores"]
+            if s["kind"] == world["catalogue"]["products"][0].get("domain", "supermarket")
+        )
         for basket in ("basket-a", "basket-b"):
             publish(
                 conn,
@@ -132,7 +149,7 @@ def prepare_slice(run: str, url: str | None = None) -> None:
                 topic="basket.requested",
                 payload={
                     "basket": basket,
-                    "store": "store-1",
+                    "store": store,
                     "sku": world["selected_product"],
                     "quantity": 1,
                     "expires_sim": 600,
@@ -180,6 +197,7 @@ def crash_worker(run: str, url: str | None = None, point: str = "after-write") -
 
 def drain(run: str, sim: int, url: str | None = None) -> None:
     queue = Queue(url)
+    deadline = time.monotonic() + 10
     with connect(url) as conn:
         conn.execute("UPDATE runs SET sim_time=%s WHERE id=%s", (sim, run))
     for _ in range(100):
@@ -193,7 +211,19 @@ def drain(run: str, sim: int, url: str | None = None) -> None:
             if not queue.process(event, lambda conn, message: None):
                 raise RuntimeError("Inventory audit failed")
             continue
-        return
+        with connect(url) as conn:
+            pending = conn.execute(
+                """SELECT count(*) AS n FROM events WHERE run_id=%s
+                AND due_sim<=%s AND state IN ('ready','leased')""",
+                (run, sim),
+            ).fetchone()
+        if not pending or pending["n"] == 0:
+            return
+        # A temporarily unavailable event is not an empty queue. Respect wall-clock
+        # availability/lease deadlines before advancing the simulation clock.
+        if time.monotonic() >= deadline:
+            raise RuntimeError("Inventory queue did not become drainable within deadline")
+        time.sleep(0.05)
     raise RuntimeError("Inventory event budget exhausted")
 
 
@@ -255,7 +285,8 @@ def run_slice(run: str, url: str | None = None, playback_seconds: float = 0) -> 
             if e["trace_id"] == "basket-a" and e["topic"] == "basket.requested"
         ]
         if attempts != [2] or any(e["state"] != "done" for e in final["events"]):
-            raise RuntimeError("Recovery or queue-drain assertion failed")
+            summary = [(e["topic"], e["state"], e["attempts"], e["error"]) for e in final["events"]]
+            raise RuntimeError(f"Recovery or queue-drain assertion failed: {summary}")
         with connect(url) as conn:
             conn.execute("UPDATE runs SET status='complete' WHERE id=%s", (run,))
         return {
@@ -273,3 +304,11 @@ def run_slice(run: str, url: str | None = None, playback_seconds: float = 0) -> 
                 "UPDATE runs SET status='failed',error=%s WHERE id=%s", (type(exc).__name__, run)
             )
         raise
+
+
+def export_slice(run: str, playback_seconds: float = 0) -> dict[str, Any]:
+    result = run_slice(run, playback_seconds=playback_seconds)
+    Path("artifacts").mkdir(exist_ok=True)
+    path = Path(f"artifacts/lab-{run}.json")
+    path.write_text(json.dumps(result, default=str, indent=2), encoding="utf-8")
+    return result

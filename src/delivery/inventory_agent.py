@@ -39,8 +39,9 @@ def handle_inventory(conn: Connection, event: Event) -> None:
     elif event.topic == "shipment.delayed":
         row = conn.execute(
             """UPDATE lab_shipments SET expected_sim=%s,status='delayed'
-                            WHERE run_id=%s AND id=%s AND status!='received' RETURNING id""",
-            (body["expected_sim"], run, body["shipment"]),
+                            WHERE run_id=%s AND id=%s AND status!='received'
+                            AND expected_sim<=%s RETURNING id""",
+            (body["expected_sim"], run, body["shipment"], body["expected_sim"]),
         ).fetchone()
         if not row or body["expected_sim"] < sim:
             raise ValueError("Invalid shipment delay")
@@ -50,7 +51,7 @@ def handle_inventory(conn: Connection, event: Event) -> None:
             producer="inventory",
             topic="shipment.received",
             payload={"shipment": body["shipment"]},
-            key=body["shipment"],
+            key=f"{body['shipment']}:{body['expected_sim']}",
             trace_id=event.trace_id,
             parent_id=event.id,
             due_sim=body["expected_sim"],
@@ -61,11 +62,20 @@ def handle_inventory(conn: Connection, event: Event) -> None:
             "rule": "expected supply is a forecast, not sellable stock",
         }
     elif event.topic == "shipment.received":
-        received = receive(conn, run, body["shipment"], sim)
+        shipment = conn.execute(
+            """SELECT expected_sim,status FROM lab_shipments
+            WHERE run_id=%s AND id=%s""",
+            (run, body["shipment"]),
+        ).fetchone()
+        if not shipment:
+            raise ValueError("Unknown shipment")
+        deferred = shipment["status"] != "received" and sim < shipment["expected_sim"]
+        received = False if deferred else receive(conn, run, body["shipment"], sim)
         detail = {
             "shipment": body["shipment"],
             "received": received,
-            "rule": "confirmed receipt adds units exactly once",
+            "deferred": deferred,
+            "rule": "ignore obsolete receipt; add units once at confirmed arrival",
         }
     else:
         raise ValueError("Unsupported inventory event")

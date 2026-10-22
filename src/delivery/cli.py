@@ -19,6 +19,7 @@ def main() -> None:
     catalogue.add_argument("output", type=Path)
     catalogue.add_argument("--source", required=True)
     catalogue.add_argument("--limit", type=int, default=50)
+    catalogue.add_argument("--domain", choices=["supermarket", "retail"], default="retail")
     catalogue.add_argument(
         "--confirmed-usd",
         action="store_true",
@@ -56,7 +57,7 @@ def main() -> None:
 
         if args.output.exists():
             parser.error("Output already exists; choose a new snapshot path")
-        snapshot = import_bakiano_csv(args.input, args.source, args.limit)
+        snapshot = import_bakiano_csv(args.input, args.source, args.limit, args.domain)
         args.output.parent.mkdir(parents=True, exist_ok=True)
         args.output.write_text(snapshot.model_dump_json(indent=2), encoding="utf-8")
         print(json.dumps({"products": len(snapshot.products), "sha256": snapshot.digest()}))

@@ -22,6 +22,7 @@ class Product(BaseModel):
     category: str | None = None
     url: str | None = None
     provenance: Literal["imported", "simulated"]
+    domain: Literal["supermarket", "retail"] = "supermarket"
 
 
 class Catalogue(BaseModel):
@@ -48,7 +49,12 @@ def load_catalogue(path: Path) -> Catalogue:
     return catalogue
 
 
-def import_bakiano_csv(path: Path, source: str, limit: int = 50) -> Catalogue:
+def import_bakiano_csv(
+    path: Path,
+    source: str,
+    limit: int = 50,
+    domain: Literal["supermarket", "retail"] = "retail",
+) -> Catalogue:
     """Read Bakiano collector exports; preserve raw prices with explicit USD-only guard.
 
     Caller must select an export whose prices are genuinely USD (e.g. Daka), not
@@ -75,6 +81,7 @@ def import_bakiano_csv(path: Path, source: str, limit: int = 50) -> Catalogue:
                     category=row.get("category") or None,
                     url=row.get("url") or None,
                     provenance="imported",
+                    domain=domain,
                 )
             )
     catalogue = Catalogue(

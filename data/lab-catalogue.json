@@ -5,7 +5,7 @@
     {"source":"demo-grocery","listing_id":"milk-1l","name":"Whole milk 1 L","price":"3.00","currency":"USD","observed_on":"2026-10-23","category":"dairy","provenance":"simulated"},
     {"source":"demo-grocery","listing_id":"rice-1kg","name":"Rice 1 kg","price":"1.50","currency":"USD","observed_on":"2026-10-23","category":"pantry","provenance":"simulated"},
     {"source":"demo-grocery","listing_id":"flour-1kg","name":"Corn flour 1 kg","price":"1.80","currency":"USD","observed_on":"2026-10-23","category":"pantry","provenance":"simulated"},
-    {"source":"demo-retail","listing_id":"microwave","name":"Countertop microwave","price":"120.00","currency":"USD","observed_on":"2026-10-23","category":"home","provenance":"simulated"},
-    {"source":"demo-retail","listing_id":"headphones","name":"Wired headphones","price":"15.00","currency":"USD","observed_on":"2026-10-23","category":"electronics","provenance":"simulated"}
+    {"source":"demo-retail","listing_id":"microwave","name":"Countertop microwave","price":"120.00","currency":"USD","observed_on":"2026-10-23","category":"home","provenance":"simulated","domain":"retail"},
+    {"source":"demo-retail","listing_id":"headphones","name":"Wired headphones","price":"15.00","currency":"USD","observed_on":"2026-10-23","category":"electronics","provenance":"simulated","domain":"retail"}
   ]
 }
