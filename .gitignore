@@ -11,5 +11,6 @@ __pycache__/
 node_modules/
 .cache/
 data/cache/
+data/local/
 artifacts/
 .coverage

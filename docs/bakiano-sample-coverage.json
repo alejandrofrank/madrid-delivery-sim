@@ -1,0 +1,149 @@
+{
+  "schema_version": 1,
+  "start": "2026-10-14",
+  "end": "2026-10-23",
+  "requested_days": 10,
+  "available_days": 9,
+  "sources": {
+    "daka": "retail",
+    "epa": "retail",
+    "gama": "supermarket",
+    "madeirense": "supermarket",
+    "plazas": "supermarket"
+  },
+  "per_source_limit": 50,
+  "observation_basis": "warehouse ingestion day",
+  "rows": 2008,
+  "days": [
+    {
+      "date": "2026-10-14",
+      "status": "available",
+      "products": 222,
+      "by_source": {
+        "daka": 34,
+        "epa": 50,
+        "gama": 45,
+        "madeirense": 46,
+        "plazas": 47
+      },
+      "sha256": "a9a9db6ded510571c870ac02df60d8b29fa92691f7b4721129fbde186cbd6e17"
+    },
+    {
+      "date": "2026-10-15",
+      "status": "available",
+      "products": 220,
+      "by_source": {
+        "daka": 34,
+        "epa": 50,
+        "gama": 43,
+        "madeirense": 46,
+        "plazas": 47
+      },
+      "sha256": "bfacbf4503e86cd9027d450bd9e7acab63d856352d905e33a9e41dffa3913307"
+    },
+    {
+      "date": "2026-10-16",
+      "status": "available",
+      "products": 223,
+      "by_source": {
+        "daka": 35,
+        "epa": 50,
+        "gama": 45,
+        "madeirense": 46,
+        "plazas": 47
+      },
+      "sha256": "51b15f6c6df7c4608e425ca10bef4f3768c2655902765c5908a8566460d3d154"
+    },
+    {
+      "date": "2026-10-17",
+      "status": "available",
+      "products": 222,
+      "by_source": {
+        "daka": 34,
+        "epa": 50,
+        "gama": 44,
+        "madeirense": 48,
+        "plazas": 46
+      },
+      "sha256": "5e5b708abe11526b1d4f3f2f774596a4d6155640c104511ffca3ee1e617fcff0"
+    },
+    {
+      "date": "2026-10-18",
+      "status": "available",
+      "products": 221,
+      "by_source": {
+        "daka": 33,
+        "epa": 50,
+        "gama": 45,
+        "madeirense": 47,
+        "plazas": 46
+      },
+      "sha256": "5d49e473b4fc39e99b752ef5919653142f46e53ec411176ddbc93ecf5e112982"
+    },
+    {
+      "date": "2026-10-19",
+      "status": "available",
+      "products": 218,
+      "by_source": {
+        "daka": 32,
+        "epa": 50,
+        "gama": 45,
+        "madeirense": 46,
+        "plazas": 45
+      },
+      "sha256": "24c099a2fd56caa098a2e9072ddc2b9c76390c6a49b8beb83396be6b7e908598"
+    },
+    {
+      "date": "2026-10-20",
+      "status": "available",
+      "products": 215,
+      "by_source": {
+        "daka": 33,
+        "epa": 50,
+        "gama": 43,
+        "madeirense": 44,
+        "plazas": 45
+      },
+      "sha256": "ad14692c04a9776d82167a88091a4e1093236afa35b6eea1593b13502b1d3c03"
+    },
+    {
+      "date": "2026-10-21",
+      "status": "available",
+      "products": 232,
+      "by_source": {
+        "daka": 47,
+        "epa": 50,
+        "gama": 47,
+        "madeirense": 47,
+        "plazas": 41
+      },
+      "sha256": "262e84573a3f9df7be2162732b418035b5c7d8daf0a1669e80798b902c2d0782"
+    },
+    {
+      "date": "2026-10-22",
+      "status": "available",
+      "products": 235,
+      "by_source": {
+        "daka": 48,
+        "epa": 50,
+        "gama": 46,
+        "madeirense": 47,
+        "plazas": 44
+      },
+      "sha256": "77952a3f1a339afa32c01c22772be5749f246ca54096c18753e27cb1c774f865"
+    },
+    {
+      "date": "2026-10-23",
+      "status": "missing",
+      "products": 0,
+      "by_source": {
+        "daka": 0,
+        "epa": 0,
+        "gama": 0,
+        "madeirense": 0,
+        "plazas": 0
+      },
+      "sha256": null
+    }
+  ]
+}
