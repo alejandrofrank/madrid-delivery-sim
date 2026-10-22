@@ -1,0 +1,16 @@
+FROM python:3.12-slim
+ENV PYTHONUNBUFFERED=1 PYTHONDONTWRITEBYTECODE=1 PIP_DISABLE_PIP_VERSION_CHECK=1
+WORKDIR /app
+COPY requirements.lock ./
+RUN pip install --no-cache-dir -r requirements.lock
+COPY pyproject.toml ./
+COPY src ./src
+RUN pip install --no-deps -e . && useradd -m -u 10001 sim
+COPY data ./data
+COPY sql ./sql
+COPY web ./web
+COPY tests ./tests
+RUN mkdir -p artifacts && chown -R sim:sim /app
+USER sim
+EXPOSE 8000
+CMD ["uvicorn", "delivery.api:app", "--host", "0.0.0.0", "--port", "8000"]
