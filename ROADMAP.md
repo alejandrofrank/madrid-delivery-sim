@@ -101,7 +101,23 @@ Score correctness separately from performance:
 
 ## Delivery milestones
 
+### Shared agent foundation prerequisite
+
+Before multiplying reasoning roles or deploying to GCP, implement the reusable
+role-configured runtime in [the agent foundation decision](docs/AGENT-RUNTIME.md).
+Research on 2026-10-23 recommends pinned ADK behind our event/tool contracts, with
+Cloud Run deployment adapters and independently enforced role identities/scopes.
+Role prompts/souls customize behavior; they cannot grant access or raise budgets.
+Include durable controller recovery and no-LLM tests before a bounded cloud smoke run.
+This prerequisite refines M3/M6; the current M2 worker remains local/deterministic.
+
 ### M2: Bakiano adapter, fictional city and inventory foundation
+
+First vertical slice implemented 2026-10-23: offline/imported catalogue adapter,
+fictional five-store graph, inventory ledger, concurrent last-unit test, actual
+worker crash/lease recovery, delayed receipts and checkpoint UI. See
+[M2 validation](docs/M2-VALIDATION.md). Larger catalogue coverage, general workflows
+and role isolation remain planned; this is not full M2 completion.
 
 Deliver a versioned snapshot importer, offline fixture/provenance manifest, fictional graph generator, scenario schema and database migrations. Implement five stores, stock ledger, atomic reservations, expiry, receipts and structured availability queries. Add inventory/as-of/incoming-stock inspection.
 

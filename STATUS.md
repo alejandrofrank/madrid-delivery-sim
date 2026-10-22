@@ -1,5 +1,15 @@
 # Status
 
+2026-10-23: M2 first slice implemented locally: catalogue adapter, fictional city,
+transactional inventory, last-unit race, real subprocess crash recovery, delayed
+supply and checkpoint inspector at `/lab`. Verified 25 tests, Ruff, mypy and Chrome
+desktop/mobile checks. See `docs/M2-VALIDATION.md` for scope and limits.
+
+Before expanding reasoning roles, the shared GCP agent foundation is specified in
+`docs/AGENT-RUNTIME.md`: ADK behind queue/tool contracts, versioned role prompts,
+independent permissions, scoped context/memory and enforced budgets. This is a
+researched design, not a cloud deployment. M2 still runs locally without model calls.
+
 2026-10-22: Setup and Milestone 1 complete and pushed to `main`.
 
 Repo: https://github.com/alejandrofrank/madrid-delivery-sim (private).
