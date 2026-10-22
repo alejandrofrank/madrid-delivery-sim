@@ -78,7 +78,8 @@ def roads() -> dict[str, Any]:
 def runs() -> list[dict[str, Any]]:
     with connect() as conn:
         return conn.execute(
-            "SELECT id,status,seed,sim_time,created_at FROM runs ORDER BY created_at DESC LIMIT 20"
+            """SELECT id,status,seed,sim_time,created_at FROM runs WHERE NOT EXISTS
+            (SELECT 1 FROM lab_worlds WHERE run_id=runs.id) ORDER BY created_at DESC LIMIT 20"""
         ).fetchall()
 
 

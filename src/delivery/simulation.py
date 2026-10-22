@@ -128,7 +128,9 @@ def snapshot(run: str | None = None, url: str | None = None) -> dict[str, Any]:
         if run:
             state = conn.execute("SELECT * FROM runs WHERE id=%s", (run,)).fetchone()
         else:
-            state = conn.execute("SELECT * FROM runs ORDER BY created_at DESC LIMIT 1").fetchone()
+            state = conn.execute("""SELECT * FROM runs WHERE NOT EXISTS
+                (SELECT 1 FROM lab_worlds WHERE run_id=runs.id)
+                ORDER BY created_at DESC LIMIT 1""").fetchone()
         if not state:
             return {"run": None}
         run = str(state["id"])

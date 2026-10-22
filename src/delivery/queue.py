@@ -14,12 +14,21 @@ from psycopg.types.json import Jsonb
 from delivery.db import Connection, connect
 
 PUBLISH: dict[str, set[str]] = {
+    "lab_scenario": {"basket.requested", "shipment.delayed", "reservation.expire"},
+    "inventory": {"inventory.decided", "shipment.received"},
     "generator": {"order.created", "complaint.created"},
     "dispatcher": {"courier.assigned"},
     "courier": {"order.delivered", "courier.available"},
     "customer_service": {"complaint.resolved", "approval.requested"},
 }
 SUBSCRIBE: dict[str, set[str]] = {
+    "inventory": {
+        "basket.requested",
+        "shipment.delayed",
+        "shipment.received",
+        "reservation.expire",
+    },
+    "inventory_audit": {"inventory.decided"},
     "dispatcher": {"order.created", "courier.available"},
     "courier": {"courier.assigned"},
     "customer_service": {"complaint.created"},

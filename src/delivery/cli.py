@@ -11,6 +11,9 @@ def main() -> None:
     parser = argparse.ArgumentParser(description="Madrid Delivery Sim")
     sub = parser.add_subparsers(dest="command", required=True)
     sub.add_parser("init")
+    lab = sub.add_parser("lab-demo")
+    lab.add_argument("--seed", type=int, default=42)
+    lab.add_argument("--catalogue", type=Path, default=Path("data/lab-catalogue.json"))
     catalogue = sub.add_parser("import-catalogue")
     catalogue.add_argument("input", type=Path)
     catalogue.add_argument("output", type=Path)
@@ -29,6 +32,25 @@ def main() -> None:
     replay = sub.add_parser("replay")
     replay.add_argument("event_id", type=int)
     args = parser.parse_args()
+    if args.command == "lab-demo":
+        from delivery.lab import create_lab, run_slice
+
+        run = create_lab(seed=args.seed, catalogue_path=args.catalogue)
+        result = run_slice(run)
+        Path("artifacts").mkdir(exist_ok=True)
+        output = Path(f"artifacts/lab-{run}.json")
+        output.write_text(json.dumps(result, default=str, indent=2), encoding="utf-8")
+        print(
+            json.dumps(
+                {
+                    "run": run,
+                    "artifact": str(output),
+                    "crash": result["crash"],
+                    "invariants": result["invariants"],
+                }
+            )
+        )
+        return
     if args.command == "import-catalogue":
         from delivery.catalogue import import_bakiano_csv
 
