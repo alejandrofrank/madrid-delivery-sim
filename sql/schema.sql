@@ -84,7 +84,7 @@ CREATE TABLE IF NOT EXISTS events (
 );
 CREATE INDEX IF NOT EXISTS event_ready_idx ON events(run_id,topic,due_sim,priority DESC,id)
     WHERE state IN ('ready','leased');
-CREATE VIEW dead_letters AS SELECT * FROM events WHERE state = 'dead';
+CREATE OR REPLACE VIEW dead_letters AS SELECT * FROM events WHERE state = 'dead';
 CREATE TABLE IF NOT EXISTS decisions (
     id bigserial PRIMARY KEY,
     run_id uuid REFERENCES runs(id),
@@ -109,4 +109,14 @@ CREATE TABLE IF NOT EXISTS complaints (
     source text,
     PRIMARY KEY(run_id,id),
     FOREIGN KEY(run_id,order_id) REFERENCES orders(run_id,id)
+);
+CREATE TABLE IF NOT EXISTS llm_requests (
+    event_id bigint PRIMARY KEY REFERENCES events(id),
+    run_id uuid REFERENCES runs(id),
+    source text NOT NULL DEFAULT 'reserved',
+    result jsonb,
+    tokens integer NOT NULL DEFAULT 0,
+    estimated_usd double precision NOT NULL DEFAULT 0,
+    model text NOT NULL,
+    created_at timestamptz NOT NULL DEFAULT now()
 );

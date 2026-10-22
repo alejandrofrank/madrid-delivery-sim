@@ -1,0 +1,18 @@
+{
+  "source": "OpenStreetMap contributors via OSMnx / Overpass",
+  "license": "ODbL-1.0",
+  "attribution": "\u00a9 OpenStreetMap contributors",
+  "source_url": "https://www.openstreetmap.org/copyright",
+  "downloaded_at": "2026-10-22T03:39:14.217286+00:00",
+  "bbox_wsen": [
+    -3.73,
+    40.375,
+    -3.64,
+    40.455
+  ],
+  "network": "drive, motor-only edges removed, largest strongly connected component",
+  "nodes": 9391,
+  "edges": 18080,
+  "stores": 3929,
+  "sha256": "9a16af396800b533c548a38bc885f85ee4904e854d7d154fb53a29e66faf2be3"
+}

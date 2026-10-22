@@ -11,9 +11,17 @@ pytestmark = pytest.mark.integration
 
 def send(url: str, run: UUID, key: str = "o1", priority: int = 0, capacity: int = 100) -> int:
     with connect(url) as conn:
-        return publish(conn, run_id=run, producer="generator", topic="order.created",
-                       payload={"order_id": key}, key=key, trace_id=key,
-                       priority=priority, capacity=capacity)
+        return publish(
+            conn,
+            run_id=run,
+            producer="generator",
+            topic="order.created",
+            payload={"order_id": key},
+            key=key,
+            trace_id=key,
+            priority=priority,
+            capacity=capacity,
+        )
 
 
 def test_concurrent_dedupe_and_claim(db_url: str, run_id: UUID) -> None:
@@ -44,7 +52,8 @@ def test_retry_rollback_dlq_and_replay(db_url: str, run_id: UUID) -> None:
             conn.execute("UPDATE events SET available_at=now() WHERE id=%s", (event_id,))
     with connect(db_url) as conn:
         assert conn.execute("SELECT sim_time FROM runs WHERE id=%s", (run_id,)).fetchone() == {
-            "sim_time": 0}
+            "sim_time": 0
+        }
         row = conn.execute("SELECT error FROM dead_letters WHERE id=%s", (event_id,)).fetchone()
         assert row == {"error": "ValueError"}
     assert q.replay(event_id)
@@ -60,14 +69,22 @@ def test_fencing_priority_capacity_and_permissions(db_url: str, run_id: UUID) ->
     with pytest.raises(Backpressure):
         send(db_url, run_id, "overflow", capacity=2)
     with connect(db_url) as conn, pytest.raises(PermissionError):
-        publish(conn, run_id=run_id, producer="courier", topic="order.created",
-                payload={}, key="bad", trace_id="bad")
+        publish(
+            conn,
+            run_id=run_id,
+            producer="courier",
+            topic="order.created",
+            payload={},
+            key="bad",
+            trace_id="bad",
+        )
     q = Queue(db_url)
     old = q.claim("dispatcher", run_id, 0)
     assert old and old.payload["order_id"] == "high"
     with connect(db_url) as conn:
-        conn.execute("UPDATE events SET lease_until=now()-interval '1 second' WHERE id=%s",
-                     (old.id,))
+        conn.execute(
+            "UPDATE events SET lease_until=now()-interval '1 second' WHERE id=%s", (old.id,)
+        )
     new = q.claim("dispatcher", run_id, 0)
     assert new and new.id == old.id and new.token != old.token
     assert not q.process(old, lambda c, e: pytest.fail("stale handler"))
@@ -80,8 +97,9 @@ def test_crashing_workers_eventually_dead_letter(db_url: str, run_id: UUID) -> N
     for _ in range(3):
         assert q.claim("dispatcher", run_id, 0)
         with connect(db_url) as conn:
-            conn.execute("UPDATE events SET lease_until=now()-interval '1 second' WHERE id=%s",
-                         (event_id,))
+            conn.execute(
+                "UPDATE events SET lease_until=now()-interval '1 second' WHERE id=%s", (event_id,)
+            )
     assert q.claim("dispatcher", run_id, 0) is None
     with connect(db_url) as conn:
         assert conn.execute("SELECT id FROM dead_letters WHERE id=%s", (event_id,)).fetchone()

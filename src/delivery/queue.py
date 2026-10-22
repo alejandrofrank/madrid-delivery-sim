@@ -48,9 +48,18 @@ class Event:
 
 
 def publish(
-    conn: Connection, *, run_id: UUID | str, producer: str, topic: str,
-    payload: dict[str, Any], key: str, trace_id: str, due_sim: int = 0,
-    priority: int = 0, parent_id: int | None = None, capacity: int = 10000,
+    conn: Connection,
+    *,
+    run_id: UUID | str,
+    producer: str,
+    topic: str,
+    payload: dict[str, Any],
+    key: str,
+    trace_id: str,
+    due_sim: int = 0,
+    priority: int = 0,
+    parent_id: int | None = None,
+    capacity: int = 10000,
 ) -> int:
     if topic not in PUBLISH.get(producer, set()):
         raise PermissionError(f"{producer} cannot publish {topic}")
@@ -90,7 +99,8 @@ class Queue:
             conn.execute(
                 """UPDATE events SET state='dead', error='lease_expired_after_max_attempts',
                    lease_token=NULL, lease_until=NULL WHERE run_id=%s AND state='leased'
-                   AND lease_until < now() AND attempts >= max_attempts""", (run_id,),
+                   AND lease_until < now() AND attempts >= max_attempts""",
+                (run_id,),
             )
             row = conn.execute(
                 """WITH candidate AS (
@@ -105,8 +115,16 @@ class Queue:
             ).fetchone()
         if row is None:
             return None
-        return Event(row["id"], row["run_id"], row["topic"], row["payload"],
-                     row["trace_id"], token, row["attempts"], row["due_sim"])
+        return Event(
+            row["id"],
+            row["run_id"],
+            row["topic"],
+            row["payload"],
+            row["trace_id"],
+            token,
+            row["attempts"],
+            row["due_sim"],
+        )
 
     def process(self, event: Event, handler: Callable[[Connection, Event], None]) -> bool:
         try:
@@ -125,7 +143,8 @@ class Queue:
                 handler(conn, event)
                 conn.execute(
                     """UPDATE events SET state='done', completed_at=now(),
-                       lease_token=NULL, lease_until=NULL WHERE id=%s""", (event.id,),
+                       lease_token=NULL, lease_until=NULL WHERE id=%s""",
+                    (event.id,),
                 )
             return True
         except StaleLease:
@@ -150,6 +169,7 @@ class Queue:
         with connect(self.url) as conn:
             row = conn.execute(
                 """UPDATE events SET state='ready', attempts=0, error=NULL,
-                   available_at=now() WHERE id=%s AND state='dead' RETURNING id""", (event_id,),
+                   available_at=now() WHERE id=%s AND state='dead' RETURNING id""",
+                (event_id,),
             ).fetchone()
         return row is not None

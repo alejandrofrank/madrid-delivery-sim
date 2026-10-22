@@ -25,6 +25,14 @@ def run_id(db_url: str) -> Iterator[UUID]:
         conn.execute("INSERT INTO runs(id,seed) VALUES (%s,42)", (run,))
     yield run
     with connect(db_url) as conn:
-        for table in ("decisions", "complaints", "orders", "couriers", "events", "runs"):
+        for table in (
+            "llm_requests",
+            "decisions",
+            "complaints",
+            "orders",
+            "couriers",
+            "events",
+            "runs",
+        ):
             field = "id" if table == "runs" else "run_id"
             conn.execute(f"DELETE FROM {table} WHERE {field}=%s", (run,))
