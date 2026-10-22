@@ -8,7 +8,15 @@ from pydantic import ValidationError
 
 from delivery.agents import Dispatcher
 from delivery.config import Settings
-from delivery.customer_service import Advice, CustomerService, refund_policy
+from delivery.customer_service import (
+    MAX_OUTPUT,
+    RESERVED_TOKENS,
+    SYSTEM,
+    Advice,
+    CustomerService,
+    complaint_prompt,
+    refund_policy,
+)
 from delivery.db import connect
 from delivery.queue import Queue, publish
 from delivery.simulation import Simulation, create_run, demand_rate, generate, snapshot
@@ -47,6 +55,16 @@ def test_peak_demand_and_refund_gate() -> None:
         Advice.model_validate({"category": "refund", "reply": "ok", "tool": "delete_orders"})
     with pytest.raises(ValidationError):
         Advice(category="execute_sql", reply="bad")  # type: ignore[arg-type]
+
+
+@pytest.mark.parametrize("body", ["\U0001f6b2" * 1000, "\x00" * 1000, '\\"' * 1000])
+def test_adversarial_text_cannot_expand_prompt_past_reservation(body: str) -> None:
+    prompt = complaint_prompt(body, "assigned")
+    assert len(prompt.encode("utf-8")) <= 1024
+    assert json.loads(prompt)["order_status"] == "assigned"
+    known_input_bytes = len(prompt.encode("utf-8")) + len(SYSTEM.encode("utf-8"))
+    known_input_bytes += len(json.dumps(Advice.model_json_schema()).encode("utf-8"))
+    assert known_input_bytes + 256 + MAX_OUTPUT < RESERVED_TOKENS
 
 
 @pytest.mark.integration

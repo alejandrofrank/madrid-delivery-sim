@@ -30,6 +30,16 @@ class Advice(BaseModel):
     reply: str = Field(min_length=1, max_length=500)
 
 
+def complaint_prompt(text: str, order_status: str) -> str:
+    """Bound serialized bytes, including Unicode and JSON escapes, before token budgeting."""
+    body = {"untrusted_complaint": text[:1000], "order_status": order_status[:32]}
+    while True:
+        prompt = json.dumps(body, ensure_ascii=False)
+        if len(prompt.encode("utf-8")) <= 1024:
+            return prompt
+        body["untrusted_complaint"] = body["untrusted_complaint"][:-64]
+
+
 def refund_policy(requested: float, overdue: bool) -> tuple[str, float]:
     if requested > 100:
         return "awaiting_approval", 0
@@ -67,12 +77,7 @@ class CustomerService:
         with client:
             response = client.models.generate_content(
                 model=config.llm_model,
-                contents=json.dumps(
-                    {
-                        "untrusted_complaint": complaint["text"][:1000],
-                        "order_status": complaint["order_status"],
-                    }
-                ),
+                contents=complaint_prompt(complaint["text"], complaint["order_status"]),
                 config=types.GenerateContentConfig(
                     system_instruction=SYSTEM,
                     response_mime_type="application/json",
