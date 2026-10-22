@@ -1,5 +1,6 @@
 import argparse
 import json
+from pathlib import Path
 
 from delivery.config import settings
 from delivery.queue import Queue
@@ -10,6 +11,17 @@ def main() -> None:
     parser = argparse.ArgumentParser(description="Madrid Delivery Sim")
     sub = parser.add_subparsers(dest="command", required=True)
     sub.add_parser("init")
+    catalogue = sub.add_parser("import-catalogue")
+    catalogue.add_argument("input", type=Path)
+    catalogue.add_argument("output", type=Path)
+    catalogue.add_argument("--source", required=True)
+    catalogue.add_argument("--limit", type=int, default=50)
+    catalogue.add_argument(
+        "--confirmed-usd",
+        action="store_true",
+        required=True,
+        help="Confirm raw vendor prices are genuinely USD",
+    )
     demo = sub.add_parser("demo")
     demo.add_argument("--wall-seconds", type=float, default=600)
     demo.add_argument("--seed", type=int, default=42)
@@ -17,6 +29,16 @@ def main() -> None:
     replay = sub.add_parser("replay")
     replay.add_argument("event_id", type=int)
     args = parser.parse_args()
+    if args.command == "import-catalogue":
+        from delivery.catalogue import import_bakiano_csv
+
+        if args.output.exists():
+            parser.error("Output already exists; choose a new snapshot path")
+        snapshot = import_bakiano_csv(args.input, args.source, args.limit)
+        args.output.parent.mkdir(parents=True, exist_ok=True)
+        args.output.write_text(snapshot.model_dump_json(indent=2), encoding="utf-8")
+        print(json.dumps({"products": len(snapshot.products), "sha256": snapshot.digest()}))
+        return
     if args.command == "replay":
         print(json.dumps({"replayed": Queue().replay(args.event_id)}))
         return
