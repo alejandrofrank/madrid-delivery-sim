@@ -3,6 +3,7 @@
 import json
 from collections.abc import AsyncIterator, Awaitable, Callable
 from contextlib import asynccontextmanager
+from datetime import date
 from pathlib import Path
 from typing import Any, Literal
 from uuid import UUID
@@ -14,6 +15,7 @@ from pydantic import BaseModel, Field
 from starlette.responses import Response
 
 from delivery.db import connect
+from delivery.history import history_catalogue, history_manifest
 from delivery.lab import create_lab, export_slice, lab_snapshot
 from delivery.simulation import Simulation, create_run, initialize, snapshot
 from delivery.world import DATA, World
@@ -33,7 +35,8 @@ app = FastAPI(title="Madrid Delivery Sim", lifespan=lifespan)
 
 class StartLab(BaseModel):
     seed: int = Field(default=42, ge=0, le=2**31 - 1)
-    catalogue: Literal["fixture", "bakiano-local"] = "fixture"
+    catalogue: Literal["fixture", "bakiano-local", "bakiano-history"] = "fixture"
+    sample_date: date | None = None
     playback_seconds: int = Field(default=15, ge=0, le=120)
 
 
@@ -45,6 +48,14 @@ def lab_page() -> FileResponse:
 @app.get("/api/lab/catalogues")
 def lab_catalogues() -> dict[str, bool]:
     return {"fixture": True, "bakiano-local": Path("artifacts/daka-snapshot.json").is_file()}
+
+
+@app.get("/api/lab/history")
+def local_history() -> dict[str, Any]:
+    try:
+        return history_manifest()
+    except (ValueError, OSError):
+        raise HTTPException(422, "Invalid local history manifest") from None
 
 
 @app.get("/api/lab/state")
@@ -62,15 +73,29 @@ def lab_background(run: str, seconds: int) -> None:
 
 @app.post("/api/lab/runs", status_code=202)
 def start_lab(body: StartLab, tasks: BackgroundTasks) -> dict[str, str]:
-    path = (
-        Path("data/lab-catalogue.json")
-        if body.catalogue == "fixture"
-        else Path("artifacts/daka-snapshot.json")
-    )
+    store_sources = None
+    if body.catalogue == "bakiano-history":
+        if body.sample_date is None:
+            raise HTTPException(422, "Choose an observed sample date")
+        try:
+            path = history_catalogue(body.sample_date)
+            store_sources = history_manifest()["sources"]
+        except FileNotFoundError:
+            raise HTTPException(
+                404, "No observed products for this date; missing days stay missing"
+            ) from None
+        except (ValueError, OSError):
+            raise HTTPException(422, "Local sample validation failed") from None
+    else:
+        path = (
+            Path("data/lab-catalogue.json")
+            if body.catalogue == "fixture"
+            else Path("artifacts/daka-snapshot.json")
+        )
     if not path.is_file():
         raise HTTPException(404, "Import a local Bakiano snapshot first")
     try:
-        run = create_lab(seed=body.seed, catalogue_path=path)
+        run = create_lab(seed=body.seed, catalogue_path=path, store_sources=store_sources)
     except ValueError:
         raise HTTPException(422, "Invalid catalogue snapshot") from None
     tasks.add_task(lab_background, run, body.playback_seconds)

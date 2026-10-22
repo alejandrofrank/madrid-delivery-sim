@@ -1,6 +1,6 @@
 ﻿# Madrid Delivery Sim
 
-A local operations lab for queue-driven delivery agents on Madrid's real street graph. Built for inspecting assignments, failure recovery, tool permissions, and the cost of selective LLM use.
+A local operations lab for queue-driven delivery agents, with a Madrid baseline and a fictional-city inventory lab. Build and polish locally; GCP portability is deferred optional work. Default demos use local databases and make no provider calls.
 
 Milestone 1 includes 18 bike, moto, and van couriers across Chamberí, Retiro, and Puente de Vallecas; 24 real OSM pickup locations; 180 synthetic customers; and a seeded 10:00 to 22:00 service day. The map renders cached street geometry with no tile API key or external map requests.
 
@@ -34,6 +34,21 @@ Imported data stays in ignored `artifacts/`; the UI offers it when that snapshot
 Prices retain their observed dates; catalogue listings do not establish real stock.
 See [M2 validation](docs/M2-VALIDATION.md) for guarantees and current limits.
 
+### Dated Bakiano sample
+
+The local private sample targets October 14-23, 2026 (ten dates). It contains 2,008
+observations for October 14-22 from Gama, Central Madeirense, Plazas, Daka and EPA.
+October 23 had no observations at extraction time and stays explicitly missing.
+Choose a date in the lab, or run:
+
+```sh
+docker compose exec -T app delivery lab-demo --sample-date 2026-10-22
+```
+
+Samples live in ignored `data/local/bakiano/`, mounted read-only at runtime and
+excluded from image builds. The public synthetic fixture remains available without
+the private package. See [local dataset policy and acquisition](docs/LOCAL-DATA.md).
+
 Requires Docker with Compose v2.24+ and GNU Make. On Windows, run Make from WSL with Docker Desktop integration enabled. Docker supplies Python and all application dependencies. Ports bind only to localhost: app **8010**, Postgres **55432**, Redis **56379**.
 
 ```sh
@@ -66,11 +81,16 @@ For Linux users running Compose directly, set `LOCAL_UID=$(id -u)` and `LOCAL_GI
 
 ## LLM configuration
 
-Copy `.env.example` to `.env` only if `.env` does not already exist. The working machine is configured with the existing `scrapmarket` Vertex authentication. Only required authentication fields and project settings were copied. `.env` is excluded from Git and Docker's build context; Compose injects it at runtime. Never paste credential values into issues or reports.
+Local Compose fixes `LLM_PROVIDER=disabled` and does not inject `.env` into the
+application. Host settings also ignore `.env` unless explicitly requested by a
+developer. Compose can still use `.env` for host options such as `APP_PORT`.
+Cloud credentials are unnecessary for ordinary startup, tests or dated sample runs.
+Provider adapters remain optional code for later experiments; configuring them is
+deferred while the local system is polished.
 
-- `LLM_PROVIDER=vertex`: set `GOOGLE_CLOUD_PROJECT`, `GOOGLE_CLOUD_LOCATION`, and `GOOGLE_CREDENTIALS_JSON` to an authorized-user ADC JSON object. Standard ADC is also supported when made available to the runtime.
-- `LLM_PROVIDER=gemini`: set `GEMINI_API_KEY`.
-- `LLM_PROVIDER=disabled`: no paid calls; requests require operator review.
+- `LLM_PROVIDER=disabled`: current local default; service requests use recorded escalation.
+- Vertex/Gemini adapters require explicit process-environment configuration. The
+  default local stack does not enable them or inherit their credentials.
 
 The default model is `gemini-2.5-flash-lite`. Credentials were verified by real Vertex calls during implementation. Model availability depends on the configured project. Changing the model requires reviewing its output/thinking support and updating cost estimates.
 

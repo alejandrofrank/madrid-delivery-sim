@@ -2,6 +2,7 @@
 const $ = id => document.getElementById(id);
 let live = null, evidence = null, runId = "", activeStore = "", polling = false;
 let drawnCity = "";
+let catalogueChosen = false;
 const productKey = p => `${p.source}:${p.listing_id}`;
 function el(tag, text, cls) {
   const node = document.createElement(tag);
@@ -66,13 +67,14 @@ function render() {
   $("status").textContent = live.run.status.toUpperCase();
   $("start").disabled = ["ready","running"].includes(live.run.status);
   if (!activeStore) activeStore = state.selected_store;
-  $("store").replaceChildren(...state.city.stores.map(s => new Option(`${s.name} · ${s.kind}`,s.id)));
+  $("store").replaceChildren(...state.city.stores.map(s => new Option(`${s.name} · ${s.catalogue_source || s.kind}`,s.id)));
   $("store").value = activeStore;
   $("stock").replaceChildren(...state.stock.filter(s => s.store===activeStore).map(s => {
     const p = products.get(s.sku);
     return row([p?.name||s.sku,s.on_hand,s.reserved,s.available_now,s.version]);
   }));
-  $("provenance").textContent = "All stock, store locations, supply and customer demand are simulated. Product prices retain their source and observation date in the manifest.";
+  const observedDates = [...new Set(state.catalogue.products.map(p => p.observed_on))].sort();
+  $("provenance").textContent = `Catalogue date: ${observedDates.join(", ")}. All stock, store locations, supply and demand are simulated. Imported prices use the warehouse observation day and are not live availability.`;
   $("manifest").textContent = JSON.stringify({city_hash:state.city.sha256,catalogue_hash:state.catalogue_hash,...state.catalogue},null,2);
   $("baskets").replaceChildren(...state.baskets.map(b => el("p",`${b.id}: ${b.status} · ${b.quantity} unit · reservation deadline minute ${b.expires_sim/60}`,"record")));
   if (!state.baskets.length) $("baskets").textContent = "No committed basket effects yet.";
@@ -110,16 +112,31 @@ async function poll() {
   finally { polling=false; }
 }
 $("checkpoint").onchange=render;
+$("catalogue").onchange=() => { catalogueChosen=true; };
 $("store").onchange=() => {activeStore=$("store").value;render();};
 $("start").onclick=async () => {
   $("start").disabled=true; $("error").hidden=true; $("download").hidden=true;
   $("status").textContent="STARTING";
   try {
-    const result=await api("/api/lab/runs",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({seed:Number($("seed").value),catalogue:$("catalogue").value,playback_seconds:15})});
+    const selection = $("catalogue").value;
+    const body = {seed:Number($("seed").value),catalogue:selection,playback_seconds:15};
+    if (selection.startsWith("history:")) { body.catalogue="bakiano-history"; body.sample_date=selection.slice(8); }
+    const result=await api("/api/lab/runs",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(body)});
     runId=result.id; live=null; evidence=null; activeStore="";
     $("checkpoint").replaceChildren(new Option("Live / final state","live"));
     await poll();
   } catch(error) {$("error").hidden=false;$("error").textContent=error.message;$("start").disabled=false;}
 };
 api("/api/lab/catalogues").then(sources => {if(sources["bakiano-local"]) $("catalogue").add(new Option("Bakiano · local imported snapshot","bakiano-local"));}).catch(()=>{});
+api("/api/lab/history").then(history => {
+  if (!history.available) { $("history-coverage").textContent="No dated sample installed. The synthetic fixture runs entirely offline."; return; }
+  const missing = history.days.filter(day => day.status==="missing").map(day => day.date);
+  $("history-coverage").textContent=`Local Bakiano sample · ${history.start} to ${history.end} · ${history.available_days}/${history.requested_days} dates observed${missing.length?` · Missing: ${missing.join(", ")}`:""}. No live queries.`;
+  [...history.days].reverse().forEach(day => {
+    const option=new Option(`Bakiano · ${day.date} · ${day.products} observations${day.status==="missing"?" · missing":""}`,`history:${day.date}`);
+    option.disabled=day.status==="missing"; $("catalogue").add(option);
+  });
+  const latest=[...history.days].reverse().find(day => day.status==="available");
+  if (latest && !catalogueChosen) $("catalogue").value=`history:${latest.date}`;
+}).catch(() => {$("history-coverage").textContent="The local history manifest needs repair. The synthetic fixture remains available.";});
 poll(); setInterval(poll,500);

@@ -4,7 +4,8 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 class Settings(BaseSettings):
-    model_config = SettingsConfigDict(env_file=".env", extra="ignore")
+    # Local startup must not implicitly import old cloud credentials/provider settings.
+    model_config = SettingsConfigDict(env_file=None, extra="ignore")
     app_port: int = 8010
     database_url: str = "postgresql://delivery:delivery_local_only@127.0.0.1:55432/delivery"
     redis_url: str = "redis://127.0.0.1:56379/0"

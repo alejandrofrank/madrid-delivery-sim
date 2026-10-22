@@ -29,17 +29,17 @@ services:
     build: .
     user: "${LOCAL_UID:-1000}:${LOCAL_GID:-1000}"
     ports: ["127.0.0.1:${APP_PORT:-8010}:8000"]
-    env_file:
-      - path: .env
-        required: false
     environment:
+      LLM_PROVIDER: disabled
       DATABASE_URL: postgresql://delivery:delivery_local_only@postgres:5432/delivery
       TEST_DATABASE_URL: postgresql://delivery:delivery_local_only@postgres:5432/delivery_test
       REDIS_URL: redis://redis:6379/0
     depends_on:
       postgres: {condition: service_healthy}
       redis: {condition: service_healthy}
-    volumes: ["./artifacts:/app/artifacts"]
+    volumes:
+      - ./artifacts:/app/artifacts
+      - ./data/local:/app/data/local:ro
     healthcheck:
       test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/api/health', timeout=3)"]
       interval: 5s

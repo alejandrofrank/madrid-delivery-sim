@@ -1,5 +1,6 @@
 import argparse
 import json
+from datetime import date
 from pathlib import Path
 
 from delivery.config import settings
@@ -14,6 +15,7 @@ def main() -> None:
     lab = sub.add_parser("lab-demo")
     lab.add_argument("--seed", type=int, default=42)
     lab.add_argument("--catalogue", type=Path, default=Path("data/lab-catalogue.json"))
+    lab.add_argument("--sample-date", type=date.fromisoformat)
     catalogue = sub.add_parser("import-catalogue")
     catalogue.add_argument("input", type=Path)
     catalogue.add_argument("output", type=Path)
@@ -36,7 +38,13 @@ def main() -> None:
     if args.command == "lab-demo":
         from delivery.lab import create_lab, run_slice
 
-        run = create_lab(seed=args.seed, catalogue_path=args.catalogue)
+        store_sources = None
+        if args.sample_date:
+            from delivery.history import history_catalogue, history_manifest
+
+            args.catalogue = history_catalogue(args.sample_date)
+            store_sources = history_manifest()["sources"]
+        run = create_lab(seed=args.seed, catalogue_path=args.catalogue, store_sources=store_sources)
         result = run_slice(run)
         Path("artifacts").mkdir(exist_ok=True)
         output = Path(f"artifacts/lab-{run}.json")

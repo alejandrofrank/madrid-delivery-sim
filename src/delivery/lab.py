@@ -11,7 +11,7 @@ from uuid import uuid4
 
 from psycopg.types.json import Jsonb
 
-from delivery.catalogue import load_catalogue
+from delivery.catalogue import Catalogue, digest, load_catalogue
 from delivery.city import fake_city
 from delivery.db import connect, migrate
 from delivery.inventory import availability, movement
@@ -20,16 +20,17 @@ from delivery.queue import Queue, publish
 
 
 def create_lab(
-    url: str | None = None, seed: int = 42, catalogue_path: Path = Path("data/lab-catalogue.json")
+    url: str | None = None,
+    seed: int = 42,
+    catalogue_path: Path = Path("data/lab-catalogue.json"),
+    store_sources: dict[str, str] | None = None,
 ) -> str:
     migrate(url)
     catalogue = load_catalogue(catalogue_path)
-    city = fake_city(seed)
+    city = catalogue_city(catalogue, seed, store_sources)
     run = str(uuid4())
     selected = f"{catalogue.products[0].source}:{catalogue.products[0].listing_id}"
-    selected_store = next(
-        s["id"] for s in city["stores"] if s["kind"] == catalogue.products[0].domain
-    )
+    selected_store = scenario_store(city, catalogue.model_dump(mode="json"))
     with connect(url) as conn:
         conn.execute(
             "INSERT INTO runs(id,seed,duration,wall_seconds) VALUES (%s,%s,900,0)", (run, seed)
@@ -46,7 +47,7 @@ def create_lab(
         )
         for store in city["stores"]:
             for product in catalogue.products:
-                if store["kind"] != product.domain:
+                if store["kind"] != product.domain or store["catalogue_source"] != product.source:
                     continue
                 sku = f"{product.source}:{product.listing_id}"
                 count = 1 if sku == selected else 10
@@ -71,6 +72,36 @@ def create_lab(
             (run, selected_store, selected),
         )
     return run
+
+
+def catalogue_city(
+    catalogue: Catalogue, seed: int, store_sources: dict[str, str] | None = None
+) -> dict[str, Any]:
+    city = fake_city(seed)
+    bindings = store_sources or {p.source: p.domain for p in catalogue.products}
+    if any(bindings.get(p.source) != p.domain for p in catalogue.products):
+        raise ValueError("Catalogue source/domain does not match store bindings")
+    for domain in ("supermarket", "retail"):
+        stores = [s for s in city["stores"] if s["kind"] == domain]
+        sources = sorted(source for source, kind in bindings.items() if kind == domain)
+        if len(sources) > len(stores):
+            raise ValueError("Too many sources for fictional stores")
+        for index, store in enumerate(stores):
+            store["catalogue_source"] = sources[index % len(sources)] if sources else None
+    city["sha256"] = digest({key: value for key, value in city.items() if key != "sha256"})
+    return city
+
+
+def scenario_store(city: dict[str, Any], catalogue: dict[str, Any]) -> str:
+    product = catalogue["products"][0]
+    return str(
+        next(
+            s["id"]
+            for s in city["stores"]
+            if s["kind"] == product.get("domain", "supermarket")
+            and s.get("catalogue_source", product["source"]) == product["source"]
+        )
+    )
 
 
 def lab_snapshot(run: str | None = None, url: str | None = None) -> dict[str, Any]:
@@ -108,11 +139,7 @@ def lab_snapshot(run: str | None = None, url: str | None = None) -> dict[str, An
             "catalogue": row["catalogue"],
             "catalogue_hash": row["catalogue_hash"],
             "selected_product": row["selected_product"],
-            "selected_store": next(
-                s["id"]
-                for s in row["city"]["stores"]
-                if s["kind"] == row["catalogue"]["products"][0].get("domain", "supermarket")
-            ),
+            "selected_store": scenario_store(row["city"], row["catalogue"]),
             "stock": stock,
             "baskets": rows("lab_baskets", "id"),
             "shipments": rows("lab_shipments", "id"),
@@ -136,11 +163,7 @@ def prepare_slice(run: str, url: str | None = None) -> None:
             "SELECT selected_product,city,catalogue FROM lab_worlds WHERE run_id=%s", (run,)
         ).fetchone()
         assert world
-        store = next(
-            s["id"]
-            for s in world["city"]["stores"]
-            if s["kind"] == world["catalogue"]["products"][0].get("domain", "supermarket")
-        )
+        store = scenario_store(world["city"], world["catalogue"])
         for basket in ("basket-a", "basket-b"):
             publish(
                 conn,
