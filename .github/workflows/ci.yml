@@ -1,0 +1,31 @@
+name: Verify simulation
+on: [push, pull_request]
+permissions:
+  contents: read
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      LOCAL_UID: "1001"
+      LOCAL_GID: "1001"
+    steps:
+      - uses: actions/checkout@v4
+      - name: Start local stack
+        run: make setup
+      - name: Typed Python and failure tests
+        run: |
+          docker compose exec -T app ruff check src tests
+          docker compose exec -T app mypy --cache-dir=/tmp/mypy-cache src
+          docker compose exec -T app pytest -q
+      - name: Full seeded day without paid calls
+        run: docker compose exec -T app delivery demo --wall-seconds 0
+      - name: Verify demo invariants
+        run: python scripts/verify_demo.py
+      - uses: actions/upload-artifact@v4
+        with:
+          name: simulation-results
+          path: artifacts/run-*.json
+      - name: Stop services
+        if: always()
+        run: docker compose down
