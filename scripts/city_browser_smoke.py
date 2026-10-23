@@ -22,7 +22,7 @@ with sync_playwright() as p:
     assert page.evaluate("getComputedStyle(document.body).backgroundColor") == "rgb(2, 4, 9)"
     assert page.evaluate("agentName('inventory:store-1')") == "Lucia Rios"
     assert page.evaluate("agentName('courier:bike-1')") == "Lucia Mora"
-    assert "Elena Vega" in page.locator('[data-agent="dispatcher:fleet"]').inner_text()
+    assert "Elena Vega" in page.locator('header [data-agent="dispatcher:fleet"]').inner_text()
     assert page.locator("[data-customer]").count() >= 96
     assert (
         page.locator(
@@ -68,6 +68,18 @@ with sync_playwright() as p:
     assert schedule
     assert any(order["arrival_sim"] > 0 for order in schedule)
     assert len({order["arrival_sim"] for order in schedule}) > 1
+    assert page.locator(".metric").count() == 5
+    assert page.locator(".order-table tbody tr").count() == len(schedule)
+    page.get_by_role("button", name="Fleet workspace", exact=True).click()
+    assert page.locator("#board-content [data-agent]").count() == len(snapshot["fleet"])
+    page.get_by_role("button", name="Stores workspace", exact=True).click()
+    assert page.locator("[data-open-store]").count() == 12
+    page.get_by_role("button", name="Orders workspace", exact=True).click()
+    page.locator("#board-filter").select_option("active")
+    assert page.locator(".order-table tbody tr").count() == sum(
+        j["status"] in ("assigned", "in_transit", "arrived") for j in snapshot["jobs"]
+    )
+    page.locator("#board-filter").select_option("all")
     page.locator("#entity-filter").select_option("all")
     page.locator('[data-store="store-1"] rect').click()
     page.get_by_role("button", name="Team", exact=True).click()
@@ -88,6 +100,9 @@ with sync_playwright() as p:
     page.reload(wait_until="networkidle")
     page.wait_for_function("window.deliverySnapshot")
     assert page.evaluate("window.deliverySnapshot.run.id") == snapshot["run"]["id"]
+    page.get_by_role("button", name="Operations overview", exact=True).click()
+    assert page.locator("#welcome").is_visible()
+    assert page.locator("#board-title").inner_text() == "Order book"
     assert not errors, errors
     print(json.dumps({"run": snapshot["run"]["id"], "orders": len(schedule), "errors": errors}))
     browser.close()

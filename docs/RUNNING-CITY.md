@@ -136,3 +136,14 @@ Agents have stable fictional display names, such as Lucia Rios (inventory),
 Lucia Luna (fulfillment), Lucia Mora (courier), Elena Vega (dispatcher), and
 Victor Sol (judge). Names are presentation labels; role IDs, queue destinations,
 database permissions and memory namespaces keep their original identities.
+
+## Operations workspace
+
+The overview pairs the dispatch map with session metrics and a contextual inspector.
+Metrics show order volume, active deliveries, delivered orders, available couriers
+and job exceptions from the saved run. Network activity lists recorded incidents.
+The order book filters all, active or attention-required orders; selecting an order
+opens its household context and route when that run contains household metadata.
+Fleet opens named courier cards and their scoped inspectors. Stores opens the
+establishment directory and shop controls. The Overview navigation returns to the
+operations watch. These views are operator projections, not additional agent access.
