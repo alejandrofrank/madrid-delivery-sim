@@ -19,17 +19,39 @@ with sync_playwright() as p:
     page.goto(args.url.rstrip("/") + "/delivery-lab", wait_until="networkidle")
     page.wait_for_selector('#city[data-node-count="1024"]')
     assert page.locator("[data-store]").count() == 12
+    assert page.locator("[data-customer]").count() >= 96
+    assert (
+        page.locator(
+            '[data-building][data-kind="home"], [data-building][data-kind="apartment"]'
+        ).count()
+        >= 96
+    )
+    assert page.locator("[data-direction]").count() > 0
+    assert "Rules only" in page.locator("header").inner_text()
     page.get_by_role("button", name="Configure", exact=True).click()
     page.locator('[name="duration_minutes"]').fill("15")
     page.locator('[name="orders_per_hour"]').fill("12")
     page.get_by_role("button", name="Save next-run settings").click()
     page.locator("#speed").select_option("2")
     for index in range(1, 4):
-        page.locator(f'[data-store="store-{index}"]').click()
+        page.locator(f'[data-store="store-{index}"] rect').click()
         page.locator('[name="couriers"]').fill("1")
         page.locator('[name="enabled"]').check()
         page.get_by_role("button", name="Save shop for next run").click()
     page.get_by_role("button", name="Start simulation").click()
+    page.wait_for_function(
+        "window.deliverySnapshot && window.deliverySnapshot.order_schedule.length"
+    )
+    first_snapshot = page.evaluate("window.deliverySnapshot")
+    upcoming = max(first_snapshot["order_schedule"], key=lambda order: order["arrival_sim"])
+    customer = next(
+        c for c in first_snapshot["city"]["customers"] if c["id"] == upcoming["customer_id"]
+    )
+    page.locator("#customer-search").fill(customer["name"])
+    page.locator("#customer-search").dispatch_event("input")
+    assert customer["name"] in page.locator("#context-title").inner_text()
+    assert upcoming["product_name"] in page.locator("#customer-view").inner_text()
+    assert "Upcoming orders" in page.locator("#customer-view").inner_text()
     page.wait_for_function(
         "window.deliverySnapshot && "
         "['complete','completed','finished'].includes(window.deliverySnapshot.run.status)",
@@ -37,12 +59,13 @@ with sync_playwright() as p:
     )
     snapshot = page.evaluate("window.deliverySnapshot")
     assert len(snapshot["city"]["nodes"]) == 1024
-    assert len(snapshot["city"]["edges"]) == 3968
+    assert 1024 < len(snapshot["city"]["edges"]) < 3968
     schedule = snapshot["order_schedule"]
     assert schedule
     assert any(order["arrival_sim"] > 0 for order in schedule)
     assert len({order["arrival_sim"] for order in schedule}) > 1
-    page.locator('[data-store="store-1"]').click()
+    page.locator("#entity-filter").select_option("all")
+    page.locator('[data-store="store-1"] rect').click()
     page.get_by_role("button", name="Team", exact=True).click()
     page.locator('[data-agent="inventory:store-1"]').click()
     page.wait_for_function("window.selectedAgentEvidence")
