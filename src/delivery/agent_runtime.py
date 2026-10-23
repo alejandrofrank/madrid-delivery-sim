@@ -25,6 +25,7 @@ class BasketRequest(BaseModel):
     sku: str = Field(min_length=1, max_length=512)
     quantity: int = Field(gt=0)
     expires_sim: int = Field(ge=0)
+    deliver: bool = False
 
 
 class ShipmentDelay(BaseModel):
@@ -93,6 +94,11 @@ class ScopedTools:
             "memory.read": self._recall,
             "memory.write": self._remember,
             "queue.publish": self._publish,
+            "fulfillment.read": self._workflow_read,
+            "fulfillment.pick": self._workflow_pick,
+            "dispatch.read": self._workflow_read,
+            "dispatch.assign": self._workflow_assign,
+            "dispatch.complete": self._workflow_complete,
         }
         if name not in registry:
             raise PermissionError("Unknown tool")
@@ -109,6 +115,34 @@ class ScopedTools:
             raise BudgetExceeded("Reserved tool slots exhausted")
         self.calls.append(name)
         return registry[name](**arguments)
+
+    def _workflow_read(self, basket: str) -> dict[str, Any]:
+        row = self.__conn.execute(
+            "SELECT public.workflow_context(%s) AS data", (basket,)
+        ).fetchone()
+        assert row
+        return dict(row["data"])
+
+    def _workflow_pick(self, basket: str) -> dict[str, Any]:
+        row = self.__conn.execute(
+            "SELECT public.fulfillment_pick(%s) AS data", (basket,)
+        ).fetchone()
+        assert row
+        return dict(row["data"])
+
+    def _workflow_assign(self, basket: str, courier: str, route: list[int]) -> dict[str, Any]:
+        row = self.__conn.execute(
+            "SELECT public.dispatch_assign(%s,%s,%s) AS data", (basket, courier, Jsonb(route))
+        ).fetchone()
+        assert row
+        return dict(row["data"])
+
+    def _workflow_complete(self, basket: str) -> dict[str, Any]:
+        row = self.__conn.execute(
+            "SELECT public.dispatch_complete(%s) AS data", (basket,)
+        ).fetchone()
+        assert row
+        return dict(row["data"])
 
     def _read(self, sku: str | None = None) -> dict[str, Any]:
         stock = self.__conn.execute(
@@ -213,13 +247,13 @@ class ScopedTools:
         return publish(
             self.__conn,
             run_id=self.scope.run,
-            producer="inventory",
+            producer=self.role.name,
             topic=topic,
             payload=payload,
             key=key,
             trace_id=self.event.trace_id,
             parent_id=self.event.id,
-            target_store=self.scope.store,
+            target_store=None,
             due_sim=self.sim if due_sim is None else due_sim,
         )
 
@@ -242,6 +276,13 @@ class InventoryPolicy:
                 quantity=request.quantity,
                 expires_sim=request.expires_sim,
             )
+            if request.deliver and status == "reserved":
+                tools.invoke(
+                    "queue.publish",
+                    topic="basket.reserved",
+                    payload={"basket": request.basket},
+                    key=request.basket,
+                )
             detail = {
                 "basket": request.basket,
                 "status": status,
@@ -301,7 +342,7 @@ class LocalAgent:
             row = conn.execute("SELECT public.agent_clock() AS sim").fetchone()
             assert row
         return Queue(self.dsn, lease_seconds).claim(
-            "inventory", self.scope.run, row["sim"], accepted_topics=self.role.accepts
+            self.role.name, self.scope.run, row["sim"], accepted_topics=self.role.accepts
         )
 
     def reserve_budget(self, event: Event) -> bool:
@@ -328,7 +369,12 @@ class LocalAgent:
         if not ticket:
             raise BudgetExceeded("A durable budget reservation is required")
         tools = ScopedTools(conn, self.scope, self.role, event)
-        detail = InventoryPolicy().decide(event, tools)
+        if self.role.name == "inventory":
+            detail = InventoryPolicy().decide(event, tools)
+        else:
+            from delivery.workflow_policy import WorkflowPolicy
+
+            detail = WorkflowPolicy().decide(event, tools)
         detail["reserved_tool_slots"] = ticket["slots"]
         conn.execute(
             """INSERT INTO decisions(run_id,sim_time,agent,order_id,event_id,action,detail)
@@ -351,7 +397,7 @@ class LocalAgent:
         return Queue(self.dsn).process(event, self.handle)
 
 
-def create_inventory_agent(dsn: str) -> LocalAgent:
+def create_agent(dsn: str) -> LocalAgent:
     """Scope is read from the authenticated database login, never from a prompt/event."""
     with connect(dsn) as conn:
         row = conn.execute(
@@ -368,3 +414,7 @@ def create_inventory_agent(dsn: str) -> LocalAgent:
         role,
         dsn,
     )
+
+
+# Compatibility for existing inventory workers; both use the same authenticated factory.
+create_inventory_agent = create_agent

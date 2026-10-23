@@ -37,12 +37,16 @@ def inventory_access(
             candidate = RoleSpec.model_validate(definition.model_dump())
             with connect(operator_url) as conn:
                 frozen = conn.execute(
-                    "SELECT definition_hash FROM agent_bindings WHERE run_id=%s LIMIT 1", (run,)
+                    """SELECT definition_hash FROM agent_bindings WHERE run_id=%s
+                    AND definition->>'role'='inventory' LIMIT 1""",
+                    (run,),
                 ).fetchone()
             if not frozen or candidate.digest != frozen["definition_hash"]:
                 raise ValueError("Role definition is frozen for this run")
         return dict(_ACCESS[key])
     role = RoleSpec.model_validate((definition or load_inventory_role()).model_dump())
+    if role.name != "inventory":
+        raise PermissionError("Inventory provisioning requires an inventory role")
     limits = role.limits
     result = {}
     with connect(operator_url) as conn:
@@ -130,3 +134,88 @@ def retire_inventory_access(run: str, url: str | None = None) -> None:
                 sql.SQL("DROP ROLE IF EXISTS {}").format(sql.Identifier(row["login_role"]))
             )
     _ACCESS.pop((operator_url, run), None)
+    for key in list(_ROLE_ACCESS):
+        if key[:2] == (operator_url, run):
+            _ROLE_ACCESS.pop(key)
+
+
+_ROLE_ACCESS: dict[tuple[str, str, str], dict[str, AgentAccess]] = {}
+
+
+def role_access(run: str, name: str, url: str | None = None) -> dict[str, AgentAccess]:
+    """Provision supported role namespaces; no caller-supplied permissions or scopes."""
+    from delivery.agent_specs import load_role
+
+    if name == "inventory":
+        return inventory_access(run, url)
+    role = load_role(name)
+    group = {"fulfillment": "lab_fulfillment_executor", "dispatcher": "lab_dispatch_executor"}[name]
+    operator = url or settings().database_url
+    key = (operator, run, name)
+    if key in _ROLE_ACCESS:
+        return dict(_ROLE_ACCESS[key])
+    result = {}
+    with connect(operator) as conn:
+        conn.execute("SELECT pg_advisory_xact_lock(hashtextextended(%s,0))", (run,))
+        world = conn.execute("SELECT city FROM lab_worlds WHERE run_id=%s", (run,)).fetchone()
+        if not world:
+            raise ValueError("Unknown run")
+        conn.execute(
+            "INSERT INTO agent_run_budgets(run_id) VALUES (%s) ON CONFLICT DO NOTHING", (run,)
+        )
+        stores = [s["id"] for s in world["city"]["stores"]] if name == "fulfillment" else ["fleet"]
+        for store in stores:
+            namespace = f"{name}:{store}"
+            login = "lab_i_" + hashlib.sha256(f"{run}:{namespace}".encode()).hexdigest()[:24]
+            password = secrets.token_urlsafe(32)
+            conn.execute(
+                sql.SQL(
+                    """CREATE ROLE {} LOGIN INHERIT NOSUPERUSER NOCREATEDB
+                    NOCREATEROLE NOREPLICATION NOBYPASSRLS PASSWORD {}"""
+                ).format(sql.Identifier(login), sql.Literal(password))
+            )
+            conn.execute(
+                sql.SQL("GRANT {} TO {}").format(sql.Identifier(group), sql.Identifier(login))
+            )
+            conn.execute(
+                "INSERT INTO agent_bindings VALUES (%s,%s,%s,%s,%s,%s)",
+                (
+                    login,
+                    run,
+                    namespace,
+                    namespace,
+                    Jsonb(role.model_dump(mode="json")),
+                    role.digest,
+                ),
+            )
+            limits = role.limits
+            conn.execute(
+                """INSERT INTO agent_budgets(run_id,store,events_limit,tools_limit,
+                step_slots,memory_entries_limit,memory_bytes_limit)
+                VALUES (%s,%s,%s,%s,%s,%s,%s)""",
+                (
+                    run,
+                    namespace,
+                    limits.events_per_run,
+                    limits.tool_calls_per_run,
+                    limits.tool_calls_per_event,
+                    limits.memory_entries,
+                    limits.memory_bytes,
+                ),
+            )
+            result[store] = AgentAccess(
+                run,
+                namespace,
+                login,
+                make_conninfo(
+                    operator,
+                    user=login,
+                    password=password,
+                    application_name=namespace,
+                    options=(
+                        "-c statement_timeout=5000 -c idle_in_transaction_session_timeout=10000"
+                    ),
+                ),
+            )
+    _ROLE_ACCESS[key] = result
+    return dict(result)

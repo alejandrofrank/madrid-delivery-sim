@@ -10,7 +10,7 @@ from pydantic import BaseModel, ConfigDict, Field, ValidationInfo, field_validat
 INVENTORY_ACCEPTS = frozenset(
     {"basket.requested", "shipment.delayed", "shipment.received", "reservation.expire"}
 )
-INVENTORY_EMITS = frozenset({"inventory.decided", "shipment.received"})
+INVENTORY_EMITS = frozenset({"inventory.decided", "shipment.received", "basket.reserved"})
 INVENTORY_TOOLS = frozenset(
     {
         "inventory.read",
@@ -23,6 +23,32 @@ INVENTORY_TOOLS = frozenset(
         "queue.publish",
     }
 )
+
+
+AUTHORITY = {
+    "inventory": {"accepts": INVENTORY_ACCEPTS, "emits": INVENTORY_EMITS, "tools": INVENTORY_TOOLS},
+    "fulfillment": {
+        "accepts": frozenset({"basket.reserved"}),
+        "emits": frozenset({"basket.ready"}),
+        "tools": frozenset(
+            {"fulfillment.read", "fulfillment.pick", "memory.read", "memory.write", "queue.publish"}
+        ),
+    },
+    "dispatcher": {
+        "accepts": frozenset({"basket.ready", "delivery.arrived"}),
+        "emits": frozenset({"delivery.assigned", "delivery.completed"}),
+        "tools": frozenset(
+            {
+                "dispatch.read",
+                "dispatch.assign",
+                "dispatch.complete",
+                "memory.read",
+                "memory.write",
+                "queue.publish",
+            }
+        ),
+    },
+}
 
 
 class RoleLimits(BaseModel):
@@ -42,7 +68,7 @@ class _RoleConfig(BaseModel):
     model_config = ConfigDict(extra="forbid", frozen=True)
 
     schema_version: Literal[1]
-    role: Literal["inventory"]
+    role: Literal["inventory", "fulfillment", "dispatcher"]
     version: str = Field(min_length=1, max_length=64)
     policy: Literal["deterministic"]
     soul_file: Literal["SOUL.md"]
@@ -55,11 +81,7 @@ class _RoleConfig(BaseModel):
     @classmethod
     def enforce_authority(cls, value: tuple[str, ...], info: ValidationInfo) -> tuple[str, ...]:
         assert info.field_name is not None
-        authority = {
-            "accepts": INVENTORY_ACCEPTS,
-            "emits": INVENTORY_EMITS,
-            "tools": INVENTORY_TOOLS,
-        }[info.field_name]
+        authority = AUTHORITY[str(info.data["role"])][info.field_name]
         if len(value) != len(set(value)) or not set(value).issubset(authority):
             raise ValueError(f"{info.field_name} exceeds server authority or contains duplicates")
         return value
@@ -87,3 +109,12 @@ def load_inventory_role(root: Path = Path("config/agents/inventory")) -> RoleSpe
     if soul_path.resolve().parent != root.resolve():
         raise ValueError("SOUL.md must remain inside the role directory")
     return RoleSpec(**config.model_dump(), soul=soul_path.read_text(encoding="utf-8"))
+
+
+def load_role(name: str) -> RoleSpec:
+    if name not in AUTHORITY:
+        raise ValueError("Unknown role")
+    role = load_inventory_role(Path("config/agents") / name)
+    if role.name != name:
+        raise ValueError("Role directory does not match role identity")
+    return role

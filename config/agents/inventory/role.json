@@ -4,9 +4,27 @@
   "version": "1",
   "policy": "deterministic",
   "soul_file": "SOUL.md",
-  "accepts": ["basket.requested", "shipment.delayed", "shipment.received", "reservation.expire"],
-  "emits": ["inventory.decided", "shipment.received"],
-  "tools": ["inventory.read", "inventory.reserve", "inventory.release", "inventory.delay", "inventory.receive", "memory.read", "memory.write", "queue.publish"],
+  "accepts": [
+    "basket.requested",
+    "shipment.delayed",
+    "shipment.received",
+    "reservation.expire"
+  ],
+  "emits": [
+    "inventory.decided",
+    "shipment.received",
+    "basket.reserved"
+  ],
+  "tools": [
+    "inventory.read",
+    "inventory.reserve",
+    "inventory.release",
+    "inventory.delay",
+    "inventory.receive",
+    "memory.read",
+    "memory.write",
+    "queue.publish"
+  ],
   "limits": {
     "events_per_run": 100,
     "tool_calls_per_event": 8,

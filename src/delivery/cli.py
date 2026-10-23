@@ -29,6 +29,8 @@ def main() -> None:
         required=True,
         help="Confirm raw vendor prices are genuinely USD",
     )
+    flow = sub.add_parser("delivery-demo")
+    flow.add_argument("--seed", type=int, default=42)
     demo = sub.add_parser("demo")
     demo.add_argument("--wall-seconds", type=float, default=600)
     demo.add_argument("--seed", type=int, default=42)
@@ -36,6 +38,25 @@ def main() -> None:
     replay = sub.add_parser("replay")
     replay.add_argument("event_id", type=int)
     args = parser.parse_args()
+    if args.command == "delivery-demo":
+        from delivery.delivery_flow import new_delivery, run_delivery
+
+        run = new_delivery(args.seed)
+        result = run_delivery(run)
+        output = Path(f"artifacts/delivery-{run}.json")
+        output.parent.mkdir(exist_ok=True)
+        output.write_text(json.dumps(result, default=str, indent=2), encoding="utf-8")
+        print(
+            json.dumps(
+                {
+                    "run": run,
+                    "artifact": str(output),
+                    "jobs": result["jobs"],
+                    "invariants": result["invariants"],
+                }
+            )
+        )
+        return
     if args.command == "lab-demo":
         from delivery.agent_specs import load_inventory_role
         from delivery.lab import create_lab, run_slice

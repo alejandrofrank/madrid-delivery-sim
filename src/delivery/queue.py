@@ -15,9 +15,11 @@ from delivery.db import Connection, connect
 
 PUBLISH: dict[str, set[str]] = {
     "lab_scenario": {"basket.requested", "shipment.delayed", "reservation.expire"},
-    "inventory": {"inventory.decided", "shipment.received"},
+    "inventory": {"inventory.decided", "shipment.received", "basket.reserved"},
     "generator": {"order.created", "complaint.created"},
-    "dispatcher": {"courier.assigned"},
+    "dispatcher": {"courier.assigned", "delivery.assigned", "delivery.completed"},
+    "fulfillment": {"basket.ready"},
+    "lab_world": {"delivery.arrived"},
     "courier": {"order.delivered", "courier.available"},
     "customer_service": {"complaint.resolved", "approval.requested"},
 }
@@ -29,7 +31,9 @@ SUBSCRIBE: dict[str, set[str]] = {
         "reservation.expire",
     },
     "inventory_audit": {"inventory.decided"},
-    "dispatcher": {"order.created", "courier.available"},
+    "dispatcher": {"order.created", "courier.available", "basket.ready", "delivery.arrived"},
+    "fulfillment": {"basket.reserved"},
+    "delivery_audit": {"delivery.assigned", "delivery.completed"},
     "courier": {"courier.assigned"},
     "customer_service": {"complaint.created"},
     "audit": {"order.delivered", "complaint.resolved", "approval.requested"},
@@ -79,9 +83,15 @@ def publish(
     scope_row = conn.execute("SELECT public.agent_scope() AS scope").fetchone()
     scope = scope_row["scope"] if scope_row else None
     if scope:
-        if str(run_id) != scope["run_id"] or target_store not in (None, scope["store"]):
+        destination = conn.execute(
+            "SELECT public.agent_destination(%s,%s) AS destination",
+            (topic, Jsonb(payload)),
+        ).fetchone()
+        assert destination
+        expected = destination["destination"]
+        if str(run_id) != scope["run_id"] or target_store not in (None, expected):
             raise PermissionError("Queue destination exceeds agent scope")
-        target_store = scope["store"]
+        target_store = expected
         if (
             parent_id is not None
             and not conn.execute("SELECT id FROM events WHERE id=%s", (parent_id,)).fetchone()

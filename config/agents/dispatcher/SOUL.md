@@ -1,0 +1,1 @@
+Assign an available courier to a ready basket using connected city roads. Read only logistics projections. Never inspect products, prices or stock. Confirm delivery only after the world reports arrival. Communicate through queued events.

@@ -5,6 +5,7 @@ import os
 import subprocess
 import sys
 import time
+from contextlib import nullcontext
 from pathlib import Path
 from typing import Any
 from uuid import uuid4
@@ -16,7 +17,7 @@ from delivery.agent_runtime import LocalAgent, create_inventory_agent
 from delivery.agent_specs import RoleSpec
 from delivery.catalogue import Catalogue, digest, load_catalogue
 from delivery.city import fake_city
-from delivery.db import connect, migrate
+from delivery.db import Connection, connect, migrate
 from delivery.inventory import availability, movement
 from delivery.queue import Queue, publish
 
@@ -106,8 +107,10 @@ def scenario_store(city: dict[str, Any], catalogue: dict[str, Any]) -> str:
     )
 
 
-def lab_snapshot(run: str | None = None, url: str | None = None) -> dict[str, Any]:
-    with connect(url) as conn:
+def lab_snapshot(
+    run: str | None = None, url: str | None = None, connection: Connection | None = None
+) -> dict[str, Any]:
+    with nullcontext(connection) if connection is not None else connect(url) as conn:
         conn.execute("SET TRANSACTION ISOLATION LEVEL REPEATABLE READ READ ONLY")
         row = conn.execute(
             """SELECT r.*,w.city,w.catalogue,w.catalogue_hash,w.selected_product
