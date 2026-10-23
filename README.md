@@ -40,8 +40,8 @@ See [M2 validation](docs/M2-VALIDATION.md) for guarantees and current limits.
 ### Basket to delivery
 
 Open **http://localhost:8010/delivery-lab** to follow stock reservation, picking,
-courier assignment and delivery on the 10×10 city. Inventory, fulfillment and
-dispatch use separate database identities, role-scoped tools and private memory.
+courier assignment, traffic delays and judged recovery on the 32×32 city. Inventory, fulfillment and
+dispatch, courier and judge roles use separate database identities, scoped tools and private memory.
 Every handoff is queued. The trusted world engine moves the bike; dispatch can
 confirm delivery only after its arrival event. No model calls are used.
 
@@ -50,7 +50,9 @@ docker compose exec -T app delivery delivery-demo
 ```
 
 See [delivery flow and permissions](docs/DELIVERY-FLOW.md) for the event chain,
-verified boundaries and current single-item/single-courier limits.
+legacy delivery boundaries. The default now runs seven requests, scarce stock, four
+bikes, 12 establishments including pharmacies, traffic and courier dropouts. See
+[fleet recovery and scoped briefings](docs/FLEET-RECOVERY.md).
 
 ### Dated Bakiano sample
 

@@ -4,7 +4,9 @@ const escapeHTML = value => String(value ?? '—').replace(/[&<>"']/g, c => ({'&
 const roles = [
  ['Inventory', 'Reserves confirmed stock. Cannot pick items or move couriers.'],
  ['Fulfillment', 'Picks a reserved basket at its assigned store. Cannot change stock policy or delivery routes.'],
- ['Dispatcher', 'Assigns couriers and routes. The world engine moves couriers and records authoritative arrival. Cannot reserve or pick stock.']
+ ['Dispatcher', 'Assigns couriers and routes; queues shared handoff briefs. Cannot reserve or pick stock.'],
+ ['Courier', 'Receives a queued briefing and custody checkpoint. The world engine controls movement and authoritative arrival.'],
+ ['Judge', 'Reviews retry cost against remaining deadline. Approves or denies reassignment using inspectable evidence.']
 ];
 let snapshot = null, runId = new URLSearchParams(location.search).get('run'), pollTimer = null;
 function renderRoles(agents = []) {
@@ -23,31 +25,44 @@ function drawCity(data) {
  const minY = Math.min(...coordinates.map(n=>n.y)), maxY = Math.max(...coordinates.map(n=>n.y));
  const pad = Math.max(maxX-minX,maxY-minY)*.055 || 1;
  svg.setAttribute('viewBox',`${minX-pad} ${minY-pad} ${maxX-minX+2*pad} ${maxY-minY+2*pad}`);
- const radius = pad*.16;
+ const radius = pad*.08;
+ const edgeLookup=new Map(data.city.edges.map(e=>[`${e.from}:${e.to}`,e]));
+ const visibleCouriers=new Set();
  for (const edge of data.city.edges) { const a=nodes.get(String(edge.from)), b=nodes.get(String(edge.to)); if(a&&b) svg.append(svgElement('line',{x1:a.x,y1:a.y,x2:b.x,y2:b.y,stroke:'#ccd7dc','stroke-width':radius*.3,'data-road':''})); }
  for(const node of coordinates) svg.append(svgElement('circle',{cx:node.x,cy:node.y,r:radius*.35,fill:'#9caeb5','data-node':node.id}));
- for(const store of data.city.stores) {const n=nodes.get(String(store.node)); if(n) {const e=svgElement('rect',{x:n.x-radius,y:n.y-radius,width:radius*2,height:radius*2,fill:'#263b43'}); const t=svgElement('title',{});t.textContent=store.name||store.id;e.append(t);svg.append(e);}}
+ for(const store of data.city.stores) {const n=nodes.get(String(store.node)); if(n) {const e=svgElement('rect',{x:n.x-radius,y:n.y-radius,width:radius*2,height:radius*2,fill:String(store.kind||store.type||store.name||store.id).toLowerCase().includes('pharmac')?'#8e55a4':'#263b43','data-store':store.id}); const t=svgElement('title',{});t.textContent=store.name||store.id;e.append(t);svg.append(e);}}
  for(const job of data.jobs) {
  const route=(job.route||[]).map(id=>nodes.get(String(id))).filter(Boolean);
  if(route.length>1) svg.append(svgElement('polyline',{points:route.map(n=>`${n.x},${n.y}`).join(' '),fill:'none',stroke:'#148674','stroke-width':radius*.6,'stroke-opacity':'.65','data-route':job.basket}));
  const customer=nodes.get(String(job.customer_node)); if(customer) svg.append(svgElement('circle',{cx:customer.x,cy:customer.y,r:radius,fill:'#fff',stroke:'#148674','stroke-width':radius*.4}));
- if(route.length) {
- const times=route.slice(1).map((n,i)=>Number(data.city.edges.find(e=>String(e.from)===String(route[i].id)&&String(e.to)===String(n.id))?.travel_seconds)||1);
+ if(job.status==='abandoned') {const n=nodes.get(String(job.pickup_node));if(n)svg.append(svgElement('rect',{x:n.x-radius,y:n.y-radius,width:radius*2,height:radius*2,fill:'#ac352a','data-abandoned':job.basket}));}
+ if(route.length && job.courier && !['abandoned','stranded','deferred','awaiting_review'].includes(job.status) && !visibleCouriers.has(job.courier)) {
+ visibleCouriers.add(job.courier);
+ const attempt=(data.attempts||[]).filter(a=>a.basket===job.basket && a.courier===job.courier && !['failed','dropped','dropout','abandoned'].includes(a.status)).at(-1);
+ const durations=job.route_durations||attempt?.edge_durations||[];
+ const times=route.slice(1).map((n,i)=>Number(durations[i])||Number(edgeLookup.get(`${route[i].id}:${n.id}`)?.travel_seconds)||1);
  let remaining=Math.max(0,Number(data.run.sim_time)-(Number(job.depart_sim)||0)),position=route[0];
  for(let i=0;i<times.length;i++){if(remaining<=times[i]){const f=remaining/times[i];position={x:route[i].x+(route[i+1].x-route[i].x)*f,y:route[i].y+(route[i+1].y-route[i].y)*f};break;}remaining-=times[i];position=route[i+1];}
  svg.append(svgElement('circle',{cx:position.x,cy:position.y,r:radius*1.25,fill:'#d57c19',stroke:'white','stroke-width':radius*.3,'data-courier':job.courier||job.basket}));
  }
  }
- $('graph-info').textContent=`${coordinates.length} nodes · ${data.city.edges.length} directed roads`;
+ $('graph-info').textContent=`${coordinates.length} nodes · ${data.city.edges.length} directed roads · ${data.city.stores.length} establishments`;
 }
 function render(data) {
  snapshot=data; $('status').textContent=data.run.status; $('clock').textContent=`Simulation ${Number(data.run.sim_time).toFixed(1)}s`;
  $('run-info').textContent=`Run ${data.run.id} · No external model calls · Local synthetic scenario`;
  const baskets=[...new Set([...data.tasks,...data.jobs].map(t=>t.basket))];
  $('baskets').innerHTML=baskets.map(b=>{const tasks=data.tasks.filter(t=>t.basket===b),jobs=data.jobs.filter(j=>j.basket===b);const status=jobs.at(-1)?.status||tasks.at(-1)?.status||'pending';const normalized=String(status).toLowerCase().replace(/[-_ ]/g,'');let index=['reserved','picking','dispatched','intransit','delivered'].indexOf(normalized);if(['picked','ready'].includes(normalized))index=1;if(['dispatch','assigned'].includes(normalized))index=2;if(normalized==='arrived')index=3;return `<article class="record" data-basket="${escapeHTML(b)}"><strong>${escapeHTML(b)} · <span data-basket-status>${escapeHTML(status)}</span></strong><p>${tasks.map(t=>escapeHTML(t.store)).join(', ')}</p><div class="steps">${['Stock reservation','Picking','Dispatch','In transit','Delivered'].map((s,i)=>`<span class="step ${i<=index?'active':''}">${s}</span>`).join('')}</div><details><summary>Task and route evidence</summary><pre>${escapeHTML(JSON.stringify({tasks,jobs},null,2))}</pre></details></article>`;}).join('');
+ $('outcomes').textContent=`${data.jobs.filter(j=>j.status==='delivered').length} delivered · ${data.jobs.filter(j=>j.status==='abandoned').length} abandoned · ${data.tasks.filter(t=>t.status==='rejected').length} rejected`;
  $('invariants').innerHTML=Object.entries(data.invariants).map(([k,v])=>`<p class="${v?'good':'bad'}">${v?'✓':'✗'} ${escapeHTML(k.replaceAll('_',' '))}</p>`).join('');
  $('stock').innerHTML=data.stock.map(s=>`<tr><td>${escapeHTML(s.store)} / ${escapeHTML(s.sku)}</td><td>${escapeHTML(s.on_hand)}</td><td>${escapeHTML(s.reserved)}</td><td>${escapeHTML(s.available_now)}</td></tr>`).join('');
  renderRoles(data.agents);
+ const evidence=(title,rows,summary)=>`<details${title.startsWith('Judge')?' open':''}><summary>${title} (${rows.length})</summary>${rows.map(row=>`<details class="record"><summary>${escapeHTML(summary(row))}</summary><pre>${escapeHTML(JSON.stringify(row,null,2))}</pre></details>`).join('')}</details>`;
+ $('fleet').innerHTML=evidence('Fleet',data.fleet||[],r=>`${r.id} · ${r.status} · basket ${r.busy_basket||'none'} · node ${r.node}`);
+ $('incidents').innerHTML=evidence('Traffic and courier incidents',data.incidents||[],r=>`${r.sim_time}s · ${r.kind} · ${r.basket||r.courier||''}`);
+ $('reviews').innerHTML=evidence('Judge cost and deadline evidence',data.reviews||[],r=>`${r.basket} · attempt ${r.attempt} · ${r.verdict} · estimated ${r.estimated_seconds}s / remaining ${r.remaining_seconds}s · ${r.reason}`);
+ $('briefs').innerHTML=evidence('Shared queued courier briefings',data.briefs||[],r=>`${r.basket} · attempt ${r.attempt} · ${r.courier}`);
+ $('attempts').innerHTML=(data.attempts||[]).map(a=>`<details class="record"><summary>${escapeHTML(a.basket)} · attempt ${escapeHTML(a.attempt)} · ${escapeHTML(a.courier)} · ${escapeHTML(a.status)}</summary><pre>${escapeHTML(JSON.stringify(a,null,2))}</pre></details>`).join('');
  $('decisions').innerHTML=data.decisions.map(d=>`<details><summary>${escapeHTML(d.sim_time)}s · ${escapeHTML(d.agent)} · ${escapeHTML(d.action)}</summary><pre>${escapeHTML(JSON.stringify(d.detail,null,2))}</pre></details>`).join('');
  $('events').innerHTML=data.events.map(e=>`<details><summary>${escapeHTML(e.topic)} · ${escapeHTML(e.state)}</summary><p>Event ${escapeHTML(e.id)} ← Parent ${escapeHTML(e.parent_id)}<br>Trace ${escapeHTML(e.trace_id)}<br>Producer ${escapeHTML(e.producer)} · Attempts ${escapeHTML(e.attempts)} · Due ${escapeHTML(e.due_sim)}s</p></details>`).join('');
  $('timeline').innerHTML=(data.timeline||[]).map(t=>`<tr><td>${escapeHTML(t.sim_time)}s</td><td>${escapeHTML(t.basket)}</td><td>${escapeHTML(t.label)}</td><td>${escapeHTML(t.status)}</td><td>${escapeHTML(t.node)}</td></tr>`).join('');

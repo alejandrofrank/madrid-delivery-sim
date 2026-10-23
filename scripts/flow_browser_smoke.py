@@ -22,7 +22,7 @@ with sync_playwright() as p:
     page.wait_for_function(
         "window.deliverySnapshot && window.deliverySnapshot.run.status === 'complete' && "
         "window.deliverySnapshot.jobs.length > 0 && "
-        "window.deliverySnapshot.jobs.every(j => j.status === 'delivered')",
+        "window.deliverySnapshot.jobs.some(j => j.status === 'delivered')",
         timeout=60000,
     )
     snapshot = page.evaluate("window.deliverySnapshot")
@@ -30,19 +30,35 @@ with sync_playwright() as p:
     evidence = page.request.get(args.url + page.locator("#download").get_attribute("href"))
     assert evidence.ok
     assert evidence.json()["checkpoints"]
-    assert len(snapshot["city"]["nodes"]) == 100
-    assert len(snapshot["city"]["edges"]) == 360
-    assert all(len(j["route"]) > 1 for j in snapshot["jobs"])
+    assert len(snapshot["city"]["nodes"]) == 1024
+    assert len(snapshot["city"]["edges"]) == 3968
+    assert len(snapshot["city"]["stores"]) == 12
+    assert any("pharmac" in json.dumps(store).lower() for store in snapshot["city"]["stores"])
+    delivered = [job for job in snapshot["jobs"] if job["status"] == "delivered"]
+    assert len(delivered) >= 2
+    assert len({job["courier"] for job in delivered}) >= 2
+    assert all(len(job["route"]) > 1 for job in delivered)
+    assert any("drop" in incident["kind"] for incident in snapshot["incidents"])
+    assert any("traffic" in incident["kind"] for incident in snapshot["incidents"])
+    verdicts = {review["verdict"] for review in snapshot["reviews"]}
+    assert verdicts & {"approved", "approve"}, verdicts
+    assert verdicts & {"denied", "deny", "rejected"}, verdicts
+    retry_briefs = [brief for brief in snapshot["briefs"] if brief["attempt"] >= 2]
+    assert retry_briefs
+    retry_text = json.dumps(retry_briefs[0]["body"]).lower()
+    assert "custody" in retry_text and "checkpoint" in retry_text
+    assert "source" in retry_text and "event" in retry_text
     assert all(snapshot["invariants"].values()), snapshot["invariants"]
-    assert page.locator("[data-node]").count() == 100
-    assert page.locator("[data-road]").count() == 360
-    assert page.locator("[data-role]").count() == 3
+    assert page.locator("[data-node]").count() == 1024
+    assert page.locator("[data-road]").count() == 3968
+    assert page.locator("[data-role]").count() == 5
     assert page.locator("[data-courier]").count() > 0
     assert page.locator("#error").is_hidden()
     assert page.evaluate("document.documentElement.scrollWidth <= innerWidth")
     page.locator("#decisions summary").first.click()
     page.locator("#events summary").first.click()
     page.screenshot(path="artifacts/flow-desktop.png", full_page=True)
+    page.screenshot(path="artifacts/flow-viewport.png")
     page.set_viewport_size({"width": 390, "height": 844})
     assert page.evaluate("document.documentElement.scrollWidth <= innerWidth")
     page.screenshot(path="artifacts/flow-mobile.png", full_page=True)
@@ -55,9 +71,9 @@ with sync_playwright() as p:
         json.dumps(
             {
                 "run": snapshot["run"]["id"],
-                "delivered": len(snapshot["jobs"]),
-                "nodes": 100,
-                "roads": 360,
+                "delivered": len(delivered),
+                "nodes": 1024,
+                "roads": 3968,
                 "role_boundaries": "passed",
                 "responsive": "passed",
                 "browser_errors": errors,

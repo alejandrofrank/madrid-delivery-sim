@@ -1,6 +1,8 @@
 # Local basket-to-delivery slice
 
-Implemented 2026-10-23. Open `/delivery-lab` and choose **Run basket delivery**.
+This document describes the preserved first delivery slice. The default `/delivery-lab`
+now uses the [expanded fleet recovery scenario](FLEET-RECOVERY.md). Saved legacy
+runs retain the behavior described below.
 The existing `/lab` last-unit/crash/delayed-supply scenario remains available.
 Both use the same local factory, permissions, scoped tools, private memory,
 durable budgets and fenced event-processing transaction.

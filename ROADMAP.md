@@ -144,6 +144,14 @@ Acceptance: same seed produces the same initial hashes; last-unit race has one w
 
 ### M3: Fulfillment, independent workers and permissions
 
+Expanded local slice: 32×32 city, 12 establishments including pharmacies, scarce
+stock, multiple baskets/couriers, queued assignment contention, seeded congestion,
+courier acknowledgements, dropouts, scoped recovery briefs and an isolated retry
+judge. See [fleet recovery](docs/FLEET-RECOVERY.md). Recovery approvals enforce
+route/deadline/cost/attempt limits. Actual concurrent dispatcher workers prove one
+assignment and one deferred job for one available courier. Full M3/M4 and eval
+completion remain deferred.
+
 First local delivery slice implemented: five isolated fulfillment identities and
 one fleet-scoped dispatcher reuse the foundation. A basket reserves, is picked
 once, receives a validated route/courier assignment and is delivered after the

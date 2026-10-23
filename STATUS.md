@@ -1,5 +1,13 @@
 # Status
 
+2026-10-23: Expanded default delivery lab to a 32x32 city, 12 establishments
+including pharmacies, scarce inventory, seven basket requests and four couriers.
+Added role-isolated courier and judge agents, queued scoped briefings, traffic delays,
+dropouts, custody-preserving recovery and deadline/cost/attempt gates. Seed 42:
+five delivered, one abandoned after denied recovery, one rejected stock request.
+Verified 86 Linux tests, Ruff, mypy and desktop/mobile Chrome.
+See `docs/FLEET-RECOVERY.md`. No model/voice-provider calls or private rows committed.
+
 2026-10-23: Added fulfillment and fleet dispatcher roles using the shared local
 factory, queue, memory and budgets. Basket-to-delivery inspector at `/delivery-lab`
 shows atomic picking, courier assignment, physical movement and queued confirmation.

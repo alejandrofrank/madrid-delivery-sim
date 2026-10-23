@@ -1,5 +1,9 @@
 # Shared local inventory agent foundation
 
+The shared factory also powers courier and judge roles in the
+[expanded fleet recovery scenario](FLEET-RECOVERY.md), with scoped exported briefings
+kept separate from private memory.
+
 Implemented and verified 2026-10-23. The same factory now also supports isolated
 fulfillment and dispatcher roles: see [basket-to-delivery flow](DELIVERY-FLOW.md).
 The original inventory scenario creates five inventory agents,
