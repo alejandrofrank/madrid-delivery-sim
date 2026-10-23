@@ -35,19 +35,53 @@ AUTHORITY = {
         ),
     },
     "dispatcher": {
-        "accepts": frozenset({"basket.ready", "delivery.arrived"}),
-        "emits": frozenset({"delivery.assigned", "delivery.completed"}),
+        "accepts": frozenset(
+            {
+                "basket.ready",
+                "delivery.arrived",
+                "dispatch.retry",
+                "recovery.reviewed",
+                "courier.accepted",
+            }
+        ),
+        "emits": frozenset(
+            {
+                "delivery.assigned",
+                "delivery.completed",
+                "courier.briefed",
+                "recovery.requested",
+                "dispatch.retry",
+                "dispatch.noted",
+            }
+        ),
         "tools": frozenset(
             {
                 "dispatch.read",
                 "dispatch.assign",
                 "dispatch.complete",
+                "dispatch.recover",
+                "dispatch.defer",
                 "memory.read",
                 "memory.write",
                 "queue.publish",
             }
         ),
     },
+}
+
+AUTHORITY["courier"] = {
+    "accepts": frozenset({"courier.briefed"}),
+    "emits": frozenset({"courier.accepted"}),
+    "tools": frozenset(
+        {"courier.read", "courier.accept", "memory.read", "memory.write", "queue.publish"}
+    ),
+}
+AUTHORITY["judge"] = {
+    "accepts": frozenset({"delivery.failed"}),
+    "emits": frozenset({"recovery.reviewed"}),
+    "tools": frozenset(
+        {"judge.read", "judge.review", "memory.read", "memory.write", "queue.publish"}
+    ),
 }
 
 
@@ -68,7 +102,7 @@ class _RoleConfig(BaseModel):
     model_config = ConfigDict(extra="forbid", frozen=True)
 
     schema_version: Literal[1]
-    role: Literal["inventory", "fulfillment", "dispatcher"]
+    role: Literal["inventory", "fulfillment", "dispatcher", "courier", "judge"]
     version: str = Field(min_length=1, max_length=64)
     policy: Literal["deterministic"]
     soul_file: Literal["SOUL.md"]

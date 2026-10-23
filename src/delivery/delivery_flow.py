@@ -141,8 +141,31 @@ def flow_snapshot(run: str, url: str | None = None) -> dict[str, Any]:
             (run,),
         ).fetchall()
         state["fleet"] = conn.execute(
-            "SELECT id,node,busy_basket FROM lab_fleet WHERE run_id=%s ORDER BY id", (run,)
+            "SELECT id,node,busy_basket,status FROM lab_fleet WHERE run_id=%s ORDER BY id", (run,)
         ).fetchall()
+        for key, table in (
+            ("attempts", "lab_delivery_attempts"),
+            ("briefs", "lab_briefs"),
+            ("reviews", "lab_retry_reviews"),
+            ("incidents", "lab_incidents"),
+        ):
+            state[key] = conn.execute(f"SELECT * FROM {table} WHERE run_id=%s", (run,)).fetchall()
+    if state["attempts"]:
+        active = [j for j in state["jobs"] if j["status"] in {"assigned", "in_transit", "arrived"}]
+        state["invariants"]["unique_courier_assignments"] = len(
+            {j["courier"] for j in active}
+        ) == len(active)
+        nodes = {n["id"] for n in state["city"]["nodes"]}
+        state["invariants"]["parcel_custody_recorded"] = all(
+            j["parcel_node"] in nodes
+            for j in state["jobs"]
+            if j["status"] in {"awaiting_review", "abandoned", "delivered"}
+        )
+        reviews = {(r["basket"], r["attempt"]): r["verdict"] for r in state["reviews"]}
+        state["invariants"]["retries_have_approval"] = all(
+            a["attempt"] == 1 or reviews.get((a["basket"], a["attempt"] - 1)) == "approved"
+            for a in state["attempts"]
+        )
     timeline = []
     for decision in state["decisions"]:
         detail = decision["detail"]
@@ -154,7 +177,7 @@ def flow_snapshot(run: str, url: str | None = None) -> dict[str, Any]:
                 "status": detail.get("status"),
             }
         )
-    for job in state["jobs"]:
+    for job in [] if state["attempts"] else state["jobs"]:
         for instant, label, node in (
             (job["pickup_sim"], "Courier collected basket", job["pickup_node"]),
             (job["arrive_sim"], "Courier arrived", job["customer_node"]),
@@ -163,11 +186,27 @@ def flow_snapshot(run: str, url: str | None = None) -> dict[str, Any]:
                 timeline.append(
                     {"sim_time": instant, "label": label, "basket": job["basket"], "node": node}
                 )
+    for incident in state["incidents"]:
+        timeline.append(
+            {
+                "sim_time": incident["sim_time"],
+                "label": incident["kind"],
+                "basket": incident["basket"],
+                "status": incident["detail"].get("status"),
+                "node": incident["detail"].get("checkpoint"),
+            }
+        )
     state["timeline"] = sorted(timeline, key=lambda item: item["sim_time"])
     return state
 
 
 def run_delivery(run: str, url: str | None = None, playback_seconds: int = 0) -> dict[str, Any]:
+    with connect(url) as conn:
+        world = conn.execute("SELECT city FROM lab_worlds WHERE run_id=%s", (run,)).fetchone()
+    if world and world["city"]["width"] == 32:
+        from delivery.fleet_flow import run_fleet
+
+        return run_fleet(run, url, playback_seconds)
     if not 0 <= playback_seconds <= 120:
         raise ValueError("Playback must be 0..120 seconds")
     prepare_delivery(run, url)
@@ -235,4 +274,10 @@ def export_delivery(run: str, seconds: int = 12) -> None:
 
 
 def new_delivery(seed: int = 42, url: str | None = None) -> str:
-    return create_lab(url, seed=seed)
+    return create_lab(
+        url,
+        seed=seed,
+        catalogue_path=Path("data/expanded-catalogue.json"),
+        city_size=32,
+        opening_units=2,
+    )

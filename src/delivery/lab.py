@@ -27,10 +27,12 @@ def create_lab(
     seed: int = 42,
     catalogue_path: Path = Path("data/lab-catalogue.json"),
     store_sources: dict[str, str] | None = None,
+    city_size: int = 10,
+    opening_units: int = 10,
 ) -> str:
     migrate(url)
     catalogue = load_catalogue(catalogue_path)
-    city = catalogue_city(catalogue, seed, store_sources)
+    city = catalogue_city(catalogue, seed, store_sources, city_size)
     run = str(uuid4())
     selected = f"{catalogue.products[0].source}:{catalogue.products[0].listing_id}"
     selected_store = scenario_store(city, catalogue.model_dump(mode="json"))
@@ -53,7 +55,7 @@ def create_lab(
                 if store["kind"] != product.domain or store["catalogue_source"] != product.source:
                     continue
                 sku = f"{product.source}:{product.listing_id}"
-                count = 1 if sku == selected else 10
+                count = 1 if sku == selected else opening_units
                 conn.execute(
                     "INSERT INTO lab_stock(run_id,store,sku,on_hand) VALUES (%s,%s,%s,%s)",
                     (run, store["id"], sku, count),
@@ -78,13 +80,16 @@ def create_lab(
 
 
 def catalogue_city(
-    catalogue: Catalogue, seed: int, store_sources: dict[str, str] | None = None
+    catalogue: Catalogue,
+    seed: int,
+    store_sources: dict[str, str] | None = None,
+    city_size: int = 10,
 ) -> dict[str, Any]:
-    city = fake_city(seed)
+    city = fake_city(seed, size=city_size)
     bindings = store_sources or {p.source: p.domain for p in catalogue.products}
     if any(bindings.get(p.source) != p.domain for p in catalogue.products):
         raise ValueError("Catalogue source/domain does not match store bindings")
-    for domain in ("supermarket", "retail"):
+    for domain in ("supermarket", "retail", "pharmacy"):
         stores = [s for s in city["stores"] if s["kind"] == domain]
         sources = sorted(source for source, kind in bindings.items() if kind == domain)
         if len(sources) > len(stores):

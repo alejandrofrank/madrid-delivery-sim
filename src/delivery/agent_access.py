@@ -149,7 +149,12 @@ def role_access(run: str, name: str, url: str | None = None) -> dict[str, AgentA
     if name == "inventory":
         return inventory_access(run, url)
     role = load_role(name)
-    group = {"fulfillment": "lab_fulfillment_executor", "dispatcher": "lab_dispatch_executor"}[name]
+    group = {
+        "fulfillment": "lab_fulfillment_executor",
+        "dispatcher": "lab_dispatch_executor",
+        "courier": "lab_courier_executor",
+        "judge": "lab_judge_executor",
+    }[name]
     operator = url or settings().database_url
     key = (operator, run, name)
     if key in _ROLE_ACCESS:
@@ -164,6 +169,13 @@ def role_access(run: str, name: str, url: str | None = None) -> dict[str, AgentA
             "INSERT INTO agent_run_budgets(run_id) VALUES (%s) ON CONFLICT DO NOTHING", (run,)
         )
         stores = [s["id"] for s in world["city"]["stores"]] if name == "fulfillment" else ["fleet"]
+        if name == "courier":
+            stores = [
+                r["id"]
+                for r in conn.execute(
+                    "SELECT id FROM lab_fleet WHERE run_id=%s ORDER BY id", (run,)
+                ).fetchall()
+            ]
         for store in stores:
             namespace = f"{name}:{store}"
             login = "lab_i_" + hashlib.sha256(f"{run}:{namespace}".encode()).hexdigest()[:24]

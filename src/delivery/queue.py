@@ -17,10 +17,19 @@ PUBLISH: dict[str, set[str]] = {
     "lab_scenario": {"basket.requested", "shipment.delayed", "reservation.expire"},
     "inventory": {"inventory.decided", "shipment.received", "basket.reserved"},
     "generator": {"order.created", "complaint.created"},
-    "dispatcher": {"courier.assigned", "delivery.assigned", "delivery.completed"},
+    "dispatcher": {
+        "courier.assigned",
+        "delivery.assigned",
+        "delivery.completed",
+        "courier.briefed",
+        "recovery.requested",
+        "dispatch.retry",
+        "dispatch.noted",
+    },
     "fulfillment": {"basket.ready"},
-    "lab_world": {"delivery.arrived"},
-    "courier": {"order.delivered", "courier.available"},
+    "lab_world": {"delivery.arrived", "delivery.failed"},
+    "judge": {"recovery.reviewed"},
+    "courier": {"order.delivered", "courier.available", "courier.accepted"},
     "customer_service": {"complaint.resolved", "approval.requested"},
 }
 SUBSCRIBE: dict[str, set[str]] = {
@@ -31,10 +40,24 @@ SUBSCRIBE: dict[str, set[str]] = {
         "reservation.expire",
     },
     "inventory_audit": {"inventory.decided"},
-    "dispatcher": {"order.created", "courier.available", "basket.ready", "delivery.arrived"},
+    "dispatcher": {
+        "order.created",
+        "courier.available",
+        "basket.ready",
+        "delivery.arrived",
+        "dispatch.retry",
+        "recovery.reviewed",
+        "courier.accepted",
+    },
     "fulfillment": {"basket.reserved"},
-    "delivery_audit": {"delivery.assigned", "delivery.completed"},
-    "courier": {"courier.assigned"},
+    "delivery_audit": {
+        "delivery.assigned",
+        "delivery.completed",
+        "dispatch.noted",
+        "recovery.requested",
+    },
+    "judge": {"delivery.failed"},
+    "courier": {"courier.assigned", "courier.briefed"},
     "customer_service": {"complaint.created"},
     "audit": {"order.delivered", "complaint.resolved", "approval.requested"},
 }
@@ -120,8 +143,8 @@ def publish(
         raise Backpressure("Queue capacity reached; retry producer after consumers drain")
     row = conn.execute(
         """INSERT INTO events(run_id,producer,topic,payload,dedupe_key,trace_id,
-           due_sim,priority,parent_id,target_store)
-           VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s) RETURNING id""",
+           due_sim,priority,parent_id,target_store,available_at)
+           VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,'1970-01-01 UTC'::timestamptz) RETURNING id""",
         (
             run_id,
             producer,

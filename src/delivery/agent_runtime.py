@@ -21,7 +21,7 @@ from delivery.queue import Event, Queue, publish
 class BasketRequest(BaseModel):
     model_config = ConfigDict(extra="forbid", strict=True)
     basket: str = Field(min_length=1, max_length=100)
-    store: str = Field(pattern=r"^store-[1-5]$")
+    store: str = Field(pattern=r"^store-([1-9]|1[0-2])$")
     sku: str = Field(min_length=1, max_length=512)
     quantity: int = Field(gt=0)
     expires_sim: int = Field(ge=0)
@@ -99,6 +99,12 @@ class ScopedTools:
             "dispatch.read": self._workflow_read,
             "dispatch.assign": self._workflow_assign,
             "dispatch.complete": self._workflow_complete,
+            "dispatch.recover": self._recover,
+            "dispatch.defer": self._defer,
+            "courier.read": self._courier_read,
+            "courier.accept": self._courier_accept,
+            "judge.read": self._judge_read,
+            "judge.review": self._judge_review,
         }
         if name not in registry:
             raise PermissionError("Unknown tool")
@@ -115,6 +121,34 @@ class ScopedTools:
             raise BudgetExceeded("Reserved tool slots exhausted")
         self.calls.append(name)
         return registry[name](**arguments)
+
+    def _json_command(self, query: str, parameters: tuple[Any, ...]) -> dict[str, Any]:
+        row = self.__conn.execute(query, parameters).fetchone()
+        assert row
+        return dict(row["data"])
+
+    def _recover(self, basket: str, attempt: int) -> dict[str, Any]:
+        return self._json_command("SELECT dispatch_recover(%s,%s) AS data", (basket, attempt))
+
+    def _defer(self, basket: str) -> dict[str, Any]:
+        return self._json_command("SELECT dispatch_defer(%s) AS data", (basket,))
+
+    def _courier_read(self, basket: str, attempt: int) -> dict[str, Any]:
+        return self._json_command("SELECT courier_context(%s,%s) AS data", (basket, attempt))
+
+    def _courier_accept(self, basket: str, attempt: int) -> dict[str, Any]:
+        return self._json_command("SELECT courier_accept(%s,%s) AS data", (basket, attempt))
+
+    def _judge_read(self, basket: str, attempt: int) -> dict[str, Any]:
+        return self._json_command("SELECT judge_context(%s,%s) AS data", (basket, attempt))
+
+    def _judge_review(
+        self, basket: str, attempt: int, courier: str | None, route: list[int] | None
+    ) -> dict[str, Any]:
+        return self._json_command(
+            "SELECT judge_review(%s,%s,%s,%s) AS data",
+            (basket, attempt, courier, Jsonb(route) if route is not None else None),
+        )
 
     def _workflow_read(self, basket: str) -> dict[str, Any]:
         row = self.__conn.execute(

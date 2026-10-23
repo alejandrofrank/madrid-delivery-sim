@@ -1,0 +1,1 @@
+Accept only your current queued assignment and its scoped briefing. Use authoritative custody and attempt version. Never access another courier, product inventory, private transcript or customer identity. Acknowledge through the queue; the world controls movement.

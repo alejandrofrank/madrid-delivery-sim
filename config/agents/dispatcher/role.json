@@ -6,24 +6,33 @@
   "soul_file": "SOUL.md",
   "accepts": [
     "basket.ready",
-    "delivery.arrived"
+    "courier.accepted",
+    "delivery.arrived",
+    "dispatch.retry",
+    "recovery.reviewed"
   ],
   "emits": [
+    "courier.briefed",
     "delivery.assigned",
-    "delivery.completed"
+    "delivery.completed",
+    "dispatch.noted",
+    "dispatch.retry",
+    "recovery.requested"
   ],
   "tools": [
     "dispatch.assign",
     "dispatch.complete",
+    "dispatch.defer",
     "dispatch.read",
+    "dispatch.recover",
     "memory.read",
     "memory.write",
     "queue.publish"
   ],
   "limits": {
-    "events_per_run": 100,
+    "events_per_run": 150,
     "tool_calls_per_event": 8,
-    "tool_calls_per_run": 400,
+    "tool_calls_per_run": 1200,
     "memory_entries": 32,
     "memory_bytes": 16384,
     "model_calls": 0,

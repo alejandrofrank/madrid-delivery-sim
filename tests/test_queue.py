@@ -10,6 +10,15 @@ from delivery.queue import Backpressure, Event, Queue, publish
 pytestmark = pytest.mark.integration
 
 
+def test_fresh_events_are_ready_without_wall_clock_gating(db_url: str, run_id: UUID) -> None:
+    event_id = send(db_url, run_id)
+    with connect(db_url) as conn:
+        row = conn.execute("SELECT available_at FROM events WHERE id=%s", (event_id,)).fetchone()
+        assert row and row["available_at"].year == 1970
+    event = Queue(db_url).claim("dispatcher", run_id, 0)
+    assert event and event.id == event_id
+
+
 def test_lease_cannot_survive_waiting_for_run_lock(db_url: str, run_id: UUID) -> None:
     send(db_url, run_id)
     queue = Queue(db_url, lease_seconds=0.1)

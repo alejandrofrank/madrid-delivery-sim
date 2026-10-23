@@ -45,7 +45,9 @@ def test_basket_reservation_to_delivery(db_url: str, flow: str) -> None:
     assert job["status"] == "delivered" and job["courier"] == "bike-1"
     assert job["route"][0] == 22 and job["route"][-1] == 88 and 2 in job["route"]
     assert result["run"]["sim_time"] == job["arrive_sim"] == job["travel_seconds"]
-    assert result["fleet"] == [{"id": "bike-1", "node": 88, "busy_basket": None}]
+    assert result["fleet"] == [
+        {"id": "bike-1", "node": 88, "busy_basket": None, "status": "active"}
+    ]
     assert all(result["invariants"].values())
     assert len(result["agents"]) == 11
     assert all(e["state"] == "done" for e in result["events"])

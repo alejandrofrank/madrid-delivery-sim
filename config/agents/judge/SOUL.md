@@ -1,0 +1,1 @@
+Judge a recovery against current custody, remaining deadline, route cost and retry cap. Approve only feasible bounded retries. A briefing exports relevant canonical facts, never another role's private memory. Explain denial and communicate the verdict through the queue.

@@ -16,7 +16,7 @@ def route_plan(context: dict[str, Any]) -> tuple[str, list[int]]:
     job = context["job"]
     candidates = []
     for courier in context["fleet"]:
-        if courier["busy_basket"] is not None:
+        if courier["busy_basket"] is not None or courier.get("status", "active") != "active":
             continue
         try:
             first = nx.shortest_path(graph, courier["node"], job["pickup_node"], weight="weight")
@@ -36,9 +36,26 @@ def route_plan(context: dict[str, Any]) -> tuple[str, list[int]]:
 
 class WorkflowPolicy:
     def decide(self, event: Event, tools: ScopedTools) -> dict[str, Any]:
+        if (
+            (event.topic == "delivery.arrived" and "attempt" in event.payload)
+            or tools.role.name in {"courier", "judge"}
+            or event.topic
+            in {
+                "dispatch.retry",
+                "recovery.reviewed",
+                "courier.accepted",
+            }
+        ):
+            from delivery.fleet_policy import FleetPolicy
+
+            return FleetPolicy().decide(event, tools)
         basket = BasketRef.model_validate(event.payload).basket
         prefix = "fulfillment" if tools.role.name == "fulfillment" else "dispatch"
         context = tools.invoke(f"{prefix}.read", basket=basket)
+        if context.get("expanded"):
+            from delivery.fleet_policy import FleetPolicy
+
+            return FleetPolicy().decide(event, tools, context)
         memory = tools.invoke("memory.read")
         if event.topic == "basket.reserved":
             result = tools.invoke("fulfillment.pick", basket=basket)
