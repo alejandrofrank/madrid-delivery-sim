@@ -100,7 +100,9 @@ def prepare_fleet(run: str, url: str | None = None) -> None:
         )
 
 
-def advance_fleet(run: str, sim: int, url: str | None = None) -> None:
+def advance_fleet(
+    run: str, sim: int, url: str | None = None, *, dropouts: set[str] | None = None
+) -> None:
     with connect(url) as conn:
         conn.execute("SELECT pg_advisory_xact_lock(hashtextextended(%s,0))", (run,))
         now = conn.execute("SELECT sim_time FROM runs WHERE id=%s FOR UPDATE", (run,)).fetchone()
@@ -112,7 +114,7 @@ def advance_fleet(run: str, sim: int, url: str | None = None) -> None:
             AND kind='courier_dropout' LIMIT 1""",
             (run,),
         ).fetchone()
-        dropout = sim >= 180 and not dropped
+        dropout = dropouts is None and sim >= 180 and not dropped
         if dropout:
             conn.execute(
                 """UPDATE lab_fleet SET status='active'
@@ -172,7 +174,11 @@ def advance_fleet(run: str, sim: int, url: str | None = None) -> None:
                         ),
                     ),
                 )
-            failed = dropout and job["courier"] in {"bike-1", "bike-2"}
+            failed = (
+                job["courier"] in dropouts
+                if dropouts is not None
+                else dropout and job["courier"] in {"bike-1", "bike-2"}
+            ) and sim < job["arrive_sim"]
             status = (
                 "awaiting_review"
                 if failed
@@ -245,6 +251,29 @@ def advance_fleet(run: str, sim: int, url: str | None = None) -> None:
                 target_store=target,
                 due_sim=sim,
             )
+        if dropouts:
+            for courier in sorted(dropouts):
+                row = conn.execute(
+                    """UPDATE lab_fleet SET status='offline' WHERE run_id=%s
+                    AND id=%s AND status='active' AND busy_basket IS NULL RETURNING node""",
+                    (run, courier),
+                ).fetchone()
+                if row:
+                    conn.execute(
+                        """INSERT INTO lab_incidents(run_id,sim_time,kind,courier,detail)
+                        VALUES (%s,%s,'courier_dropout',%s,%s)""",
+                        (
+                            run,
+                            sim,
+                            courier,
+                            Jsonb(
+                                {
+                                    "checkpoint": row["node"],
+                                    "reason": "Courier unavailable while idle",
+                                }
+                            ),
+                        ),
+                    )
 
 
 def run_fleet(run: str, url: str | None = None, playback_seconds: int = 0) -> dict[str, Any]:

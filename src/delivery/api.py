@@ -14,6 +14,7 @@ from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
 from starlette.responses import Response
 
+from delivery.city_config import CitySettings
 from delivery.db import connect
 from delivery.history import history_catalogue, history_manifest
 from delivery.lab import create_lab, export_slice, lab_snapshot
@@ -40,9 +41,55 @@ class StartLab(BaseModel):
     playback_seconds: int = Field(default=15, ge=0, le=120)
 
 
+@app.get("/api/lab/city-config")
+def city_configuration() -> dict[str, Any]:
+    from delivery.catalogue import load_catalogue
+    from delivery.city import fake_city
+    from delivery.city_config import CitySettings
+
+    return {
+        "defaults": CitySettings().model_dump(mode="json"),
+        "city": fake_city(size=32),
+        "products": load_catalogue(Path("data/expanded-catalogue.json")).model_dump(mode="json")[
+            "products"
+        ],
+    }
+
+
+def city_background(run: str) -> None:
+    from delivery.running_city import run_city
+
+    try:
+        result = run_city(run)
+        path = Path(f"artifacts/delivery-{run}.json")
+        path.parent.mkdir(exist_ok=True)
+        path.write_text(json.dumps(result, default=str, indent=2), encoding="utf-8")
+    except Exception:
+        pass  # Runtime persists a sanitized failure type.
+
+
 class StartDelivery(BaseModel):
     seed: int = Field(default=42, ge=0, le=2**31 - 1)
     playback_seconds: int = Field(default=12, ge=0, le=120)
+
+
+@app.post("/api/lab/city-runs", status_code=202)
+def start_city(body: CitySettings, tasks: BackgroundTasks) -> dict[str, str]:
+    from delivery.running_city import new_city
+
+    run = new_city(body)
+    tasks.add_task(city_background, run)
+    return {"id": run}
+
+
+@app.get("/api/lab/city-runs/{run}/agents/{agent_id}")
+def inspect_city_agent(run: UUID, agent_id: str) -> dict[str, Any]:
+    from delivery.running_city import agent_inspection
+
+    result = agent_inspection(str(run), agent_id)
+    if result is None:
+        raise HTTPException(404, "Unknown agent in this run")
+    return result
 
 
 @app.get("/delivery-lab")

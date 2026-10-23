@@ -7,6 +7,7 @@ from typing import Any
 
 from delivery.agent_access import retire_inventory_access, role_access
 from delivery.agent_runtime import LocalAgent, create_agent
+from delivery.catalogue import digest
 from delivery.db import connect
 from delivery.lab import create_lab, lab_snapshot
 from delivery.queue import Queue, publish
@@ -143,6 +144,19 @@ def flow_snapshot(run: str, url: str | None = None) -> dict[str, Any]:
         state["fleet"] = conn.execute(
             "SELECT id,node,busy_basket,status FROM lab_fleet WHERE run_id=%s ORDER BY id", (run,)
         ).fetchall()
+        settings_row = conn.execute(
+            "SELECT config,order_schedule,summary FROM lab_city_configs WHERE run_id=%s", (run,)
+        ).fetchone()
+        if settings_row:
+            state["config"] = settings_row["config"]
+            state["configuration_hash"] = digest(settings_row["config"])
+            state["order_schedule"] = settings_row["order_schedule"]
+            state["session_summary"] = settings_row["summary"]
+        for courier in state["fleet"]:
+            home = conn.execute(
+                "SELECT home_store FROM lab_fleet WHERE run_id=%s AND id=%s", (run, courier["id"])
+            ).fetchone()
+            courier["home_store"] = home["home_store"] if home else None
         for key, table in (
             ("attempts", "lab_delivery_attempts"),
             ("briefs", "lab_briefs"),
