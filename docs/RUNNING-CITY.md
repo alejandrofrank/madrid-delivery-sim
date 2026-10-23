@@ -116,3 +116,11 @@ and queued communication. It demonstrates these controls and recovery behavior,
 not LLM judgement or learned behavior. Household profiles and future schedules are
 operator views; agent projections expose only the role's required operational data.
 Any future model adapter needs separate evaluation before claiming AI capability.
+
+## Courier traces
+
+Route colors distinguish couriers. Solid faded sections show travelled distance;
+dashed sections show the remaining plan, and a diamond marks the destination.
+A route can revisit a junction while approaching a shop and then delivering.
+Couriers move only after accepting an assignment, using each persisted road
+duration. Selecting a shop or order can expose its route for inspection.

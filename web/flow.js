@@ -33,12 +33,46 @@ function drawStores(){const layer=$('store-layer');if(!layer)return;layer.replac
  g.append(svgNode('circle',{cx:n.x,cy:n.y,r:unit*1.3,fill:'transparent'}));g.append(svgNode('rect',{x:n.x-unit*.6,y:n.y-unit*.6,width:unit*1.2,height:unit*1.2,rx:unit*.2,fill:s.enabled===false?'#9ca9a0':pharmacy?'#90619d':'#37745f',stroke:selectedStore===s.id?'#db9b36':'#fff','stroke-width':unit*.18}));
  g.append(svgNode('path',{d:`M${n.x-unit*.65},${n.y-unit*.25}h${unit*1.3}m-${unit*1.05},${unit*.15}v${unit*.45}m${unit*.55},-${unit*.45}v${unit*.45}`,stroke:'#fff','stroke-width':unit*.1,fill:'none','pointer-events':'none'}));
  const text=svgNode('text',{x:n.x+unit*.9,y:n.y+unit*.2,'font-size':unit*.65});text.textContent=s.name||s.id;g.append(text);g.onclick=()=>selectStore(s.id);g.onkeydown=e=>{if(['Enter',' '].includes(e.key)){e.preventDefault();selectStore(s.id);}};layer.append(g);}}
-function drawMovement(data){const routes=$('route-layer'),couriers=$('courier-layer');if(!routes)return;routes.replaceChildren();couriers.replaceChildren();const nodes=new Map(city.nodes.map(n=>[String(n.id),n]));const edges=new Map(city.edges.map(e=>[`${e.from}:${e.to}`,e]));const unit=fullView.w/110;const drawn=new Set();
- for(const job of data.jobs||[]){const route=(job.route||[]).map(id=>nodes.get(String(id))).filter(Boolean);if(!route.length)continue;const failed=['abandoned','stranded'].includes(job.status);const active=['assigned','in_transit','arrived'].includes(job.status);if(active||selectedStore===job.store||selectedBasket===job.basket){routes.append(svgNode('polyline',{points:route.map(n=>`${n.x},${n.y}`).join(' '),fill:'none',stroke:selectedBasket===job.basket?'#db8a22':failed?'#b25b48':'#58a68b','stroke-width':unit*.25,'stroke-opacity':'.7'}));}if(job.status==='abandoned'){const n=nodes.get(String(job.parcel_node))||route[0];routes.append(svgNode('path',{d:`M${n.x-unit/2},${n.y-unit/2}l${unit},${unit}m0,-${unit}l-${unit},${unit}`,stroke:'#b25b48','stroke-width':unit*.3}));}
- const attempts=(data.attempts||[]).filter(a=>a.basket===job.basket&&a.courier===job.courier);const attempt=attempts.at(-1);if(!active||!job.courier||drawn.has(job.courier)||attempt?.accepted===false||['failed','dropped','dropout','abandoned','rejected'].includes(attempt?.status))continue;
- const durations=job.route_durations||attempt?.edge_durations||[];let remaining=Math.max(0,Number(data.run.sim_time)-Number(job.depart_sim||0)),position=route[0];for(let i=0;i<route.length-1;i++){const duration=Number(durations[i])||Number(edges.get(`${route[i].id}:${route[i+1].id}`)?.travel_seconds)||1;if(remaining<=duration){const f=remaining/duration;position={x:route[i].x+(route[i+1].x-route[i].x)*f,y:route[i].y+(route[i+1].y-route[i].y)*f};break;}remaining-=duration;position=route[i+1];}courierMarker(job.courier,position,unit,couriers);drawn.add(job.courier);}
- for(const courier of data.fleet||[]){if(drawn.has(courier.id))continue;const n=nodes.get(String(courier.node));if(n)courierMarker(courier.id,n,unit,couriers,courier.status);}}
-function courierMarker(id,n,unit,layer,status='active'){const g=svgNode('g',{'data-courier':id,class:'courier-marker',role:'button',tabindex:0,'aria-label':`Courier ${id} ${status}`});g.append(svgNode('circle',{cx:n.x,cy:n.y,r:unit*.75,fill:'transparent'}),svgNode('circle',{cx:n.x,cy:n.y,r:unit*.4,fill:['offline','dropped','dropout','unavailable'].includes(status)?'#8b9490':'#d48628',stroke:'#fff','stroke-width':unit*.12}));g.append(svgNode('path',{d:`M${n.x-unit*.25},${n.y}h${unit*.5}m-${unit*.15},0l-${unit*.12},-${unit*.2}`,stroke:'#fff','stroke-width':unit*.1,fill:'none','pointer-events':'none'}));g.onclick=()=>inspectAgent(`courier:${id}`);g.onkeydown=e=>{if(e.key==='Enter')inspectAgent(`courier:${id}`);};layer.append(g);}
+// Preserve route order, including repeated junctions on pickup/delivery legs.
+function routeProgress(route,durations,elapsed){
+ const travelled=route.length?[route[0]]:[];let remaining=Math.max(0,elapsed),position=route[0];
+ for(let i=0;i<route.length-1;i++){
+  const seconds=Number(durations[i]);if(!Number.isFinite(seconds)||seconds<=0)return null;
+  if(remaining<seconds){const f=remaining/seconds;position={x:route[i].x+(route[i+1].x-route[i].x)*f,y:route[i].y+(route[i+1].y-route[i].y)*f};if(f>0)travelled.push(position);return {position,travelled,remaining:[position,...route.slice(i+1)]};}
+  remaining-=seconds;position=route[i+1];travelled.push(position);
+ }
+ return {position,travelled,remaining:[]};
+}
+function routeColor(id){let hash=0;for(const char of String(id))hash=(hash*31+char.charCodeAt(0))>>>0;return ['#246b99','#9b5b22','#7560a6','#287b65','#ad4865','#68772b'][hash%6];}
+function drawMovement(data){
+ const routes=$('route-layer'),couriers=$('courier-layer');if(!routes)return;routes.replaceChildren();couriers.replaceChildren();
+ const nodes=new Map(city.nodes.map(n=>[String(n.id),n])),edges=new Map(city.edges.map(e=>[`${e.from}:${e.to}`,e]));const unit=fullView.w/110,drawn=new Set();
+ for(const job of data.jobs||[]){
+  const ids=job.route||[],route=ids.map(id=>nodes.get(String(id)));if(!route.length||route.some(n=>!n))continue;
+  // Missing or forbidden edges must never become straight-line shortcuts.
+  if(ids.some((id,i)=>i>0&&!edges.has(`${ids[i-1]}:${id}`)))continue;
+  const active=['assigned','in_transit','arrived'].includes(job.status),failed=['abandoned','stranded'].includes(job.status);
+  const selected=selectedBasket===job.basket||selectedStore===job.store||selectedAgent===`courier:${job.courier}`;
+  const attempts=(data.attempts||[]).filter(a=>a.basket===job.basket&&a.courier===job.courier),attempt=attempts.at(-1);
+  const accepted=job.accepted===true||attempt?.accepted===true;
+  const durations=job.route_durations?.length?job.route_durations:attempt?.edge_durations||ids.slice(1).map((id,i)=>edges.get(`${ids[i]}:${id}`).travel_seconds);
+  const elapsed=job.status==='delivered'?Infinity:accepted&&!failed?Math.max(0,Number(data.run.sim_time)-Number(job.depart_sim??data.run.sim_time)):0;
+  const progress=routeProgress(route,durations,elapsed);if(!progress)continue;
+  const color=failed?'#a94e43':routeColor(job.courier||job.basket);
+  if(active||selected){
+   const group=svgNode('g',{'data-route-basket':job.basket,'data-route-courier':job.courier||'', 'data-route-status':job.status});
+   const title=svgNode('title');title.textContent=`${job.courier||'Awaiting courier'} · ${job.basket} · solid: travelled, dashed: remaining`;group.append(title);
+   const line=(points,kind)=>{if(points.length<2)return;group.append(svgNode('polyline',{points:points.map(n=>`${n.x},${n.y}`).join(' '),'data-route-part':kind,fill:'none',stroke:color,'stroke-width':unit*(selected ? .32 : .22),'stroke-opacity':kind==='travelled'?'.4':'.9','stroke-dasharray':kind==='remaining'?`${unit*.65} ${unit*.4}`:'none','stroke-linejoin':'round','stroke-linecap':'round'}));};
+   line(progress.travelled,'travelled');line(progress.remaining,'remaining');
+   const end=route.at(-1);group.append(svgNode('path',{'data-route-end':job.basket,d:`M${end.x},${end.y-unit*.55}l${unit*.55},${unit*.55}l-${unit*.55},${unit*.55}l-${unit*.55},-${unit*.55}Z`,fill:'#fff',stroke:color,'stroke-width':unit*.15}));routes.append(group);
+  }
+  if(failed){const n=nodes.get(String(job.parcel_node))||route[0];routes.append(svgNode('path',{d:`M${n.x-unit/2},${n.y-unit/2}l${unit},${unit}m0,-${unit}l-${unit},${unit}`,stroke:'#b25b48','stroke-width':unit*.3}));}
+  if(!active||!accepted||!job.courier||drawn.has(job.courier)||['failed','dropped','dropout','abandoned','rejected'].includes(attempt?.status))continue;
+  courierMarker(job.courier,progress.position,unit,couriers,'active',color);drawn.add(job.courier);
+ }
+ for(const courier of data.fleet||[]){if(drawn.has(courier.id))continue;const n=nodes.get(String(courier.node));if(n)courierMarker(courier.id,n,unit,couriers,courier.status,routeColor(courier.id));}
+}
+function courierMarker(id,n,unit,layer,status='active',color='#d48628'){const g=svgNode('g',{'data-courier':id,class:'courier-marker',role:'button',tabindex:0,'aria-label':`Courier ${id} ${status}`});g.append(svgNode('circle',{cx:n.x,cy:n.y,r:unit*.75,fill:'transparent'}),svgNode('circle',{cx:n.x,cy:n.y,r:unit*.4,fill:['offline','dropped','dropout','unavailable'].includes(status)?'#8b9490':color,stroke:'#fff','stroke-width':unit*.12}));g.append(svgNode('path',{d:`M${n.x-unit*.25},${n.y}h${unit*.5}m-${unit*.15},0l-${unit*.12},-${unit*.2}`,stroke:'#fff','stroke-width':unit*.1,fill:'none','pointer-events':'none'}));g.onclick=()=>inspectAgent(`courier:${id}`);g.onkeydown=e=>{if(e.key==='Enter')inspectAgent(`courier:${id}`);};layer.append(g);}
 function selectStore(id){selectedCustomer=null;selectedBasket=null;selectedStore=id;selectedAgent=null;storeDirty=false;show('store-view');selectedTab='overview';for(const button of document.querySelectorAll('[data-tab]'))button.setAttribute('aria-selected',button.dataset.tab===selectedTab);renderStore();drawStores();if(snapshot)drawMovement(snapshot);}
 function renderStore(preserveEdits=false){if(!selectedStore||!city)return;const raw=city.stores.find(s=>s.id===selectedStore);if(!raw)return;const store=storeData(raw),editable=Boolean(config)&&!legacyReadOnly;$('context-title').textContent=store.name||store.id;
  $('store-overview').hidden=selectedTab!=='overview';$('store-stock').hidden=selectedTab!=='stock';$('store-team').hidden=selectedTab!=='team';
