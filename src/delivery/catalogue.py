@@ -22,7 +22,7 @@ class Product(BaseModel):
     category: str | None = None
     url: str | None = None
     provenance: Literal["imported", "simulated"]
-    domain: Literal["supermarket", "retail"] = "supermarket"
+    domain: Literal["supermarket", "retail", "pharmacy"] = "supermarket"
 
 
 class Catalogue(BaseModel):
