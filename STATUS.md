@@ -1,5 +1,12 @@
 # Status
 
+2026-10-23: Shared local inventory foundation implemented: frozen role/soul definitions,
+five per-run/store database identities with row security, scoped tools and private TTL
+memory, durable agent/aggregate budgets and queue-only communication. Expanded the
+fictional city to 10×10 (100 nodes, 360 directed edges). Linux Compose: 67 tests, Ruff
+and mypy passed; dated Bakiano crash recovery and desktop/mobile browser checks passed.
+See `docs/AGENT-FOUNDATION.md`. No provider calls or private rows committed.
+
 2026-10-23: Local-first decision applied. Forty tests pass, including immutable
 dated history, missing-day validation, distinct store-source binding and local
 settings that ignore old cloud credentials. The local sample has 2,008 observations

@@ -1,6 +1,6 @@
 # Roadmap: Bakiano delivery operations lab
 
-Updated 2026-10-23. Everything after the current baseline is planned, not implemented.
+Updated 2026-10-23. Implemented slices are identified below; remaining milestones are planned.
 
 ## Objective and baseline
 
@@ -110,6 +110,13 @@ Score correctness separately from performance:
 
 ### Shared agent foundation prerequisite
 
+Inventory foundation implemented locally on 2026-10-23: immutable validated roles
+and souls, five authenticated store identities, database row security, private TTL
+memory, fixed scoped tools, durable per-agent/run budgets, queue-only messages and
+a 10×10 city. Verified with 67 tests and browser checks. See
+[implemented foundation and limits](docs/AGENT-FOUNDATION.md). The steps below
+remain the direction for extending other roles, reasoning and controller recovery.
+
 Before multiplying reasoning roles, implement and validate the reusable local
 role-configured factory in [the agent foundation decision](docs/AGENT-RUNTIME.md).
 Use the same event/tool contracts, independently enforced scopes and deterministic
@@ -129,7 +136,7 @@ First vertical slice implemented 2026-10-23: offline/imported catalogue adapter,
 fictional five-store graph, inventory ledger, concurrent last-unit test, actual
 worker crash/lease recovery, delayed receipts and checkpoint UI. See
 [M2 validation](docs/M2-VALIDATION.md). Larger catalogue coverage, general workflows
-and role isolation remain planned; this is not full M2 completion.
+remain planned; inventory role isolation is implemented. This is not full M2 completion.
 
 Deliver a versioned snapshot importer, offline fixture/provenance manifest, fictional graph generator, scenario schema and database migrations. Implement five stores, stock ledger, atomic reservations, expiry, receipts and structured availability queries. Add inventory/as-of/incoming-stock inspection.
 

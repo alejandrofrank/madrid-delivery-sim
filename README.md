@@ -14,7 +14,10 @@ The fictional-city inventory lab is at **http://localhost:8010/lab** after start
 the stack. It uses three supermarkets, two retail stores and synthetic stock.
 Start the last-unit scenario to inspect a real worker-process crash, lease recovery,
 competing baskets, reservation expiry and delayed replenishment. Checkpoint selection
-and downloadable JSON retain the evidence. This slice makes no model calls.
+and downloadable JSON retain the evidence. This slice makes no model calls. The city is a deterministic 10×10 grid with 100
+nodes and 360 directed road segments. Five inventory identities share one local
+agent implementation, with enforced per-store database access, private memory,
+frozen role/soul definitions and durable budgets. See [agent foundation](docs/AGENT-FOUNDATION.md).
 
 ```sh
 docker compose exec -T app delivery lab-demo
@@ -135,7 +138,7 @@ Postgres is authoritative. Agent messages use the durable queue exclusively; rea
 - Handler state changes, emitted events, and ACK share one transaction. Failure rolls back state and outgoing messages. Retries wait 1, 2, then 4 wall-clock seconds, capped at 30; three unsuccessful deliveries enter `dead_letters`.
 - Delivery is at least once with transactionally idempotent database effects. External LLM calls do not have an exactly-once guarantee. Durable reservations and cached results prevent automatic rebilling after an ambiguous crash.
 - M1 serializes state-writing handlers within a run using an advisory lock. Different runs remain independent. A partial unique index prevents two active orders per courier; conditional versioned updates prevent duplicate claims.
-- Producer/consumer allowlists enforce in-process queue-tool permissions. They are not a sandbox against malicious Python: the local service shares one database account. Separate database roles, MCP tools, and row-level policies remain roadmap work.
+- Producer/consumer allowlists enforce in-process queue-tool permissions. They are not a sandbox against malicious Python: the local service shares one database account. M2 inventory agents now use separate database logins and row-level policies; M1 retains this earlier boundary. See the agent foundation for the current threat model.
 - A hard event budget stops processing loops. Error records contain exception types, not provider exception strings. Failed or unaffordable complaints fail closed to approval.
 
 Inspect `/api/state`, `/api/runs`, and `/api/runs/<uuid>/trace?order=ORDER_ID`. Selections show recorded policies, route estimates, transitions, and replies. These are auditable decision records, not private model reasoning. Queue rows retain event lineage and order correlation IDs.

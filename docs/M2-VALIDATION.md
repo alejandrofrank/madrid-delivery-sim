@@ -4,7 +4,7 @@ Implemented 2026-10-23. This is a first vertical slice, not completion of every 
 
 ## What runs
 
-- A generated, hash-versioned 16-node directed fictional city: three supermarkets,
+- A generated, hash-versioned 100-node (10×10), 360-edge directed fictional city: three supermarkets,
   two retail stores, depot, supplier, fuel and charging locations. Coordinates are
   fictional metres. Roads are an inspectable fixture; routing traffic/couriers over
   it is later work.
@@ -45,7 +45,7 @@ These are captured inspection checkpoints, not yet a full replay/import engine.
 
 ## Verification
 
-- 25 tests passed against dedicated Postgres `delivery_test`, including the existing
+- Initial slice: 25 tests passed against dedicated Postgres `delivery_test`, including the existing
   Madrid regression suite, real process crashes and the new API contracts.
 - Ruff and mypy passed. One existing upstream Starlette TestClient deprecation
   warning remains.
@@ -56,10 +56,14 @@ These are captured inspection checkpoints, not yet a full replay/import engine.
   installed Playwright dependency documented for browser checks.
   Chrome checks passed at 1440x1100 and 390x844 with no page errors or mobile overflow.
 
+The shared-agent extension now passes 67 tests, Ruff, mypy and the dated-sample
+browser check. See [foundation verification](AGENT-FOUNDATION.md).
+
 ## Limits and next boundary
 
 The agent currently uses deterministic queue handlers and inventory tools, not a
-GCP-deployed reasoning framework. Role-isolated database credentials, pgvector,
+GCP-deployed reasoning framework. Role-isolated database credentials and the shared inventory runtime are now implemented;
+see [foundation verification](AGENT-FOUNDATION.md). pgvector,
 model-assisted inventory judgment, full baskets/fulfillment, cancellation events,
 expiry scheduling for arbitrary orders and a larger catalogue are subsequent work.
 The current fixture schedules expiry for its known winning basket explicitly.

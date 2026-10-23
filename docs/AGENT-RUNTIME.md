@@ -5,6 +5,10 @@ Polish the local lab and shared agent factory before considering an optional GCP
 adapter. Default demos require no deployments, provider calls, cloud credentials or
 cloud services. The M2 inventory slice remains a deterministic local worker.
 
+The inventory implementation is now available: see [implemented foundation](AGENT-FOUNDATION.md)
+for actual modules, permissions, budgets and verification. The proposed ADK-specific
+shape and example contract below remain future design, not the executable role schema.
+
 ## What an agent is in this project
 
 An agent is a versioned identity with a goal, a bounded decision loop, observations,
@@ -63,7 +67,9 @@ config/agents/
 config/topologies/    # reporting/approval routes, separate from role behavior
 ```
 
-These paths describe the intended local building block; they are not yet implemented.
+These proposed paths describe a future reasoning adapter layout. The implemented
+inventory foundation uses `src/delivery/agent_runtime.py`, `agent_access.py` and
+`agent_specs.py`, plus the inventory role/soul paths shown above.
 Build and validate one shared factory locally, with deterministic policies and scripted
 model adapters. ADK is optional behind these contracts; default demos make no provider
 calls. Cloud packaging and a GCP adapter remain deferred until the local lab is polished.
@@ -183,9 +189,9 @@ automatically spend again after a crash. A stale proposal must revalidate or esc
 
 Before adding more reasoning roles:
 
-1. Build a strict role schema, fixed tool registry and factory with no-LLM default.
-2. Run the existing inventory slice through that shared worker without changing its
-   outcomes; add two store scopes and prove cross-store denial outside prompts.
+1. Implemented for inventory: strict role schema, fixed tool registry and factory with no-LLM default.
+2. Implemented for five inventory store scopes: existing slice uses the shared worker;
+   real non-superuser database tests prove cross-store and cross-run denial.
 3. Add optional reasoning adapters using scripted/fake-model tests locally; keep
    the default factory and demo free of provider calls and cloud dependencies.
 4. Test prompt changes cannot grant tools, memory access, spending or approvals;

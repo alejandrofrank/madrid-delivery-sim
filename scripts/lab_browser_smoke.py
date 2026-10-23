@@ -37,6 +37,10 @@ with sync_playwright() as p:
     page.wait_for_function("document.getElementById('checkpoint').options.length === 7")
     assert page.locator("#available").inner_text() == "6"
     assert page.locator("#invariants").inner_text() == "PASS"
+    assert page.locator("#error").is_hidden()
+    assert page.locator("#city line").count() == 360
+    assert "inventory:store-1" in page.locator("#agent-scope").inner_text()
+    assert "model budget $0" in page.locator("#agent-budget").inner_text()
     if args.sample_date:
         assert args.sample_date in page.locator("#provenance").inner_text()
         history = page.request.get(args.url + "/api/lab/history").json()
@@ -56,6 +60,7 @@ with sync_playwright() as p:
     assert "minute 15" in page.locator("#eta").inner_text()
     page.get_by_role("button", name="Inspect South Market").click()
     assert page.locator("#store").input_value() == "store-3"
+    assert "inventory:store-3" in page.locator("#agent-scope").inner_text()
     page.locator("#store").select_option("store-1")
     prefix = "lab-history" if args.sample_date else "lab"
     page.screenshot(path=f"artifacts/{prefix}-desktop.png", full_page=True)

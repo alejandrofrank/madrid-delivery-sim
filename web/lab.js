@@ -88,11 +88,17 @@ function render() {
   const observedDates = [...new Set(state.catalogue.products.map(p => p.observed_on))].sort();
   $("provenance").textContent = `Catalogue date: ${observedDates.join(", ")}. All stock, store locations, supply and demand are simulated. Imported prices use the warehouse observation day and are not live availability.`;
   $("manifest").textContent = JSON.stringify({city_hash:state.city.sha256,catalogue_hash:state.catalogue_hash,...state.catalogue},null,2);
+  const agent = state.agents?.find(a => a.store===activeStore);
+  $("agent-scope").textContent = agent ? `${agent.agent_id} · own store and current run only · database row security` : "No agent provisioned for this run yet.";
+  $("agent-budget").textContent = agent ? `${agent.events_reserved}/${agent.events_limit} event attempts · ${agent.tools_reserved}/${agent.tools_limit} reserved tool slots · ${agent.committed_tool_calls} committed tool calls · model budget $0` : "";
+  $("agent-memory").textContent = agent ? `Private memory: ${agent.memory_entries}/${agent.memory_entries_limit} live entries · ${agent.memory_bytes}/${agent.memory_bytes_limit} bytes. Expired entries are not retrieved.` : "";
+  $("agent-role").textContent = agent ? JSON.stringify({hash:agent.definition_hash,policy:agent.policy,tools:agent.tools,limits:agent.limits,soul:agent.soul},null,2) : "";
   $("baskets").replaceChildren(...state.baskets.map(b => el("p",`${b.id}: ${b.status} · ${b.quantity} unit · reservation deadline minute ${b.expires_sim/60}`,"record")));
   if (!state.baskets.length) $("baskets").textContent = "No committed basket effects yet.";
   $("decisions").replaceChildren(...state.decisions.map(d => {
     const record = el("div",undefined,"record");
-    record.append(el("strong",`Minute ${d.sim_time/60} · ${d.action}`),el("p",d.detail.rule),el("small",JSON.stringify(d.detail)));
+    record.append(el("strong",`Minute ${d.sim_time/60} · ${d.action}`),el("p",d.detail.rule));
+    const details=el("details"); details.append(el("summary","Tools, observations and memory"),el("pre",JSON.stringify(d.detail,null,2))); record.append(details);
     return record;
   }));
   $("events").replaceChildren(...state.events.map(e => row([e.topic,e.state,e.attempts,e.due_sim/60])));
@@ -108,6 +114,7 @@ async function poll() {
     const requestedRun = runId;
     const state = await api(`/api/lab/state${requestedRun?`?run=${requestedRun}`:""}`);
     if (requestedRun !== runId) return;
+    $("error").hidden=true;
     if (!state.run) { $("status").textContent="READY"; return; }
     if(live?.run?.id!==state.run.id) { evidence=null; activeStore=""; $("checkpoint").replaceChildren(new Option("Live / final state","live")); }
     live=state; runId=state.run.id;
