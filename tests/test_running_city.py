@@ -72,6 +72,15 @@ def test_running_city_uses_configured_traffic_and_keeps_history_frozen(db_url, c
     assert len({e["due_sim"] for e in result["events"] if e["topic"] == "basket.requested"}) > 1
     assert all(result["invariants"].values())
     assert not any(i["kind"] == "courier_dropout" for i in result["incidents"])
+    assert len(result["customers"]) == 128
+    customers = {c["id"]: c for c in result["customers"]}
+    for order in result["order_schedule"]:
+        customer = customers[order["customer_id"]]
+        assert order["customer_node"] == customer["home_node"]
+        assert order["home_id"] == customer["home_id"]
+        assert order["customer_name"] == customer["name"]
+        assert order["product_name"] != order["sku"]
+    assert result["agent_runtime"]["model_calls"] == 0
     edges = {(e["from"], e["to"]): e["travel_seconds"] for e in result["city"]["edges"]}
     for attempt in result["attempts"]:
         assert attempt["edge_durations"] == [
@@ -117,13 +126,13 @@ def test_fractional_traffic_is_recomputed_from_frozen_configuration(db_url, city
             (city,),
         )
         row = conn.execute(
-            "SELECT fleet_route_metrics(%s,'[99,100]',99,99,100) AS data", (city,)
+            "SELECT fleet_route_metrics(%s,'[100,99]',100,100,99) AS data", (city,)
         ).fetchone()
         world = conn.execute("SELECT city FROM lab_worlds WHERE run_id=%s", (city,)).fetchone()
     import math
 
     base = next(
-        e["travel_seconds"] for e in world["city"]["edges"] if e["from"] == 99 and e["to"] == 100
+        e["travel_seconds"] for e in world["city"]["edges"] if e["from"] == 100 and e["to"] == 99
     )
     assert row["data"]["durations"] == [math.ceil(base * 1.5)]
     assert row["data"]["delay"] == math.ceil(base * 1.5) - base

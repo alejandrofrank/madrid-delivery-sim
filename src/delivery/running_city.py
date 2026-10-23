@@ -13,13 +13,14 @@ from delivery.db import connect
 from delivery.delivery_flow import flow_snapshot, new_delivery
 from delivery.fleet_flow import advance_fleet
 from delivery.queue import Queue, publish
+from delivery.urban_city import urban_city
 
 
 def new_city(config: CitySettings, url: str | None = None) -> str:
     run = new_delivery(config.seed, url)
     state = flow_snapshot(run, url)
     settings = {s.id: s for s in config.stores}
-    city = state["city"]
+    city = urban_city(state["city"])
     for store in city["stores"]:
         store["name"] = settings[store["id"]].name
         store["enabled"] = settings[store["id"]].enabled
@@ -58,7 +59,14 @@ def new_city(config: CitySettings, url: str | None = None) -> str:
         fleet = conn.execute(
             "SELECT id,node,home_store FROM lab_fleet WHERE run_id=%s ORDER BY id", (run,)
         ).fetchall()
-        orders = demand_schedule(config, state["stock"])
+        names = {
+            f"{p['source']}:{p['listing_id']}": p["name"] for p in state["catalogue"]["products"]
+        }
+        products = [
+            {**stock, "product_name": names.get(stock["sku"], stock["sku"])}
+            for stock in state["stock"]
+        ]
+        orders = demand_schedule(config, products, city["customers"])
         failures = dropout_schedule(config, fleet)
         conn.execute(
             """INSERT INTO lab_city_configs(run_id,config,order_schedule,dropout_schedule)

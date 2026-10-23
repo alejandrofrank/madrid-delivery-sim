@@ -147,6 +147,15 @@ def flow_snapshot(run: str, url: str | None = None) -> dict[str, Any]:
         settings_row = conn.execute(
             "SELECT config,order_schedule,summary FROM lab_city_configs WHERE run_id=%s", (run,)
         ).fetchone()
+        state["customers"] = state["city"].get("customers", [])
+        state["agent_runtime"] = {
+            "decision_mode": "deterministic",
+            "model_provider": "disabled",
+            "model_calls": 0,
+            "model_spend": 0,
+            "policy_source": "fixed Python rules",
+            "soul_usage": "versioned guidance only",
+        }
         if settings_row:
             state["config"] = settings_row["config"]
             state["configuration_hash"] = digest(settings_row["config"])

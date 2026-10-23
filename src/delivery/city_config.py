@@ -52,7 +52,9 @@ class CitySettings(BaseModel):
         return self
 
 
-def demand_schedule(config: CitySettings, stock: list[dict[str, Any]]) -> list[dict[str, Any]]:
+def demand_schedule(
+    config: CitySettings, stock: list[dict[str, Any]], customers: list[dict[str, Any]] | None = None
+) -> list[dict[str, Any]]:
     rng = random.Random(config.seed)
     stores = [
         s
@@ -66,14 +68,29 @@ def demand_schedule(config: CitySettings, stock: list[dict[str, Any]]) -> list[d
     while instant < config.duration_minutes * 60 and len(result) < 24:
         store = rng.choices(stores, weights=[s.demand_weight for s in stores], k=1)[0]
         products = sorted(row["sku"] for row in stock if row["store"] == store.id)
+        sku = rng.choice(products)
+        customer = rng.choice(customers) if customers else None
         result.append(
             {
                 "basket": f"order-{len(result) + 1:03d}",
                 "store": store.id,
-                "sku": rng.choice(products),
+                "sku": sku,
+                "product_name": next(
+                    (r.get("product_name", sku) for r in stock if r["sku"] == sku), sku
+                ),
                 "quantity": 1,
                 "arrival_sim": int(instant),
-                "customer_node": rng.randrange(1024),
+                "customer_node": customer["home_node"] if customer else rng.randrange(1024),
+                **(
+                    {
+                        "customer_id": customer["id"],
+                        "customer_name": customer["name"],
+                        "home_id": customer["home_id"],
+                        "address": customer["address"],
+                    }
+                    if customer
+                    else {}
+                ),
                 "deadline_sim": int(instant) + 7200,
             }
         )

@@ -46,10 +46,11 @@ def city_configuration() -> dict[str, Any]:
     from delivery.catalogue import load_catalogue
     from delivery.city import fake_city
     from delivery.city_config import CitySettings
+    from delivery.urban_city import urban_city
 
     return {
         "defaults": CitySettings().model_dump(mode="json"),
-        "city": fake_city(size=32),
+        "city": urban_city(fake_city(size=32)),
         "products": load_catalogue(Path("data/expanded-catalogue.json")).model_dump(mode="json")[
             "products"
         ],
