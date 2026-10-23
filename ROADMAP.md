@@ -144,6 +144,13 @@ Acceptance: same seed produces the same initial hashes; last-unit race has one w
 
 ### M3: Fulfillment, independent workers and permissions
 
+First local delivery slice implemented: five isolated fulfillment identities and
+one fleet-scoped dispatcher reuse the foundation. A basket reserves, is picked
+once, receives a validated route/courier assignment and is delivered after the
+world's queued arrival event. See [delivery flow](docs/DELIVERY-FLOW.md). Cancellation,
+full baskets, cargo/energy constraints and durable worker/controller supervision
+remain planned; this is not full M3 completion.
+
 Deliver single-store baskets, quotes, picking, delivery and cancellation compensation. Add inventory/fulfillment roles, independently restartable workers, heartbeats, least-privilege tools and database roles. Trace stock and orders together; introduce invariants in CI.
 
 Acceptance: normal/cancelled baskets conserve units; crash-around-commit and out-of-order tests pass; store A cannot mutate store B; incompatible cargo is rejected. Offline demo explains a shortage and recovered worker failure.

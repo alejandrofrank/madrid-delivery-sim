@@ -37,6 +37,21 @@ Imported data stays in ignored `artifacts/`; the UI offers it when that snapshot
 Prices retain their observed dates; catalogue listings do not establish real stock.
 See [M2 validation](docs/M2-VALIDATION.md) for guarantees and current limits.
 
+### Basket to delivery
+
+Open **http://localhost:8010/delivery-lab** to follow stock reservation, picking,
+courier assignment and delivery on the 10×10 city. Inventory, fulfillment and
+dispatch use separate database identities, role-scoped tools and private memory.
+Every handoff is queued. The trusted world engine moves the bike; dispatch can
+confirm delivery only after its arrival event. No model calls are used.
+
+```sh
+docker compose exec -T app delivery delivery-demo
+```
+
+See [delivery flow and permissions](docs/DELIVERY-FLOW.md) for the event chain,
+verified boundaries and current single-item/single-courier limits.
+
 ### Dated Bakiano sample
 
 The local private sample targets October 14-23, 2026 (ten dates). It contains 2,008

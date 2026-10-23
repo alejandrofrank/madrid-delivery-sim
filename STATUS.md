@@ -1,5 +1,11 @@
 # Status
 
+2026-10-23: Added fulfillment and fleet dispatcher roles using the shared local
+factory, queue, memory and budgets. Basket-to-delivery inspector at `/delivery-lab`
+shows atomic picking, courier assignment, physical movement and queued confirmation.
+Linux full suite: 76 tests; additional API contract: 1 test; Ruff/mypy passed.
+See `docs/DELIVERY-FLOW.md` for permissions, evidence and remaining boundaries.
+
 2026-10-23: Shared local inventory foundation implemented: frozen role/soul definitions,
 five per-run/store database identities with row security, scoped tools and private TTL
 memory, durable agent/aggregate budgets and queue-only communication. Expanded the

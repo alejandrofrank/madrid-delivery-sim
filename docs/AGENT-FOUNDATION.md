@@ -1,6 +1,8 @@
 # Shared local inventory agent foundation
 
-Implemented and verified 2026-10-23. One factory creates five inventory agents,
+Implemented and verified 2026-10-23. The same factory now also supports isolated
+fulfillment and dispatcher roles: see [basket-to-delivery flow](DELIVERY-FLOW.md).
+The original inventory scenario creates five inventory agents,
 one per fictional store. Everything runs locally; model calls, tokens and dollars
 are capped at zero. The existing last-unit, delayed-replenishment and real worker
 crash scenario now uses this foundation.
@@ -98,6 +100,6 @@ stock and budget invariants. Chrome checks passed for map edges, store-specific
 agent inspection, crash/race/delay checkpoints and desktop/mobile layout.
 
 Still deferred: controller restart/resumption and cleanup after abrupt controller
-death, independently supervised continuous workers, other business roles, configurable
+death, independently supervised continuous workers, additional business roles, configurable
 hierarchies, pgvector, model adapters, full replay and multi-seed architecture evals.
 GCP remains an optional later deployment adapter.
