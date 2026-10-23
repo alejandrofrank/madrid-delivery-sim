@@ -40,6 +40,52 @@ class StartLab(BaseModel):
     playback_seconds: int = Field(default=15, ge=0, le=120)
 
 
+class StartDelivery(BaseModel):
+    seed: int = Field(default=42, ge=0, le=2**31 - 1)
+    playback_seconds: int = Field(default=12, ge=0, le=120)
+
+
+@app.get("/delivery-lab")
+def delivery_page() -> FileResponse:
+    return FileResponse("web/flow.html")
+
+
+def delivery_background(run: str, seconds: int) -> None:
+    from delivery.delivery_flow import export_delivery
+
+    try:
+        export_delivery(run, seconds)
+    except Exception:
+        pass  # Controller persists sanitized error; no credentials in responses.
+
+
+@app.post("/api/lab/delivery-runs", status_code=202)
+def start_delivery(body: StartDelivery, tasks: BackgroundTasks) -> dict[str, str]:
+    from delivery.delivery_flow import new_delivery
+
+    run = new_delivery(body.seed)
+    tasks.add_task(delivery_background, run, body.playback_seconds)
+    return {"id": run}
+
+
+@app.get("/api/lab/delivery-runs/{run}")
+def delivery_state(run: UUID) -> dict[str, Any]:
+    from delivery.delivery_flow import flow_snapshot
+
+    state = flow_snapshot(str(run))
+    if not state["run"]:
+        raise HTTPException(404, "Unknown delivery run")
+    return state
+
+
+@app.get("/api/lab/delivery-runs/{run}/evidence")
+def delivery_evidence(run: UUID) -> FileResponse:
+    path = Path(f"artifacts/delivery-{run}.json")
+    if not path.is_file():
+        raise HTTPException(404, "Evidence is available after the scenario completes")
+    return FileResponse(path, media_type="application/json", filename=path.name)
+
+
 @app.get("/lab")
 def lab_page() -> FileResponse:
     return FileResponse("web/lab.html")
