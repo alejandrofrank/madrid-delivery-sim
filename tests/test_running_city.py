@@ -63,6 +63,24 @@ def test_orders_are_released_over_time_and_release_is_idempotent(db_url, city):
     assert len(state["events"]) == 1
     assert all(stock["on_hand"] == 3 for stock in state["stock"])
     assert len(state["fleet"]) == 3 and all(c["home_store"] for c in state["fleet"])
+    from delivery.agent_runtime import create_agent
+
+    with connect(db_url) as conn:
+        conn.execute("UPDATE runs SET sim_time=%s WHERE id=%s", (schedule[0]["arrival_sim"], city))
+
+    for role in ("inventory", "fulfillment"):
+        access = role_access(city, role, db_url)[schedule[0]["store"]]
+        agent = create_agent(access.dsn)
+        assert agent.process(agent.claim())
+    dispatcher = role_access(city, "dispatcher", db_url)["fleet"]
+    with connect(dispatcher.dsn) as conn:
+        context = conn.execute(
+            "SELECT workflow_context(%s) AS data", (schedule[0]["basket"],)
+        ).fetchone()["data"]
+        assert not any(
+            key in str(context)
+            for key in ("customers", "customer_name", "customer_id", "order_schedule", "address")
+        )
 
 
 def test_running_city_uses_configured_traffic_and_keeps_history_frozen(db_url, city):
