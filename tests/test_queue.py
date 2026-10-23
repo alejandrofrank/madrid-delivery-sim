@@ -1,3 +1,4 @@
+import time
 from concurrent.futures import ThreadPoolExecutor
 from uuid import UUID
 
@@ -7,6 +8,21 @@ from delivery.db import Connection, connect
 from delivery.queue import Backpressure, Event, Queue, publish
 
 pytestmark = pytest.mark.integration
+
+
+def test_lease_cannot_survive_waiting_for_run_lock(db_url: str, run_id: UUID) -> None:
+    send(db_url, run_id)
+    queue = Queue(db_url, lease_seconds=0.1)
+    event = queue.claim("dispatcher", run_id, 0)
+    assert event
+    called = []
+    with ThreadPoolExecutor(max_workers=1) as pool:
+        with connect(db_url) as conn:
+            conn.execute("SELECT pg_advisory_xact_lock(hashtextextended(%s,0))", (str(run_id),))
+            task = pool.submit(queue.process, event, lambda c, e: called.append(e.id))
+            time.sleep(0.25)
+        assert not task.result()
+    assert called == []
 
 
 def send(url: str, run: UUID, key: str = "o1", priority: int = 0, capacity: int = 100) -> int:

@@ -16,6 +16,7 @@ def main() -> None:
     lab.add_argument("--seed", type=int, default=42)
     lab.add_argument("--catalogue", type=Path, default=Path("data/lab-catalogue.json"))
     lab.add_argument("--sample-date", type=date.fromisoformat)
+    lab.add_argument("--role-dir", type=Path, default=Path("config/agents/inventory"))
     catalogue = sub.add_parser("import-catalogue")
     catalogue.add_argument("input", type=Path)
     catalogue.add_argument("output", type=Path)
@@ -36,6 +37,7 @@ def main() -> None:
     replay.add_argument("event_id", type=int)
     args = parser.parse_args()
     if args.command == "lab-demo":
+        from delivery.agent_specs import load_inventory_role
         from delivery.lab import create_lab, run_slice
 
         store_sources = None
@@ -45,7 +47,7 @@ def main() -> None:
             args.catalogue = history_catalogue(args.sample_date)
             store_sources = history_manifest()["sources"]
         run = create_lab(seed=args.seed, catalogue_path=args.catalogue, store_sources=store_sources)
-        result = run_slice(run)
+        result = run_slice(run, role=load_inventory_role(args.role_dir))
         Path("artifacts").mkdir(exist_ok=True)
         output = Path(f"artifacts/lab-{run}.json")
         output.write_text(json.dumps(result, default=str, indent=2), encoding="utf-8")

@@ -13,8 +13,14 @@ INVENTORY_ACCEPTS = frozenset(
 INVENTORY_EMITS = frozenset({"inventory.decided", "shipment.received"})
 INVENTORY_TOOLS = frozenset(
     {
-        "inventory.read", "inventory.reserve", "inventory.release", "inventory.delay",
-        "inventory.receive", "memory.read", "memory.write", "queue.publish",
+        "inventory.read",
+        "inventory.reserve",
+        "inventory.release",
+        "inventory.delay",
+        "inventory.receive",
+        "memory.read",
+        "memory.write",
+        "queue.publish",
     }
 )
 
@@ -50,7 +56,9 @@ class _RoleConfig(BaseModel):
     def enforce_authority(cls, value: tuple[str, ...], info: ValidationInfo) -> tuple[str, ...]:
         assert info.field_name is not None
         authority = {
-            "accepts": INVENTORY_ACCEPTS, "emits": INVENTORY_EMITS, "tools": INVENTORY_TOOLS,
+            "accepts": INVENTORY_ACCEPTS,
+            "emits": INVENTORY_EMITS,
+            "tools": INVENTORY_TOOLS,
         }[info.field_name]
         if len(value) != len(set(value)) or not set(value).issubset(authority):
             raise ValueError(f"{info.field_name} exceeds server authority or contains duplicates")

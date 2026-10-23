@@ -11,11 +11,13 @@ from uuid import uuid4
 
 from psycopg.types.json import Jsonb
 
+from delivery.agent_access import inventory_access, retire_inventory_access
+from delivery.agent_runtime import LocalAgent, create_inventory_agent
+from delivery.agent_specs import RoleSpec
 from delivery.catalogue import Catalogue, digest, load_catalogue
 from delivery.city import fake_city
 from delivery.db import connect, migrate
 from delivery.inventory import availability, movement
-from delivery.inventory_agent import handle_inventory
 from delivery.queue import Queue, publish
 
 
@@ -127,6 +129,25 @@ def lab_snapshot(run: str | None = None, url: str | None = None) -> dict[str, An
         conservation = all(
             totals.get((s["store"], s["sku"])) == (s["on_hand"], s["reserved"]) for s in stock
         )
+        agents = conn.execute(
+            """SELECT b.agent_id,b.store,b.definition_hash,
+            b.definition->>'policy' AS policy,b.definition->>'soul' AS soul,
+            b.definition->'tools' AS tools,b.definition->'limits' AS limits,
+            a.events_reserved,a.tools_reserved,a.events_limit,a.tools_limit,
+            a.memory_entries_limit,a.memory_bytes_limit,
+            (SELECT count(*) FROM agent_memories m WHERE m.run_id=b.run_id AND m.store=b.store
+                AND m.expires_sim>%s) AS memory_entries,
+            (SELECT coalesce(sum(octet_length(m.body::text)),0) FROM agent_memories m
+                WHERE m.run_id=b.run_id AND m.store=b.store AND m.expires_sim>%s) AS memory_bytes,
+            (SELECT coalesce(sum(t.observed_tools),0) FROM agent_event_budgets t
+                WHERE t.run_id=b.run_id AND t.store=b.store) AS committed_tool_calls
+            FROM agent_bindings b JOIN agent_budgets a USING(run_id,store)
+            WHERE b.run_id=%s ORDER BY b.store""",
+            (row["sim_time"], row["sim_time"], run),
+        ).fetchall()
+        run_budget = conn.execute(
+            "SELECT * FROM agent_run_budgets WHERE run_id=%s", (run,)
+        ).fetchone()
 
         def rows(table: str, order: str) -> list[dict[str, Any]]:
             return conn.execute(
@@ -141,18 +162,32 @@ def lab_snapshot(run: str | None = None, url: str | None = None) -> dict[str, An
             "selected_product": row["selected_product"],
             "selected_store": scenario_store(row["city"], row["catalogue"]),
             "stock": stock,
+            "agents": agents,
+            "run_budget": run_budget,
             "baskets": rows("lab_baskets", "id"),
             "shipments": rows("lab_shipments", "id"),
             "movements": rows("lab_movements", "sim_time,command_key"),
             "decisions": rows("decisions", "id"),
             "events": conn.execute(
                 """SELECT id,topic,trace_id,parent_id,state,attempts,
-                    due_sim,error FROM events WHERE run_id=%s ORDER BY id""",
+                    due_sim,error,target_store FROM events WHERE run_id=%s ORDER BY id""",
                 (run,),
             ).fetchall(),
             "invariants": {
                 "stock_conserved": conservation,
                 "nonnegative_available": all(s["available_now"] >= 0 for s in stock),
+                "agent_budgets_within_caps": all(
+                    a["events_reserved"] <= a["events_limit"]
+                    and a["tools_reserved"] <= a["tools_limit"]
+                    for a in agents
+                )
+                and (
+                    not run_budget
+                    or (
+                        run_budget["events_reserved"] <= run_budget["events_limit"]
+                        and run_budget["tools_reserved"] <= run_budget["tools_limit"]
+                    )
+                ),
             },
         }
 
@@ -179,6 +214,7 @@ def prepare_slice(run: str, url: str | None = None) -> None:
                 },
                 key=basket,
                 trace_id=basket,
+                target_store=store,
             )
         publish(
             conn,
@@ -189,6 +225,7 @@ def prepare_slice(run: str, url: str | None = None) -> None:
             key="delay-1",
             trace_id="supply-1",
             due_sim=120,
+            target_store=store,
         )
         publish(
             conn,
@@ -199,13 +236,24 @@ def prepare_slice(run: str, url: str | None = None) -> None:
             key="expiry-a",
             trace_id="basket-a",
             due_sim=600,
+            target_store=store,
         )
 
 
 def crash_worker(run: str, url: str | None = None, point: str = "after-write") -> int:
-    env = os.environ.copy()
-    if url:
-        env["DATABASE_URL"] = url
+    # Trusted supervisor selects the deployment identity, not the event or SOUL.
+    with connect(url) as conn:
+        world = conn.execute(
+            "SELECT city,catalogue FROM lab_worlds WHERE run_id=%s", (run,)
+        ).fetchone()
+        assert world
+    access = inventory_access(run, url)[scenario_store(world["city"], world["catalogue"])]
+    env = {
+        key: value
+        for key, value in os.environ.items()
+        if key.upper() in {"SYSTEMROOT", "WINDIR", "PATH", "TEMP", "TMP", "LANG", "LC_ALL"}
+    }
+    env["DATABASE_URL"] = access.dsn
     result = subprocess.run(
         [sys.executable, "-m", "delivery.lab_worker", run, "--crash", point],
         env=env,
@@ -218,16 +266,26 @@ def crash_worker(run: str, url: str | None = None, point: str = "after-write") -
     return result.returncode
 
 
-def drain(run: str, sim: int, url: str | None = None) -> None:
+def drain(
+    run: str, sim: int, url: str | None = None, agents: dict[str, LocalAgent] | None = None
+) -> None:
     queue = Queue(url)
+    agents = agents or {
+        store: create_inventory_agent(access.dsn)
+        for store, access in inventory_access(run, url).items()
+    }
     deadline = time.monotonic() + 10
     with connect(url) as conn:
         conn.execute("UPDATE runs SET sim_time=%s WHERE id=%s", (sim, run))
     for _ in range(100):
-        event = queue.claim("inventory", run, sim)
-        if event:
-            if not queue.process(event, handle_inventory):
-                raise RuntimeError("Inventory handler failed; inspect event errors")
+        worked = False
+        for agent in agents.values():
+            event = agent.claim()
+            if event:
+                if not agent.process(event):
+                    raise RuntimeError("Scoped inventory worker failed; inspect event errors")
+                worked = True
+        if worked:
             continue
         event = queue.claim("inventory_audit", run, sim)
         if event:
@@ -250,7 +308,9 @@ def drain(run: str, sim: int, url: str | None = None) -> None:
     raise RuntimeError("Inventory event budget exhausted")
 
 
-def run_slice(run: str, url: str | None = None, playback_seconds: float = 0) -> dict[str, Any]:
+def run_slice(
+    run: str, url: str | None = None, playback_seconds: float = 0, role: RoleSpec | None = None
+) -> dict[str, Any]:
     if playback_seconds < 0 or playback_seconds > 120:
         raise ValueError("Playback must be 0..120 seconds")
     with connect(url) as conn:
@@ -263,6 +323,10 @@ def run_slice(run: str, url: str | None = None, playback_seconds: float = 0) -> 
             raise ValueError("Lab run must be ready; completed runs are immutable")
     checkpoints = []
     try:
+        agents = {
+            store: create_inventory_agent(access.dsn)
+            for store, access in inventory_access(run, url, role).items()
+        }
         prepare_slice(run, url)
         exit_code = crash_worker(run, url)
         crashed = lab_snapshot(run, url)
@@ -294,7 +358,7 @@ def run_slice(run: str, url: str | None = None, playback_seconds: float = 0) -> 
             (600, "unused reservation expired"),
             (900, "shipment received"),
         ]:
-            drain(run, sim, url)
+            drain(run, sim, url, agents)
             state = lab_snapshot(run, url)
             if not all(state["invariants"].values()):
                 raise RuntimeError("Inventory invariant failed")
@@ -327,6 +391,8 @@ def run_slice(run: str, url: str | None = None, playback_seconds: float = 0) -> 
                 "UPDATE runs SET status='failed',error=%s WHERE id=%s", (type(exc).__name__, run)
             )
         raise
+    finally:
+        retire_inventory_access(run, url)
 
 
 def export_slice(run: str, playback_seconds: float = 0) -> dict[str, Any]:

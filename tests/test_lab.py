@@ -3,6 +3,7 @@ from collections.abc import Iterator
 import pytest
 from fastapi.testclient import TestClient
 
+from delivery.agent_access import retire_inventory_access
 from delivery.api import app
 from delivery.config import settings
 from delivery.db import connect
@@ -16,6 +17,7 @@ pytestmark = pytest.mark.integration
 def scenario(db_url: str) -> Iterator[str]:
     run = create_lab(db_url)
     yield run
+    retire_inventory_access(run, db_url)
     with connect(db_url) as conn:
         conn.execute("DELETE FROM decisions WHERE run_id=%s", (run,))
         conn.execute("DELETE FROM events WHERE run_id=%s", (run,))
@@ -99,6 +101,7 @@ def test_second_delay_defers_obsolete_receipt(db_url: str, scenario: str) -> Non
             key="second-delay",
             trace_id="supply-1",
             due_sim=240,
+            target_store="store-1",
         )
     drain(scenario, 240, db_url)
     drain(scenario, 900, db_url)

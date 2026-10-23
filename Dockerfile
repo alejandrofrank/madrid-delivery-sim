@@ -11,6 +11,7 @@ RUN pip install --no-deps -e . && useradd -m -u 10001 sim
 COPY data ./data
 COPY sql ./sql
 COPY web ./web
+COPY config ./config
 COPY tests ./tests
 RUN mkdir -p artifacts && chown -R sim:sim /app
 USER sim

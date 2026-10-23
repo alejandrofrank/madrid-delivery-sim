@@ -54,6 +54,7 @@ class Event:
     token: UUID
     attempts: int
     due_sim: int
+    target_store: str | None = None
 
 
 def publish(
@@ -69,27 +70,60 @@ def publish(
     priority: int = 0,
     parent_id: int | None = None,
     capacity: int = 10000,
+    target_store: str | None = None,
 ) -> int:
     if topic not in PUBLISH.get(producer, set()):
         raise PermissionError(f"{producer} cannot publish {topic}")
     # Serializes capacity and dedupe checks for this run without a global queue lock.
     conn.execute("SELECT pg_advisory_xact_lock(hashtextextended(%s, 0))", (str(run_id),))
+    scope_row = conn.execute("SELECT public.agent_scope() AS scope").fetchone()
+    scope = scope_row["scope"] if scope_row else None
+    if scope:
+        if str(run_id) != scope["run_id"] or target_store not in (None, scope["store"]):
+            raise PermissionError("Queue destination exceeds agent scope")
+        target_store = scope["store"]
+        if (
+            parent_id is not None
+            and not conn.execute("SELECT id FROM events WHERE id=%s", (parent_id,)).fetchone()
+        ):
+            raise PermissionError("Parent event is outside agent scope")
     existing = conn.execute(
         "SELECT id FROM events WHERE run_id=%s AND topic=%s AND dedupe_key=%s",
         (run_id, topic, key),
     ).fetchone()
     if existing:
         return int(existing["id"])
-    count = conn.execute(
-        "SELECT count(*) AS n FROM events WHERE run_id=%s AND state IN ('ready','leased')",
-        (run_id,),
-    ).fetchone()
-    if count and count["n"] >= capacity:
+    room = (
+        conn.execute("SELECT public.agent_queue_room(%s) AS room", (capacity,)).fetchone()
+        if scope
+        else None
+    )
+    count = (
+        None
+        if scope
+        else conn.execute(
+            "SELECT count(*) AS n FROM events WHERE run_id=%s AND state IN ('ready','leased')",
+            (run_id,),
+        ).fetchone()
+    )
+    if (room and not room["room"]) or (count and count["n"] >= capacity):
         raise Backpressure("Queue capacity reached; retry producer after consumers drain")
     row = conn.execute(
         """INSERT INTO events(run_id,producer,topic,payload,dedupe_key,trace_id,
-           due_sim,priority,parent_id) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s) RETURNING id""",
-        (run_id, producer, topic, Jsonb(payload), key, trace_id, due_sim, priority, parent_id),
+           due_sim,priority,parent_id,target_store)
+           VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s) RETURNING id""",
+        (
+            run_id,
+            producer,
+            topic,
+            Jsonb(payload),
+            key,
+            trace_id,
+            due_sim,
+            priority,
+            parent_id,
+            target_store,
+        ),
     ).fetchone()
     assert row
     return int(row["id"])
@@ -100,27 +134,37 @@ class Queue:
         self.url = url
         self.lease_seconds = lease_seconds
 
-    def claim(self, role: str, run_id: UUID | str, sim_time: int) -> Event | None:
+    def claim(
+        self,
+        role: str,
+        run_id: UUID | str,
+        sim_time: int,
+        *,
+        accepted_topics: tuple[str, ...] | None = None,
+    ) -> Event | None:
         if role not in SUBSCRIBE:
             raise PermissionError(f"Unknown consumer role: {role}")
+        topics = set(accepted_topics) if accepted_topics is not None else SUBSCRIBE[role]
+        if not topics.issubset(SUBSCRIBE[role]):
+            raise PermissionError("Consumer topics exceed role authority")
         token = uuid4()
         with connect(self.url) as conn:
             conn.execute(
                 """UPDATE events SET state='dead', error='lease_expired_after_max_attempts',
                    lease_token=NULL, lease_until=NULL WHERE run_id=%s AND state='leased'
-                   AND lease_until < now() AND attempts >= max_attempts""",
+                   AND lease_until < clock_timestamp() AND attempts >= max_attempts""",
                 (run_id,),
             )
             row = conn.execute(
                 """WITH candidate AS (
                      SELECT id FROM events WHERE run_id=%s AND topic=ANY(%s)
-                     AND due_sim<=%s AND available_at<=now() AND attempts<max_attempts
-                     AND (state='ready' OR (state='leased' AND lease_until<now()))
+                     AND due_sim<=%s AND available_at<=clock_timestamp() AND attempts<max_attempts
+                     AND (state='ready' OR (state='leased' AND lease_until<clock_timestamp()))
                      ORDER BY priority DESC, due_sim, id FOR UPDATE SKIP LOCKED LIMIT 1
                    ) UPDATE events e SET state='leased', lease_token=%s,
-                     lease_until=now() + %s * interval '1 second', attempts=attempts+1
+                     lease_until=clock_timestamp() + %s * interval '1 second', attempts=attempts+1
                    FROM candidate c WHERE e.id=c.id RETURNING e.*""",
-                (run_id, sorted(SUBSCRIBE[role]), sim_time, token, self.lease_seconds),
+                (run_id, sorted(topics), sim_time, token, self.lease_seconds),
             ).fetchone()
         if row is None:
             return None
@@ -133,6 +177,7 @@ class Queue:
             token,
             row["attempts"],
             row["due_sim"],
+            row["target_store"],
         )
 
     def process(self, event: Event, handler: Callable[[Connection, Event], None]) -> bool:
@@ -144,17 +189,20 @@ class Queue:
                 )
                 row = conn.execute(
                     """SELECT id FROM events WHERE id=%s AND state='leased'
-                       AND lease_token=%s AND lease_until>now() FOR UPDATE""",
+                       AND lease_token=%s AND lease_until>clock_timestamp() FOR UPDATE""",
                     (event.id, event.token),
                 ).fetchone()
                 if not row:
                     raise StaleLease("Worker no longer owns event")
                 handler(conn, event)
-                conn.execute(
+                ack = conn.execute(
                     """UPDATE events SET state='done', completed_at=now(),
-                       lease_token=NULL, lease_until=NULL WHERE id=%s""",
-                    (event.id,),
+                       lease_token=NULL, lease_until=NULL WHERE id=%s
+                       AND lease_token=%s AND lease_until>clock_timestamp()""",
+                    (event.id, event.token),
                 )
+                if ack.rowcount != 1:
+                    raise StaleLease("Lease expired before commit")
             return True
         except StaleLease:
             return False
@@ -168,16 +216,17 @@ class Queue:
             conn.execute(
                 """UPDATE events SET state=CASE WHEN attempts>=max_attempts THEN 'dead'
                      ELSE 'ready' END, error=%s, lease_token=NULL, lease_until=NULL,
-                     available_at=now() + %s * interval '1 second'
+                     available_at=clock_timestamp() + least(30,power(2,least(5,
+                         greatest(0,attempts-greatest(0,max_attempts-3)-1)))) * interval '1 second'
                    WHERE id=%s AND state='leased' AND lease_token=%s""",
-                (code[:80], min(30, 2 ** (event.attempts - 1)), event.id, event.token),
+                (code[:80], event.id, event.token),
             )
 
     def replay(self, event_id: int) -> bool:
         """Explicit operator action; no automatic poison-message loop."""
         with connect(self.url) as conn:
             row = conn.execute(
-                """UPDATE events SET state='ready', attempts=0, error=NULL,
+                """UPDATE events SET state='ready', max_attempts=attempts+3, error=NULL,
                    available_at=now() WHERE id=%s AND state='dead' RETURNING id""",
                 (event_id,),
             ).fetchone()
