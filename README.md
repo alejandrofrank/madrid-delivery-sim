@@ -37,22 +37,26 @@ Imported data stays in ignored `artifacts/`; the UI offers it when that snapshot
 Prices retain their observed dates; catalogue listings do not establish real stock.
 See [M2 validation](docs/M2-VALIDATION.md) for guarantees and current limits.
 
-### Basket to delivery
+### Running city
 
-Open **http://localhost:8010/delivery-lab** to follow stock reservation, picking,
-courier assignment, traffic delays and judged recovery on the 32×32 city. Inventory, fulfillment and
-dispatch, courier and judge roles use separate database identities, scoped tools and private memory.
-Every handoff is queued. The trusted world engine moves the bike; dispatch can
-confirm delivery only after its arrival event. No model calls are used.
+Open **http://localhost:8010/delivery-lab** for the map-first city. Click a store to
+configure its opening stock, demand weight and home couriers. Global controls set
+order intensity, traffic, dropout rates, duration and seed. Orders arrive over time.
+Click a store's team member or a courier to inspect its parameters and private memory.
+Settings apply to the next session; each run keeps its frozen starting configuration.
+
+See [running city controls and limits](docs/RUNNING-CITY.md). All agents retain their
+separate database identities, scoped tools, budgets and queued handoffs. Everything
+runs locally with no model/provider calls.
+
+The fixed fleet recovery regression remains available from the CLI:
 
 ```sh
 docker compose exec -T app delivery delivery-demo
 ```
 
-See [delivery flow and permissions](docs/DELIVERY-FLOW.md) for the event chain,
-legacy delivery boundaries. The default now runs seven requests, scarce stock, four
-bikes, 12 establishments including pharmacies, traffic and courier dropouts. See
-[fleet recovery and scoped briefings](docs/FLEET-RECOVERY.md).
+Its traffic/dropout scenario and scoped rescue briefings are documented in
+[fleet recovery](docs/FLEET-RECOVERY.md).
 
 ### Dated Bakiano sample
 

@@ -1,7 +1,8 @@
 # Multi-basket fleet and judged recovery
 
-The default `/delivery-lab` and `delivery delivery-demo` now run a local 32×32
-synthetic scenario. Existing saved 10×10 runs and the separate `/lab` inventory
+The fixed `delivery delivery-demo` runs the local 32×32 synthetic scenario below.
+The default `/delivery-lab` now uses [configurable running-city sessions](RUNNING-CITY.md);
+saved fixed runs remain inspectable in the map UI. Existing saved 10×10 runs and the separate `/lab` inventory
 crash/replenishment exercise retain their earlier behavior.
 
 The expanded city has 1,024 nodes, 3,968 directed adjacent roads and 12 establishments:

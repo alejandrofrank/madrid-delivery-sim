@@ -1,5 +1,11 @@
 # Status
 
+2026-10-23: Added frozen local city configuration, seeded orders over time, store
+stock/demand/staffing and configurable traffic/withdrawal rates. Map-first UI supports
+shop/team selection and selected-agent parameter, budget and memory inspection.
+Verified 91 Linux tests, Ruff, mypy and desktop/mobile browser interactions.
+See `docs/RUNNING-CITY.md`. Settings affect new sessions, with unfinished work visible.
+
 2026-10-23: Expanded default delivery lab to a 32x32 city, 12 establishments
 including pharmacies, scarce inventory, seven basket requests and four couriers.
 Added role-isolated courier and judge agents, queued scoped briefings, traffic delays,

@@ -2,6 +2,12 @@
 
 Updated 2026-10-23. Implemented slices are identified below; remaining milestones are planned.
 
+Local interaction update: map-first city controls now configure store opening stock,
+home couriers, demand weights, global timed order intensity, traffic and withdrawal
+rates. Seeded arrivals replace the fixed script in the UI; the fixed chaos regression
+remains in the CLI. Human operator agent inspection exposes one selected namespace's
+parameters and live memory. See [running city](docs/RUNNING-CITY.md).
+
 ## Objective and baseline
 
 Compare which agent architecture operates the same disrupted delivery business most reliably under the same permissions and budget.
