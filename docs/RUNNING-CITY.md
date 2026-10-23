@@ -124,3 +124,15 @@ dashed sections show the remaining plan, and a diamond marks the destination.
 A route can revisit a junction while approaching a shop and then delivering.
 Couriers move only after accepting an assignment, using each persisted road
 duration. Selecting a shop or order can expose its route for inspection.
+
+## Appearance and fictional team names
+
+The city interface follows Bakiano's dark application palette: blue-tinted surfaces,
+red brand accent, blue controls and bordered panels. Fonts use local system fallbacks
+when Space Grotesk/Space Mono are unavailable; no remote font requests are made.
+Map shops, household icons and couriers are enlarged for easier selection.
+
+Agents have stable fictional display names, such as Lucia Rios (inventory),
+Lucia Luna (fulfillment), Lucia Mora (courier), Elena Vega (dispatcher), and
+Victor Sol (judge). Names are presentation labels; role IDs, queue destinations,
+database permissions and memory namespaces keep their original identities.

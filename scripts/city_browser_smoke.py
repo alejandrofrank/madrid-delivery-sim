@@ -19,6 +19,10 @@ with sync_playwright() as p:
     page.goto(args.url.rstrip("/") + "/delivery-lab", wait_until="networkidle")
     page.wait_for_selector('#city[data-node-count="1024"]')
     assert page.locator("[data-store]").count() == 12
+    assert page.evaluate("getComputedStyle(document.body).backgroundColor") == "rgb(2, 4, 9)"
+    assert page.evaluate("agentName('inventory:store-1')") == "Lucia Rios"
+    assert page.evaluate("agentName('courier:bike-1')") == "Lucia Mora"
+    assert "Elena Vega" in page.locator('[data-agent="dispatcher:fleet"]').inner_text()
     assert page.locator("[data-customer]").count() >= 96
     assert (
         page.locator(
@@ -73,6 +77,7 @@ with sync_playwright() as p:
     assert evidence["agent"]["agent_id"] == "inventory:store-1"
     assert isinstance(evidence["memory"], list)
     assert "Private memory" in page.locator("#agent-content").inner_text()
+    assert "Lucia Rios" in page.locator("#context-title").inner_text()
     assert page.locator("#city").is_visible()
     assert page.evaluate("document.documentElement.scrollWidth <= innerWidth")
     page.screenshot(path="artifacts/city-desktop.png", full_page=True)
