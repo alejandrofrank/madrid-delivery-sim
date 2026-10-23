@@ -51,9 +51,9 @@ def test_expanded_catalogue_domains_are_explicitly_simulated() -> None:
     catalogue = load_catalogue(Path("data/expanded-catalogue.json"))
     assert "Simulated synthetic" in catalogue.origin
     assert Counter(p.domain for p in catalogue.products) == {
-        "supermarket": 3,
-        "retail": 2,
-        "pharmacy": 2,
+        "supermarket": 60,
+        "retail": 30,
+        "pharmacy": 30,
     }
     assert all(p.provenance == "simulated" for p in catalogue.products)
     assert {p.category for p in catalogue.products if p.domain == "pharmacy"} == {"hygiene"}
