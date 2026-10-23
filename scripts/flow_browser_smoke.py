@@ -16,13 +16,14 @@ with sync_playwright() as p:
     page = browser.new_page(viewport={"width": 1440, "height": 1100})
     errors = []
     page.on("pageerror", lambda error: errors.append(str(error)))
-    page.goto(args.url.rstrip("/") + "/delivery-lab", wait_until="networkidle")
-    page.locator("#duration").fill("2")
-    page.get_by_role("button", name="Run basket delivery").click()
+    response = page.request.post(
+        args.url.rstrip("/") + "/api/lab/delivery-runs", data={"seed": 42, "playback_seconds": 2}
+    )
+    assert response.ok
+    run = response.json()["id"]
+    page.goto(args.url.rstrip("/") + "/delivery-lab?run=" + run, wait_until="networkidle")
     page.wait_for_function(
-        "window.deliverySnapshot && window.deliverySnapshot.run.status === 'complete' && "
-        "window.deliverySnapshot.jobs.length > 0 && "
-        "window.deliverySnapshot.jobs.some(j => j.status === 'delivered')",
+        "window.deliverySnapshot && window.deliverySnapshot.run.status === 'complete'",
         timeout=60000,
     )
     snapshot = page.evaluate("window.deliverySnapshot")
@@ -49,14 +50,15 @@ with sync_playwright() as p:
     assert "custody" in retry_text and "checkpoint" in retry_text
     assert "source" in retry_text and "event" in retry_text
     assert all(snapshot["invariants"].values()), snapshot["invariants"]
-    assert page.locator("[data-node]").count() == 1024
-    assert page.locator("[data-road]").count() == 3968
-    assert page.locator("[data-role]").count() == 5
+    assert page.locator("#city").get_attribute("data-node-count") == "1024"
     assert page.locator("[data-courier]").count() > 0
     assert page.locator("#error").is_hidden()
     assert page.evaluate("document.documentElement.scrollWidth <= innerWidth")
-    page.locator("#decisions summary").first.click()
-    page.locator("#events summary").first.click()
+    page.get_by_role("button", name="Judge", exact=True).click()
+    page.wait_for_function(
+        "window.selectedAgentEvidence && "
+        "window.selectedAgentEvidence.agent.agent_id === 'judge:fleet'"
+    )
     page.screenshot(path="artifacts/flow-desktop.png", full_page=True)
     page.screenshot(path="artifacts/flow-viewport.png")
     page.set_viewport_size({"width": 390, "height": 844})

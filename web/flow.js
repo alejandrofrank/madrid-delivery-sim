@@ -1,80 +1,92 @@
 'use strict';
-const $ = id => document.getElementById(id);
-const escapeHTML = value => String(value ?? '—').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-const roles = [
- ['Inventory', 'Reserves confirmed stock. Cannot pick items or move couriers.'],
- ['Fulfillment', 'Picks a reserved basket at its assigned store. Cannot change stock policy or delivery routes.'],
- ['Dispatcher', 'Assigns couriers and routes; queues shared handoff briefs. Cannot reserve or pick stock.'],
- ['Courier', 'Receives a queued briefing and custody checkpoint. The world engine controls movement and authoritative arrival.'],
- ['Judge', 'Reviews retry cost against remaining deadline. Approves or denies reassignment using inspectable evidence.']
-];
-let snapshot = null, runId = new URLSearchParams(location.search).get('run'), pollTimer = null;
-function renderRoles(agents = []) {
- $('roles').innerHTML = roles.map(([name, boundary]) => `<article class="role-card" data-role="${name.toLowerCase()}"><h3>${name}</h3><p>${boundary}</p></article>`).join('');
- const active=agents.filter(a=>Number(a.events_reserved)>0||Number(a.tools_reserved)>0);
- const identity=a=>`<details><summary>${escapeHTML(a.agent_id)} · ${escapeHTML(a.store)} · events ${escapeHTML(a.events_reserved)} / ${escapeHTML(a.events_limit)} · tools ${escapeHTML(a.tools_reserved)} / ${escapeHTML(a.tools_limit)}</summary><pre>${escapeHTML(JSON.stringify(a,null,2))}</pre></details>`;
- $('agent-identities').innerHTML=`<details><summary>Active agent identities (${active.length})</summary>${active.map(identity).join('')}</details><details><summary>Inactive agent identities (${agents.length-active.length})</summary>${agents.filter(a=>!active.includes(a)).map(identity).join('')}</details>`;
+const $=id=>document.getElementById(id);
+const esc=value=>String(value??'—').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const svgNode=(tag,attrs={})=>{const node=document.createElementNS('http://www.w3.org/2000/svg',tag);for(const [key,value] of Object.entries(attrs))node.setAttribute(key,value);return node;};
+let config=null,city=null,snapshot=null,selectedStore=null,selectedAgent=null,selectedTab='overview',runId=new URLSearchParams(location.search).get('run'),pollTimer=null;
+let view=null,fullView=null,mapCity=null,drag=null,storeDirty=false,legacyReadOnly=false;
+const terminal=status=>['complete','completed','finished','failed'].includes(status);
+async function request(url,options){const r=await fetch(url,options);if(!r.ok){let message='The request could not be completed.';try{const body=await r.json();const detail=body.detail;if(Array.isArray(detail))message=detail.map(item=>`${(item.loc||[]).filter(part=>part!=='body').join(' → ')}: ${item.msg||'Invalid value'}`).join('; ');else if(typeof detail==='string')message=detail;}catch{}throw Error(message);}return r.json();}
+function fail(error){$('error').textContent=error.message;$('error').hidden=false;$('start').disabled=false;$('status').textContent='Connection error';}
+function show(section){for(const id of ['welcome','configuration','store-view','agent-view'])$(id).hidden=id!==section;}
+function applyView(){if(view)$('city').setAttribute('viewBox',`${view.x} ${view.y} ${view.w} ${view.h}`);}
+function zoom(factor,x=.5,y=.5){if(!view)return;const w=view.w*factor,h=view.h*factor;if(w<fullView.w*.08||w>fullView.w*2)return;view={x:view.x+(view.w-w)*x,y:view.y+(view.h-h)*y,w,h};applyView();}
+$('zoom-in').onclick=()=>zoom(.75);$('zoom-out').onclick=()=>zoom(1.3);$('reset-map').onclick=()=>{view={...fullView};applyView();};
+$('city').addEventListener('wheel',event=>{event.preventDefault();const r=$('city').getBoundingClientRect();zoom(event.deltaY>0?1.12:.89,(event.clientX-r.left)/r.width,(event.clientY-r.top)/r.height);},{passive:false});
+$('city').addEventListener('pointerdown',event=>{if(event.target.closest('[data-store],[data-courier]'))return;drag={x:event.clientX,y:event.clientY,view:{...view}};$('city').setPointerCapture(event.pointerId);$('city').classList.add('dragging');});
+$('city').addEventListener('pointermove',event=>{if(!drag)return;const r=$('city').getBoundingClientRect();view={...drag.view,x:drag.view.x-(event.clientX-drag.x)*drag.view.w/r.width,y:drag.view.y-(event.clientY-drag.y)*drag.view.h/r.height};applyView();});
+$('city').addEventListener('pointerup',()=>{drag=null;$('city').classList.remove('dragging');});
+function baseMap(nextCity){
+ city=nextCity;const identity=JSON.stringify([city.nodes.length,city.edges.length,city.stores.map(s=>s.id)]);if(identity===mapCity)return;mapCity=identity;
+ const svg=$('city');svg.replaceChildren();const nodes=new Map(city.nodes.map(n=>[String(n.id),n]));
+ const xs=city.nodes.map(n=>n.x),ys=city.nodes.map(n=>n.y),minX=Math.min(...xs),minY=Math.min(...ys),width=Math.max(...xs)-minX,height=Math.max(...ys)-minY,pad=Math.max(width,height)*.065||1;
+ fullView={x:minX-pad,y:minY-pad,w:width+pad*2,h:height+pad*2};view={...fullView};applyView();
+ const roads=svgNode('g',{'data-layer':'roads'});let path='';for(const e of city.edges){const a=nodes.get(String(e.from)),b=nodes.get(String(e.to));if(a&&b)path+=`M${a.x},${a.y}L${b.x},${b.y}`;}roads.append(svgNode('path',{d:path,stroke:'#cedbcf','stroke-width':Math.max(width/800,.5),fill:'none'}));svg.append(roads);
+ svg.setAttribute('data-node-count',city.nodes.length);svg.setAttribute('data-road-count',city.edges.length);
+ svg.append(svgNode('g',{id:'route-layer'}),svgNode('g',{id:'store-layer'}),svgNode('g',{id:'courier-layer'}));
+ $('graph-info').textContent=`${city.nodes.length.toLocaleString()} junctions · ${city.stores.length} shops`;
+ drawStores();
 }
-renderRoles();
-const svgElement = (tag, attrs) => { const e = document.createElementNS('http://www.w3.org/2000/svg',tag); for (const [k,v] of Object.entries(attrs)) e.setAttribute(k,v); return e; };
-function drawCity(data) {
- const svg = $('city'); svg.replaceChildren();
- const nodes = new Map(data.city.nodes.map(n => [String(n.id),n]));
- const coordinates = data.city.nodes;
- const minX = Math.min(...coordinates.map(n=>n.x)), maxX = Math.max(...coordinates.map(n=>n.x));
- const minY = Math.min(...coordinates.map(n=>n.y)), maxY = Math.max(...coordinates.map(n=>n.y));
- const pad = Math.max(maxX-minX,maxY-minY)*.055 || 1;
- svg.setAttribute('viewBox',`${minX-pad} ${minY-pad} ${maxX-minX+2*pad} ${maxY-minY+2*pad}`);
- const radius = pad*.08;
- const edgeLookup=new Map(data.city.edges.map(e=>[`${e.from}:${e.to}`,e]));
- const visibleCouriers=new Set();
- for (const edge of data.city.edges) { const a=nodes.get(String(edge.from)), b=nodes.get(String(edge.to)); if(a&&b) svg.append(svgElement('line',{x1:a.x,y1:a.y,x2:b.x,y2:b.y,stroke:'#ccd7dc','stroke-width':radius*.3,'data-road':''})); }
- for(const node of coordinates) svg.append(svgElement('circle',{cx:node.x,cy:node.y,r:radius*.35,fill:'#9caeb5','data-node':node.id}));
- for(const store of data.city.stores) {const n=nodes.get(String(store.node)); if(n) {const e=svgElement('rect',{x:n.x-radius,y:n.y-radius,width:radius*2,height:radius*2,fill:String(store.kind||store.type||store.name||store.id).toLowerCase().includes('pharmac')?'#8e55a4':'#263b43','data-store':store.id}); const t=svgElement('title',{});t.textContent=store.name||store.id;e.append(t);svg.append(e);}}
- for(const job of data.jobs) {
- const route=(job.route||[]).map(id=>nodes.get(String(id))).filter(Boolean);
- if(route.length>1) svg.append(svgElement('polyline',{points:route.map(n=>`${n.x},${n.y}`).join(' '),fill:'none',stroke:'#148674','stroke-width':radius*.6,'stroke-opacity':'.65','data-route':job.basket}));
- const customer=nodes.get(String(job.customer_node)); if(customer) svg.append(svgElement('circle',{cx:customer.x,cy:customer.y,r:radius,fill:'#fff',stroke:'#148674','stroke-width':radius*.4}));
- if(job.status==='abandoned') {const n=nodes.get(String(job.pickup_node));if(n)svg.append(svgElement('rect',{x:n.x-radius,y:n.y-radius,width:radius*2,height:radius*2,fill:'#ac352a','data-abandoned':job.basket}));}
- if(route.length && job.courier && !['abandoned','stranded','deferred','awaiting_review'].includes(job.status) && !visibleCouriers.has(job.courier)) {
- visibleCouriers.add(job.courier);
- const attempt=(data.attempts||[]).filter(a=>a.basket===job.basket && a.courier===job.courier && !['failed','dropped','dropout','abandoned'].includes(a.status)).at(-1);
- const durations=job.route_durations||attempt?.edge_durations||[];
- const times=route.slice(1).map((n,i)=>Number(durations[i])||Number(edgeLookup.get(`${route[i].id}:${n.id}`)?.travel_seconds)||1);
- let remaining=Math.max(0,Number(data.run.sim_time)-(Number(job.depart_sim)||0)),position=route[0];
- for(let i=0;i<times.length;i++){if(remaining<=times[i]){const f=remaining/times[i];position={x:route[i].x+(route[i+1].x-route[i].x)*f,y:route[i].y+(route[i+1].y-route[i].y)*f};break;}remaining-=times[i];position=route[i+1];}
- svg.append(svgElement('circle',{cx:position.x,cy:position.y,r:radius*1.25,fill:'#d57c19',stroke:'white','stroke-width':radius*.3,'data-courier':job.courier||job.basket}));
+function storeData(store){return config?.stores?.find(s=>s.id===store.id)||store;}
+function drawStores(){const layer=$('store-layer');if(!layer)return;layer.replaceChildren();const nodes=new Map(city.nodes.map(n=>[String(n.id),n]));const unit=fullView.w/75;
+ for(const raw of city.stores){const s=storeData(raw),n=nodes.get(String(raw.node));if(!n)continue;const pharmacy=JSON.stringify(raw).toLowerCase().includes('pharmac');const g=svgNode('g',{'data-store':s.id,class:'store-marker',tabindex:0,role:'button','aria-label':`Shop ${s.name||s.id}`});
+ g.append(svgNode('circle',{cx:n.x,cy:n.y,r:unit*1.3,fill:'transparent'}));g.append(svgNode('rect',{x:n.x-unit*.6,y:n.y-unit*.6,width:unit*1.2,height:unit*1.2,rx:unit*.2,fill:s.enabled===false?'#9ca9a0':pharmacy?'#90619d':'#37745f',stroke:selectedStore===s.id?'#db9b36':'#fff','stroke-width':unit*.18}));
+ const text=svgNode('text',{x:n.x+unit*.9,y:n.y+unit*.2,'font-size':unit*.65});text.textContent=s.name||s.id;g.append(text);g.onclick=()=>selectStore(s.id);g.onkeydown=e=>{if(['Enter',' '].includes(e.key)){e.preventDefault();selectStore(s.id);}};layer.append(g);}}
+function drawMovement(data){const routes=$('route-layer'),couriers=$('courier-layer');if(!routes)return;routes.replaceChildren();couriers.replaceChildren();const nodes=new Map(city.nodes.map(n=>[String(n.id),n]));const edges=new Map(city.edges.map(e=>[`${e.from}:${e.to}`,e]));const unit=fullView.w/110;const drawn=new Set();
+ for(const job of data.jobs||[]){const route=(job.route||[]).map(id=>nodes.get(String(id))).filter(Boolean);if(!route.length)continue;const failed=['abandoned','stranded'].includes(job.status);const active=['assigned','in_transit','arrived'].includes(job.status);if(active||selectedStore===job.store){routes.append(svgNode('polyline',{points:route.map(n=>`${n.x},${n.y}`).join(' '),fill:'none',stroke:failed?'#b25b48':'#58a68b','stroke-width':unit*.25,'stroke-opacity':'.7'}));}if(job.status==='abandoned'){const n=nodes.get(String(job.parcel_node))||route[0];routes.append(svgNode('path',{d:`M${n.x-unit/2},${n.y-unit/2}l${unit},${unit}m0,-${unit}l-${unit},${unit}`,stroke:'#b25b48','stroke-width':unit*.3}));}
+ const attempts=(data.attempts||[]).filter(a=>a.basket===job.basket&&a.courier===job.courier);const attempt=attempts.at(-1);if(!active||!job.courier||drawn.has(job.courier)||attempt?.accepted===false||['failed','dropped','dropout','abandoned','rejected'].includes(attempt?.status))continue;
+ const durations=job.route_durations||attempt?.edge_durations||[];let remaining=Math.max(0,Number(data.run.sim_time)-Number(job.depart_sim||0)),position=route[0];for(let i=0;i<route.length-1;i++){const duration=Number(durations[i])||Number(edges.get(`${route[i].id}:${route[i+1].id}`)?.travel_seconds)||1;if(remaining<=duration){const f=remaining/duration;position={x:route[i].x+(route[i+1].x-route[i].x)*f,y:route[i].y+(route[i+1].y-route[i].y)*f};break;}remaining-=duration;position=route[i+1];}courierMarker(job.courier,position,unit,couriers);drawn.add(job.courier);}
+ for(const courier of data.fleet||[]){if(drawn.has(courier.id))continue;const n=nodes.get(String(courier.node));if(n)courierMarker(courier.id,n,unit,couriers,courier.status);}}
+function courierMarker(id,n,unit,layer,status='active'){const g=svgNode('g',{'data-courier':id,class:'courier-marker',role:'button',tabindex:0,'aria-label':`Courier ${id} ${status}`});g.append(svgNode('circle',{cx:n.x,cy:n.y,r:unit*.75,fill:'transparent'}),svgNode('circle',{cx:n.x,cy:n.y,r:unit*.4,fill:['offline','dropped','dropout','unavailable'].includes(status)?'#8b9490':'#d48628',stroke:'#fff','stroke-width':unit*.12}));g.onclick=()=>inspectAgent(`courier:${id}`);g.onkeydown=e=>{if(e.key==='Enter')inspectAgent(`courier:${id}`);};layer.append(g);}
+function selectStore(id){selectedStore=id;selectedAgent=null;storeDirty=false;show('store-view');selectedTab='overview';for(const button of document.querySelectorAll('[data-tab]'))button.setAttribute('aria-selected',button.dataset.tab===selectedTab);renderStore();drawStores();if(snapshot)drawMovement(snapshot);}
+function renderStore(preserveEdits=false){if(!selectedStore||!city)return;const raw=city.stores.find(s=>s.id===selectedStore);if(!raw)return;const store=storeData(raw),editable=Boolean(config)&&!legacyReadOnly;$('context-title').textContent=store.name||store.id;
+ $('store-overview').hidden=selectedTab!=='overview';$('store-stock').hidden=selectedTab!=='stock';$('store-team').hidden=selectedTab!=='team';
+ const jobs=(snapshot?.jobs||[]).filter(j=>j.store===store.id),scheduled=(snapshot?.order_schedule||[]).filter(o=>o.store===store.id);
+ const keepForm=preserveEdits&&(storeDirty||document.activeElement?.closest('#store-form'));
+ if(!keepForm){
+ $('store-overview').innerHTML=`<p class="muted">${esc(raw.domain||raw.kind||raw.type||'Local shop')} · ${esc(store.id)}</p><form id="store-form"><label>Name<input name="name" type="text" minlength="1" maxlength="60" required value="${esc(store.name||store.id)}" ${editable?'':'disabled'}></label><label>Open for orders<input name="enabled" type="checkbox" ${store.enabled!==false?'checked':''} ${editable?'':'disabled'}></label><label>Stock units<input name="stock_units" type="number" min="0" max="20" value="${store.stock_units??3}" ${editable?'':'disabled'}></label><label>Couriers<input name="couriers" type="number" min="0" max="3" value="${store.couriers??1}" ${editable?'':'disabled'}></label><label>Demand weight<input name="demand_weight" type="number" min="0" max="3" step="0.1" value="${store.demand_weight??1}" ${editable?'':'disabled'}></label>${editable?'<button type="submit">Save shop for next run</button>':'<p>This saved run has a read-only shop configuration.</p>'}</form><p id="store-saved" class="muted"></p><h3>Orders</h3><p>${scheduled.length} scheduled · ${jobs.filter(j=>j.status==='delivered').length} delivered</p>${jobs.map(j=>`<div class="record"><strong>${esc(j.basket)}</strong> <span class="badge">${esc(j.status)}</span><p class="muted">${esc(j.courier||'Waiting for courier')}</p></div>`).join('')}`;
+ $('store-form').onsubmit=event=>{event.preventDefault();if(!editable)return;const form=new FormData(event.target);Object.assign(store,{name:String(form.get('name')),enabled:form.has('enabled'),stock_units:Number(form.get('stock_units')),couriers:Number(form.get('couriers')),demand_weight:Number(form.get('demand_weight'))});storeDirty=false;$('store-saved').textContent='Saved for the next simulation.';$('context-title').textContent=store.name;drawStores();};
+ $('store-form').oninput=()=>{storeDirty=true;};
  }
- }
- $('graph-info').textContent=`${coordinates.length} nodes · ${data.city.edges.length} directed roads · ${data.city.stores.length} establishments`;
+ const stock=(snapshot?.stock||[]).filter(s=>s.store===store.id);$('store-stock').innerHTML=stock.length?`<table><thead><tr><th>Product</th><th>On hand</th><th>Reserved</th><th>Available</th></tr></thead><tbody>${stock.map(s=>`<tr><td>${esc(s.sku)}</td><td>${esc(s.on_hand)}</td><td>${esc(s.reserved)}</td><td>${esc(s.available_now)}</td></tr>`).join('')}</tbody></table>`:'<p>Stock appears when the simulation starts.</p>';
+ const fleet=(snapshot?.fleet||[]).filter(c=>c.home_store===store.id);$('store-team').innerHTML=`<p>Inspect one agent’s role, tools and private memory at a time. Home-base couriers join the shared fleet; each courier sees only its own job. A home base grants no stock access.</p>${[['inventory:'+store.id,'Inventory','Reserves available stock'],['fulfillment:'+store.id,'Fulfillment','Picks reserved baskets'],...fleet.map(c=>['courier:'+c.id,c.id,c.status])].map(([id,name,detail])=>`<button class="agent-button" data-agent="${esc(id)}">${esc(name)}<small>${esc(detail)}</small></button>`).join('')}${snapshot?'':'<p class="muted">Start a simulation to inspect agent memory.</p>'}`;
 }
-function render(data) {
- snapshot=data; $('status').textContent=data.run.status; $('clock').textContent=`Simulation ${Number(data.run.sim_time).toFixed(1)}s`;
- $('run-info').textContent=`Run ${data.run.id} · No external model calls · Local synthetic scenario`;
- const baskets=[...new Set([...data.tasks,...data.jobs].map(t=>t.basket))];
- $('baskets').innerHTML=baskets.map(b=>{const tasks=data.tasks.filter(t=>t.basket===b),jobs=data.jobs.filter(j=>j.basket===b);const status=jobs.at(-1)?.status||tasks.at(-1)?.status||'pending';const normalized=String(status).toLowerCase().replace(/[-_ ]/g,'');let index=['reserved','picking','dispatched','intransit','delivered'].indexOf(normalized);if(['picked','ready'].includes(normalized))index=1;if(['dispatch','assigned'].includes(normalized))index=2;if(normalized==='arrived')index=3;return `<article class="record" data-basket="${escapeHTML(b)}"><strong>${escapeHTML(b)} · <span data-basket-status>${escapeHTML(status)}</span></strong><p>${tasks.map(t=>escapeHTML(t.store)).join(', ')}</p><div class="steps">${['Stock reservation','Picking','Dispatch','In transit','Delivered'].map((s,i)=>`<span class="step ${i<=index?'active':''}">${s}</span>`).join('')}</div><details><summary>Task and route evidence</summary><pre>${escapeHTML(JSON.stringify({tasks,jobs},null,2))}</pre></details></article>`;}).join('');
- $('outcomes').textContent=`${data.jobs.filter(j=>j.status==='delivered').length} delivered · ${data.jobs.filter(j=>j.status==='abandoned').length} abandoned · ${data.tasks.filter(t=>t.status==='rejected').length} rejected`;
- $('invariants').innerHTML=Object.entries(data.invariants).map(([k,v])=>`<p class="${v?'good':'bad'}">${v?'✓':'✗'} ${escapeHTML(k.replaceAll('_',' '))}</p>`).join('');
- $('stock').innerHTML=data.stock.map(s=>`<tr><td>${escapeHTML(s.store)} / ${escapeHTML(s.sku)}</td><td>${escapeHTML(s.on_hand)}</td><td>${escapeHTML(s.reserved)}</td><td>${escapeHTML(s.available_now)}</td></tr>`).join('');
- renderRoles(data.agents);
- const evidence=(title,rows,summary)=>`<details${title.startsWith('Judge')?' open':''}><summary>${title} (${rows.length})</summary>${rows.map(row=>`<details class="record"><summary>${escapeHTML(summary(row))}</summary><pre>${escapeHTML(JSON.stringify(row,null,2))}</pre></details>`).join('')}</details>`;
- $('fleet').innerHTML=evidence('Fleet',data.fleet||[],r=>`${r.id} · ${r.status} · basket ${r.busy_basket||'none'} · node ${r.node}`);
- $('incidents').innerHTML=evidence('Traffic and courier incidents',data.incidents||[],r=>`${r.sim_time}s · ${r.kind} · ${r.basket||r.courier||''}`);
- $('reviews').innerHTML=evidence('Judge cost and deadline evidence',data.reviews||[],r=>`${r.basket} · attempt ${r.attempt} · ${r.verdict} · estimated ${r.estimated_seconds}s / remaining ${r.remaining_seconds}s · ${r.reason}`);
- $('briefs').innerHTML=evidence('Shared queued courier briefings',data.briefs||[],r=>`${r.basket} · attempt ${r.attempt} · ${r.courier}`);
- $('attempts').innerHTML=(data.attempts||[]).map(a=>`<details class="record"><summary>${escapeHTML(a.basket)} · attempt ${escapeHTML(a.attempt)} · ${escapeHTML(a.courier)} · ${escapeHTML(a.status)}</summary><pre>${escapeHTML(JSON.stringify(a,null,2))}</pre></details>`).join('');
- $('decisions').innerHTML=data.decisions.map(d=>`<details><summary>${escapeHTML(d.sim_time)}s · ${escapeHTML(d.agent)} · ${escapeHTML(d.action)}</summary><pre>${escapeHTML(JSON.stringify(d.detail,null,2))}</pre></details>`).join('');
- $('events').innerHTML=data.events.map(e=>`<details><summary>${escapeHTML(e.topic)} · ${escapeHTML(e.state)}</summary><p>Event ${escapeHTML(e.id)} ← Parent ${escapeHTML(e.parent_id)}<br>Trace ${escapeHTML(e.trace_id)}<br>Producer ${escapeHTML(e.producer)} · Attempts ${escapeHTML(e.attempts)} · Due ${escapeHTML(e.due_sim)}s</p></details>`).join('');
- $('timeline').innerHTML=(data.timeline||[]).map(t=>`<tr><td>${escapeHTML(t.sim_time)}s</td><td>${escapeHTML(t.basket)}</td><td>${escapeHTML(t.label)}</td><td>${escapeHTML(t.status)}</td><td>${escapeHTML(t.node)}</td></tr>`).join('');
- $('download').href=`/api/lab/delivery-runs/${encodeURIComponent(data.run.id)}/evidence`;
- $('download').hidden=!['completed','complete','finished'].includes(data.run.status);
- drawCity(data);
- window.deliverySnapshot=data;
+for(const button of document.querySelectorAll('[data-tab]'))button.onclick=()=>{selectedTab=button.dataset.tab;for(const b of document.querySelectorAll('[data-tab]'))b.setAttribute('aria-selected',b===button);renderStore();};
+function agentSettings(data){
+ const parameters=data.parameters||{},budget=data.agent?.budget||{},store=parameters.store;
+ const rows=[];
+ if(parameters.home_store)rows.push(['Home base',parameters.home_store]);
+ if(store)rows.push(['Shop',store.name||store.id],['Stock units',store.stock_units],['Home-base couriers',store.couriers],['Demand weight',store.demand_weight],['Accepting orders',store.enabled?'Yes':'No']);
+ for(const [key,label] of [['traffic_multiplier','Traffic multiplier'],['dropout_rate_per_hour','Dropout per courier-hour'],['memory_ttl_seconds','Memory lifetime (seconds)'],['max_total_attempts','Maximum attempts'],['max_retry_route_minutes','Retry route limit (minutes)']])if(parameters[key]!==undefined)rows.push([label,parameters[key]]);
+ if(parameters.settings_apply)rows.push(['Settings apply',String(parameters.settings_apply).replaceAll('_',' ')]);
+ const budgetLabels={events_reserved:'Events reserved',tools_reserved:'Tools reserved',events_limit:'Event allowance',tools_limit:'Tool allowance',events_used:'Events used',tools_used:'Tools used'};
+ for(const [key,value]of Object.entries(budget))if(key in budgetLabels&&typeof value!=='object')rows.push([budgetLabels[key]||key.replaceAll('_',' '),value]);
+ if(data.expired_memory_count)rows.push(['Expired memory records',data.expired_memory_count]);
+ return rows.length?`<table><tbody>${rows.map(([label,value])=>`<tr><td>${esc(label)}</td><td>${esc(value)}</td></tr>`).join('')}</tbody></table>`:'<p class="muted">Frozen settings available in the role definition.</p>';
 }
-async function request(url,options){const response=await fetch(url,options);if(!response.ok)throw Error(`${response.status}: ${await response.text()}`);return response.json();}
-async function poll(){try{const data=await request(`/api/lab/delivery-runs/${encodeURIComponent(runId)}`);render(data);if(['completed','complete','failed','finished'].includes(data.run.status)){ $('start').disabled=false;return;}pollTimer=setTimeout(poll,500);}catch(e){fail(e);}}
-function fail(e){$('error').textContent=e.message;$('error').hidden=false;$('status').textContent='Run error';$('start').disabled=false;}
-$('start').addEventListener('click',async()=>{clearTimeout(pollTimer);$('error').hidden=true;$('start').disabled=true;$('status').textContent='Starting';try{const result=await request('/api/lab/delivery-runs',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({seed:Number($('seed').value),playback_seconds:Number($('duration').value)})});runId=result.id;history.replaceState(null,'',`?run=${encodeURIComponent(runId)}`);await poll();}catch(e){fail(e);}});
-
-
-if (runId) { $("start").disabled=true; poll(); }
+async function inspectAgent(id){
+ selectedAgent=id;show('agent-view');$('context-title').textContent=id;
+ $('agent-content').innerHTML='<p>Loading this agent’s memory…</p>';
+ if(!runId){$('agent-content').innerHTML='<p>Start a simulation to inspect this agent.</p>';return;}
+ try{
+  const data=await request(`/api/lab/city-runs/${encodeURIComponent(runId)}/agents/${encodeURIComponent(id)}`);
+  if(selectedAgent!==id)return;
+  window.selectedAgentEvidence=data;const agent=data.agent;
+  const memories=(data.memory||[]).map(m=>`<details class="record"><summary>${esc(m.key)}</summary><pre>${esc(JSON.stringify(m.body,null,2))}</pre><small>Observed ${esc(m.observed_sim)}s · expires ${esc(m.expires_sim)}s · event ${esc(m.event_id)}</small></details>`).join('');
+  $('agent-content').innerHTML=`<button id="refresh-agent">Refresh this agent’s memory</button>
+   <span class="badge">${esc(agent.agent_id)}</span><h3>Private memory · ${(data.memory||[]).length} records</h3>
+   ${memories||'<p>No current private memory. Records may have expired or this agent may have no observations yet.</p>'}
+   ${data.expired_memory_count?`<p class="muted">${esc(data.expired_memory_count)} expired records are excluded.</p>`:''}
+   <details open><summary>Agent settings</summary>${agentSettings(data)}</details>
+   <details><summary>Role, tools and frozen definition</summary><pre>${esc(JSON.stringify({tools:agent.tools,limits:agent.limits,soul:agent.soul,definition_hash:agent.definition_hash},null,2))}</pre></details>
+   <h3>Shared courier briefings</h3><p class="muted">Simulated queued messages; no real calls.</p>
+   ${(data.briefs||[]).map(b=>`<details><summary>Basket ${esc(b.basket)} · attempt ${esc(b.attempt)}</summary><pre>${esc(JSON.stringify(b.body,null,2))}</pre></details>`).join('')||'<p>No briefings for this agent.</p>'}`;
+ }catch(error){$('agent-content').innerHTML=`<p class="bad">${esc(error.message)}</p>`;}
+}
+document.addEventListener('click',event=>{if(event.target.closest('#refresh-agent')&&selectedAgent){inspectAgent(selectedAgent);return;}const button=event.target.closest('[data-agent]');if(button)inspectAgent(button.dataset.agent);});$('back-store').onclick=()=>selectedStore?selectStore(selectedStore):resetPanel();function resetPanel(){selectedAgent=null;selectedStore=null;show('welcome');$('context-title').textContent='Your city';drawStores();}$('close-panel').onclick=resetPanel;
+$('configure').onclick=()=>{if(legacyReadOnly){legacyReadOnly=false;storeDirty=false;populateConfig();$('config-saved').textContent='New-session defaults restored. This saved run’s evidence stays unchanged.';}show('configuration');$('context-title').textContent='Configure city';$('configure').setAttribute('aria-expanded','true');};
+function populateConfig(){if(!config)return;for(const input of $('global-form').elements){if(input.name&&config[input.name]!==undefined)input.value=config[input.name];}$('speed').value=String(config.playback_seconds||30);}
+$('global-form').onsubmit=event=>{event.preventDefault();if(!config)return;for(const [key,value] of new FormData(event.target))config[key]=Number(value);$('config-saved').textContent='Saved for the next simulation.';};$('speed').onchange=()=>{if(config)config.playback_seconds=Number($('speed').value);};
+function render(data){snapshot=data;window.deliverySnapshot=data;$('status').textContent=data.run.status;$('clock').textContent=`${String(Math.floor(data.run.sim_time/60)).padStart(2,'0')}:${String(Math.floor(data.run.sim_time%60)).padStart(2,'0')}`;baseMap(data.city);drawMovement(data);const jobs=data.jobs||[],delivered=jobs.filter(j=>j.status==='delivered').length;$('run-summary').textContent=`${delivered} delivered · ${jobs.filter(j=>['assigned','in_transit'].includes(j.status)).length} on the road · ${(data.order_schedule||[]).length} scheduled`;const session=data.session_summary?.completion_reason?data.session_summary:null;if(session&&terminal(data.run.status)){const reason=session.completion_reason==='budget_limit'?'Stopped at session budget':'Observation window ended';$('status').textContent=reason;$('run-summary').textContent=`${reason} · ${delivered} delivered · ${session.unfinished_jobs} unfinished · ${session.scheduled_orders} scheduled`;} $('outcomes').textContent=`${jobs.length} baskets · ${delivered} delivered${session?' · '+session.unfinished_jobs+' unfinished':''}`;if(selectedStore&&!selectedAgent)renderStore(true);$('timeline').innerHTML=(data.timeline||[]).map(t=>`<div class="record"><small>${esc(t.sim_time)}s</small> ${esc(t.label)} · ${esc(t.basket)} <span class="badge">${esc(t.status)}</span></div>`).join('');$('trace').innerHTML=`<pre>${esc(JSON.stringify({invariants:data.invariants,incidents:data.incidents,reviews:data.reviews,events:data.events,decisions:data.decisions},null,2))}</pre>`;$('download').href=`/api/lab/delivery-runs/${encodeURIComponent(data.run.id)}/evidence`;$('download').hidden=!terminal(data.run.status);}
+async function poll(){try{const data=await request(`/api/lab/delivery-runs/${encodeURIComponent(runId)}`);render(data);if(terminal(data.run.status)){$('start').disabled=false;return;}pollTimer=setTimeout(poll,500);}catch(error){fail(error);}}
+$('start').onclick=async()=>{if(!config)return;clearTimeout(pollTimer);$('error').hidden=true;$('start').disabled=true;$('status').textContent='Starting';try{config.playback_seconds=Number($('speed').value);const result=await request('/api/lab/city-runs',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(config)});runId=result.id;history.replaceState(null,'',`?run=${encodeURIComponent(runId)}`);selectedAgent=null;await poll();}catch(error){fail(error);}};
+(async()=>{try{const result=await request('/api/lab/city-config');config=structuredClone(result.defaults);baseMap(result.city);populateConfig();$('status').textContent='Ready';window.cityConfig=config;if(runId){const data=await request(`/api/lab/delivery-runs/${encodeURIComponent(runId)}`);legacyReadOnly=!data.config;config=data.config?structuredClone(data.config):config;populateConfig();render(data);if(!terminal(data.run.status)){$('start').disabled=true;pollTimer=setTimeout(poll,500);}}}catch(error){if(runId){config=null;await poll();}else fail(error);}})();
