@@ -1,5 +1,11 @@
 # Status
 
+2026-10-23: Added 120 synthetic products, 128 identifiable households, customer
+order views, entity filters, urban buildings and actual one-way routing. The UI
+explicitly identifies delivery-lab agents as rules-only workers with no AI calls.
+Verified 97 Linux tests, a targeted dispatcher privacy check, Ruff, mypy, and both
+city and fixed-fleet browser checks on desktop/mobile.
+
 2026-10-23: Added frozen local city configuration, seeded orders over time, store
 stock/demand/staffing and configurable traffic/withdrawal rates. Map-first UI supports
 shop/team selection and selected-agent parameter, budget and memory inspection.

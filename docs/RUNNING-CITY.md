@@ -88,3 +88,31 @@ The fixed `delivery delivery-demo` remains the deterministic chaos regression,
 documented in [fleet recovery](FLEET-RECOVERY.md). Configured sessions run locally
 through the UI. Controller restart recovery, live mutation of physical settings,
 arbitrary stores, recurring replenishment and longer continuous services are deferred.
+
+## Households, assortment and streets
+
+New sessions use 128 synthetic households with stable IDs, addresses and homes.
+Search a household or select its house to inspect upcoming, active and past orders
+within the session. These are seeded simulated arrivals, not predictions or promises.
+Entity filters switch between shops, customers and couriers. Stock views show product
+names and SKUs: 60 grocery products per supermarket and 30 per retail/pharmacy shop
+(120 distinct products across the city). Pharmacy products are hygiene goods.
+
+The city has nine neighborhoods, residential blocks, offices and parks. Alternating
+interior streets are one-way; perimeter roads are two-way. The 2,108 directed road
+edges remain strongly connected. Couriers plan and travel on those actual edges.
+Existing fixed chaos runs retain their original regression graph.
+
+## What the agents actually do
+
+These delivery-lab agents are deterministic Python workers. They do not use an AI
+key, call a model or perform AI reasoning. Role definitions and SOUL files describe
+and version each identity; current policies do not ask a model to interpret them.
+Inventory reserves stock, fulfillment picks it, dispatch assigns routes, couriers
+move orders, and a rule-based judge gates recovery after a dropout.
+
+The foundation enforces scoped database identities, tools, private memory, budgets
+and queued communication. It demonstrates these controls and recovery behavior,
+not LLM judgement or learned behavior. Household profiles and future schedules are
+operator views; agent projections expose only the role's required operational data.
+Any future model adapter needs separate evaluation before claiming AI capability.

@@ -8,6 +8,10 @@ rates. Seeded arrivals replace the fixed script in the UI; the fixed chaos regre
 remains in the CLI. Human operator agent inspection exposes one selected namespace's
 parameters and live memory. See [running city](docs/RUNNING-CITY.md).
 
+Current city detail: 120 synthetic products, 128 household homes and scheduled
+customer order views; named directed streets affect actual route planning. The lab
+uses deterministic role workers. Model-backed judgement remains future work.
+
 ## Objective and baseline
 
 Compare which agent architecture operates the same disrupted delivery business most reliably under the same permissions and budget.
