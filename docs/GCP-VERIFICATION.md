@@ -64,11 +64,13 @@ project. Every planned resource belongs to this project. Project deletion owns
 implicit service agents and other platform-created project children. No shared
 billing account or operator identity is deleted.
 
-**The destroy plan is verified; actual deletion has not been executed.** Retain
-`infra/gcp-ai/terraform.tfstate` until cleanup succeeds. Use `terraform destroy`
-from that root with the private variables. Project deletion is asynchronous and
-subject to Google retention, billing records and permissions; do not promise
-immediate erasure. [Teardown coverage receipt](evidence/gcp-teardown-plan.json).
+**Teardown executed on 2026-10-25:** Terraform reported 15 destroyed resources;
+`terraform state list` is empty. Google reports the dedicated project as
+`DELETE_REQUESTED`, so final project erasure remains asynchronous and subject to
+platform retention. The local app is healthy with `local: true`, `gcp_ai: false`
+and the cloud credential override removed. Scrapmarket was not touched.
+[Actual teardown receipt](evidence/gcp-teardown-result.json).
+The earlier [plan receipt](evidence/gcp-teardown-plan.json) records the pre-execution check.
 
 ## Enterprise interpretation
 

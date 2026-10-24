@@ -6,7 +6,9 @@ recipes/three markets plus numeric control facts. A live eval exposed a missing-
 approval; deterministic preflight now gates invalid requests. Guarded eval: 6/6
 (one model decision, five policy denials). UI GCP/local pairing verified one/zero
 model calls and all invariants. Full Linux suite: 135 passed; Ruff/mypy passed.
-Teardown plan covers all 15 owned resources; actual teardown choice remains pending.
+Teardown completed 2026-10-25: all 15 managed resources destroyed, Terraform state
+empty, project DELETE_REQUESTED. Local-only mode restored; see the redeployment
+walkthrough in docs/GCP-AI.md.
 See docs/GCP-VERIFICATION.md and docs/ENTERPRISE-GCP.md.
 
 2026-10-24: Added interpolated courier movement, timed order-book arrivals and

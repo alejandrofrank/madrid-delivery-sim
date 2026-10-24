@@ -1,6 +1,6 @@
 # Optional GCP judgement gateway
 
-The local city works without GCP. The optional switch sends only a bounded retry judgement to a private Cloud Run gateway using Vertex AI. Inventory, fulfillment, dispatch, couriers, movement, custody and SQL policy enforcement remain local and deterministic. This is a hosted judgement role, not a hosted fleet. A live deployment and UI verification were completed on 2026-10-24; see [verification](GCP-VERIFICATION.md).
+The local city works without GCP. The optional switch sends only a bounded retry judgement to a private Cloud Run gateway using Vertex AI. Inventory, fulfillment, dispatch, couriers, movement, custody and SQL policy enforcement remain local and deterministic. This is a hosted judgement role, not a hosted fleet. A live deployment and UI verification were completed on 2026-10-24, followed by verified teardown on 2026-10-25. The cloud demo is currently off; see [verification](GCP-VERIFICATION.md).
 
 `infra/gcp-ai` is a standalone Terraform root with its own local state. It creates a **new dedicated project**, billing link, APIs, image repository, runtime/caller service accounts, prediction-only custom role and optional private Cloud Run service. It has no imports, remote-state dependencies or references to scrapmarket. Never run this root against an existing shared project or reuse another root's state. Keep state and variable files outside version control and retain the state until teardown succeeds.
 
@@ -43,3 +43,37 @@ or image. Select GCP AI recovery judge in Configure and save for the next run.
 Each cloud-enabled session freezes its gateway origin. Reverting to local rules
 affects new sessions and makes no inference requests. The UI switch does not
 apply or destroy Terraform. Use the isolated Terraform root for lifecycle changes.
+
+
+## Guided redeployment and inspection
+
+Keep the demo local until an explicit cloud session is wanted. The previous project
+is pending deletion; redeploy with a fresh unique project ID in the private variables,
+using this same standalone root and its now-empty state. Never reuse Scrapmarket state.
+The registry was destroyed too: recreate the project/repository first, build and push
+the gateway image again, then deploy the service with its immutable image digest.
+Follow the setup steps above; do not reuse the deleted endpoint or assume the old
+image still exists. Refresh the compose override with the new outputs.
+
+For the next guided session, inspect these in order:
+
+1. **Ownership:** review the Terraform plan, dedicated project, billing link and all
+   resources. Confirm no shared-project changes or public invocation binding.
+2. **Identity:** inspect the runtime prediction-only role, caller's service-specific
+   invocation permission, and keyless authentication. Confirm anonymous requests fail.
+3. **Data boundary:** inspect the seven-meal synthetic snapshot and actual serialized
+   request. Confirm names, customer details and private memory bodies stay local.
+4. **Agent boundary:** follow a stock reservation through queued fulfillment and
+   dispatch. Inspect role-scoped tools, memory and SQL enforcement.
+5. **Model and cost:** inspect the configured model, scale limits, per-run call/token
+   reservations and returned usage. Explain why those controls are not a dollar cap.
+6. **Evals:** run the fixed recovery cases, distinguish policy-gate answers from actual
+   model answers, and compare with the preserved initial failure and guarded results.
+7. **Live switch:** run the explicit `scripts/verify_gcp_switch.py --live-cloud`
+   verification. Inspect one cloud decision and the paired local run with zero calls,
+   including stock, custody and retry invariants.
+8. **Cleanup:** review and execute the destroy plan, verify empty state and project
+   lifecycle, then recreate the app using base compose to remove the cloud override.
+
+Retain sanitized receipts and commit verified changes. Keep credentials, Terraform
+state, private variables and saved plans out of Git.

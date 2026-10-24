@@ -1,0 +1,16 @@
+{
+  "date": "2026-10-25",
+  "project_id": "mds-ai-judge-261024-c7b4",
+  "destroy_executed": true,
+  "resources_destroyed": 15,
+  "terraform_state_resources_remaining": 0,
+  "project_lifecycle": "DELETE_REQUESTED",
+  "final_project_erasure_confirmed": false,
+  "local_app_healthy": true,
+  "agent_modes": {
+    "local": true,
+    "gcp_ai": false
+  },
+  "cloud_compose_override_removed": true,
+  "scrapmarket_touched": false
+}
