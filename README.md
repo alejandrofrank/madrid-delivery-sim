@@ -1,6 +1,6 @@
 ﻿# Madrid Delivery Sim
 
-A local operations lab for queue-driven delivery agents, with a Madrid baseline and a fictional-city inventory lab. Default demos use local databases and make no provider calls. An optional private GCP recovery judge deploys through a separate Terraform root; the simulation stays local. Deployment and teardown were verified on October 24–25, 2026; the cloud demo is currently off.
+A local operations lab for queue-driven delivery agents, with a Madrid baseline and a fictional-city inventory lab. Default demos use local databases and make no provider calls. An optional private GCP recovery judge deploys through a separate Terraform root; the simulation stays local. Deployment and teardown were verified on October 24–25, 2026; the cloud demo is currently off. The restored project is retained with billing disabled; routine shutdown removes runtime resources and keeps the project.
 
 Milestone 1 includes 18 bike, moto, and van couriers across Chamberí, Retiro, and Puente de Vallecas; 24 real OSM pickup locations; 180 synthetic customers; and a seeded 10:00 to 22:00 service day. The map renders cached street geometry with no tile API key or external map requests.
 

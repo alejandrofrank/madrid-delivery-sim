@@ -15,25 +15,37 @@ provider "google" {}
 resource "google_project" "ai" {
   project_id          = var.project_id
   name                = "Madrid simulation AI"
-  billing_account     = var.billing_account
+  billing_account     = var.enable_billing ? var.billing_account : null
   org_id              = var.org_id
   folder_id           = var.folder_id
   auto_create_network = false
-  deletion_policy     = "DELETE"
+  deletion_policy     = "PREVENT"
   labels              = { application = "madrid-delivery-sim", component = "optional-ai" }
+  lifecycle {
+    prevent_destroy = true
+    precondition {
+      condition     = !var.enable_runtime || var.enable_billing
+      error_message = "Runtime requires enable_billing=true. Delete runtime first, then disable billing in a second apply."
+    }
+    precondition {
+      condition     = !var.enable_gateway || var.enable_runtime
+      error_message = "Gateway requires enable_runtime=true; turn both flags off to park the project."
+    }
+  }
 }
 
 resource "google_project_service" "api" {
-  for_each = toset([
+  for_each = var.enable_runtime ? toset([
     "run.googleapis.com", "artifactregistry.googleapis.com", "aiplatform.googleapis.com",
     "iam.googleapis.com", "iamcredentials.googleapis.com", "cloudresourcemanager.googleapis.com"
-  ])
+  ]) : toset([])
   project            = google_project.ai.project_id
   service            = each.value
-  disable_on_destroy = false # Project deletion owns final API cleanup.
+  disable_on_destroy = false # Enabled APIs persist without runtime resources or a billing link.
 }
 
 resource "google_artifact_registry_repository" "images" {
+  count         = var.enable_runtime ? 1 : 0
   project       = google_project.ai.project_id
   location      = var.region
   repository_id = "judgement"
@@ -42,6 +54,7 @@ resource "google_artifact_registry_repository" "images" {
 }
 
 resource "google_service_account" "judge" {
+  count        = var.enable_runtime ? 1 : 0
   project      = google_project.ai.project_id
   account_id   = "judgement-runtime"
   display_name = "Bounded Vertex judgement gateway"
@@ -49,6 +62,7 @@ resource "google_service_account" "judge" {
 }
 
 resource "google_project_iam_custom_role" "judge_predict" {
+  count       = var.enable_runtime ? 1 : 0
   project     = google_project.ai.project_id
   role_id     = "boundedJudgePredict"
   title       = "Bounded judge model inference"
@@ -57,12 +71,14 @@ resource "google_project_iam_custom_role" "judge_predict" {
 }
 
 resource "google_project_iam_member" "vertex" {
+  count   = var.enable_runtime ? 1 : 0
   project = google_project.ai.project_id
-  role    = google_project_iam_custom_role.judge_predict.name
-  member  = "serviceAccount:${google_service_account.judge.email}"
+  role    = google_project_iam_custom_role.judge_predict[0].name
+  member  = "serviceAccount:${google_service_account.judge[0].email}"
 }
 
 resource "google_service_account" "caller" {
+  count        = var.enable_runtime ? 1 : 0
   project      = google_project.ai.project_id
   account_id   = "judgement-caller"
   display_name = "Keyless local judgement caller"
@@ -70,7 +86,8 @@ resource "google_service_account" "caller" {
 }
 
 resource "google_service_account_iam_binding" "caller_tokens" {
-  service_account_id = google_service_account.caller.name
+  count              = var.enable_runtime ? 1 : 0
+  service_account_id = google_service_account.caller[0].name
   role               = "roles/iam.serviceAccountTokenCreator"
   members            = var.invoker_members
 }
@@ -87,7 +104,7 @@ resource "google_cloud_run_v2_service" "judge" {
     max_instance_count = 1
   }
   template {
-    service_account                  = google_service_account.judge.email
+    service_account                  = google_service_account.judge[0].email
     timeout                          = "35s"
     max_instance_request_concurrency = 4
     scaling {
@@ -130,15 +147,49 @@ resource "google_cloud_run_v2_service_iam_binding" "invoker" {
   location = var.region
   name     = google_cloud_run_v2_service.judge[0].name
   role     = "roles/run.invoker"
-  members  = ["serviceAccount:${google_service_account.caller.email}"]
+  members  = ["serviceAccount:${google_service_account.caller[0].email}"]
 }
 
 output "image_repository" {
-  value = "${var.region}-docker.pkg.dev/${google_project.ai.project_id}/${google_artifact_registry_repository.images.repository_id}"
+  value = try("${var.region}-docker.pkg.dev/${google_project.ai.project_id}/${google_artifact_registry_repository.images[0].repository_id}", null)
 }
 output "gateway_url" {
   value = try(google_cloud_run_v2_service.judge[0].uri, null)
 }
 output "caller_service_account" {
-  value = google_service_account.caller.email
+  value = try(google_service_account.caller[0].email, null)
+}
+
+moved {
+  from = google_artifact_registry_repository.images
+  to   = google_artifact_registry_repository.images[0]
+}
+
+moved {
+  from = google_service_account.judge
+  to   = google_service_account.judge[0]
+}
+
+moved {
+  from = google_project_iam_custom_role.judge_predict
+  to   = google_project_iam_custom_role.judge_predict[0]
+}
+
+moved {
+  from = google_project_iam_member.vertex
+  to   = google_project_iam_member.vertex[0]
+}
+
+moved {
+  from = google_service_account.caller
+  to   = google_service_account.caller[0]
+}
+
+moved {
+  from = google_service_account_iam_binding.caller_tokens
+  to   = google_service_account_iam_binding.caller_tokens[0]
+}
+
+output "runtime_enabled" {
+  value = var.enable_runtime
 }

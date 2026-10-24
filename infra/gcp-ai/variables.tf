@@ -1,9 +1,9 @@
 variable "project_id" {
-  description = "New globally unique dedicated project ID. Never import a shared project."
+  description = "Dedicated simulation project ID. Only import this owned project, never a shared project."
   type        = string
 }
 variable "billing_account" {
-  description = "Billing account to link to this disposable project."
+  description = "Billing account linked only while enable_billing=true."
   type        = string
 }
 variable "org_id" {
@@ -45,4 +45,16 @@ variable "invoker_members" {
     ])
     error_message = "Only explicit user or serviceAccount identities may impersonate the caller."
   }
+}
+
+variable "enable_runtime" {
+  description = "Opt in to billable infrastructure and its scoped runtime identities. False deletes runtime/images while retaining the project. Disable billing separately after runtime deletion."
+  type        = bool
+  default     = false
+}
+
+variable "enable_billing" {
+  description = "Link the selected billing account. Shut down runtime first before setting this false."
+  type        = bool
+  default     = false
 }

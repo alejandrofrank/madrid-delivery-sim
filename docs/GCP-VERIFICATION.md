@@ -79,3 +79,24 @@ not a claim that an LLM is necessary for numeric feasibility. Keep local rules a
 baseline and default. Before exposing more users, add gateway-wide admission budgets,
 held-out business evals, stronger release automation, recovery SLOs and finance
 reconciliation. [Architecture and tradeoffs](ENTERPRISE-GCP.md).
+
+
+## Restored persistent project (2026-10-25)
+
+After the completed historical teardown above, the user requested keeping the
+project between demos. The dedicated project was restored, imported into the
+same Terraform root, and protected against deletion. Its current lifecycle is
+`ACTIVE`, billing is disabled, and state contains only `google_project.ai`.
+The live parked plan is unchanged; Cloud Run lists zero services. Artifact
+Registry listing is blocked by `BILLING_DISABLED`; its repository was confirmed
+deleted during the earlier teardown, rather than inferred absent from that error.
+An initial attempt to register APIs immediately after restoration encountered
+service propagation errors; parked mode does not need those registrations.
+
+Six mocked Terraform runs cover parked defaults, active deployment, deleting
+runtime while retaining billing, final parked mode, and rejection of invalid
+runtime/gateway combinations. These are plan/apply tests with a mocked provider,
+not a second paid deployment. A live full destroy plan was rejected by
+`lifecycle.prevent_destroy`. Follow the two-phase shutdown in GCP-AI.md, not the
+historical full-delete procedure above.
+[Restoration receipt](evidence/gcp-project-restored.json).

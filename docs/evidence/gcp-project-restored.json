@@ -1,0 +1,18 @@
+{
+  "date": "2026-10-25",
+  "project_id": "mds-ai-judge-261024-c7b4",
+  "project_lifecycle": "ACTIVE",
+  "billing_enabled": false,
+  "terraform_resources": [
+    "google_project.ai"
+  ],
+  "parked_plan_changes": 0,
+  "cloud_run_services": 0,
+  "artifact_registry_list": "BILLING_DISABLED",
+  "artifact_repository_deletion_evidence": "gcp-teardown-result.json",
+  "full_destroy_plan_blocked": true,
+  "mock_lifecycle_tests_passed": 6,
+  "live_active_to_parked_cycle_executed": false,
+  "local_mode": true,
+  "gcp_mode_available": false
+}

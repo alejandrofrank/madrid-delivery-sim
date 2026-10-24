@@ -1,5 +1,11 @@
 # Status
 
+2026-10-25: Restored the dedicated AI project and imported it into its original
+Terraform state. Added protected persistent-project lifecycle, opt-in runtime and
+billing flags, and two-phase shutdown (delete runtime first, unlink billing second).
+The project is ACTIVE with billing disabled; no Cloud Run services. Parked plan
+is unchanged and only the project remains in state. See docs/GCP-AI.md.
+
 2026-10-24: Deployed the private GCP recovery judge into a dedicated Terraform-owned
 project, isolated from Scrapmarket. Model context is limited to seven synthetic meal
 recipes/three markets plus numeric control facts. A live eval exposed a missing-facts
