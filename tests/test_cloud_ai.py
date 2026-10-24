@@ -108,3 +108,9 @@ def test_local_adc_uses_keyless_id_token_impersonation(monkeypatch):
     assert captured["lifetime"] == 300
     assert captured["target_audience"] == "https://judge-abc.run.app"
     assert captured["include_email"] and captured["refreshed"]
+
+
+def test_classic_cloud_run_origin_is_supported():
+    assert CloudJudge("https://judgement-abc-ew.a.run.app", lambda: "token").endpoint.endswith(
+        ".a.run.app"
+    )

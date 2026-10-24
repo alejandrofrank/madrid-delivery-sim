@@ -11,3 +11,8 @@ __pycache__
 .ruff_cache
 data/cache
 data/local/
+
+infra/gcp-ai/.terraform
+**/*.tfstate*
+**/*.tfvars*
+**/*.tfplan

@@ -191,7 +191,10 @@ def cloud_judgement(
     try:
         if not tools.cloud_endpoint:
             raise ValueError("Cloud endpoint required")
-        judgement = CloudJudge(tools.cloud_endpoint).review(context, memory, candidate=candidate)
+        model_context = {**context, "job": {**context.get("job", {}), "sim_time": tools.sim}}
+        judgement = CloudJudge(tools.cloud_endpoint).review(
+            model_context, memory, candidate=candidate
+        )
         audit.update(judgement.model_dump())
         audit["fallback"] = None
         if judgement.decision != "approve_retry":

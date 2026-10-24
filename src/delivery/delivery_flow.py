@@ -166,7 +166,13 @@ def flow_snapshot(run: str, url: str | None = None) -> dict[str, Any]:
                 state["agent_runtime"] = {
                     "decision_mode": "gcp_ai_judge",
                     "model_provider": "vertex_ai",
-                    "model_calls": len([c for c in calls if "model" in c["detail"]]),
+                    "model_calls": len(
+                        [
+                            c
+                            for c in calls
+                            if "model" in c["detail"] and c["detail"].get("source") != "policy_gate"
+                        ]
+                    ),
                     "model_reservations": len(calls),
                     "reserved_tokens": sum(c["reserved_tokens"] for c in calls),
                     "policy_source": "GCP recovery judge; all other roles use local rules",

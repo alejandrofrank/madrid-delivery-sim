@@ -78,6 +78,7 @@ def evaluate(
                     decision=oracle,
                     reason="Deterministic SQL policy baseline",
                     model="local-rules-v1",
+                    source="policy_gate",
                     input_tokens=0,
                     output_tokens=0,
                 )
@@ -100,6 +101,8 @@ def evaluate(
     output_tokens = sum(r["output_tokens"] for r in rows)
     summary = {
         "cases": len(rows),
+        "model_decisions": sum(r.get("source") == "model" and r["status"] == "ok" for r in rows),
+        "policy_gate_decisions": sum(r.get("source") == "policy_gate" for r in rows),
         "passed": sum(r["passed"] for r in rows),
         "approval_agreement": (
             sum(r["passed"] for r in successful) / len(successful) if successful else None

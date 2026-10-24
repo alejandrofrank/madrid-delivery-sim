@@ -2,3 +2,5 @@
 *.tfstate*
 *.tfvars
 *.tfplan
+
+*.tfvars.json

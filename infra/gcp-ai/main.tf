@@ -48,9 +48,17 @@ resource "google_service_account" "judge" {
   depends_on   = [google_project_service.api]
 }
 
+resource "google_project_iam_custom_role" "judge_predict" {
+  project     = google_project.ai.project_id
+  role_id     = "boundedJudgePredict"
+  title       = "Bounded judge model inference"
+  permissions = ["aiplatform.endpoints.predict"]
+  depends_on  = [google_project_service.api]
+}
+
 resource "google_project_iam_member" "vertex" {
   project = google_project.ai.project_id
-  role    = "roles/aiplatform.user"
+  role    = google_project_iam_custom_role.judge_predict.name
   member  = "serviceAccount:${google_service_account.judge.email}"
 }
 
@@ -74,6 +82,10 @@ resource "google_cloud_run_v2_service" "judge" {
   location            = var.region
   deletion_protection = false
   ingress             = "INGRESS_TRAFFIC_ALL" # IAM-authenticated local clients can reach it.
+  scaling {
+    min_instance_count = 0
+    max_instance_count = 1
+  }
   template {
     service_account                  = google_service_account.judge.email
     timeout                          = "35s"
@@ -85,7 +97,9 @@ resource "google_cloud_run_v2_service" "judge" {
     containers {
       image = var.gateway_image
       resources {
-        limits = { cpu = "1", memory = "512Mi" }
+        cpu_idle          = true
+        startup_cpu_boost = false
+        limits            = { cpu = "1", memory = "512Mi" }
       }
       env {
         name  = "GOOGLE_CLOUD_PROJECT"

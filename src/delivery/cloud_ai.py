@@ -18,6 +18,7 @@ TIMEOUT_SECONDS = 30
 class Judgment(BaseModel):
     model_config = ConfigDict(extra="forbid", strict=True)
     decision: Literal["approve_retry", "deny_retry"]
+    source: Literal["model", "policy_gate"] = "model"
     reason: str = Field(min_length=1, max_length=600)
     model: str = Field(min_length=1, max_length=200)
     input_tokens: int = Field(ge=0, le=8192)
@@ -62,7 +63,11 @@ def identity_token(audience: str) -> str:
         import google.auth
         from google.auth import impersonated_credentials
 
-        source, _ = google.auth.default(scopes=["https://www.googleapis.com/auth/cloud-platform"])
+        caller_project = caller.split("@")[-1].removesuffix(".iam.gserviceaccount.com")
+        source, _ = google.auth.default(
+            scopes=["https://www.googleapis.com/auth/cloud-platform"],
+            quota_project_id=caller_project,
+        )
         target = impersonated_credentials.Credentials(
             source_credentials=source,
             target_principal=caller,
@@ -79,7 +84,7 @@ def identity_token(audience: str) -> str:
 
 class CloudJudge:
     def __init__(self, endpoint: str, token_provider: Callable[[], str] | None = None) -> None:
-        if not re.fullmatch(r"https://[a-z0-9-]+\.run\.app", endpoint):
+        if not re.fullmatch(r"https://[a-z0-9-]+(?:\.a)?\.run\.app", endpoint):
             raise ValueError("A Cloud Run HTTPS service origin is required")
         self.endpoint = endpoint
         self.token_provider = token_provider or (lambda: identity_token(endpoint))
