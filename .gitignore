@@ -14,3 +14,9 @@ data/cache/
 data/local/
 artifacts/
 .coverage
+
+# Standalone optional AI deployment state and credentials
+infra/gcp-ai/.terraform/
+infra/gcp-ai/*.tfstate*
+infra/gcp-ai/*.tfvars
+infra/gcp-ai/*.tfplan

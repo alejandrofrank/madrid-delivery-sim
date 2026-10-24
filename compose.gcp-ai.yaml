@@ -1,0 +1,9 @@
+# Explicit opt-in only. ADC is mounted read-only and never built into an image.
+services:
+  app:
+    environment:
+      DELIVERY_GCP_AI_ENDPOINT: ${DELIVERY_GCP_AI_ENDPOINT:?Set Terraform gateway_url}
+      DELIVERY_GCP_AI_CALLER_SERVICE_ACCOUNT: ${DELIVERY_GCP_AI_CALLER_SERVICE_ACCOUNT:?Set Terraform caller_service_account}
+      GOOGLE_APPLICATION_CREDENTIALS: /gcp-adc/application_default_credentials.json
+    volumes:
+      - ${GCP_ADC_DIRECTORY:?Set the directory containing local ADC}:/gcp-adc:ro
