@@ -1,0 +1,35 @@
+{
+  "cloud_run": "fe8fbad6-103f-42ff-8fd1-1e12e384cb02",
+  "local_run": "95057578-594a-42ed-b2e1-2862104f139e",
+  "cloud_runtime": {
+    "decision_mode": "gcp_ai_judge",
+    "model_provider": "vertex_ai",
+    "model_calls": 1,
+    "model_reservations": 1,
+    "reserved_tokens": 8448,
+    "policy_source": "GCP recovery judge; all other roles use local rules",
+    "soul_usage": "bounded gateway judgement prompt"
+  },
+  "cloud_audits": [
+    {
+      "model": "gemini-3.5-flash-lite",
+      "reason": "The retry candidate is valid and within all time limits.",
+      "source": "model",
+      "decision": "approve_retry",
+      "fallback": null,
+      "provider": "gcp_ai",
+      "input_tokens": 2142,
+      "output_tokens": 24
+    }
+  ],
+  "local_model_calls": 0,
+  "invariants": {
+    "stock_conserved": true,
+    "nonnegative_available": true,
+    "agent_budgets_within_caps": true,
+    "unique_courier_assignments": true,
+    "parcel_custody_recorded": true,
+    "retries_have_approval": true
+  },
+  "browser_errors": []
+}

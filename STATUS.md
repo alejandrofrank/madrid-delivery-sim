@@ -1,5 +1,14 @@
 # Status
 
+2026-10-24: Deployed the private GCP recovery judge into a dedicated Terraform-owned
+project, isolated from Scrapmarket. Model context is limited to seven synthetic meal
+recipes/three markets plus numeric control facts. A live eval exposed a missing-facts
+approval; deterministic preflight now gates invalid requests. Guarded eval: 6/6
+(one model decision, five policy denials). UI GCP/local pairing verified one/zero
+model calls and all invariants. Full Linux suite: 135 passed; Ruff/mypy passed.
+Teardown plan covers all 15 owned resources; actual teardown choice remains pending.
+See docs/GCP-VERIFICATION.md and docs/ENTERPRISE-GCP.md.
+
 2026-10-24: Added interpolated courier movement, timed order-book arrivals and
 current driver order/route/ETA with scoped memory inspection. Optional GCP Vertex
 recovery judge uses durable six-call/token reservations and fail-closed decisions.

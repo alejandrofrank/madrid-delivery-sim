@@ -1,0 +1,4 @@
+{
+  "unauthenticated": 403,
+  "malformed_authenticated": 422
+}

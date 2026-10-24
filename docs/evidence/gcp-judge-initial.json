@@ -1,0 +1,104 @@
+{
+  "fixture_version": "recovery-judge-v1",
+  "seed": 731,
+  "created_at": "2026-10-24T21:34:36.100980+00:00",
+  "label": "gcp-live-seven-meals",
+  "model_version": "gemini-3.5-flash-lite",
+  "mode": "cloud",
+  "summary": {
+    "cases": 6,
+    "passed": 4,
+    "approval_agreement": 0.8,
+    "hard_policy_violations": 1,
+    "schema_failures": 0,
+    "provider_errors": 1,
+    "input_tokens": 10732,
+    "output_tokens": 150,
+    "total_latency_ms": 11641.432
+  },
+  "results": [
+    {
+      "case_id": "timely-feasible",
+      "expected_decision": "approve_retry",
+      "actual_decision": "approve_retry",
+      "status": "ok",
+      "input_tokens": 2150,
+      "output_tokens": 33,
+      "reason": "Retry attempt is within limits and estimated time is well within remaining seconds.",
+      "model": "gemini-3.5-flash-lite",
+      "latency_ms": 2169.975,
+      "passed": true,
+      "hard_policy_violation": false
+    },
+    {
+      "case_id": "deadline-exceeded",
+      "expected_decision": "deny_retry",
+      "actual_decision": "deny_retry",
+      "status": "ok",
+      "input_tokens": 2149,
+      "output_tokens": 27,
+      "reason": "The estimated seconds exceed the remaining seconds.",
+      "model": "gemini-3.5-flash-lite",
+      "latency_ms": 1818.003,
+      "passed": true,
+      "hard_policy_violation": false
+    },
+    {
+      "case_id": "cost-cap-exceeded",
+      "expected_decision": "deny_retry",
+      "actual_decision": "deny_retry",
+      "status": "ok",
+      "input_tokens": 2152,
+      "output_tokens": 25,
+      "reason": "Estimated seconds exceed the 6000 seconds limit.",
+      "model": "gemini-3.5-flash-lite",
+      "latency_ms": 2007.978,
+      "passed": true,
+      "hard_policy_violation": false
+    },
+    {
+      "case_id": "retry-exhausted",
+      "expected_decision": "deny_retry",
+      "actual_decision": "deny_retry",
+      "status": "ok",
+      "input_tokens": 2150,
+      "output_tokens": 30,
+      "reason": "Retry limit is exhausted as attempt equals retry_limit.",
+      "model": "gemini-3.5-flash-lite",
+      "latency_ms": 1943.92,
+      "passed": true,
+      "hard_policy_violation": false
+    },
+    {
+      "case_id": "no-available-courier",
+      "expected_decision": "deny_retry",
+      "actual_decision": null,
+      "status": "provider_error",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "error_type": "HTTPError",
+      "latency_ms": 1847.789,
+      "passed": false,
+      "hard_policy_violation": false
+    },
+    {
+      "case_id": "missing-required-facts",
+      "expected_decision": "deny_retry",
+      "actual_decision": "approve_retry",
+      "status": "ok",
+      "input_tokens": 2131,
+      "output_tokens": 35,
+      "reason": "The candidate has a valid estimated time well below the remaining seconds and maximum limit.",
+      "model": "gemini-3.5-flash-lite",
+      "latency_ms": 1853.767,
+      "passed": false,
+      "hard_policy_violation": true
+    }
+  ],
+  "usage_note": "Tokens cover successful responses only; failed calls may incur unreported usage.",
+  "pricing_usd_per_million": {
+    "input": 0.3,
+    "output": 2.5
+  },
+  "estimated_cost_usd": 0.0035946
+}

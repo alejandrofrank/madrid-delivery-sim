@@ -1,0 +1,23 @@
+{
+  "project": "mds-ai-judge-261024-c7b4",
+  "planned_deletions": 15,
+  "only_owned_project": true,
+  "destroy_executed": false,
+  "addresses": [
+    "google_artifact_registry_repository.images",
+    "google_cloud_run_v2_service.judge[0]",
+    "google_cloud_run_v2_service_iam_binding.invoker[0]",
+    "google_project.ai",
+    "google_project_iam_custom_role.judge_predict",
+    "google_project_iam_member.vertex",
+    "google_project_service.api[\"aiplatform.googleapis.com\"]",
+    "google_project_service.api[\"artifactregistry.googleapis.com\"]",
+    "google_project_service.api[\"cloudresourcemanager.googleapis.com\"]",
+    "google_project_service.api[\"iam.googleapis.com\"]",
+    "google_project_service.api[\"iamcredentials.googleapis.com\"]",
+    "google_project_service.api[\"run.googleapis.com\"]",
+    "google_service_account.caller",
+    "google_service_account.judge",
+    "google_service_account_iam_binding.caller_tokens"
+  ]
+}

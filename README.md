@@ -1,6 +1,6 @@
 ﻿# Madrid Delivery Sim
 
-A local operations lab for queue-driven delivery agents, with a Madrid baseline and a fictional-city inventory lab. Build and polish locally; GCP portability is deferred optional work. Default demos use local databases and make no provider calls.
+A local operations lab for queue-driven delivery agents, with a Madrid baseline and a fictional-city inventory lab. Default demos use local databases and make no provider calls. An explicitly enabled, private GCP recovery judge is deployed through a separate Terraform root; the simulation stays local.
 
 Milestone 1 includes 18 bike, moto, and van couriers across Chamberí, Retiro, and Puente de Vallecas; 24 real OSM pickup locations; 180 synthetic customers; and a seeded 10:00 to 22:00 service day. The map renders cached street geometry with no tile API key or external map requests.
 
@@ -47,7 +47,10 @@ Settings apply to the next session; each run keeps its frozen starting configura
 
 See [running city controls and limits](docs/RUNNING-CITY.md). All agents retain their
 separate database identities, scoped tools, budgets and queued handoffs. Everything
-runs locally with no model/provider calls.
+runs locally by default with no model/provider calls. Optional GCP mode uses a bounded,
+IAM-protected judge with only a synthetic seven-meal supermarket snapshot and
+numeric recovery facts. See [live GCP verification](docs/GCP-VERIFICATION.md) and
+[enterprise design tradeoffs](docs/ENTERPRISE-GCP.md).
 
 The fixed fleet recovery regression remains available from the CLI:
 
