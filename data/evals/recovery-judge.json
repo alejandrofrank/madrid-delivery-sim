@@ -1,0 +1,12 @@
+{
+  "version": "recovery-judge-v1",
+  "seed": 731,
+  "cases": [
+    {"id":"timely-feasible","facts":{"attempt":1,"retry_limit":2,"sim_time":1000,"deadline_sim":8000,"cost_eur":10},"candidate":{"estimated_seconds":300,"remaining_seconds":7000,"route_nodes":4},"expected_decision":"approve_retry"},
+    {"id":"deadline-exceeded","facts":{"attempt":1,"retry_limit":2,"sim_time":1000,"deadline_sim":1200,"cost_eur":10},"candidate":{"estimated_seconds":300,"remaining_seconds":200,"route_nodes":4},"expected_decision":"deny_retry"},
+    {"id":"cost-cap-exceeded","facts":{"attempt":1,"retry_limit":2,"sim_time":1000,"deadline_sim":10000,"cost_eur":10},"candidate":{"estimated_seconds":6001,"remaining_seconds":9000,"route_nodes":4},"expected_decision":"deny_retry"},
+    {"id":"retry-exhausted","facts":{"attempt":2,"retry_limit":2,"sim_time":1000,"deadline_sim":8000,"cost_eur":10},"candidate":{"estimated_seconds":300,"remaining_seconds":7000,"route_nodes":4},"expected_decision":"deny_retry"},
+    {"id":"no-available-courier","facts":{"attempt":1,"retry_limit":2,"sim_time":1000,"deadline_sim":8000,"cost_eur":10},"candidate":null,"expected_decision":"deny_retry"},
+    {"id":"missing-required-facts","facts":{"attempt":1,"sim_time":1000,"cost_eur":10},"candidate":{"estimated_seconds":300,"remaining_seconds":7000,"route_nodes":4},"expected_decision":"deny_retry"}
+  ]
+}
