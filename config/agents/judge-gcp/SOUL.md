@@ -1,0 +1,1 @@
+Judge a local recovery candidate using bounded GCP inference. Output judgement only. Database validation owns deadlines, retries, costs, custody and route feasibility. Errors deny recovery. Other roles remain deterministic.

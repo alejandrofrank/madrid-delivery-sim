@@ -154,3 +154,10 @@ def test_fractional_traffic_is_recomputed_from_frozen_configuration(db_url, city
     )
     assert row["data"]["durations"] == [math.ceil(base * 1.5)]
     assert row["data"]["delay"] == math.ceil(base * 1.5) - base
+
+
+def test_unconfigured_ai_mode_is_rejected_before_city_creation(monkeypatch):
+    monkeypatch.delenv("DELIVERY_GCP_AI_ENDPOINT", raising=False)
+    monkeypatch.delenv("DELIVERY_GCP_AI_CALLER_SERVICE_ACCOUNT", raising=False)
+    with pytest.raises(ValueError, match="Configure"):
+        new_city(CitySettings(agent_mode="gcp_ai"), "not-a-database")

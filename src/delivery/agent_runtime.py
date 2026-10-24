@@ -65,6 +65,8 @@ class ScopedTools:
         self.role = role
         self.event = event
         self.calls: list[str] = []
+        self.cloud_endpoint: str | None = None
+        self.cloud_dsn: str | None = None
         ticket = conn.execute(
             """SELECT b.slots FROM agent_event_budgets b JOIN events e
             ON e.id=b.event_id WHERE b.event_id=%s AND b.attempt=%s AND e.state='leased'
@@ -370,6 +372,7 @@ class LocalAgent:
     scope: AgentScope
     role: RoleSpec
     dsn: str = field(repr=False)
+    cloud_endpoint: str | None = None
 
     def claim(self, *, lease_seconds: float = 45) -> Event | None:
         with connect(self.dsn) as conn:
@@ -403,6 +406,15 @@ class LocalAgent:
         if not ticket:
             raise BudgetExceeded("A durable budget reservation is required")
         tools = ScopedTools(conn, self.scope, self.role, event)
+        if self.role.policy == "gcp_ai":
+            model_ticket = conn.execute(
+                "SELECT public.agent_model_reserved(%s,%s,%s) AS reserved",
+                (event.id, event.token, event.attempts),
+            ).fetchone()
+            if not model_ticket or not model_ticket["reserved"]:
+                raise BudgetExceeded("A durable model reservation is required")
+            tools.cloud_endpoint = self.cloud_endpoint
+            tools.cloud_dsn = self.dsn
         if self.role.name == "inventory":
             detail = InventoryPolicy().decide(event, tools)
         else:
@@ -428,10 +440,21 @@ class LocalAgent:
         if not self.reserve_budget(event):
             Queue(self.dsn).fail(event, "BudgetExceeded")
             return False
+        if self.role.policy == "gcp_ai":
+            with connect(self.dsn) as conn:
+                row = conn.execute(
+                    "SELECT public.agent_reserve_model(%s,%s,%s) AS reserved",
+                    (event.id, event.token, event.attempts),
+                ).fetchone()
+            if not row or not row["reserved"]:
+                Queue(self.dsn).fail(event, "ModelBudgetExceeded")
+                return False
         return Queue(self.dsn).process(event, self.handle)
 
 
-def create_agent(dsn: str) -> LocalAgent:
+def create_agent(
+    dsn: str, *, agent_mode: str = "local", cloud_endpoint: str | None = None
+) -> LocalAgent:
     """Scope is read from the authenticated database login, never from a prompt/event."""
     with connect(dsn) as conn:
         row = conn.execute(
@@ -439,14 +462,23 @@ def create_agent(dsn: str) -> LocalAgent:
         ).fetchone()
     if not row or not row["scope"] or not row["definition"]:
         raise PermissionError("Authenticated agent binding required")
+    if agent_mode not in {"local", "gcp_ai"}:
+        raise ValueError("Unknown agent mode")
     data = row["scope"]
     role = RoleSpec.model_validate(row["definition"])
     if role.digest != data["definition_hash"]:
         raise PermissionError("Role definition hash mismatch")
+    if role.name == "judge":
+        expected = "gcp_ai" if agent_mode == "gcp_ai" else "deterministic"
+        if role.policy != expected:
+            raise ValueError("Agent mode differs from frozen role")
+        if role.policy == "gcp_ai" and not cloud_endpoint:
+            raise ValueError("Cloud judge endpoint required")
     return LocalAgent(
         AgentScope(data["run_id"], data["store"], data["agent_id"], data["definition_hash"]),
         role,
         dsn,
+        cloud_endpoint,
     )
 
 

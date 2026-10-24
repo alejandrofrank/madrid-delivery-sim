@@ -1,6 +1,7 @@
 """Local operator interface. Never exposes LLM credentials or accepts model tool calls."""
 
 import json
+import os
 from collections.abc import AsyncIterator, Awaitable, Callable
 from contextlib import asynccontextmanager
 from datetime import date
@@ -50,6 +51,13 @@ def city_configuration() -> dict[str, Any]:
 
     return {
         "defaults": CitySettings().model_dump(mode="json"),
+        "agent_modes": {
+            "local": True,
+            "gcp_ai": bool(
+                os.environ.get("DELIVERY_GCP_AI_ENDPOINT")
+                and os.environ.get("DELIVERY_GCP_AI_CALLER_SERVICE_ACCOUNT")
+            ),
+        },
         "city": urban_city(fake_city(size=32)),
         "products": load_catalogue(Path("data/expanded-catalogue.json")).model_dump(mode="json")[
             "products"
@@ -78,7 +86,12 @@ class StartDelivery(BaseModel):
 def start_city(body: CitySettings, tasks: BackgroundTasks) -> dict[str, str]:
     from delivery.running_city import new_city
 
-    run = new_city(body)
+    try:
+        run = new_city(body)
+    except ValueError:
+        raise HTTPException(
+            422, "GCP AI requires a configured Terraform gateway and caller identity"
+        ) from None
     tasks.add_task(city_background, run)
     return {"id": run}
 

@@ -2,9 +2,11 @@
 
 from typing import Any
 
+from psycopg.types.json import Jsonb
 from pydantic import BaseModel, ConfigDict, Field
 
 from delivery.agent_runtime import BasketRef, ScopedTools
+from delivery.db import connect
 from delivery.queue import Event
 from delivery.workflow_policy import route_plan
 
@@ -64,6 +66,11 @@ class FleetPolicy:
                 courier, route = route_plan(context)
             except ValueError:
                 courier, route = None, None
+            cloud_audit = None
+            if tools.role.policy == "gcp_ai":
+                courier, route, cloud_audit = cloud_judgement(
+                    event, tools, context, memory, courier, route
+                )
             result = tools.invoke(
                 "judge.review", basket=basket, attempt=attempt, courier=courier, route=route
             )
@@ -75,6 +82,8 @@ class FleetPolicy:
                     tools.sim,
                 )
             )
+            if cloud_audit is not None:
+                result["cloud_judgement"] = cloud_audit
             rule = "approve a feasible bounded retry only within remaining deadline and cost cap"
         elif role == "courier":
             result = tools.invoke("courier.accept", basket=basket, attempt=attempt)
@@ -157,3 +166,44 @@ class FleetPolicy:
             "role_hash": tools.scope.definition_hash,
             "policy": tools.role.policy,
         }
+
+
+def cloud_judgement(
+    event: Event,
+    tools: ScopedTools,
+    context: dict[str, Any],
+    memory: list[dict[str, Any]],
+    courier: str | None,
+    route: list[int] | None,
+) -> tuple[str | None, list[int] | None, dict[str, Any]]:
+    """Model can veto a local candidate; SQL still owns every feasibility gate."""
+    from delivery.cloud_ai import CloudJudge
+
+    candidate = None
+    if route is not None:
+        edges = {(e["from"], e["to"]): e["travel_seconds"] for e in context["roads"]["edges"]}
+        candidate = {
+            "estimated_seconds": sum(edges[a, b] for a, b in zip(route, route[1:], strict=False)),
+            "remaining_seconds": context["job"]["deadline_sim"] - tools.sim,
+            "route_nodes": len(route),
+        }
+    audit: dict[str, Any] = {"provider": "gcp_ai", "fallback": "fail_closed"}
+    try:
+        if not tools.cloud_endpoint:
+            raise ValueError("Cloud endpoint required")
+        judgement = CloudJudge(tools.cloud_endpoint).review(context, memory, candidate=candidate)
+        audit.update(judgement.model_dump())
+        audit["fallback"] = None
+        if judgement.decision != "approve_retry":
+            courier, route = None, None
+    except Exception as exc:
+        audit["error"] = type(exc).__name__
+        courier, route = None, None
+    if tools.cloud_dsn is None:
+        raise PermissionError("Durable cloud audit connection required")
+    with connect(tools.cloud_dsn) as conn:
+        conn.execute(
+            "SELECT public.agent_record_model(%s,%s,%s)",
+            (event.id, event.attempts, Jsonb(audit)),
+        )
+    return courier, route, audit

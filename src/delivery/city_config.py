@@ -1,7 +1,7 @@
 """Validated, frozen local experiment settings and seeded demand, never agent authority."""
 
 import random
-from typing import Any
+from typing import Any, Literal
 
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
@@ -31,9 +31,10 @@ def default_stores() -> tuple[StoreSettings, ...]:
 
 class CitySettings(BaseModel):
     model_config = ConfigDict(extra="forbid", frozen=True)
+    agent_mode: Literal["local", "gcp_ai"] = "local"
     seed: int = Field(default=42, ge=0, le=2**31 - 1, strict=True)
     duration_minutes: int = Field(default=30, ge=15, le=120, strict=True)
-    playback_seconds: int = Field(default=30, ge=0, le=120, strict=True)
+    playback_seconds: int = Field(default=90, ge=0, le=120, strict=True)
     orders_per_hour: float = Field(default=12, ge=0, le=24, allow_inf_nan=False)
     traffic_multiplier: float = Field(default=1.5, ge=0.5, le=3, allow_inf_nan=False)
     dropout_rate: float = Field(default=0.15, ge=0, le=1, allow_inf_nan=False)

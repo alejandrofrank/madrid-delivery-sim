@@ -158,6 +158,20 @@ def flow_snapshot(run: str, url: str | None = None) -> dict[str, Any]:
         }
         if settings_row:
             state["config"] = settings_row["config"]
+            if settings_row["config"].get("agent_mode") == "gcp_ai":
+                calls = conn.execute(
+                    "SELECT status,detail,reserved_tokens FROM agent_model_calls WHERE run_id=%s",
+                    (run,),
+                ).fetchall()
+                state["agent_runtime"] = {
+                    "decision_mode": "gcp_ai_judge",
+                    "model_provider": "vertex_ai",
+                    "model_calls": len([c for c in calls if "model" in c["detail"]]),
+                    "model_reservations": len(calls),
+                    "reserved_tokens": sum(c["reserved_tokens"] for c in calls),
+                    "policy_source": "GCP recovery judge; all other roles use local rules",
+                    "soul_usage": "bounded gateway judgement prompt",
+                }
             state["configuration_hash"] = digest(settings_row["config"])
             state["order_schedule"] = settings_row["order_schedule"]
             state["session_summary"] = settings_row["summary"]

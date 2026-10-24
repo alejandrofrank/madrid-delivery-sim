@@ -1,5 +1,6 @@
 """Finite, seeded city sessions with ongoing demand and frozen operator settings."""
 
+import os
 import time
 from typing import Any
 
@@ -17,6 +18,16 @@ from delivery.urban_city import urban_city
 
 
 def new_city(config: CitySettings, url: str | None = None) -> str:
+    if config.agent_mode == "gcp_ai":
+        from delivery.cloud_ai import CloudJudge
+
+        endpoint = os.environ.get("DELIVERY_GCP_AI_ENDPOINT", "")
+        if not endpoint or not os.environ.get("DELIVERY_GCP_AI_CALLER_SERVICE_ACCOUNT"):
+            raise ValueError("Configure the Terraform GCP gateway and caller identity first")
+        CloudJudge(endpoint)  # Validate server-owned origin before creating the city.
+    frozen_endpoint = (
+        os.environ.get("DELIVERY_GCP_AI_ENDPOINT") if config.agent_mode == "gcp_ai" else None
+    )
     run = new_delivery(config.seed, url)
     state = flow_snapshot(run, url)
     settings = {s.id: s for s in config.stores}
@@ -72,6 +83,9 @@ def new_city(config: CitySettings, url: str | None = None) -> str:
             """INSERT INTO lab_city_configs(run_id,config,order_schedule,dropout_schedule)
             VALUES (%s,%s,%s,%s)""",
             (run, Jsonb(config.model_dump(mode="json")), Jsonb(orders), Jsonb(failures)),
+        )
+        conn.execute(
+            "UPDATE lab_city_configs SET cloud_endpoint=%s WHERE run_id=%s", (frozen_endpoint, run)
         )
         conn.execute("INSERT INTO lab_fleet_scenarios(run_id) VALUES (%s)", (run,))
     return run
@@ -143,9 +157,13 @@ def run_city(run: str, url: str | None = None) -> dict[str, Any]:
     clock = time.monotonic()
     try:
         agents = {
-            access.store: create_agent(access.dsn)
+            access.store: create_agent(
+                access.dsn,
+                agent_mode=config.agent_mode,
+                cloud_endpoint=row["cloud_endpoint"] if config.agent_mode == "gcp_ai" else None,
+            )
             for role in ("inventory", "fulfillment", "dispatcher", "courier", "judge")
-            for access in role_access(run, role, url).values()
+            for access in role_access(run, role, url, agent_mode=config.agent_mode).values()
         }
         sim = 0
         for _cycle in range(1600):
@@ -166,7 +184,10 @@ def run_city(run: str, url: str | None = None) -> dict[str, Any]:
                             failure = conn.execute(
                                 "SELECT error FROM events WHERE id=%s", (event.id,)
                             ).fetchone()
-                        if failure and failure["error"] == "BudgetExceeded":
+                        if failure and failure["error"] in {
+                            "BudgetExceeded",
+                            "ModelBudgetExceeded",
+                        }:
                             completion_reason = "budget_limit"
                             break
                         raise RuntimeError("CityAgentStepFailed")
@@ -292,6 +313,24 @@ def agent_inspection(run: str, agent_id: str, url: str | None = None) -> dict[st
                 (run, agent_id.removeprefix("courier:")),
             ).fetchone()
             home = staff["home_store"] if staff else None
+        driver = None
+        if role == "courier":
+            courier_id = agent_id.removeprefix("courier:")
+            fleet = conn.execute(
+                "SELECT id,node,status,busy_basket,home_store FROM lab_fleet "
+                "WHERE run_id=%s AND id=%s",
+                (run, courier_id),
+            ).fetchone()
+            job = conn.execute(
+                "SELECT basket,store,status,route,route_durations,depart_sim,pickup_sim,"
+                "arrive_sim,customer_node,accepted,attempt FROM lab_delivery_jobs "
+                "WHERE run_id=%s AND courier=%s AND status IN "
+                "('assigned','in_transit','arrived') ORDER BY depart_sim DESC LIMIT 1",
+                (run, courier_id),
+            ).fetchone()
+            driver = {"courier": fleet, "current_order": job, "sim_time": binding["sim_time"]}
+            if job:
+                driver["eta_sim_seconds"] = max(0, job["arrive_sim"] - binding["sim_time"])
         parameters: dict[str, Any] = {"memory_ttl_seconds": 3600, "settings_apply": "next_session"}
         if role in {"inventory", "fulfillment", "courier"}:
             parameters["home_store"] = home
@@ -321,4 +360,5 @@ def agent_inspection(run: str, agent_id: str, url: str | None = None) -> dict[st
             "expired_memory_count": expired["n"] if expired else 0,
             "parameters": parameters,
             "briefs": briefs,
+            "driver": driver,
         }

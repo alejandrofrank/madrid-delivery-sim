@@ -5,7 +5,7 @@ import json
 from pathlib import Path
 from typing import Literal
 
-from pydantic import BaseModel, ConfigDict, Field, ValidationInfo, field_validator
+from pydantic import BaseModel, ConfigDict, Field, ValidationInfo, field_validator, model_validator
 
 INVENTORY_ACCEPTS = frozenset(
     {"basket.requested", "shipment.delayed", "shipment.received", "reservation.expire"}
@@ -93,8 +93,8 @@ class RoleLimits(BaseModel):
     tool_calls_per_run: int = Field(default=400, ge=1, le=2000, strict=True)
     memory_entries: int = Field(default=32, ge=1, le=100, strict=True)
     memory_bytes: int = Field(default=16384, ge=1, le=65536, strict=True)
-    model_calls: Literal[0] = 0
-    model_tokens: Literal[0] = 0
+    model_calls: int = Field(default=0, ge=0, le=100, strict=True)
+    model_tokens: int = Field(default=0, ge=0, le=51200, strict=True)
     model_usd: Literal[0] = 0
 
 
@@ -104,12 +104,21 @@ class _RoleConfig(BaseModel):
     schema_version: Literal[1]
     role: Literal["inventory", "fulfillment", "dispatcher", "courier", "judge"]
     version: str = Field(min_length=1, max_length=64)
-    policy: Literal["deterministic"]
+    policy: Literal["deterministic", "gcp_ai"]
     soul_file: Literal["SOUL.md"]
     accepts: tuple[str, ...]
     emits: tuple[str, ...]
     tools: tuple[str, ...]
     limits: RoleLimits = Field(default_factory=RoleLimits)
+
+    @model_validator(mode="after")
+    def model_authority(self) -> "_RoleConfig":
+        if self.policy == "gcp_ai":
+            if self.role != "judge" or not self.limits.model_calls or not self.limits.model_tokens:
+                raise ValueError("Only the bounded recovery judge may use GCP AI")
+        elif self.limits.model_calls or self.limits.model_tokens:
+            raise ValueError("Deterministic roles cannot reserve model budgets")
+        return self
 
     @field_validator("accepts", "emits", "tools")
     @classmethod
@@ -146,9 +155,9 @@ def load_inventory_role(root: Path = Path("config/agents/inventory")) -> RoleSpe
 
 
 def load_role(name: str) -> RoleSpec:
-    if name not in AUTHORITY:
+    if name not in AUTHORITY and name != "judge-gcp":
         raise ValueError("Unknown role")
     role = load_inventory_role(Path("config/agents") / name)
-    if role.name != name:
+    if role.name != ("judge" if name == "judge-gcp" else name):
         raise ValueError("Role directory does not match role identity")
     return role

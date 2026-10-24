@@ -142,13 +142,17 @@ def retire_inventory_access(run: str, url: str | None = None) -> None:
 _ROLE_ACCESS: dict[tuple[str, str, str], dict[str, AgentAccess]] = {}
 
 
-def role_access(run: str, name: str, url: str | None = None) -> dict[str, AgentAccess]:
+def role_access(
+    run: str, name: str, url: str | None = None, *, agent_mode: str = "local"
+) -> dict[str, AgentAccess]:
     """Provision supported role namespaces; no caller-supplied permissions or scopes."""
     from delivery.agent_specs import load_role
 
     if name == "inventory":
         return inventory_access(run, url)
-    role = load_role(name)
+    if agent_mode not in {"local", "gcp_ai"}:
+        raise ValueError("Unknown agent mode")
+    role = load_role("judge-gcp" if name == "judge" and agent_mode == "gcp_ai" else name)
     group = {
         "fulfillment": "lab_fulfillment_executor",
         "dispatcher": "lab_dispatch_executor",
@@ -158,6 +162,14 @@ def role_access(run: str, name: str, url: str | None = None) -> dict[str, AgentA
     operator = url or settings().database_url
     key = (operator, run, name)
     if key in _ROLE_ACCESS:
+        with connect(operator) as conn:
+            frozen = conn.execute(
+                """SELECT definition_hash FROM agent_bindings WHERE run_id=%s
+                AND definition->>'role'=%s LIMIT 1""",
+                (run, name),
+            ).fetchone()
+        if not frozen or frozen["definition_hash"] != role.digest:
+            raise ValueError("Role definition is frozen for this run")
         return dict(_ROLE_ACCESS[key])
     result = {}
     with connect(operator) as conn:
