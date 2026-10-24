@@ -1,6 +1,6 @@
 # Roadmap: Bakiano delivery operations lab
 
-Updated 2026-10-23. Implemented slices are identified below; remaining milestones are planned.
+Updated 2026-10-24. Implemented slices are identified below; remaining milestones are planned.
 
 Local interaction update: map-first city controls now configure store opening stock,
 home couriers, demand weights, global timed order intensity, traffic and withdrawal
@@ -10,7 +10,7 @@ parameters and live memory. See [running city](docs/RUNNING-CITY.md).
 
 Current city detail: 120 synthetic products, 128 household homes and scheduled
 customer order views; named directed streets affect actual route planning. The lab
-uses deterministic role workers. Model-backed judgement remains future work.
+uses deterministic role workers. Optional model-backed recovery judgement is implemented behind a GCP switch; cloud deployment and live-provider evals remain pending.
 
 ## Objective and baseline
 

@@ -147,3 +147,20 @@ opens its household context and route when that run contains household metadata.
 Fleet opens named courier cards and their scoped inspectors. Stores opens the
 establishment directory and shop controls. The Overview navigation returns to the
 operations watch. These views are operator projections, not additional agent access.
+
+## Live movement and driver inspection
+
+New sessions default to a 90-second playback. Courier markers interpolate along
+accepted route edges between authoritative snapshots and stop at the latest
+received simulation time; the browser does not invent future movement. Instant
+playback remains available. The order book admits arrivals over simulated time,
+with a brief new-order notice; future household schedules remain inspectable.
+
+Select a courier to see the fictional name, current order, pickup/drop-off,
+remaining ETA in simulated minutes/seconds, route focus and that courier's private
+memory. Active courier memory refreshes while observed. ETA includes persisted
+traffic-adjusted road durations and is frozen when the simulation stops.
+
+The optional GCP recovery-judge switch applies to the next session. It stays
+unavailable until a server-owned gateway and keyless caller identity are configured.
+See [GCP deployment and teardown](GCP-AI.md). The city and routine workers stay local.

@@ -70,6 +70,45 @@ with sync_playwright() as p:
     assert len({order["arrival_sim"] for order in schedule}) > 1
     assert page.locator(".metric").count() == 5
     assert page.locator(".order-table tbody tr").count() == len(schedule)
+    active = next(
+        (
+            j
+            for j in snapshot["jobs"]
+            if j["accepted"] and j["status"] in ("assigned", "in_transit")
+        ),
+        None,
+    )
+    assert active, "Seeded run must retain an active courier for inspector verification"
+    page.locator("#entity-filter").select_option("all")
+    page.locator(f'[data-courier="{active["courier"]}"]').click()
+    page.wait_for_function("window.selectedAgentEvidence?.driver?.current_order")
+    assert active["basket"] in page.locator("#driver-live").inner_text()
+    assert "Simulated time" in page.locator("#driver-live").inner_text()
+    assert "Private memory" in page.locator("#agent-content").inner_text()
+    page.locator("#focus-driver-route").click()
+    assert page.locator(f'[data-route-basket="{active["basket"]}"]').count() == 1
+    page.locator("#reset-map").click()
+    page.evaluate(
+        """job => {
+        movementClock={run:snapshot.run.id,from:job.depart_sim,to:job.depart_sim+30,
+            at:performance.now(),interval:1000};
+        cacheAnimationRoutes(snapshot);
+    }""",
+        active,
+    )
+    marker = page.locator(f'[data-courier="{active["courier"]}"]')
+    start_transform = marker.get_attribute("transform")
+    page.wait_for_timeout(180)
+    assert marker.get_attribute("transform") != start_transform
+    assert page.evaluate("visualSimTime() <= movementClock.to")
+    page.evaluate("movementClock=null; animationRoutes=[]; drawMovement(snapshot)")
+    page.evaluate("""() => {
+        const sample={...snapshot,run:{...snapshot.run,id:'arrival-check',sim_time:0}};
+        announceArrivals(sample);
+        sample.run.sim_time=sample.order_schedule[0].arrival_sim;
+        announceArrivals(sample);
+    }""")
+    assert "New order" in page.locator("#arrival-toast").inner_text()
     page.get_by_role("button", name="Fleet workspace", exact=True).click()
     assert page.locator("#board-content [data-agent]").count() == len(snapshot["fleet"])
     page.get_by_role("button", name="Stores workspace", exact=True).click()
@@ -84,7 +123,7 @@ with sync_playwright() as p:
     page.locator('[data-store="store-1"] rect').click()
     page.get_by_role("button", name="Team", exact=True).click()
     page.locator('[data-agent="inventory:store-1"]').click()
-    page.wait_for_function("window.selectedAgentEvidence")
+    page.wait_for_function("window.selectedAgentEvidence?.agent.agent_id === 'inventory:store-1'")
     evidence = page.evaluate("window.selectedAgentEvidence")
     assert evidence["agent"]["agent_id"] == "inventory:store-1"
     assert isinstance(evidence["memory"], list)

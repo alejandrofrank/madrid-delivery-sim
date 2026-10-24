@@ -1,5 +1,12 @@
 # Status
 
+2026-10-24: Added interpolated courier movement, timed order-book arrivals and
+current driver order/route/ETA with scoped memory inspection. Optional GCP Vertex
+recovery judge uses durable six-call/token reservations and fail-closed decisions.
+Standalone Terraform owns a dedicated cloud project; nothing deployed. Verified
+112 Linux tests, additional budget exhaustion checks, Ruff/mypy, live desktop/mobile
+browser interactions and Terraform validation. Docker recovered without deleting volumes.
+
 2026-10-23: Added 120 synthetic products, 128 identifiable households, customer
 order views, entity filters, urban buildings and actual one-way routing. The UI
 explicitly identifies delivery-lab agents as rules-only workers with no AI calls.
