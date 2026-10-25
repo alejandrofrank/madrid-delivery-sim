@@ -1,6 +1,6 @@
 """Local city by default; explicitly start/stop the optional paid GCP judge.
 
-Stdlib only: python scripts/gcp_demo.py start|stop|status
+Stdlib only: python3 scripts/gcp_demo.py start|stop|status
 """
 
 from __future__ import annotations

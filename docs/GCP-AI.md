@@ -13,10 +13,10 @@ Project deletion is blocked by both `deletion_policy = "PREVENT"` and
 
 From the repository root (Python 3.12+ with only its standard library):
 
-```powershell
-python scripts/gcp_demo.py start
-python scripts/gcp_demo.py status
-python scripts/gcp_demo.py stop
+```bash
+python3 scripts/gcp_demo.py start
+python3 scripts/gcp_demo.py status
+python3 scripts/gcp_demo.py stop
 ```
 
 `make gcp-start`, `make gcp-status` and `make gcp-stop` are equivalent aliases.
@@ -83,7 +83,7 @@ Only numeric allowlisted job facts, numeric candidate summary (`estimated_second
 Routine shutdown uses **apply**, not `terraform destroy`. Keep the project and
 its state. In `infra/gcp-ai`, run these two phases in order, reviewing each plan:
 
-```powershell
+```bash
 terraform plan -var='enable_billing=true' -var='enable_runtime=false' -var='enable_gateway=false' -out=stop-runtime.tfplan
 terraform apply stop-runtime.tfplan
 terraform plan -var='enable_billing=false' -var='enable_runtime=false' -var='enable_gateway=false' -out=park.tfplan

@@ -4,10 +4,10 @@ A local operations lab for queue-driven delivery agents, with a Madrid baseline 
 
 The city runs locally. Enable the optional paid judge only for agent tests:
 
-```powershell
-python scripts/gcp_demo.py start
-python scripts/gcp_demo.py status
-python scripts/gcp_demo.py stop
+```bash
+python3 scripts/gcp_demo.py start
+python3 scripts/gcp_demo.py status
+python3 scripts/gcp_demo.py stop
 ```
 
 Stop removes billable runtime resources and disables billing while retaining the
@@ -107,10 +107,10 @@ python scripts/verify_demo.py                # validate seed-42 full-day artifac
 make down                                   # stop services; retain database volumes
 ```
 
-On Windows PowerShell, equivalent commands are:
+To run the equivalent commands directly in Bash:
 
-```powershell
-New-Item -ItemType Directory -Path artifacts -Force | Out-Null
+```bash
+mkdir -p artifacts
 docker compose up -d --build --wait
 docker compose exec -T app delivery init
 docker compose exec -T app delivery demo --wall-seconds 600

@@ -1,0 +1,8 @@
+---
+description: Always use Bash for this user's shell commands and examples
+alwaysApply: true
+---
+
+- Use Bash for all shell commands, shell scripts and documentation examples.
+- Do not use PowerShell unless the user explicitly requests it.
+- Prefer `python3` in Bash; Make accepts `PYTHON` for an explicit interpreter.

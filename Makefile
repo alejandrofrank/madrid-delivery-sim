@@ -1,4 +1,5 @@
 .PHONY: setup up demo test check down graph
+PYTHON ?= python3
 export LOCAL_UID ?= $(shell id -u)
 export LOCAL_GID ?= $(shell id -g)
 setup:
@@ -21,8 +22,8 @@ down:
 # City development remains local. These explicitly opt into/out of the paid judge.
 .PHONY: gcp-start gcp-stop gcp-status
 gcp-start:
-	python scripts/gcp_demo.py start
+	$(PYTHON) scripts/gcp_demo.py start
 gcp-stop:
-	python scripts/gcp_demo.py stop
+	$(PYTHON) scripts/gcp_demo.py stop
 gcp-status:
-	python scripts/gcp_demo.py status
+	$(PYTHON) scripts/gcp_demo.py status

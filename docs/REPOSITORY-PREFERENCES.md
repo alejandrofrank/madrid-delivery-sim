@@ -7,3 +7,5 @@ User authorization recorded 2026-10-25:
   authorization covers future pushes.
 - Keep this repository private unless the user explicitly requests otherwise.
 - Exclude credentials, private Terraform variables, state and plans from commits.
+- Always use Bash for shell commands, scripts and documentation examples.
+  Do not use PowerShell unless the user explicitly requests it.
