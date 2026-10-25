@@ -20,3 +20,7 @@ infra/gcp-ai/.terraform/
 infra/gcp-ai/*.tfstate*
 infra/gcp-ai/*.tfvars
 infra/gcp-ai/*.tfplan
+
+# Local lifecycle command scratch files (no credentials or plans in Git)
+infra/gcp-ai/.demo-command.lock
+infra/gcp-ai/zz-demo.auto.tfvars.tmp

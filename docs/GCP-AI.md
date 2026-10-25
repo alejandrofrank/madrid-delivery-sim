@@ -9,7 +9,59 @@ state. The restored simulation project is imported into its original state.
 Project deletion is blocked by both `deletion_policy = "PREVENT"` and
 `lifecycle.prevent_destroy`. Keep private variables, plans and state out of Git.
 
-## Explicit bootstrap
+## Daily commands
+
+From the repository root (Python 3.12+ with only its standard library):
+
+```powershell
+python scripts/gcp_demo.py start
+python scripts/gcp_demo.py status
+python scripts/gcp_demo.py stop
+```
+
+`make gcp-start`, `make gcp-status` and `make gcp-stop` are equivalent aliases.
+The city, homes, stores, stock, orders, queues, roles, memory and rules run locally
+in Docker. Building the city and testing deterministic agent/event behavior
+requires no GCP deployment or inference. Leave the project parked for that work.
+
+`start` explicitly links billing, creates the image repository, builds/pushes the
+small gateway image locally, deploys its immutable digest and reconnects the
+local app with a read-only ADC mount. It makes GCP AI available in Configure;
+it does not select it or change saved runs. Startup itself makes no model calls.
+Image storage and Cloud Run usage can incur charges while enabled. Model charges
+begin only when an explicitly cloud-enabled run asks the recovery judge for a
+decision. Every stock reservation, route movement and queue event remains local.
+Use traces to compare local rules against those selected model decisions.
+
+`stop` resets the app to local mode first, deletes the gateway and stored images
+with billing still linked, then unlinks billing. Project, APIs, service accounts,
+custom role and free IAM bindings remain. Repeated stop on a parked project does
+not relink billing. A deletion failure prevents billing unlinking so cleanup can
+be retried. A local app reset failure is reported after attempting cloud cleanup.
+
+`status` reads project lifecycle, billing, actual Cloud Run services, Terraform
+runtime resources and local provider availability. With billing enabled it also
+lists repositories; otherwise that check is explicitly unavailable. It makes no
+model calls and never enables billing to answer a status request. A parked result
+is not a billing invoice and does not erase earlier charges.
+
+Prerequisites: gcloud/Terraform/Docker on PATH, Docker running, existing protected
+project/IAM state in this root, the ignored `infra/gcp-ai/deploy.auto.tfvars.json`,
+and local ADC (`gcloud auth application-default login`). The CLI reads the selected
+project/region from that private file. `GCP_ADC_DIRECTORY` can override the usual
+local ADC directory; no keys are downloaded. Commands work from any working
+directory when invoked with the script's path. Use `APP_PORT` if not 8010.
+
+Commands validate saved plans before applying: foundation changes, replacements,
+unexpected resources and another project's runtime are rejected. Desired flags
+are saved only after successful apply to the ignored
+`zz-demo.auto.tfvars.json`, which overrides the bootstrap values on future plans.
+Saved plans remain ignored. Start/stop share a lock; if a process is forcibly
+terminated, inspect status and confirm it has stopped before removing
+`infra/gcp-ai/.demo-command.lock`. If startup fails after creating resources,
+inspect status and run stop. Neither command runs a model evaluation automatically.
+
+## Manual bootstrap (first setup or troubleshooting)
 
 An operator needs project creation and billing-link permissions, Terraform, gcloud and Docker. Select a supported model and Vertex location explicitly; no model or region is assumed. Set `project_id`, `billing_account`, `region`, `vertex_region`, `vertex_model`, and optionally one of `org_id` or `folder_id` in a private tfvars file. Billing, runtime infrastructure and the gateway all default off. Terraform 1.7+ is needed for the mocked lifecycle tests.
 
@@ -26,7 +78,7 @@ Runtime authentication uses Application Default Credentials and an audience-boun
 
 Only numeric allowlisted job facts, numeric candidate summary (`estimated_seconds`, `remaining_seconds`, `route_nodes`) and memory entry count leave the local application. The gateway adds a reviewed, synthetic seven-meal supermarket snapshot as read-only business reference. Full roads, names, basket IDs, courier IDs, arbitrary prompts and memory bodies are excluded. This gateway has no database, queue, browser or arbitrary tool interface. A request is bounded to 8192 serialized bytes, the client waits 30 seconds, Vertex has a 5 second token-count timeout and 15 second generation timeout, output including reported reasoning is limited to 256 tokens, and responses are size/schema checked. Retries are not automatic. Cloud Run scales to zero and at most one instance, with four concurrent requests. These are usage bounds, not a guaranteed monetary cap; model pricing and other project usage can create charges. Choose a model with known price/context limits and use the local durable budget as the admission gate.
 
-## Park the project after a demo
+## Manual shutdown (the stop command runs these phases)
 
 Routine shutdown uses **apply**, not `terraform destroy`. Keep the project and
 its state. In `infra/gcp-ai`, run these two phases in order, reviewing each plan:
@@ -43,9 +95,9 @@ binding, and repository/images. The free IAM foundation stays in state: both
 service accounts, the prediction-only custom role, its runtime binding, and
 operator impersonation permissions on the caller.
 Billing must stay linked until deletion finishes: Artifact Registry management
-requests can fail with billing disabled. Phase two unlinks billing. Then save
-all three flags as false in the ignored private variables so the next ordinary
-plan stays parked. Clear the obsolete gateway image digest; rebuild and push it
+requests can fail with billing disabled. Phase two unlinks billing. For manual operation, save
+all three flags as false in the private override so the next ordinary plan stays
+parked. The command writes its own `zz-demo.auto.tfvars.json` after successful apply. Clear the obsolete gateway image digest; rebuild and push it
 when starting another session. Do not unlink billing first or apply all three
 false directly from an active deployment.
 

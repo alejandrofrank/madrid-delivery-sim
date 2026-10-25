@@ -14,7 +14,7 @@ COPY web ./web
 COPY config ./config
 COPY tests ./tests
 COPY infra/gcp-ai/gateway.py ./infra/gcp-ai/gateway.py
-COPY scripts/eval_cloud_judge.py ./scripts/eval_cloud_judge.py
+COPY scripts/eval_cloud_judge.py scripts/gcp_demo.py ./scripts/
 RUN mkdir -p artifacts && chown -R sim:sim /app
 USER sim
 EXPOSE 8000

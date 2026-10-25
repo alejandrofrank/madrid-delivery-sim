@@ -1,5 +1,14 @@
 # Status
 
+2026-10-25: Added one-command GCP judge start/stop/status while city/environment
+and event workers stay local. Verified a live start and two-phase stop: one
+private gateway/repository when active, no runtime and billing disabled at finish,
+12 foundation resources and both original identity IDs retained. Twenty command
+regression tests cover failure cleanup, plan guards, registry token isolation,
+and repeated operations. Clean Linux suite: 155 passed; Ruff/mypy passed.
+Excluded host pytest/Python bytecode after a stale-cache test failure.
+See docs/GCP-AI.md and the lifecycle command receipt.
+
 2026-10-25: Recovered original caller/runtime identities and custom prediction
 role; retained free IAM and API registrations between sessions. Parked mode keeps
 12 non-billable foundation resources, with billing disabled and no Cloud Run

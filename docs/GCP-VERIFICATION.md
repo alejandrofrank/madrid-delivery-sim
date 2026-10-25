@@ -119,3 +119,31 @@ then plan restart with the same service-account unique IDs. No paid runtime was
 redeployed for this check. A live parked plan must have zero changes.
 The earlier project-only receipt remains a historical checkpoint.
 [Current IAM recovery receipt](evidence/gcp-iam-recovered.json).
+
+
+## One-command demo lifecycle (2026-10-25)
+
+`python scripts/gcp_demo.py start` was exercised against the isolated project:
+billing linked, the repository was created, a local build was pushed and pinned
+by digest, the private gateway deployed, and the local app exposed GCP judge mode.
+Read-only status confirmed one service/repository and all 12 foundation resources.
+No simulation or model inference was started by lifecycle verification.
+
+`python scripts/gcp_demo.py stop` reset the app to local-only, successfully deleted
+the service/repository before unlinking billing, and preserved the free foundation.
+Final status: ACTIVE project, billing disabled, no service/runtime resources,
+local-only app, and unchanged original caller/runtime numeric IDs. A refreshed
+Terraform plan had zero changes. The repository list is unavailable after billing
+unlink; deletion was observed during the successful first cleanup phase.
+
+Twenty offline command regression tests cover plan rejection for foundation or
+cross-project changes, shutdown sequencing and failures, credential isolation,
+idempotence and locking. These complement the live lifecycle check.
+[Command verification receipt](evidence/gcp-demo-commands.json).
+
+
+The first broad container run exposed a copied Windows pytest assertion cache:
+153 passed and the existing lease-wait test failed. Running that test directly
+from source passed. Docker context now excludes nested `__pycache__`/bytecode;
+the rebuilt Linux image passed all **155 tests**. Ruff and source type checks
+also pass. This build reproducibility fix is committed separately from the CLI.

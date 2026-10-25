@@ -1,0 +1,64 @@
+{
+  "date": "2026-10-25",
+  "live_start_stop_cycle_verified": true,
+  "active": {
+    "project": "mds-ai-judge-261024-c7b4",
+    "lifecycle": "ACTIVE",
+    "billing_enabled": true,
+    "runtime_in_state": [
+      "google_artifact_registry_repository.images[0]",
+      "google_cloud_run_v2_service.judge[0]",
+      "google_cloud_run_v2_service_iam_binding.invoker[0]"
+    ],
+    "cloud_run_services": 1,
+    "artifact_repositories": 1,
+    "artifact_check": "live",
+    "foundation_resources": 12,
+    "agent_modes": {
+      "local": true,
+      "gcp_ai": true
+    },
+    "mode": "cloud-enabled",
+    "inference_calls_from_lifecycle_commands": 0
+  },
+  "final": {
+    "project": "mds-ai-judge-261024-c7b4",
+    "lifecycle": "ACTIVE",
+    "billing_enabled": false,
+    "runtime_in_state": [],
+    "cloud_run_services": 0,
+    "artifact_repositories": null,
+    "artifact_check": "unavailable_without_billing",
+    "foundation_resources": 12,
+    "agent_modes": {
+      "local": true,
+      "gcp_ai": false
+    },
+    "mode": "parked",
+    "lifecycle_command_running": false,
+    "inference_calls_from_lifecycle_commands": 0
+  },
+  "final_terraform_plan_changes": 0,
+  "original_identity_ids_preserved": true,
+  "model_inference_requested_by_verification": false,
+  "lifecycle_regression_tests_passed": 20,
+  "coverage": [
+    "plan scope guard",
+    "two-phase shutdown",
+    "partial startup failure",
+    "cleanup despite local failure or timeout",
+    "already parked stop avoids billing relink",
+    "repeated start reuses gateway",
+    "ephemeral registry credentials",
+    "concurrent mutation lock"
+  ],
+  "registry_deletion_observation": "Terraform remove-runtime phase succeeded before billing unlink",
+  "final_registry_list": "unavailable_without_billing",
+  "credentials_state_plans_excluded_from_git": true,
+  "full_linux_suite_passed": 155,
+  "initial_broad_suite": {
+    "passed": 153,
+    "failed_test": "tests/test_queue.py::test_lease_cannot_survive_waiting_for_run_lock",
+    "failure_resolved_by": "exclude nested host Python/pytest bytecode from Docker context and rebuild"
+  }
+}

@@ -17,3 +17,12 @@ graph:
 	python -m delivery.world --download
 down:
 	docker compose down
+
+# City development remains local. These explicitly opt into/out of the paid judge.
+.PHONY: gcp-start gcp-stop gcp-status
+gcp-start:
+	python scripts/gcp_demo.py start
+gcp-stop:
+	python scripts/gcp_demo.py stop
+gcp-status:
+	python scripts/gcp_demo.py status
