@@ -16,3 +16,7 @@ infra/gcp-ai/.terraform
 **/*.tfstate*
 **/*.tfvars*
 **/*.tfplan
+# Never ship host/interpreter/test assertion bytecode into Linux images.
+**/__pycache__
+**/*.pyc
+**/*.pyo
