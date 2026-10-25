@@ -100,3 +100,22 @@ not a second paid deployment. A live full destroy plan was rejected by
 `lifecycle.prevent_destroy`. Follow the two-phase shutdown in GCP-AI.md, not the
 historical full-delete procedure above.
 [Restoration receipt](evidence/gcp-project-restored.json).
+
+
+## Persistent free IAM recovery (2026-10-25)
+
+Both original service accounts were undeleted using the numeric IDs from the
+original teardown plan, then imported at their indexed Terraform addresses.
+`boundedJudgePredict` was undeleted and imported with the original single
+prediction permission. Free API registrations and narrow IAM bindings are now
+retained between sessions. The parked state holds 12 foundation resources:
+project, six API registrations, two accounts, custom role and two bindings.
+Billing remains disabled and Cloud Run has no services. Artifact Registry's
+listing API still requires billing; prior successful repository deletion and
+its absence from current state are the available repository evidence.
+
+Seven mocked lifecycle runs now apply active, runtime-off and billing-off states,
+then plan restart with the same service-account unique IDs. No paid runtime was
+redeployed for this check. A live parked plan must have zero changes.
+The earlier project-only receipt remains a historical checkpoint.
+[Current IAM recovery receipt](evidence/gcp-iam-recovered.json).

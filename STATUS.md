@@ -1,10 +1,18 @@
 # Status
 
+2026-10-25: Recovered original caller/runtime identities and custom prediction
+role; retained free IAM and API registrations between sessions. Parked mode keeps
+12 non-billable foundation resources, with billing disabled and no Cloud Run
+service or artifact repository in state. Shutdown deletes only billable runtime
+and its attached invocation binding, then unlinks billing. Seven lifecycle tests
+include shutdown/restart with identical service-account IDs.
+
 2026-10-25: Restored the dedicated AI project and imported it into its original
 Terraform state. Added protected persistent-project lifecycle, opt-in runtime and
 billing flags, and two-phase shutdown (delete runtime first, unlink billing second).
 The project is ACTIVE with billing disabled; no Cloud Run services. Parked plan
-is unchanged and only the project remains in state. See docs/GCP-AI.md.
+was unchanged with only the project in state at that checkpoint; IAM recovery
+above supersedes that state. See docs/GCP-AI.md.
 
 2026-10-24: Deployed the private GCP recovery judge into a dedicated Terraform-owned
 project, isolated from Scrapmarket. Model context is limited to seven synthetic meal

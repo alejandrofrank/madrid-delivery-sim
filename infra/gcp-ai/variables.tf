@@ -48,7 +48,7 @@ variable "invoker_members" {
 }
 
 variable "enable_runtime" {
-  description = "Opt in to billable infrastructure and its scoped runtime identities. False deletes runtime/images while retaining the project. Disable billing separately after runtime deletion."
+  description = "Opt in to billable runtime and image storage. False retains the project, API registrations and free IAM foundation. Disable billing separately after runtime deletion."
   type        = bool
   default     = false
 }

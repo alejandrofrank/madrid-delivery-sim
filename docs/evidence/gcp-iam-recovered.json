@@ -1,0 +1,35 @@
+{
+  "date": "2026-10-25",
+  "project_id": "mds-ai-judge-261024-c7b4",
+  "original_caller_unique_id": "108780209802092054377",
+  "original_runtime_unique_id": "105662098881414929441",
+  "custom_role_permissions": [
+    "aiplatform.endpoints.predict"
+  ],
+  "runtime_project_roles": [
+    "projects/mds-ai-judge-261024-c7b4/roles/boundedJudgePredict"
+  ],
+  "caller_impersonation_matches_private_allowlist": true,
+  "user_managed_keys": 0,
+  "billing_enabled": false,
+  "cloud_run_services": 0,
+  "parked_state_resources": [
+    "google_project.ai",
+    "google_project_iam_custom_role.judge_predict[0]",
+    "google_project_iam_member.vertex[0]",
+    "google_project_service.api[\"aiplatform.googleapis.com\"]",
+    "google_project_service.api[\"artifactregistry.googleapis.com\"]",
+    "google_project_service.api[\"cloudresourcemanager.googleapis.com\"]",
+    "google_project_service.api[\"iam.googleapis.com\"]",
+    "google_project_service.api[\"iamcredentials.googleapis.com\"]",
+    "google_project_service.api[\"run.googleapis.com\"]",
+    "google_service_account.caller[0]",
+    "google_service_account.judge[0]",
+    "google_service_account_iam_binding.caller_tokens[0]"
+  ],
+  "parked_plan_changes": 0,
+  "mock_lifecycle_tests_passed": 7,
+  "live_paid_runtime_redeployed": false,
+  "local_mode": true,
+  "gcp_mode_available": false
+}

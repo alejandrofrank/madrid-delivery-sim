@@ -13,12 +13,12 @@ Project deletion is blocked by both `deletion_policy = "PREVENT"` and
 
 An operator needs project creation and billing-link permissions, Terraform, gcloud and Docker. Select a supported model and Vertex location explicitly; no model or region is assumed. Set `project_id`, `billing_account`, `region`, `vertex_region`, `vertex_model`, and optionally one of `org_id` or `folder_id` in a private tfvars file. Billing, runtime infrastructure and the gateway all default off. Terraform 1.7+ is needed for the mocked lifecycle tests.
 
-1. From `infra/gcp-ai`, run `terraform init`, review `terraform plan`, then `terraform apply`. With all enable flags false this keeps only the protected project. To bootstrap the repository, set `enable_billing=true`, `enable_runtime=true`, `enable_gateway=false`, review and apply again. This enables APIs and creates the image repository and scoped identities without Cloud Run.
+1. From `infra/gcp-ai`, run `terraform init`, review `terraform plan`, then `terraform apply`. With all enable flags false this keeps the protected project, six API registrations, both keyless service accounts, the prediction-only custom role and scoped IAM bindings. Set `invoker_members` to explicit operators in the private variables to configure keyless caller impersonation. To bootstrap the repository, set `enable_billing=true`, `enable_runtime=true`, `enable_gateway=false`, review and apply again. This links billing and creates the image repository without Cloud Run; existing identities are reused.
 2. From the repository root, build `infra/gcp-ai/Dockerfile` and push the image to the `image_repository` output using an operator's authenticated Docker registry login. For example, `docker build -f infra/gcp-ai/Dockerfile -t REGION-docker.pkg.dev/PROJECT/judgement/gateway:VERSION .` then `docker push` that same tag. Prefer its immutable digest for `gateway_image`. The image must be this gateway, not an arbitrary server.
-3. Set `enable_gateway=true`, `gateway_image` to that image, and `invoker_members` to explicit operator principals such as `user:you@example.com`. Review and apply again. There is no `allUsers` binding. Terraform creates a dedicated keyless caller service account and grants only listed operators permission to mint its tokens.
+3. Set `enable_gateway=true`, `gateway_image` to that image, and `invoker_members` to explicit operator principals such as `user:you@example.com`. Review and apply again. There is no `allUsers` binding. Terraform retains the dedicated keyless caller service account and grants only listed operators permission to mint its tokens.
 4. Set the server environment variable `DELIVERY_GCP_AI_ENDPOINT` to the `gateway_url` output and select GCP AI mode in the city configuration. The mode is frozen per session. Local mode remains the default. Changing settings affects new sessions only.
 
-Runtime authentication uses Application Default Credentials and an audience-bound Cloud Run ID token. Run `gcloud auth application-default login` locally, then set `DELIVERY_GCP_AI_CALLER_SERVICE_ACCOUNT` to the `caller_service_account` Terraform output. The adapter uses your ADC to impersonate that account and mint an ID token without a downloaded key. Terraform grants listed operators `roles/iam.serviceAccountTokenCreator` only on this caller account and grants that account `roles/run.invoker` only on the gateway. On Cloud Run, attached credentials can supply tokens directly when attached to the authorized caller account. Never use service-account key files or API keys. The gateway runtime receives a project-owned custom role containing only `aiplatform.endpoints.predict` in this dedicated project. Both service accounts and their IAM bindings are owned by this root and removed at teardown. Operator identities outside the project are not deleted.
+Runtime authentication uses Application Default Credentials and an audience-bound Cloud Run ID token. Run `gcloud auth application-default login` locally, then set `DELIVERY_GCP_AI_CALLER_SERVICE_ACCOUNT` to the `caller_service_account` Terraform output. The adapter uses your ADC to impersonate that account and mint an ID token without a downloaded key. Terraform grants listed operators `roles/iam.serviceAccountTokenCreator` only on this caller account and grants that account `roles/run.invoker` only on the gateway. On Cloud Run, attached credentials can supply tokens directly when attached to the authorized caller account. Never use service-account key files or API keys. The gateway runtime receives a project-owned custom role containing only `aiplatform.endpoints.predict` in this dedicated project. Both service accounts, the custom role and their identity-level IAM bindings are owned by this root and retained during routine shutdown. The Cloud Run invocation binding belongs to the deleted service and is recreated with it. Operator identities outside the project are not deleted.
 
 ## Contract and limits
 
@@ -38,8 +38,10 @@ terraform plan -var='enable_billing=false' -var='enable_runtime=false' -var='ena
 terraform apply park.tfplan
 ```
 
-Phase one deletes Cloud Run (including revisions), invocation permissions,
-repository/images, runtime/caller accounts and custom inference permissions.
+Phase one deletes Cloud Run (including revisions), its service-specific invocation
+binding, and repository/images. The free IAM foundation stays in state: both
+service accounts, the prediction-only custom role, its runtime binding, and
+operator impersonation permissions on the caller.
 Billing must stay linked until deletion finishes: Artifact Registry management
 requests can fail with billing disabled. Phase two unlinks billing. Then save
 all three flags as false in the ignored private variables so the next ordinary
@@ -49,7 +51,8 @@ false directly from an active deployment.
 
 API registrations can remain enabled without provisioned runtime resources;
 `disable_on_destroy=false` avoids service dependency failures. A parked state
-tracks only the protected project. Verify a no-change plan, `ACTIVE` project,
+tracks the protected project, six API registrations and five IAM resources (12
+resources total). Verify a no-change plan, `ACTIVE` project,
 `billingEnabled: false`, and absence of Cloud Run services. Confirm repository
 removal during phase one; once billing is disabled its list API may be unavailable.
 Recreate the local app with base `compose.yaml` to remove cloud credentials and
@@ -86,10 +89,9 @@ apply or destroy Terraform. Use the isolated Terraform root for lifecycle change
 ## Guided redeployment and inspection
 
 Keep the demo local until an explicit cloud session is wanted. Reuse the restored
-project ID and original standalone state. The previous full teardown also deleted the service accounts and custom role.
-Before reusing their names, recover any soft-deleted identities/role with Google's
-undelete operations and import them into their indexed Terraform addresses; otherwise
-use new identity/role names. Do not assume an immediate same-name recreation works.
+project ID and original standalone state. The original service accounts and custom
+role were recovered and imported on 2026-10-25; their unique IDs are unchanged.
+Routine shutdown now retains these identities, so no repeated recovery is needed.
 Enable billing and runtime first with the gateway off, rebuild/push the deleted
 image, then enable the gateway with a new
 immutable digest. Follow the bootstrap steps above and refresh the local compose
@@ -113,8 +115,18 @@ For the next guided session, inspect these in order:
    verification. Inspect one cloud decision and the paired local run with zero calls,
    including stock, custody and retry invariants.
 8. **Cleanup:** delete runtime resources with billing linked, then unlink billing.
-   Verify the protected project remains active, state contains only the project,
+   Verify the protected project remains active and state retains project/APIs/IAM,
    and billing is disabled. Recreate the app using base compose.
 
 Retain sanitized receipts and commit verified changes. Keep credentials, Terraform
 state, private variables and saved plans out of Git.
+
+
+## Recovered IAM evidence
+
+The original caller (`108780209802092054377`) and runtime
+(`105662098881414929441`) were undeleted by numeric ID, and
+`boundedJudgePredict` was undeleted and imported. It still grants only
+`aiplatform.endpoints.predict`. Recovery creates no service-account keys.
+See [IAM recovery receipt](evidence/gcp-iam-recovered.json).
+Google documents that [undeleting preserves the original identity](https://docs.cloud.google.com/iam/docs/service-accounts-delete-undelete).

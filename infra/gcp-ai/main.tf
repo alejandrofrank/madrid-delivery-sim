@@ -35,10 +35,10 @@ resource "google_project" "ai" {
 }
 
 resource "google_project_service" "api" {
-  for_each = var.enable_runtime ? toset([
+  for_each = toset([
     "run.googleapis.com", "artifactregistry.googleapis.com", "aiplatform.googleapis.com",
     "iam.googleapis.com", "iamcredentials.googleapis.com", "cloudresourcemanager.googleapis.com"
-  ]) : toset([])
+  ])
   project            = google_project.ai.project_id
   service            = each.value
   disable_on_destroy = false # Enabled APIs persist without runtime resources or a billing link.
@@ -54,7 +54,7 @@ resource "google_artifact_registry_repository" "images" {
 }
 
 resource "google_service_account" "judge" {
-  count        = var.enable_runtime ? 1 : 0
+  count        = 1 # Persistent, non-billable IAM identity or binding.
   project      = google_project.ai.project_id
   account_id   = "judgement-runtime"
   display_name = "Bounded Vertex judgement gateway"
@@ -62,7 +62,7 @@ resource "google_service_account" "judge" {
 }
 
 resource "google_project_iam_custom_role" "judge_predict" {
-  count       = var.enable_runtime ? 1 : 0
+  count       = 1 # Persistent, non-billable IAM identity or binding.
   project     = google_project.ai.project_id
   role_id     = "boundedJudgePredict"
   title       = "Bounded judge model inference"
@@ -71,14 +71,14 @@ resource "google_project_iam_custom_role" "judge_predict" {
 }
 
 resource "google_project_iam_member" "vertex" {
-  count   = var.enable_runtime ? 1 : 0
+  count   = 1 # Persistent, non-billable IAM identity or binding.
   project = google_project.ai.project_id
   role    = google_project_iam_custom_role.judge_predict[0].name
   member  = "serviceAccount:${google_service_account.judge[0].email}"
 }
 
 resource "google_service_account" "caller" {
-  count        = var.enable_runtime ? 1 : 0
+  count        = 1 # Persistent, non-billable IAM identity or binding.
   project      = google_project.ai.project_id
   account_id   = "judgement-caller"
   display_name = "Keyless local judgement caller"
@@ -86,7 +86,7 @@ resource "google_service_account" "caller" {
 }
 
 resource "google_service_account_iam_binding" "caller_tokens" {
-  count              = var.enable_runtime ? 1 : 0
+  count              = 1 # Persistent, non-billable IAM identity or binding.
   service_account_id = google_service_account.caller[0].name
   role               = "roles/iam.serviceAccountTokenCreator"
   members            = var.invoker_members
@@ -192,4 +192,11 @@ moved {
 
 output "runtime_enabled" {
   value = var.enable_runtime
+}
+
+output "caller_unique_id" {
+  value = google_service_account.caller[0].unique_id
+}
+output "judge_unique_id" {
+  value = google_service_account.judge[0].unique_id
 }

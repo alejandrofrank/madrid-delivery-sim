@@ -27,8 +27,8 @@ run "parked_default" {
     error_message = "Parked project must be protected and unlinked from billing."
   }
   assert {
-    condition     = length(google_artifact_registry_repository.images) == 0 && length(google_cloud_run_v2_service.judge) == 0 && length(google_service_account.judge) == 0
-    error_message = "Parked mode must contain no image storage, gateway or runtime identity."
+    condition     = length(google_artifact_registry_repository.images) == 0 && length(google_cloud_run_v2_service.judge) == 0 && length(google_service_account.judge) == 1
+    error_message = "Parked mode must remove image storage and gateway while retaining its runtime identity."
   }
 }
 
@@ -47,7 +47,7 @@ run "active_runtime" {
 }
 
 run "remove_runtime_before_unlinking_billing" {
-  command = plan
+  command = apply
   variables {
     enable_billing = true
   }
@@ -58,10 +58,10 @@ run "remove_runtime_before_unlinking_billing" {
 }
 
 run "park_after_active" {
-  command = plan
+  command = apply
   assert {
-    condition     = google_project.ai.billing_account == null && length(google_artifact_registry_repository.images) == 0 && length(google_cloud_run_v2_service.judge) == 0 && length(google_service_account.caller) == 0 && length(google_project_service.api) == 0
-    error_message = "Shutdown must remove the runtime and billing link, retaining the protected project."
+    condition     = google_project.ai.billing_account == null && length(google_artifact_registry_repository.images) == 0 && length(google_cloud_run_v2_service.judge) == 0 && length(google_service_account.caller) == 1 && length(google_project_service.api) == 6 && length(google_project_iam_custom_role.judge_predict) == 1 && length(google_project_iam_member.vertex) == 1 && length(google_service_account_iam_binding.caller_tokens) == 1
+    error_message = "Shutdown must remove billable runtime and billing link while retaining project, APIs and scoped IAM."
   }
 }
 
@@ -80,4 +80,16 @@ run "reject_runtime_without_billing" {
     enable_runtime = true
   }
   expect_failures = [google_project.ai]
+}
+
+run "restart_with_same_identities" {
+  command = plan
+  variables {
+    enable_billing = true
+    enable_runtime = true
+  }
+  assert {
+    condition     = google_service_account.caller[0].unique_id == run.active_runtime.caller_unique_id && google_service_account.judge[0].unique_id == run.active_runtime.judge_unique_id
+    error_message = "Restart must reuse the same IAM identities."
+  }
 }
