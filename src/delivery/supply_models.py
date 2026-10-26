@@ -158,7 +158,7 @@ class EntityDefinition(FrozenDefinition):
     excluded_ingredients: tuple[IngredientId, ...] = Field(default=(), max_length=17)
     agent: AgentDefinition | None = None
     opening_stock: Mapping[IngredientId, Annotated[int, Field(strict=True, ge=0, le=100000)]] = (
-        Field(default_factory=dict)
+        Field(default_factory=lambda: MappingProxyType({}))
     )
 
     @field_validator("opening_stock")

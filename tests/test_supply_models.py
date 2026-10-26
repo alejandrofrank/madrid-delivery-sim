@@ -290,6 +290,8 @@ def test_transcripts_include_explicit_household_ingredient_exclusions():
 def test_opening_stock_is_strict_canonical_immutable_and_changes_digest():
     base = default_config()
     market = next(e for e in base.entities if e.kind == "market")
+    with pytest.raises(TypeError):
+        market.opening_stock["flour"] = 1
     data = market.model_dump(mode="json")
     edited = EntityDefinition.model_validate({**data, "opening_stock": {"flour": 250}})
     assert edited.opening_stock["flour"] == 250
