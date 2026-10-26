@@ -1,0 +1,10 @@
+# Explicit opt-in for Jev search only. City and agent events stay local.
+# .env.jev is ignored by Git and Docker build contexts; never commit a key.
+services:
+  app:
+    env_file:
+      - .env.jev
+    environment:
+      DELIVERY_JEV_ENABLED: "1"
+      TYPESAFE_MODEL: ${TYPESAFE_MODEL:-jev-1.14.0}
+      DELIVERY_OPERATOR_KEY: ${DELIVERY_OPERATOR_KEY:?Set a private local operator key}
