@@ -35,6 +35,8 @@ let displayedClock = '';
 let clock = {from: 0, to: 0, at: performance.now(), interval: 500};
 let searchContext = '';
 let searchVersion = 0;
+let orderBookRun = null;
+const orderRows = new Map();
 
 function element(tag, text, className) {
   const node = document.createElement(tag);
@@ -374,7 +376,19 @@ function renderMetrics() {
     ['Provider calls', calls, usageCaption],
   ];
   $('metrics').replaceChildren(...stats.map(([label, value, caption]) => {
-    const metric = element('article', null, 'metric');
+    const metric = element(label === 'Orders' ? 'button' : 'article', null, 'metric');
+    if (label === 'Orders') {
+      metric.type = 'button';
+      metric.classList.add('metric-action');
+      metric.disabled = !snapshot;
+      metric.setAttribute('aria-label', `View all ${orders.length} orders`);
+      metric.setAttribute('aria-controls', 'orders-panel');
+      metric.addEventListener('click', () => {
+        activateTab($('orders-tab'), $('orders-tab').parentElement);
+        $('orders-tab').focus({preventScroll: true});
+        $('run-evidence').scrollIntoView({behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'instant' : 'smooth', block: 'start'});
+      });
+    }
     metric.append(element('span', label), element('strong', value), element('small', caption));
     return metric;
   }));
@@ -690,37 +704,174 @@ function entityLink(id) {
   return button;
 }
 
+function actorName(id) {
+  const known = {'dispatcher:fleet': 'Fleet dispatcher', lab_world: 'City world', supply_ingress: 'Household scheduler'};
+  return known[id] || entityName(String(id || '').replace(/^(household|restaurant|market):/, ''));
+}
+
+function readableAction(value) {
+  const text = String(value || 'Recorded step').replaceAll('_', ' ').replaceAll('.', ' · ');
+  return text.charAt(0).toUpperCase() + text.slice(1);
+}
+
+function renderOrderBook() {
+  const box = $('orders-panel');
+  const currentRun = snapshot?.run.id || null;
+  if (orderBookRun !== currentRun || !box.firstChild) {
+    orderBookRun = currentRun;
+    orderRows.clear();
+    box.replaceChildren();
+    box.append(element('p', 'All orders in this run, including scheduled calls. Select an order to expand its complete history.', 'order-book-note'));
+  }
+  if (!snapshot?.orders?.length) {
+    if (!box.querySelector('.empty')) box.append(element('p', snapshot ? 'No orders were scheduled for this run.' : 'Start a simulation to see its orders here.', 'empty'));
+    return;
+  }
+  const schedule = new Map((snapshot.calls || snapshot.config.schedule || []).map(call => [call.order_id, call]));
+  const orders = [...snapshot.orders].sort((a, b) => (schedule.get(a.id)?.arrival_sim ?? a.created_sim) - (schedule.get(b.id)?.arrival_sim ?? b.created_sim) || a.id.localeCompare(b.id));
+  for (const order of orders) {
+    let row = orderRows.get(order.id);
+    if (!row) {
+      const disclosure = element('details', null, 'order-record');
+      disclosure.dataset.orderId = order.id;
+      const summary = element('summary', null, 'order-summary');
+      const body = element('div', null, 'order-history');
+      disclosure.append(summary, body);
+      row = {disclosure, summary, body, signature: '', data: null, loading: false, fetchedAt: 0, fingerprint: ''};
+      orderRows.set(order.id, row);
+      disclosure.addEventListener('toggle', event => {
+        if (event.target === disclosure && disclosure.open) loadOrderHistory(order.id, row);
+      });
+      box.append(disclosure);
+    }
+    const call = schedule.get(order.id);
+    const signature = pretty([order, call?.arrival_sim]);
+    if (row.signature !== signature) {
+      row.signature = signature;
+      const arrow = element('span', '›', 'order-disclosure'); arrow.setAttribute('aria-hidden', 'true');
+      const title = element('span', null, 'order-title');
+      title.append(element('strong', readableAction(order.meal)), element('small', `${order.id} · ${order.quantity} serving(s)`));
+      const route = element('span', `${entityName(order.household)} → ${entityName(order.restaurant)}`, 'order-parties');
+      row.summary.replaceChildren(arrow, title, route, stateBadge(order.status === 'intent' ? 'scheduled' : order.status), element('span', formatHour(call?.arrival_sim ?? order.created_sim), 'mono order-time'));
+    }
+    if (row.disclosure.open && running()) loadOrderHistory(order.id, row);
+  }
+}
+
+async function loadOrderHistory(orderId, row, force = false) {
+  if (row.loading || (!force && row.data && (!running() || performance.now() - row.fetchedAt < 5000))) return;
+  const requestedRun = snapshot?.run.id;
+  if (!requestedRun) return;
+  row.loading = true;
+  if (!row.data) row.body.replaceChildren(element('p', 'Loading complete order history…', 'order-load-state'));
+  try {
+    const data = await api(`/api/supply/runs/${encodeURIComponent(requestedRun)}/orders/${encodeURIComponent(orderId)}`);
+    if (snapshot?.run.id !== requestedRun || orderRows.get(orderId) !== row) return;
+    row.data = data;
+    row.fetchedAt = performance.now();
+    const fingerprint = pretty(data);
+    if (fingerprint !== row.fingerprint || force) {
+      row.fingerprint = fingerprint;
+      renderOrderHistory(data, row.body, () => loadOrderHistory(orderId, row, true));
+    }
+  } catch (error) {
+    if (snapshot?.run.id !== requestedRun || orderRows.get(orderId) !== row) return;
+    row.fingerprint = '';
+    const message = element('p', `Order history unavailable: ${error.message}`, 'notice error');
+    const retry = element('button', 'Retry loading history');
+    retry.type = 'button'; retry.addEventListener('click', () => loadOrderHistory(orderId, row, true));
+    row.body.replaceChildren(message, retry);
+  } finally { row.loading = false; }
+}
+
+function renderOrderHistory(data, box, refresh) {
+  box.replaceChildren();
+  const header = element('div', null, 'order-history-heading');
+  header.append(element('p', `${data.order.id} · ${data.facts.length} facts · ${data.events.length} messages · ${data.decisions.length} decisions. Complete order history, independent of the map selection.`));
+  const button = element('button', 'Refresh history'); button.type = 'button'; button.addEventListener('click', refresh);
+  header.append(button); box.append(header);
+  if (data.order.reason) box.append(element('p', data.order.reason, 'order-outcome'));
+  if (data.call?.transcript) {
+    const call = element('section', null, 'order-section');
+    call.append(element('h3', 'Customer call'), element('p', data.call.transcript, 'order-transcript'));
+    box.append(call);
+  }
+  if (data.requests.length) {
+    const ingredients = element('section', null, 'order-section');
+    ingredients.append(element('h3', 'Ingredient requests · latest state'), table(['Ingredient', 'Quantity', 'Supermarket', 'Status'], data.requests.map(request => [request.ingredient, `${request.quantity} ${request.unit}`, entityName(request.market), stateBadge(request.status)])));
+    box.append(ingredients);
+  }
+  const steps = element('section', null, 'order-section');
+  steps.append(element('h3', 'All steps'));
+  const decisions = new Map(data.decisions.map(decision => [decision.event_id, decision]));
+  const factEvents = new Set(data.facts.map(fact => fact.event_id));
+  const timeline = [
+    ...data.facts.map(fact => ({sim: fact.sim_time, actor: fact.actor, title: fact.detail?.action || fact.kind, detail: fact.detail, sequence: fact.sequence, decision: decisions.get(fact.event_id)})),
+    ...data.decisions.filter(decision => !factEvents.has(decision.event_id)).map(decision => ({sim: decision.sim_time, actor: decision.agent, title: decision.action, detail: decision.detail, decision, sequence: Number.MAX_SAFE_INTEGER})),
+  ].sort((a, b) => a.sim - b.sim || a.sequence - b.sequence);
+  for (const step of timeline) {
+    const record = element('article', null, 'record order-step');
+    const heading = element('div', null, 'record-head');
+    heading.append(element('time', formatHour(step.sim), 'mono'), element('strong', readableAction(step.title)));
+    record.append(heading, element('p', actorName(step.actor)));
+    if (step.detail?.reason) record.append(element('p', step.detail.reason));
+    if (step.decision?.detail?.rule) record.append(element('p', step.decision.detail.rule));
+    record.append(jsonDetails('Recorded state and decision', {step: step.detail, decision: step.decision?.detail}));
+    steps.append(record);
+  }
+  if (!timeline.length) steps.append(element('p', 'No steps recorded yet. This order may still be scheduled.'));
+  box.append(steps);
+  const chat = element('section', null, 'order-section');
+  chat.append(element('h3', 'Calls & messages'), element('p', 'Recorded structured queue messages and simulated calls.'));
+  for (const event of data.events) {
+    const record = element('article', null, 'record');
+    const heading = element('div', null, 'record-head');
+    heading.append(element('time', formatHour(event.due_sim), 'mono'), element('strong', readableAction(event.topic)), stateBadge(event.state));
+    record.append(heading, element('p', `${actorName(event.sender)} → ${actorName(event.target_store || 'City audit')}`));
+    if (event.topic === 'household.call' && data.call?.transcript) record.append(element('p', data.call.transcript, 'order-transcript'));
+    record.append(jsonDetails(`Message #${event.id} · ${event.attempts} attempt(s)`, event.payload));
+    if (event.error) record.append(element('p', `Recorded error: ${event.error}`));
+    chat.append(record);
+  }
+  if (!data.events.length) chat.append(element('p', 'No messages recorded yet.'));
+  box.append(chat);
+  const memory = element('section', null, 'order-section');
+  memory.append(element('h3', 'Agent memory'));
+  if (data.decisions.length && !data.memory_history_complete) memory.append(element('p', 'This run predates complete memory history. Showing retained memory and the recorded decision context; earlier memory writes are unavailable.', 'order-memory-note'));
+  const writes = data.memory_history.length ? data.memory_history : data.memories;
+  for (const write of writes) {
+    const record = element('article', null, 'record');
+    record.append(element('p', `${formatHour(write.observed_sim)} · ${actorName(write.agent)} · ${write.key}`), jsonDetails('Recorded memory contents', write.body, true));
+    memory.append(record);
+  }
+  if (!writes.length) memory.append(element('p', data.decisions.length ? 'No retained memory writes are available for this order.' : 'No agent has written memory for this order yet.'));
+  if (!data.memory_history_complete) {
+    for (const decision of data.decisions) memory.append(jsonDetails(`${formatHour(decision.sim_time)} · ${actorName(decision.agent)} · recorded context`, {memory_hits: decision.detail.memory_hits, observations: decision.detail.observed_state, rule: decision.detail.rule}));
+  }
+  box.append(memory);
+  const navigation = element('nav', null, 'order-history-navigation');
+  navigation.setAttribute('aria-label', 'Order history sections');
+  for (const [label, section] of [['All steps', steps], ['Calls & messages', chat], ['Agent memory', memory]]) {
+    const link = element('button', label);
+    link.type = 'button';
+    link.addEventListener('click', () => section.scrollIntoView({block: 'start', behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'instant' : 'smooth'}));
+    navigation.append(link);
+  }
+  header.append(navigation);
+}
+
 function renderEvidence() {
   const ids = selectedOrderIds();
-  const orders = (snapshot?.orders || []).filter(order => related(order, ids));
+  const orders = snapshot?.orders || [];
   const messages = (snapshot?.events || []).filter(event => related(event, ids));
   const facts = (snapshot?.facts || []).filter(fact => related(fact, ids));
   $('order-count').textContent = orders.length;
   $('message-count').textContent = messages.length;
   $('fact-count').textContent = facts.length;
-  $('orders-panel').replaceChildren();
+  renderOrderBook();
   $('messages-panel').replaceChildren();
   $('facts-panel').replaceChildren();
   const emptyText = snapshot ? 'No records for this selection. Clear “Selected entity only” to inspect the full run.' : 'Start a simulation to watch household calls create orders and ingredient requests.';
-  if (orders.length) {
-    $('orders-panel').append(table(['Order / meal', 'Household', 'Restaurant', 'Status', 'Timing'], orders.map(order => {
-      const name = element('div', order.meal || order.recipe || 'Meal');
-      name.append(element('small', `${order.id} · ${order.quantity || 1} serving(s)`));
-      if (order.transcript) {
-        const call = element('details', null, 'call-transcript');
-        call.append(element('summary', 'Simulated phone transcript'), element('p', order.transcript));
-        name.append(call);
-      }
-      const timing = element('span', relativeTime(order.created_sim));
-      timing.append(element('small', `Deadline ${relativeTime(order.deadline)}`));
-      return [name, entityLink(order.household), order.restaurant ? entityLink(order.restaurant) : 'Awaiting response', stateBadge(order.status), timing];
-    })));
-    const requests = (snapshot?.requests || []).filter(request => related(request, ids));
-    if (requests.length) {
-      const details = element('details'); details.append(element('summary', `${requests.length} ingredient supply requests`), table(['Request', 'Ingredient', 'Market', 'State'], requests.map(request => [request.id, `${request.quantity} ${request.unit} ${request.ingredient}`, request.market ? entityLink(request.market) : 'Searching', stateBadge(request.status)])));
-      $('orders-panel').append(details);
-    }
-  } else $('orders-panel').append(element('p', emptyText, 'empty'));
   if (messages.length) {
     for (const event of messages.slice(-150).reverse()) {
       const record = element('article', null, 'record');
@@ -768,6 +919,7 @@ async function verifyReplay() {
 }
 
 function activateTab(tab, row) {
+  if (row.classList.contains('evidence-tabs')) $('entity-filter-control').hidden = tab.id === 'orders-tab';
   const tabs = [...row.querySelectorAll('[role=tab]')];
   for (const item of tabs) {
     const selected = item === tab;
@@ -814,11 +966,17 @@ $('ingredient-search-form').addEventListener('submit', searchIngredients);
 $('save-blueprint').addEventListener('click', saveBlueprint);
 $('start-run').addEventListener('click', startRun);
 $('check-replay').addEventListener('click', verifyReplay);
-$('download-evidence').addEventListener('click', () => {
+$('download-evidence').addEventListener('click', async () => {
   if (!snapshot) return;
-  const url = URL.createObjectURL(new Blob([pretty({...snapshot, replay_check: replay})], {type: 'application/json'}));
-  const link = element('a'); link.href = url; link.download = `restaurant-supply-${snapshot.run.id}.json`; link.click();
-  setTimeout(() => URL.revokeObjectURL(url), 1000);
+  const requestedRun = snapshot.run.id;
+  const button = $('download-evidence'); button.disabled = true; button.textContent = 'Preparing JSON…';
+  try {
+    const evidence = await api(`/api/supply/runs/${encodeURIComponent(requestedRun)}/evidence`);
+    const url = URL.createObjectURL(new Blob([pretty(evidence)], {type: 'application/json'}));
+    const link = element('a'); link.href = url; link.download = `restaurant-supply-${requestedRun}.json`; link.click();
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+  } catch (error) { showError(error); }
+  finally { button.textContent = 'Download JSON'; updateButtons(); }
 });
 window.addEventListener('beforeunload', event => { if (draftDirty) { event.preventDefault(); event.returnValue = ''; } });
 

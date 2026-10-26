@@ -96,8 +96,8 @@
         </div>
       </aside>
     </div>
-    <section class="evidence panel" aria-label="Run evidence">
-      <div class="panel-heading"><div><h2>Run evidence</h2><p id="evidence-context">Select an entity to follow its orders, messages, and facts.</p></div><label class="inline-label"><input id="entity-only" type="checkbox" checked>Selected entity only</label><button id="download-evidence" disabled>Download JSON</button></div>
+    <section id="run-evidence" class="evidence panel" aria-label="Run evidence">
+      <div class="panel-heading"><div><h2>Run evidence</h2><p id="evidence-context">All orders, with complete steps, conversations, and recorded memory.</p></div><label id="entity-filter-control" class="inline-label" hidden><input id="entity-only" type="checkbox" checked>Selected entity only</label><button id="download-evidence" disabled>Download JSON</button></div>
       <div class="tab-row evidence-tabs" role="tablist" aria-label="Evidence views">
         <button id="orders-tab" role="tab" aria-selected="true" aria-controls="orders-panel" tabindex="0">Orders <span id="order-count" class="count">0</span></button>
         <button id="messages-tab" role="tab" aria-selected="false" aria-controls="messages-panel" tabindex="-1">Simulated calls & messages <span id="message-count" class="count">0</span></button>

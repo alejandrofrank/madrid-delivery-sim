@@ -215,6 +215,26 @@ Restaurants in the delivery sidebar. Select any map entity to edit its next-run
 definition or inspect its frozen stock, orders, memory and budget. Advanced JSON
 supports per-ingredient opening stock and per-entity or shared agent definitions.
 
+Click the **Orders** metric to open all orders for the current run, independent of
+the map selection. Each order expands into its customer call, ingredient requests,
+complete timeline, queued messages and agent memory. Section buttons jump between
+steps, messages and memory; expanded orders stay open during live updates. Future
+calls are marked scheduled. The evidence download fetches the complete server
+bundle rather than exporting only the dashboard's recent window.
+
+From 2026-10-27, successful memory writes are retained in the same transaction as
+the decision and event acknowledgement. The order inspector can show those actual
+writes after live memory expires. Older runs show retained memory and recorded
+decision context, with an explicit notice when historical writes are unavailable.
+The history belongs to the trusted operator view; agent recall tools retain their
+existing identity, scope and expiry rules.
+
+Order inspection was verified with seven API tests and 20 runtime/supply tests,
+plus lint and type checks. Browser checks on an existing 64-order run confirmed
+all orders remain visible across store selections, complete per-order steps and
+messages load, memory coverage is labeled accurately, and keyboard expansion and
+section shortcuts work without browser errors.
+
 The default Compose configuration binds the application to loopback, sets
 `LLM_PROVIDER=disabled`, and uses local services. No Jev, telephony, speech,
 or cloud model is enabled by starting a supply run.
@@ -224,6 +244,7 @@ or cloud model is enabled by starting a supply run.
 | `GET/PUT /api/supply/blueprint` | Trusted local operator; `PUT` requires `If-Match` revision |
 | `POST /api/supply/runs` | Freeze the saved revision and start a local run |
 | `GET /api/supply/runs/{run}` | Operator's map, stock, orders, queue and metrics |
+| `GET /api/supply/runs/{run}/orders/{order}` | Complete single-order events, facts, decisions, requests and recorded memory; no recent-window truncation |
 | `GET /api/supply/runs/{run}/agents/{agent}` | Operator inspection of one agent's memory, definition and decisions |
 | `POST .../agents/{agent}/channel` | Requires a separately configured `DELIVERY_OPERATOR_KEY` in `X-Operator-Key`; disabled by default |
 | `POST .../agents/{agent}/claim` | Bearer token bound to this run and agent; claims only its accepted messages |
