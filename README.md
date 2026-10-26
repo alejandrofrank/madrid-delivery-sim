@@ -64,6 +64,13 @@ IAM-protected judge with only a synthetic seven-meal supermarket snapshot and
 numeric recovery facts. See [live GCP verification](docs/GCP-VERIFICATION.md) and
 [enterprise design tradeoffs](docs/ENTERPRISE-GCP.md).
 
+The [restaurant supply lab](http://localhost:8010/restaurant-lab) adds scheduled
+household meal calls, seven restaurants, nearby ingredient markets, reservations,
+substitution consent, cooking and courier handoff. Edit entity/agent definitions
+on the map; inspect private memory and replay recorded business facts. It runs
+locally with zero provider calls by default. Optional scoped Jev relevance search
+has separate opt-in and budgets. See [contracts and limitations](docs/RESTAURANT-SUPPLY.md).
+
 The fixed fleet recovery regression remains available from the CLI:
 
 ```sh

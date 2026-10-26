@@ -1,0 +1,114 @@
+{
+  "verified_on": "2026-10-26",
+  "verified_backend_commit": "eab3230",
+  "kind": "local development scenario receipt; not a pinned architecture benchmark",
+  "city": {
+    "grid": "32x32",
+    "entities": {
+      "household": 128,
+      "market": 3,
+      "restaurant": 7
+    },
+    "couriers": 6
+  },
+  "run_id": "d62e58aa-43ae-423e-beef-90812a902d45",
+  "status": "complete",
+  "metrics": {
+    "scheduled_calls": 64,
+    "events": 1762,
+    "dead_letters": 0,
+    "retries": 0,
+    "delivered": 7,
+    "unfinished_orders": 0,
+    "open_delivery_jobs": 21,
+    "late_physical_deliveries": 3,
+    "model_calls": 0,
+    "model_provider": "disabled",
+    "search_reserved_calls": 0,
+    "search_reserved_input_tokens": 0,
+    "search_unknown_usage_calls": 0,
+    "search_actual_input_tokens": null,
+    "search_actual_output_tokens": null,
+    "decision_mode": "local_rules",
+    "transport": "durable_queue",
+    "call_mode": "simulated_transcript",
+    "communication_latency_seconds": 5
+  },
+  "order_statuses": {
+    "failed": 57,
+    "delivered": 7
+  },
+  "failure_reasons": {
+    "Meal deadline expired": 24,
+    "No safe available ingredient substitution": 33
+  },
+  "invariants": {
+    "stock_nonnegative": true,
+    "stock_conserved": true,
+    "canonical_units": true
+  },
+  "replay": {
+    "matches": true,
+    "hash_chain_valid": true,
+    "projections": {
+      "stock": true,
+      "orders": true,
+      "requests": true,
+      "allocations": true,
+      "delivery_jobs": true
+    },
+    "facts": 1791,
+    "hash": "83794bda6cbcb53733143bb7ce1ab9df24b82fa7774faba24f3baf8b95482066",
+    "counts": {
+      "stock": 170,
+      "orders": 64,
+      "requests": 248,
+      "allocations": 125,
+      "delivery_jobs": 31
+    },
+    "model_calls": 0
+  },
+  "tests": {
+    "full_suite_before_final_search_audit_regression": {
+      "passed": 271
+    },
+    "search_service_including_expired_review_lease": {
+      "passed": 10
+    },
+    "api_full_export_and_controller_retry_after_final_changes": {
+      "passed": 7
+    },
+    "immutable_default_definitions": {
+      "passed": 31
+    },
+    "lint": "passed",
+    "types": "34 source files passed"
+  },
+  "browser": {
+    "run_id": "4f9f1734-5017-416c-8d9c-e8548aa6bc2e",
+    "orders": 2,
+    "delivered": 2,
+    "provider_calls": 0,
+    "checks": [
+      "private restaurant memory",
+      "local own-stock search",
+      "all five replay projections",
+      "390px mobile without horizontal overflow",
+      "no browser or console errors",
+      "rebuilt navigation and both simulated phone transcripts",
+      "original blueprint restored"
+    ]
+  },
+  "regressions_found_and_fixed": [
+    "Default city exhausted the smaller dispatcher budget: frozen supply fleet profile added",
+    "Late delivery after household failure diverged from replay: transactional delivery-job facts added",
+    "Expired post-review search lease lost its audit: preserve review audit while denying stock response"
+  ],
+  "limitations": [
+    "Calls are scripted typed meal intents, not voice or telephony",
+    "Policies are deterministic; editable souls are descriptions, not interpreted model prompts",
+    "Live Jev calls were not run; provider transport and errors were mocked",
+    "Observation horizon preserves open physical work and failed deadlines explicitly",
+    "Operator API and host are trusted; roles constrain tools and SQL, not hostile operating-system code"
+  ]
+}

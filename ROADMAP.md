@@ -1,6 +1,14 @@
 # Roadmap: Bakiano delivery operations lab
 
-Updated 2026-10-24. Implemented slices are identified below; remaining milestones are planned.
+Updated 2026-10-26. Implemented slices are identified below; remaining milestones are planned.
+
+Restaurant supply slice: scheduled household meal calls now pass through isolated
+restaurant and market agents, ingredient reservation/forwarding, explicit household
+substitution consent, cooking and last-mile delivery. Entity and agent definitions
+are editable and frozen per run. Scoped local ingredient search and an opt-in Jev
+relevance adapter use separate durable admission accounting. Model calls are not
+part of ordinary city execution; live Jev verification remains pending. See
+[restaurant supply contracts and verification](docs/RESTAURANT-SUPPLY.md).
 
 Local interaction update: map-first city controls now configure store opening stock,
 home couriers, demand weights, global timed order intensity, traffic and withdrawal
@@ -10,7 +18,9 @@ parameters and live memory. See [running city](docs/RUNNING-CITY.md).
 
 Current city detail: 120 synthetic products, 128 household homes and scheduled
 customer order views; named directed streets affect actual route planning. The lab
-uses deterministic role workers. Optional model-backed recovery judgement is implemented behind a GCP switch; cloud deployment and live-provider evals remain pending.
+uses deterministic role workers. Optional model-backed recovery judgement was
+verified behind a GCP switch; the separate cloud runtime can remain shut down
+between explicit tests. Broad architecture/model benchmarks remain planned.
 
 ## Objective and baseline
 
