@@ -84,6 +84,40 @@ AUTHORITY["judge"] = {
     ),
 }
 
+# Supply-chain agents share the same runtime. Their command publishes a fixed,
+# transactional outbox; a prompt cannot choose arbitrary recipients or tools.
+SUPPLY_ACCEPTS = {
+    "household": {"household.intent", "household.offer", "household.status", "meal.delivery"},
+    "restaurant": {
+        "household.call",
+        "ingredient.shortage",
+        "ingredient.arrived",
+        "restaurant.approval",
+        "restaurant.cook",
+    },
+    "market": {"market.request", "market.transfer"},
+}
+SUPPLY_EMITS = {
+    "household": {"household.call", "restaurant.approval", "meal.delivery"},
+    "restaurant": {
+        "market.request",
+        "household.offer",
+        "household.status",
+        "restaurant.cook",
+        "basket.ready",
+        "meal.delivery",
+    },
+    "market": {"market.request", "market.transfer", "ingredient.shortage", "ingredient.arrived"},
+}
+for _supply_role, _topics in SUPPLY_ACCEPTS.items():
+    AUTHORITY[_supply_role] = {
+        "accepts": frozenset(_topics),
+        "emits": frozenset(SUPPLY_EMITS[_supply_role]),
+        "tools": frozenset(
+            {"supply.read", "supply.command", "supply.search", "memory.read", "memory.write"}
+        ),
+    }
+
 
 class RoleLimits(BaseModel):
     model_config = ConfigDict(extra="forbid", frozen=True)
@@ -102,7 +136,16 @@ class _RoleConfig(BaseModel):
     model_config = ConfigDict(extra="forbid", frozen=True)
 
     schema_version: Literal[1]
-    role: Literal["inventory", "fulfillment", "dispatcher", "courier", "judge"]
+    role: Literal[
+        "inventory",
+        "fulfillment",
+        "dispatcher",
+        "courier",
+        "judge",
+        "household",
+        "restaurant",
+        "market",
+    ]
     version: str = Field(min_length=1, max_length=64)
     policy: Literal["deterministic", "gcp_ai"]
     soul_file: Literal["SOUL.md"]
