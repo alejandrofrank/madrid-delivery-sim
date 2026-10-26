@@ -65,6 +65,7 @@ class ScopedTools:
         self.role = role
         self.event = event
         self.calls: list[str] = []
+        self.memory_writes: list[dict[str, Any]] = []
         self.cloud_endpoint: str | None = None
         self.cloud_dsn: str | None = None
         ticket = conn.execute(
@@ -284,6 +285,15 @@ class ScopedTools:
             ),
         )
 
+        self.memory_writes.append(
+            {
+                "key": key,
+                "body": json.loads(json.dumps(body)),
+                "observed_sim": self.sim,
+                "expires_sim": self.sim + ttl_seconds,
+            }
+        )
+
     def _publish(
         self, topic: str, payload: dict[str, Any], key: str, due_sim: int | None = None
     ) -> int:
@@ -437,6 +447,9 @@ class LocalAgent:
 
             detail = WorkflowPolicy().decide(event, tools)
         detail["reserved_tool_slots"] = ticket["slots"]
+        # Persist actual writes with the decision/ACK transaction, so order
+        # inspection survives TTL cleanup without changing agent recall access.
+        detail["memory_writes"] = tools.memory_writes
         conn.execute(
             """INSERT INTO decisions(run_id,sim_time,agent,order_id,event_id,action,detail)
             VALUES (%s,%s,%s,%s,%s,%s,%s)""",

@@ -6,7 +6,7 @@ import os
 from typing import Any, Literal
 from uuid import UUID
 
-from fastapi import APIRouter, BackgroundTasks, Header, HTTPException
+from fastapi import APIRouter, BackgroundTasks, Header, HTTPException, Path
 from fastapi.responses import FileResponse
 from pydantic import BaseModel, ConfigDict, Field
 
@@ -116,6 +116,72 @@ def replay(run: UUID) -> dict[str, Any]:
         return replay_supply(str(run))
     except ValueError:
         raise HTTPException(404, "Unknown supply run") from None
+
+
+@router.get("/api/supply/runs/{run}/orders/{order_id}")
+def order_history(run: UUID, order_id: str = Path(min_length=1, max_length=200)) -> dict[str, Any]:
+    """Trusted local operator view; never provided as an agent tool."""
+    from delivery.db import connect
+
+    with connect() as conn:
+        conn.execute("SET TRANSACTION ISOLATION LEVEL REPEATABLE READ READ ONLY")
+        order = conn.execute(
+            "SELECT * FROM supply_orders WHERE run_id=%s AND id=%s", (run, order_id)
+        ).fetchone()
+        if not order:
+            raise HTTPException(404, "Unknown order in this supply run")
+        session = conn.execute(
+            "SELECT config->'schedule' schedule FROM supply_sessions WHERE run_id=%s", (run,)
+        ).fetchone()
+        assert session
+        call = next((c for c in session["schedule"] if c["order_id"] == order_id), None)
+        events = conn.execute(
+            "SELECT e.id,e.topic,e.producer,coalesce(p.target_store,e.producer) sender,"
+            "e.target_store,e.due_sim,e.state,e.trace_id,e.parent_id,e.payload,e.attempts,e.error "
+            "FROM events e LEFT JOIN events p ON p.id=e.parent_id AND p.run_id=e.run_id "
+            "WHERE e.run_id=%s AND (e.trace_id=%s OR e.payload->>'order'=%s "
+            "OR e.payload->>'basket'=%s) ORDER BY e.due_sim,e.id",
+            (run, order_id, order_id, order_id),
+        ).fetchall()
+        event_ids = [event["id"] for event in events]
+        facts = conn.execute(
+            "SELECT sequence,event_id,actor,kind,sim_time,hash,payload->'detail' detail "
+            "FROM supply_facts WHERE run_id=%s AND order_id=%s ORDER BY sequence",
+            (run, order_id),
+        ).fetchall()
+        decisions = conn.execute(
+            "SELECT id,event_id,agent,sim_time,action,detail FROM decisions "
+            "WHERE run_id=%s AND (order_id=%s OR event_id=ANY(%s)) ORDER BY sim_time,id",
+            (run, order_id, event_ids),
+        ).fetchall()
+        memories = conn.execute(
+            "SELECT coalesce(b.agent_id,m.store) agent,m.key,m.body,m.observed_sim,"
+            "m.expires_sim,m.event_id FROM agent_memories m LEFT JOIN agent_bindings b "
+            "ON b.run_id=m.run_id AND b.store=m.store "
+            "WHERE m.run_id=%s AND m.key=%s AND m.event_id=ANY(%s) "
+            "ORDER BY m.observed_sim,m.store",
+            (run, f"last:{order_id}", event_ids),
+        ).fetchall()
+        requests = conn.execute(
+            "SELECT * FROM supply_requests WHERE run_id=%s AND order_id=%s ORDER BY id",
+            (run, order_id),
+        ).fetchall()
+    return {
+        "order": order,
+        "call": call,
+        "events": events,
+        "facts": facts,
+        "decisions": decisions,
+        "memories": memories,
+        "memory_history": [
+            {**write, "agent": decision["agent"], "event_id": decision["event_id"]}
+            for decision in decisions
+            for write in decision["detail"].get("memory_writes", [])
+        ],
+        "memory_history_complete": bool(decisions)
+        and all("memory_writes" in decision["detail"] for decision in decisions),
+        "requests": requests,
+    }
 
 
 @router.get("/api/supply/runs/{run}/agents/{agent_id}")

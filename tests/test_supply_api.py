@@ -145,6 +145,62 @@ def envelope(event: dict[str, Any]) -> dict[str, Any]:
     return {key: event[key] for key in ("event_id", "lease_token", "attempt")}
 
 
+def test_complete_order_history_is_scoped_and_not_a_recent_event_window(
+    supply_api: SupplyAPI,
+) -> None:
+    run = supply_api.start()
+    state = supply.run_supply(run, supply_api.url)
+    order, other = state["orders"]
+    with connect(supply_api.url) as conn:
+        conn.execute(
+            "INSERT INTO events(run_id,producer,topic,payload,dedupe_key,trace_id) "
+            "SELECT %s,'test','test.history',jsonb_build_object('order',%s::text),"
+            "'history-'||n,%s FROM generate_series(1,1002) n",
+            (run, order["id"], order["id"]),
+        )
+    response = supply_api.client.get(f"/api/supply/runs/{run}/orders/{order['id']}")
+    assert response.status_code == 200
+    history = response.json()
+    assert history["order"]["id"] == order["id"]
+    assert history["call"]["order_id"] == order["id"] and history["call"]["transcript"]
+    assert len(history["events"]) > 1002
+    assert any(event["topic"] == "household.intent" for event in history["events"])
+    assert all(event["trace_id"] == order["id"] for event in history["events"])
+    assert all("lease_token" not in event for event in history["events"])
+    assert all(fact["detail"]["order"] == order["id"] for fact in history["facts"])
+    assert history["memory_history_complete"] and history["memory_history"]
+    assert all(write["key"] == f"last:{order['id']}" for write in history["memory_history"])
+    assert all(request["order_id"] == order["id"] for request in history["requests"])
+    event_ids = {event["id"] for event in history["events"]}
+    assert all(decision["event_id"] in event_ids for decision in history["decisions"])
+    assert other["id"] not in {event["trace_id"] for event in history["events"]}
+    # The recorded writes survive deletion of live TTL memory.
+    with connect(supply_api.url) as conn:
+        conn.execute("DELETE FROM agent_memories WHERE run_id=%s", (run,))
+    retained = supply_api.client.get(f"/api/supply/runs/{run}/orders/{order['id']}").json()
+    assert not retained["memories"] and retained["memory_history"] == history["memory_history"]
+    assert "postgresql://" not in response.text and "password" not in response.text
+
+
+def test_order_history_marks_legacy_memory_and_rejects_unknown_scopes(
+    supply_api: SupplyAPI,
+) -> None:
+    run = supply_api.start()
+    state = supply.run_supply(run, supply_api.url)
+    order_id = state["orders"][0]["id"]
+    with connect(supply_api.url) as conn:
+        conn.execute("UPDATE decisions SET detail=detail-'memory_writes' WHERE run_id=%s", (run,))
+    history = supply_api.client.get(f"/api/supply/runs/{run}/orders/{order_id}").json()
+    assert not history["memory_history_complete"] and history["memory_history"] == []
+    assert history["decisions"] and history["events"]
+    for path in (
+        f"/api/supply/runs/{uuid4()}/orders/{order_id}",
+        f"/api/supply/runs/{run}/orders/unknown-order",
+    ):
+        assert supply_api.client.get(path).status_code == 404
+    assert supply_api.client.get(f"/api/supply/runs/{run}/orders/" + "x" * 201).status_code == 422
+
+
 def test_blueprint_compare_and_swap_validation_and_frozen_run_config(supply_api: SupplyAPI) -> None:
     client = supply_api.client
     initial = client.get("/api/supply/blueprint")
