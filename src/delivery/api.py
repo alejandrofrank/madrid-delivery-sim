@@ -20,6 +20,7 @@ from delivery.db import connect
 from delivery.history import history_catalogue, history_manifest
 from delivery.lab import create_lab, export_slice, lab_snapshot
 from delivery.simulation import Simulation, create_run, initialize, snapshot
+from delivery.supply_api import router as supply_router
 from delivery.world import DATA, World
 
 world: World
@@ -222,7 +223,18 @@ async def local_mutations(
     request: Request, call_next: Callable[[Request], Awaitable[Response]]
 ) -> Response:
     origin = request.headers.get("origin")
-    if request.method == "POST" and origin and origin != str(request.base_url).rstrip("/"):
+    if request.url.path.startswith("/api/supply") and request.url.hostname not in {
+        "localhost",
+        "127.0.0.1",
+        "::1",
+        "testserver",
+    }:
+        return JSONResponse({"detail": "Supply endpoints are local-only"}, status_code=403)
+    if (
+        request.method in {"POST", "PUT", "PATCH", "DELETE"}
+        and origin
+        and origin != str(request.base_url).rstrip("/")
+    ):
         return JSONResponse({"detail": "Cross-origin mutations are disabled"}, status_code=403)
     return await call_next(request)
 
@@ -312,4 +324,5 @@ def favicon() -> None:
     raise HTTPException(status_code=404)
 
 
+app.include_router(supply_router)
 app.mount("/static", StaticFiles(directory="web"), name="static")

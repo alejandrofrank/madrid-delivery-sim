@@ -130,6 +130,8 @@ def test_freeze_is_recursive_and_digest_is_canonical_after_json_round_trip():
         ("supplier_delay_seconds", 1801),
         ("restaurant_stock_servings", 11),
         ("market_stock_servings", 21),
+        ("fleet_couriers", 0),
+        ("fleet_couriers", 17),
         ("provider", "gcp_ai"),
     ],
 )

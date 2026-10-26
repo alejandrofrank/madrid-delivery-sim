@@ -107,6 +107,8 @@ class ScopedTools:
             "courier.accept": self._courier_accept,
             "judge.read": self._judge_read,
             "judge.review": self._judge_review,
+            "supply.read": self._supply_read,
+            "supply.command": self._supply_command,
         }
         if name not in registry:
             raise PermissionError("Unknown tool")
@@ -128,6 +130,15 @@ class ScopedTools:
         row = self.__conn.execute(query, parameters).fetchone()
         assert row
         return dict(row["data"])
+
+    def _supply_read(self, order: str) -> dict[str, Any]:
+        return self._json_command("SELECT public.supply_context(%s) AS data", (order,))
+
+    def _supply_command(self) -> dict[str, Any]:
+        return self._json_command(
+            "SELECT public.supply_command(%s,%s,%s) AS data",
+            (self.event.id, self.event.token, self.event.attempts),
+        )
 
     def _recover(self, basket: str, attempt: int) -> dict[str, Any]:
         return self._json_command("SELECT dispatch_recover(%s,%s) AS data", (basket, attempt))
@@ -415,7 +426,11 @@ class LocalAgent:
                 raise BudgetExceeded("A durable model reservation is required")
             tools.cloud_endpoint = self.cloud_endpoint
             tools.cloud_dsn = self.dsn
-        if self.role.name == "inventory":
+        if self.role.name in {"household", "restaurant", "market"}:
+            from delivery.supply_policy import SupplyPolicy
+
+            detail = SupplyPolicy().decide(event, tools)
+        elif self.role.name == "inventory":
             detail = InventoryPolicy().decide(event, tools)
         else:
             from delivery.workflow_policy import WorkflowPolicy

@@ -11,6 +11,7 @@ from uuid import UUID, uuid4
 
 from psycopg.types.json import Jsonb
 
+from delivery.agent_specs import SUPPLY_ACCEPTS, SUPPLY_EMITS
 from delivery.db import Connection, connect
 
 PUBLISH: dict[str, set[str]] = {
@@ -61,6 +62,11 @@ SUBSCRIBE: dict[str, set[str]] = {
     "customer_service": {"complaint.created"},
     "audit": {"order.delivered", "complaint.resolved", "approval.requested"},
 }
+
+
+PUBLISH.update({role: set(topics) for role, topics in SUPPLY_EMITS.items()})
+PUBLISH["supply_ingress"] = {"household.intent"}
+SUBSCRIBE.update({role: set(topics) for role, topics in SUPPLY_ACCEPTS.items()})
 
 
 class Backpressure(RuntimeError):

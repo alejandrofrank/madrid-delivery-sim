@@ -271,6 +271,7 @@ class SupplyConfig(FrozenDefinition):
     supplier_delay_seconds: int = Field(default=60, ge=0, le=1800, strict=True)
     restaurant_stock_servings: int = Field(default=0, ge=0, le=10, strict=True)
     market_stock_servings: int = Field(default=3, ge=0, le=20, strict=True)
+    fleet_couriers: int = Field(default=6, ge=1, le=16, strict=True)
     entities: tuple[EntityDefinition, ...] = Field(
         default_factory=default_entities, min_length=3, max_length=160
     )
