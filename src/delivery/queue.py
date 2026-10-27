@@ -9,6 +9,7 @@ from dataclasses import dataclass
 from typing import Any
 from uuid import UUID, uuid4
 
+from psycopg.errors import ProgramLimitExceeded
 from psycopg.types.json import Jsonb
 
 from delivery.agent_specs import SUPPLY_ACCEPTS, SUPPLY_EMITS
@@ -104,6 +105,8 @@ def publish(
     parent_id: int | None = None,
     capacity: int = 10000,
     target_store: str | None = None,
+    lease_token: UUID | None = None,
+    event_attempt: int | None = None,
 ) -> int:
     if topic not in PUBLISH.get(producer, set()):
         raise PermissionError(f"{producer} cannot publish {topic}")
@@ -118,34 +121,48 @@ def publish(
         ).fetchone()
         assert destination
         expected = destination["destination"]
-        if str(run_id) != scope["run_id"] or target_store not in (None, expected):
-            raise PermissionError("Queue destination exceeds agent scope")
-        target_store = expected
+        definition = conn.execute("SELECT public.agent_definition() AS definition").fetchone()
+        assert definition
         if (
-            parent_id is not None
-            and not conn.execute("SELECT id FROM events WHERE id=%s", (parent_id,)).fetchone()
+            str(run_id) != scope["run_id"]
+            or producer != definition["definition"]["role"]
+            or target_store not in (None, expected)
         ):
-            raise PermissionError("Parent event is outside agent scope")
+            raise PermissionError("Queue destination exceeds agent scope")
+        if parent_id is None or lease_token is None or event_attempt is None:
+            raise PermissionError("Publishing requires a complete incoming event lease")
+        try:
+            row = conn.execute(
+                "SELECT public.agent_queue_publish(%s,%s,%s,%s,%s,%s,%s,%s,%s) AS id",
+                (
+                    parent_id,
+                    lease_token,
+                    event_attempt,
+                    topic,
+                    Jsonb(payload),
+                    key,
+                    due_sim,
+                    priority,
+                    capacity,
+                ),
+            ).fetchone()
+        except ProgramLimitExceeded:
+            raise Backpressure(
+                "Queue capacity reached; retry producer after consumers drain"
+            ) from None
+        assert row
+        return int(row["id"])
     existing = conn.execute(
         "SELECT id FROM events WHERE run_id=%s AND topic=%s AND dedupe_key=%s",
         (run_id, topic, key),
     ).fetchone()
     if existing:
         return int(existing["id"])
-    room = (
-        conn.execute("SELECT public.agent_queue_room(%s) AS room", (capacity,)).fetchone()
-        if scope
-        else None
-    )
-    count = (
-        None
-        if scope
-        else conn.execute(
-            "SELECT count(*) AS n FROM events WHERE run_id=%s AND state IN ('ready','leased')",
-            (run_id,),
-        ).fetchone()
-    )
-    if (room and not room["room"]) or (count and count["n"] >= capacity):
+    count = conn.execute(
+        "SELECT count(*) AS n FROM events WHERE run_id=%s AND state IN ('ready','leased')",
+        (run_id,),
+    ).fetchone()
+    if count and count["n"] >= capacity:
         raise Backpressure("Queue capacity reached; retry producer after consumers drain")
     row = conn.execute(
         """INSERT INTO events(run_id,producer,topic,payload,dedupe_key,trace_id,
@@ -188,32 +205,43 @@ class Queue:
             raise PermissionError("Consumer topics exceed role authority")
         token = uuid4()
         with connect(self.url) as conn:
-            conn.execute(
-                """UPDATE events SET state='dead', error='lease_expired_after_max_attempts',
-                   lease_token=NULL, lease_until=NULL WHERE run_id=%s AND state='leased'
-                   AND lease_until < clock_timestamp() AND attempts >= max_attempts""",
-                (run_id,),
-            )
-            row = conn.execute(
-                """WITH candidate AS (
-                     SELECT id FROM events WHERE run_id=%s AND topic=ANY(%s)
-                     AND due_sim<=%s AND available_at<=clock_timestamp() AND attempts<max_attempts
-                     AND (state='ready' OR (state='leased' AND lease_until<clock_timestamp()))
-                     ORDER BY priority DESC, due_sim, id FOR UPDATE SKIP LOCKED LIMIT 1
-                   ) UPDATE events e SET state='leased', lease_token=%s,
-                     lease_until=clock_timestamp() + %s * interval '1 second', attempts=attempts+1
-                   FROM candidate c WHERE e.id=c.id RETURNING e.*""",
-                (run_id, sorted(topics), sim_time, token, self.lease_seconds),
-            ).fetchone()
+            scope = conn.execute("SELECT public.agent_scope() AS scope").fetchone()
+            if scope and scope["scope"]:
+                claimed = conn.execute(
+                    "SELECT public.agent_queue_claim(%s,%s,%s,%s) AS event",
+                    (role, run_id, sorted(topics), self.lease_seconds),
+                ).fetchone()
+                assert claimed
+                row = claimed["event"]
+            else:
+                conn.execute(
+                    """UPDATE events SET state='dead', error='lease_expired_after_max_attempts',
+                       lease_token=NULL, lease_until=NULL WHERE run_id=%s AND state='leased'
+                       AND lease_until < clock_timestamp() AND attempts >= max_attempts""",
+                    (run_id,),
+                )
+                row = conn.execute(
+                    """WITH candidate AS (
+                         SELECT id FROM events WHERE run_id=%s AND topic=ANY(%s)
+                         AND due_sim<=%s AND available_at<=clock_timestamp()
+                         AND attempts<max_attempts
+                         AND (state='ready' OR (state='leased' AND lease_until<clock_timestamp()))
+                         ORDER BY priority DESC, due_sim, id FOR UPDATE SKIP LOCKED LIMIT 1
+                       ) UPDATE events e SET state='leased', lease_token=%s,
+                         lease_until=clock_timestamp() + %s * interval '1 second',
+                         attempts=attempts+1
+                       FROM candidate c WHERE e.id=c.id RETURNING e.*""",
+                    (run_id, sorted(topics), sim_time, token, self.lease_seconds),
+                ).fetchone()
         if row is None:
             return None
         return Event(
             row["id"],
-            row["run_id"],
+            UUID(str(row["run_id"])),
             row["topic"],
             row["payload"],
             row["trace_id"],
-            token,
+            UUID(str(row["lease_token"])),
             row["attempts"],
             row["due_sim"],
             row["target_store"],
@@ -226,22 +254,54 @@ class Queue:
                 conn.execute(
                     "SELECT pg_advisory_xact_lock(hashtextextended(%s, 0))", (str(event.run_id),)
                 )
-                row = conn.execute(
-                    """SELECT id FROM events WHERE id=%s AND state='leased'
-                       AND lease_token=%s AND lease_until>clock_timestamp() FOR UPDATE""",
-                    (event.id, event.token),
-                ).fetchone()
-                if not row:
-                    raise StaleLease("Worker no longer owns event")
-                handler(conn, event)
-                ack = conn.execute(
-                    """UPDATE events SET state='done', completed_at=now(),
-                       lease_token=NULL, lease_until=NULL WHERE id=%s
-                       AND lease_token=%s AND lease_until>clock_timestamp()""",
-                    (event.id, event.token),
-                )
-                if ack.rowcount != 1:
-                    raise StaleLease("Lease expired before commit")
+                scope = conn.execute("SELECT public.agent_scope() AS scope").fetchone()
+                if scope and scope["scope"]:
+                    locked = conn.execute(
+                        "SELECT public.agent_queue_lock(%s,%s,%s) AS locked",
+                        (event.id, event.token, event.attempts),
+                    ).fetchone()
+                    if not locked or not locked["locked"]:
+                        raise StaleLease("Worker no longer owns event")
+                    source = conn.execute(
+                        "SELECT * FROM events WHERE id=%s", (event.id,)
+                    ).fetchone()
+                    assert source
+                    # Typed policies see the authoritative leased source, including its payload.
+                    current = Event(
+                        source["id"],
+                        source["run_id"],
+                        source["topic"],
+                        source["payload"],
+                        source["trace_id"],
+                        source["lease_token"],
+                        source["attempts"],
+                        source["due_sim"],
+                        source["target_store"],
+                    )
+                    handler(conn, current)
+                    acked = conn.execute(
+                        "SELECT public.agent_queue_ack(%s,%s,%s) AS acked",
+                        (event.id, event.token, event.attempts),
+                    ).fetchone()
+                    if not acked or not acked["acked"]:
+                        raise StaleLease("Lease expired before commit")
+                else:
+                    row = conn.execute(
+                        """SELECT id FROM events WHERE id=%s AND state='leased'
+                           AND lease_token=%s AND lease_until>clock_timestamp() FOR UPDATE""",
+                        (event.id, event.token),
+                    ).fetchone()
+                    if not row:
+                        raise StaleLease("Worker no longer owns event")
+                    handler(conn, event)
+                    ack = conn.execute(
+                        """UPDATE events SET state='done', completed_at=now(),
+                           lease_token=NULL, lease_until=NULL WHERE id=%s
+                           AND lease_token=%s AND lease_until>clock_timestamp()""",
+                        (event.id, event.token),
+                    )
+                    if ack.rowcount != 1:
+                        raise StaleLease("Lease expired before commit")
             return True
         except StaleLease:
             return False
@@ -252,6 +312,13 @@ class Queue:
 
     def fail(self, event: Event, code: str) -> None:
         with connect(self.url) as conn:
+            scope = conn.execute("SELECT public.agent_scope() AS scope").fetchone()
+            if scope and scope["scope"]:
+                conn.execute(
+                    "SELECT public.agent_queue_fail(%s,%s,%s,%s)",
+                    (event.id, event.token, event.attempts, code[:80]),
+                )
+                return
             conn.execute(
                 """UPDATE events SET state=CASE WHEN attempts>=max_attempts THEN 'dead'
                      ELSE 'ready' END, error=%s, lease_token=NULL, lease_until=NULL,

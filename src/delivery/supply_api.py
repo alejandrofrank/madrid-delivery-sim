@@ -10,7 +10,7 @@ from fastapi import APIRouter, BackgroundTasks, Header, HTTPException, Path
 from fastapi.responses import FileResponse
 from pydantic import BaseModel, ConfigDict, Field
 
-from delivery.agent_runtime import LocalAgent
+from delivery.agent_runtime import BudgetExceeded, LocalAgent, ScopedTools
 from delivery.queue import Event
 from delivery.running_city import agent_inspection
 from delivery.supply import (
@@ -47,6 +47,11 @@ class ProcessEnvelope(BaseModel):
 class SearchEnvelope(ProcessEnvelope):
     query: str = Field(min_length=1, max_length=80)
     mode: Literal["local", "jev"] = "local"
+
+
+class RecallEnvelope(ProcessEnvelope):
+    kinds: list[str] | None = Field(default=None, max_length=9)
+    limit: int = Field(default=8, ge=1, le=16, strict=True)
 
 
 def channel(run: UUID, agent_id: str, authorization: str | None) -> LocalAgent:
@@ -170,6 +175,17 @@ def order_history(run: UUID, order_id: str = Path(min_length=1, max_length=200))
             "SELECT * FROM supply_requests WHERE run_id=%s AND order_id=%s ORDER BY id",
             (run, order_id),
         ).fetchall()
+        typed_memory = conn.execute(
+            "SELECT m.*,coalesce(b.agent_id,m.store) agent FROM agent_memory_facts m "
+            "LEFT JOIN agent_bindings b ON b.run_id=m.run_id AND b.store=m.store "
+            "WHERE m.run_id=%s AND m.context_type='order' AND m.context_id=%s "
+            "ORDER BY m.observed_sim,m.id",
+            (run, order_id),
+        ).fetchall()
+        latest = {(f["store"], f["kind"], f["subject"]): f for f in typed_memory}
+        memories.extend(
+            {**f, "fact_id": f["id"], "key": f"{f['kind']}:{f['subject']}"} for f in latest.values()
+        )
         identities = {order["household"], order["restaurant"]}
         for event in events:
             for identity in (event["sender"], event["target_store"]):
@@ -180,6 +196,30 @@ def order_history(run: UUID, order_id: str = Path(min_length=1, max_length=200))
             "SELECT id,name,kind FROM supply_entities WHERE run_id=%s AND id=ANY(%s)",
             (run, list(identities)),
         ).fetchall()
+    by_id = {f["id"]: f for f in typed_memory}
+    writes = []
+    for decision in decisions:
+        for receipt in decision["detail"].get("memory_writes", []):
+            write = {**receipt, "agent": decision["agent"], "event_id": decision["event_id"]}
+            current = by_id.get(write.get("fact_id"))
+            if (
+                current
+                and current["agent"] == decision["agent"]
+                and current["event_id"] == decision["event_id"]
+            ):
+                previous = by_id.get(current["previous_id"])
+                if previous and all(
+                    previous[k] == current[k] for k in ("store", "kind", "subject", "context_id")
+                ):
+                    write["previous"] = {
+                        k: previous[k]
+                        for k in ("body", "observed_sim", "expires_sim", "event_id", "version")
+                    }
+                elif current["previous_id"] is None:
+                    write["previous"] = None
+            elif "previous_id" in write and write["previous_id"] is None:
+                write["previous"] = None
+            writes.append(write)
     result = {
         "order": order,
         "call": call,
@@ -187,14 +227,11 @@ def order_history(run: UUID, order_id: str = Path(min_length=1, max_length=200))
         "facts": facts,
         "decisions": decisions,
         "memories": memories,
-        "memory_history": [
-            {**write, "agent": decision["agent"], "event_id": decision["event_id"]}
-            for decision in decisions
-            for write in decision["detail"].get("memory_writes", [])
-        ],
+        "memory_history": writes,
         "memory_history_complete": bool(decisions)
         and all("memory_writes" in decision["detail"] for decision in decisions),
         "requests": requests,
+        "typed_memory": typed_memory,
     }
     result["conversation"] = conversation(result, {e["id"]: e for e in entities})
     return result
@@ -366,15 +403,42 @@ def operator_search(run: UUID, entity_id: str, query: str) -> dict[str, Any]:
 def own_memory(
     run: UUID, agent_id: str, authorization: str | None = Header(default=None)
 ) -> dict[str, Any]:
-    agent = channel(run, agent_id, authorization)
+    channel(run, agent_id, authorization)
+    raise HTTPException(410, "Use POST memory/recall with the current incoming event lease")
+
+
+@router.post("/api/supply/runs/{run}/agents/{agent_id}/memory/recall")
+def recall_memory(
+    run: UUID,
+    agent_id: str,
+    body: RecallEnvelope,
+    authorization: str | None = Header(default=None),
+) -> dict[str, Any]:
+    import psycopg
+
     from delivery.db import connect
 
-    with connect(agent.dsn) as conn:
-        rows = conn.execute(
-            "SELECT key,body,observed_sim,expires_sim FROM agent_memories "
-            "WHERE expires_sim>agent_clock()"
-        ).fetchall()
-    return {"agent_id": agent_id, "memory": rows}
+    agent = channel(run, agent_id, authorization)
+    event = _LEASES.get((str(run), agent_id, body.event_id))
+    if not event or event.token != body.lease_token or event.attempts != body.attempt:
+        raise HTTPException(409, "Recall requires this agent current incoming message lease")
+    if not agent.reserve_budget(event):
+        raise HTTPException(429, "Recall lease or agent budget unavailable")
+    try:
+        with connect(agent.dsn) as conn:
+            tools = ScopedTools(conn, agent.scope, agent.role, event)
+            facts = tools.invoke("memory.read", kinds=body.kinds, limit=body.limit)
+    except (BudgetExceeded, psycopg.errors.InsufficientPrivilege):
+        raise HTTPException(409, "Recall lease or reserved tool budget unavailable") from None
+    except (ValueError, psycopg.errors.CheckViolation):
+        raise HTTPException(422, "Recall exceeds this role fact types or limits") from None
+    return {
+        "agent_id": agent_id,
+        "memory": facts,
+        "scope": "current_incoming_order",
+        "limit": body.limit,
+        "max_bytes": 8192,
+    }
 
 
 @router.get("/api/supply/runs/{run}/evidence")

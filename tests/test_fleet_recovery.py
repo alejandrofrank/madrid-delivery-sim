@@ -5,7 +5,7 @@ import psycopg
 import pytest
 
 from delivery.agent_access import retire_inventory_access, role_access
-from delivery.agent_runtime import create_agent
+from delivery.agent_runtime import ScopedTools, create_agent
 from delivery.db import connect
 from delivery.delivery_flow import flow_snapshot, new_delivery, run_delivery
 from delivery.fleet_flow import advance_fleet, prepare_fleet
@@ -92,7 +92,8 @@ def test_courier_and_judge_logins_have_no_raw_state_or_cross_role_tools(
                     conn.execute(f"SELECT * FROM {table}")
             with pytest.raises(psycopg.errors.InsufficientPrivilege), conn.transaction():
                 conn.execute("SET ROLE lab_dispatch_executor")
-            assert conn.execute("SELECT * FROM agent_memories").fetchall() == []
+            with pytest.raises(psycopg.errors.InsufficientPrivilege), conn.transaction():
+                conn.execute("SELECT * FROM agent_memories")
             with pytest.raises(psycopg.errors.InsufficientPrivilege), conn.transaction():
                 conn.execute("SELECT dispatch_assign('delivery-a','bike-1','[1,2]')")
     with connect(courier.dsn) as conn:
@@ -133,6 +134,53 @@ def test_courier_cannot_accept_another_couriers_briefing(db_url: str, fleet: str
     assert acknowledged["depart_sim"] == 60
     advance_fleet(fleet, 60, db_url)
     assert flow_snapshot(fleet, db_url)["fleet"] == before["fleet"]
+
+
+def test_courier_memory_does_not_cross_assignment_attempts(db_url: str, fleet: str) -> None:
+    prepare_fleet(fleet, db_url)
+    for name, key in (
+        ("inventory", "store-1"),
+        ("fulfillment", "store-1"),
+        ("dispatcher", "fleet"),
+    ):
+        agent = create_agent(role_access(fleet, name, db_url)[key].dsn)
+        event = agent.claim()
+        assert event and agent.process(event)
+    couriers = role_access(fleet, "courier", db_url)
+    own = create_agent(couriers["bike-1"].dsn)
+    first = own.claim()
+    assert first and first.payload["attempt"] == 1 and own.reserve_budget(first)
+    with connect(own.dsn) as conn:
+        tools = ScopedTools(conn, own.scope, own.role, first)
+        with pytest.raises(psycopg.errors.InsufficientPrivilege), conn.transaction():
+            tools.invoke(
+                "memory.write", kind="courier.commitment", body={"status": "accepted", "attempt": 2}
+            )
+        tools.invoke(
+            "memory.write", kind="courier.commitment", body={"status": "accepted", "attempt": 1}
+        )
+        assert tools.invoke("memory.read")[0]["body"]["attempt"] == 1
+    # A trusted queued rebrief addresses the same order but another attempt.
+    with connect(db_url) as conn:
+        publish(
+            conn,
+            run_id=fleet,
+            producer="dispatcher",
+            topic="courier.briefed",
+            payload={**first.payload, "attempt": 2},
+            key="memory-attempt-2",
+            trace_id=first.trace_id,
+            target_store=first.target_store,
+        )
+    second = own.claim()
+    assert second and second.id != first.id and own.reserve_budget(second)
+    with connect(own.dsn) as conn:
+        assert ScopedTools(conn, own.scope, own.role, second).invoke("memory.read") == []
+    with connect(couriers["bike-2"].dsn) as conn:
+        with pytest.raises(psycopg.errors.InsufficientPrivilege):
+            conn.execute(
+                "SELECT agent_memory_recall(%s,%s,%s)", (first.id, first.token, first.attempts)
+            )
 
 
 def test_reassignment_requires_judgement_and_private_legacy_commands_are_denied(

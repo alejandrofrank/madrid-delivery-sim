@@ -105,10 +105,8 @@ def test_actual_role_connections_deny_other_domains(db_url: str, flow: str) -> N
                     conn.execute(f"SELECT * FROM {table}")
             with pytest.raises(psycopg.errors.InsufficientPrivilege), conn.transaction():
                 conn.execute("SET ROLE lab_inventory_executor")
-            assert all(
-                row["store"] == access.store
-                for row in conn.execute("SELECT * FROM agent_memories").fetchall()
-            )
+            with pytest.raises(psycopg.errors.InsufficientPrivilege), conn.transaction():
+                conn.execute("SELECT * FROM agent_memories")
     with connect(dispatch.dsn) as conn:
         context = conn.execute("SELECT workflow_context('basket-delivery') AS data").fetchone()[
             "data"
@@ -123,7 +121,8 @@ def test_actual_role_connections_deny_other_domains(db_url: str, flow: str) -> N
         with pytest.raises(psycopg.errors.InsufficientPrivilege), conn.transaction():
             conn.execute("SELECT workflow_context('basket-delivery')")
         assert conn.execute("SELECT * FROM events").fetchall() == []
-        assert conn.execute("SELECT * FROM agent_memories").fetchall() == []
+        with pytest.raises(psycopg.errors.InsufficientPrivilege), conn.transaction():
+            conn.execute("SELECT * FROM agent_memories")
 
 
 def test_expired_reservation_cannot_be_picked(db_url: str, flow: str) -> None:

@@ -128,10 +128,8 @@ def test_human_inspection_selects_only_the_requested_agents_memory(db_url, city)
     assert "login_role" not in inspected["agent"]
     assert agent_inspection(city, "inventory:missing", db_url) is None
     with connect(accesses["store-1"].dsn) as conn:
-        assert all(
-            row["store"] == "store-1"
-            for row in conn.execute("SELECT * FROM agent_memories").fetchall()
-        )
+        with pytest.raises(psycopg.errors.InsufficientPrivilege), conn.transaction():
+            conn.execute("SELECT * FROM agent_memories")
         with pytest.raises(psycopg.errors.InsufficientPrivilege), conn.transaction():
             conn.execute("SELECT * FROM lab_city_configs")
 

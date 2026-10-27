@@ -4,7 +4,6 @@ Policies receive tools and a typed event, never an operator connection or city s
 There are deliberately no file, SQL, network, code-execution or direct-agent tools.
 """
 
-import json
 from collections.abc import Callable
 from dataclasses import dataclass, field
 from typing import Any
@@ -66,6 +65,7 @@ class ScopedTools:
         self.event = event
         self.calls: list[str] = []
         self.memory_writes: list[dict[str, Any]] = []
+        self.memory_reads: list[dict[str, Any]] = []
         self.cloud_endpoint: str | None = None
         self.cloud_dsn: str | None = None
         ticket = conn.execute(
@@ -113,17 +113,14 @@ class ScopedTools:
         }
         if name not in registry:
             raise PermissionError("Unknown tool")
-        consumed = self.__conn.execute(
-            """UPDATE agent_event_budgets
-            SET observed_tools=observed_tools+1 WHERE event_id=%s AND attempt=%s
-            AND observed_tools<slots AND EXISTS (SELECT 1 FROM events e
-                WHERE e.id=agent_event_budgets.event_id AND e.state='leased'
-                AND e.lease_token=%s AND e.lease_until>clock_timestamp())
-            RETURNING observed_tools""",
-            (self.event.id, self.event.attempts, self.event.token),
-        ).fetchone()
-        if not consumed:
-            raise BudgetExceeded("Reserved tool slots exhausted")
+        # Memory and publish functions charge internally so direct SQL cannot skip admission.
+        if name not in {"memory.read", "memory.write", "queue.publish"}:
+            consumed = self.__conn.execute(
+                "SELECT public.agent_consume_tool(%s,%s,%s,%s) AS consumed",
+                (self.event.id, self.event.token, self.event.attempts, name),
+            ).fetchone()
+            if not consumed or not consumed["consumed"]:
+                raise BudgetExceeded("Reserved tool slots exhausted")
         self.calls.append(name)
         return registry[name](**arguments)
 
@@ -254,57 +251,73 @@ class ScopedTools:
             else receive(self.__conn, self.scope.run, shipment, self.sim),
         }
 
-    def _recall(self) -> list[dict[str, Any]]:
-        return self.__conn.execute(
-            """SELECT key,body,observed_sim,expires_sim,event_id
-            FROM agent_memories WHERE run_id=%s AND store=%s AND expires_sim>%s ORDER BY key""",
-            (self.scope.run, self.scope.store, self.sim),
-        ).fetchall()
-
-    def _remember(self, key: str, body: dict[str, Any], ttl_seconds: int = 3600) -> None:
-        if not 1 <= len(key) <= 100 or not 1 <= ttl_seconds <= 86400:
-            raise ValueError("Invalid memory key or TTL")
-        if len(json.dumps(body, ensure_ascii=False).encode()) > 2048:
-            raise ValueError("Memory entry exceeds byte limit")
-        # Read through the same authenticated connection and transaction as the write.
-        # Expired entries are not an active baseline, but retain that distinction for audit.
-        self.__conn.execute(
-            "SELECT pg_advisory_xact_lock(hashtextextended(%s,0))",
-            (f"memory:{self.scope.run}:{self.scope.store}:{key}",),
-        )
-        previous = self.__conn.execute(
-            "SELECT body,observed_sim,expires_sim,event_id FROM agent_memories "
-            "WHERE run_id=%s AND store=%s AND key=%s FOR UPDATE",
-            (self.scope.run, self.scope.store, key),
-        ).fetchone()
-        self.__conn.execute(
-            "DELETE FROM agent_memories WHERE run_id=%s AND store=%s AND expires_sim<=%s",
-            (self.scope.run, self.scope.store, self.sim),
-        )
-        self.__conn.execute(
-            """INSERT INTO agent_memories VALUES (%s,%s,%s,%s,%s,%s,%s)
-            ON CONFLICT(run_id,store,key) DO UPDATE SET body=excluded.body,
-            observed_sim=excluded.observed_sim,expires_sim=excluded.expires_sim,event_id=excluded.event_id""",
+    def _recall(self, kinds: list[str] | None = None, limit: int = 8) -> list[dict[str, Any]]:
+        if (
+            type(limit) is not int
+            or not 1 <= limit <= 16
+            or (
+                kinds is not None
+                and (
+                    type(kinds) is not list
+                    or len(kinds) > 9
+                    or any(type(kind) is not str for kind in kinds)
+                )
+            )
+        ):
+            raise ValueError("Invalid typed recall filters or limit")
+        row = self.__conn.execute(
+            "SELECT public.agent_memory_recall(%s,%s,%s,%s,%s) AS facts",
             (
-                self.scope.run,
-                self.scope.store,
-                key,
-                Jsonb(body),
-                self.sim,
-                self.sim + ttl_seconds,
                 self.event.id,
+                self.event.token,
+                self.event.attempts,
+                Jsonb(kinds) if kinds is not None else None,
+                limit,
             ),
-        )
-
-        self.memory_writes.append(
+        ).fetchone()
+        assert row
+        facts = list(row["facts"])
+        self.memory_reads.append(
             {
-                "key": key,
-                "body": json.loads(json.dumps(body)),
-                "observed_sim": self.sim,
-                "expires_sim": self.sim + ttl_seconds,
-                "previous": previous,
+                "event_id": self.event.id,
+                "limit": limit,
+                "kinds": kinds,
+                "facts": [
+                    {
+                        k: fact[k]
+                        for k in (
+                            "fact_id",
+                            "kind",
+                            "version",
+                            "event_id",
+                            "context_id",
+                            "expires_sim",
+                        )
+                    }
+                    for fact in facts
+                ],
             }
         )
+        return facts
+
+    def _remember(self, kind: str, body: dict[str, Any], ttl_seconds: int = 3600) -> None:
+        from delivery.typed_memory import validate_fact
+
+        if type(ttl_seconds) is not int or not 1 <= ttl_seconds <= 86400:
+            raise ValueError("Invalid typed memory TTL")
+        validated = validate_fact(kind, body, self.role.name, self.event.topic)
+        result = self._json_command(
+            "SELECT public.agent_memory_record(%s,%s,%s,%s,%s,%s) AS data",
+            (
+                self.event.id,
+                self.event.token,
+                self.event.attempts,
+                kind,
+                Jsonb(validated),
+                ttl_seconds,
+            ),
+        )
+        self.memory_writes.append(result)
 
     def _publish(
         self, topic: str, payload: dict[str, Any], key: str, due_sim: int | None = None
@@ -324,6 +337,8 @@ class ScopedTools:
             parent_id=self.event.id,
             target_store=None,
             due_sim=self.sim if due_sim is None else due_sim,
+            lease_token=self.event.token,
+            event_attempt=self.event.attempts,
         )
 
 
@@ -383,11 +398,9 @@ class InventoryPolicy:
             detail["rule"] = "ignore obsolete receipt; add units once at confirmed arrival"
         else:
             raise PermissionError("Unsupported event")
-        tools.invoke(
-            "memory.write",
-            key=f"last:{event.topic}",
-            body={"topic": event.topic, "outcome": detail},
-        )
+        from delivery.typed_memory import outcome_fact
+
+        tools.invoke("memory.write", **outcome_fact("inventory", event.topic, detail))
         tools.invoke("queue.publish", topic="inventory.decided", payload=detail, key=str(event.id))
         return {
             **detail,
@@ -462,6 +475,7 @@ class LocalAgent:
         # Persist actual writes with the decision/ACK transaction, so order
         # inspection survives TTL cleanup without changing agent recall access.
         detail["memory_writes"] = tools.memory_writes
+        detail["memory_reads"] = tools.memory_reads
         conn.execute(
             """INSERT INTO decisions(run_id,sim_time,agent,order_id,event_id,action,detail)
             VALUES (%s,%s,%s,%s,%s,%s,%s)""",

@@ -6,6 +6,7 @@ from pydantic import BaseModel, ConfigDict, Field
 
 from delivery.agent_runtime import ScopedTools
 from delivery.queue import Event
+from delivery.typed_memory import outcome_fact
 
 
 class SupplyRef(BaseModel):
@@ -23,8 +24,9 @@ class SupplyPolicy:
         # cannot learn household identity, preferences, recipes or pantry stock.
         tools.invoke(
             "memory.write",
-            key=f"last:{order}"[:100],
-            body={key: value for key, value in result.items() if key != "outbox"},
+            **outcome_fact(
+                tools.role.name, event.topic, result, context, event.payload.get("request")
+            ),
         )
         return {
             **result,

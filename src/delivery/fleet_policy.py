@@ -8,6 +8,7 @@ from pydantic import BaseModel, ConfigDict, Field
 from delivery.agent_runtime import BasketRef, ScopedTools
 from delivery.db import connect
 from delivery.queue import Event
+from delivery.typed_memory import outcome_fact
 from delivery.workflow_policy import route_plan
 
 
@@ -153,7 +154,7 @@ class FleetPolicy:
             rule = "claim a free online courier atomically, or wait through a queued retry"
         else:
             raise PermissionError("Unsupported recovery event")
-        tools.invoke("memory.write", key=f"last:{basket}", body=result)
+        tools.invoke("memory.write", **outcome_fact(role, event.topic, result))
         for topic, payload, key, due in emits:
             tools.invoke("queue.publish", topic=topic, payload=payload, key=key, due_sim=due)
         return {

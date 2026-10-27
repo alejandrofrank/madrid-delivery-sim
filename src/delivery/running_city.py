@@ -294,6 +294,21 @@ def agent_inspection(run: str, agent_id: str, url: str | None = None) -> dict[st
             WHERE run_id=%s AND store=%s AND expires_sim>%s ORDER BY key""",
             (run, binding["store"], binding["sim_time"]),
         ).fetchall()
+        memory.extend(
+            conn.execute(
+                "SELECT kind||':'||subject key,body,observed_sim,expires_sim,event_id,"
+                "id fact_id,kind,version,context_type,context_id,owner_role "
+                "FROM agent_memory_current WHERE run_id=%s AND store=%s AND expires_sim>%s "
+                "ORDER BY observed_sim DESC,id DESC",
+                (run, binding["store"], binding["sim_time"]),
+            ).fetchall()
+        )
+        memory_history = conn.execute(
+            "SELECT id fact_id,kind,body,version,event_id,observed_sim,expires_sim,previous_id,"
+            "context_type,context_id,subject FROM agent_memory_facts "
+            "WHERE run_id=%s AND store=%s ORDER BY id",
+            (run, binding["store"]),
+        ).fetchall()
         briefs = []
         if definition["role"] == "courier":
             briefs = conn.execute(
@@ -344,7 +359,9 @@ def agent_inspection(run: str, agent_id: str, url: str | None = None) -> dict[st
         if role == "judge":
             parameters.update(max_total_attempts=2, max_retry_route_minutes=100)
         expired = conn.execute(
-            """SELECT count(*) AS n FROM agent_memories
+            """SELECT count(*) AS n FROM (
+            SELECT run_id,store,expires_sim FROM agent_memories UNION ALL
+            SELECT run_id,store,expires_sim FROM agent_memory_current) m
             WHERE run_id=%s AND store=%s AND expires_sim<=%s""",
             (run, binding["store"], binding["sim_time"]),
         ).fetchone()
@@ -357,6 +374,7 @@ def agent_inspection(run: str, agent_id: str, url: str | None = None) -> dict[st
                 "budget": budget,
             },
             "memory": memory,
+            "typed_memory_history": memory_history,
             "expired_memory_count": expired["n"] if expired else 0,
             "parameters": parameters,
             "briefs": briefs,

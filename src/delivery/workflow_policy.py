@@ -6,6 +6,7 @@ import networkx as nx
 
 from delivery.agent_runtime import BasketRef, ScopedTools
 from delivery.queue import Event
+from delivery.typed_memory import outcome_fact
 
 
 def route_plan(context: dict[str, Any]) -> tuple[str, list[int]]:
@@ -77,7 +78,7 @@ class WorkflowPolicy:
             rule = "confirm delivery only after authoritative world arrival"
         else:
             raise PermissionError("Unsupported workflow event")
-        tools.invoke("memory.write", key=f"last:{basket}", body=result)
+        tools.invoke("memory.write", **outcome_fact(tools.role.name, event.topic, result))
         tools.invoke("queue.publish", topic=topic, payload={"basket": basket}, key=basket)
         return {
             **result,

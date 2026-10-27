@@ -151,6 +151,43 @@ def drain_kitchen(run: SupplyRun, agents: dict[str, LocalAgent]) -> None:
     raise AssertionError("Kitchen event drain exceeded its bounded step count")
 
 
+def test_completed_supplier_memory_expires_but_keeps_revision_history(
+    supply_run: Callable[..., SupplyRun],
+) -> None:
+    run = supply_run()
+    state = run_supply(run.run, run.url)
+    assert state["orders"][0]["status"] == "delivered"
+    with connect(run.url) as conn:
+        rows = conn.execute(
+            "SELECT * FROM agent_memory_facts WHERE run_id=%s AND kind='market.request' "
+            "ORDER BY id",
+            (run.run,),
+        ).fetchall()
+        by_id = {row["id"]: row for row in rows}
+        assert len(rows) == 8
+        assert any(
+            row["body"]["outcome"] == "supplier_reserved"
+            and row["expires_sim"] > state["run"]["sim_time"]
+            for row in rows
+        )
+        for row in rows:
+            if row["body"]["outcome"] == "supplier_reserved":
+                assert row["expires_sim"] - row["observed_sim"] == 3600
+            else:
+                assert row["body"]["outcome"] == "supplier_dispatched"
+                assert row["expires_sim"] - row["observed_sim"] == 60
+                assert by_id[row["previous_id"]]["subject"] == row["subject"]
+                assert row["expires_sim"] <= state["run"]["sim_time"]
+        assert (
+            conn.execute(
+                "SELECT count(*) n FROM agent_memory_current WHERE run_id=%s "
+                "AND kind='market.request' AND expires_sim>%s",
+                (run.run, state["run"]["sim_time"]),
+            ).fetchone()["n"]
+            == 0
+        )
+
+
 def test_real_supply_roles_deny_raw_state_forgery_and_cross_household_memory(
     supply_run: Callable[..., SupplyRun],
 ) -> None:
@@ -191,10 +228,13 @@ def test_real_supply_roles_deny_raw_state_forgery_and_cross_household_memory(
         with pytest.raises(psycopg.errors.InsufficientPrivilege), conn.transaction():
             conn.execute("SELECT supply_command(%s,%s,%s)", (eb.id, eb.token, eb.attempts))
         tools = ScopedTools(conn, a.scope, a.role, ea)
-        tools.invoke("memory.write", key="private", body={"text": "private household note"})
-        assert tools.invoke("memory.read")[0]["body"] == {"text": "private household note"}
+        tools.invoke(
+            "memory.write", kind="household.order", body={"status": "calling", "action": "calling"}
+        )
+        assert tools.invoke("memory.read")[0]["body"] == {"status": "calling", "action": "calling"}
     with connect(b.dsn) as conn:
-        assert conn.execute("SELECT * FROM agent_memories").fetchall() == []
+        with pytest.raises(psycopg.errors.InsufficientPrivilege), conn.transaction():
+            conn.execute("SELECT * FROM agent_memories")
         with pytest.raises(psycopg.errors.InsufficientPrivilege), conn.transaction():
             conn.execute(
                 """INSERT INTO agent_memories(run_id,store,key,body,observed_sim,
@@ -242,7 +282,7 @@ def test_supply_stock_facts_memory_and_outgoing_events_roll_back_before_ack(
         )
         assert (
             conn.execute(
-                "SELECT count(*) n FROM agent_memories WHERE run_id=%s AND store=%s",
+                "SELECT count(*) n FROM agent_memory_facts WHERE run_id=%s AND store=%s",
                 (run.run, run.restaurant),
             ).fetchone()["n"]
             == 0
@@ -275,6 +315,37 @@ def test_supply_stock_facts_memory_and_outgoing_events_roll_back_before_ack(
             conn.execute("SELECT state FROM events WHERE id=%s", (event.id,)).fetchone()["state"]
             == "done"
         )
+
+
+def test_supplier_recall_is_restricted_to_the_current_ingredient_request(
+    supply_run: Callable[..., SupplyRun],
+) -> None:
+    run = supply_run(pantry=0)
+    agents = provision(run.run, run.url)
+    release(run)
+    home, kitchen, market = agents[run.household], agents[run.restaurant], agents["market-a"]
+    assert home.process(claim(home))
+    with connect(run.url) as conn:
+        conn.execute("UPDATE runs SET sim_time=1000 WHERE id=%s", (run.run,))
+    assert kitchen.process(claim(kitchen))
+    with connect(run.url) as conn:
+        conn.execute("UPDATE runs SET sim_time=1020 WHERE id=%s", (run.run,))
+    first = claim(market)
+    assert market.process(first)
+    second = claim(market)
+    assert first.payload["order"] == second.payload["order"]
+    assert first.payload["request"] != second.payload["request"]
+    assert market.reserve_budget(second)
+    with connect(market.dsn) as conn:
+        tools = ScopedTools(conn, market.scope, market.role, second)
+        assert tools.invoke("memory.read") == []
+        with pytest.raises(psycopg.errors.CheckViolation), conn.transaction():
+            tools.invoke("memory.read", kinds=["household.order"])
+    with connect(agents["market-b"].dsn) as conn:
+        with pytest.raises(psycopg.errors.InsufficientPrivilege), conn.transaction():
+            conn.execute(
+                "SELECT agent_memory_recall(%s,%s,%s)", (second.id, second.token, second.attempts)
+            )
 
 
 def test_two_orders_cannot_reserve_the_last_recipe_twice(

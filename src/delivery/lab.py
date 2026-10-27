@@ -143,9 +143,13 @@ def lab_snapshot(
             b.definition->'tools' AS tools,b.definition->'limits' AS limits,
             a.events_reserved,a.tools_reserved,a.events_limit,a.tools_limit,
             a.memory_entries_limit,a.memory_bytes_limit,
-            (SELECT count(*) FROM agent_memories m WHERE m.run_id=b.run_id AND m.store=b.store
+            (SELECT count(*) FROM (SELECT run_id,store,body,expires_sim FROM agent_memories
+                UNION ALL SELECT run_id,store,body,expires_sim FROM agent_memory_current) m
+                WHERE m.run_id=b.run_id AND m.store=b.store
                 AND m.expires_sim>%s) AS memory_entries,
-            (SELECT coalesce(sum(octet_length(m.body::text)),0) FROM agent_memories m
+            (SELECT coalesce(sum(octet_length(m.body::text)),0) FROM
+                (SELECT run_id,store,body,expires_sim FROM agent_memories UNION ALL
+                 SELECT run_id,store,body,expires_sim FROM agent_memory_current) m
                 WHERE m.run_id=b.run_id AND m.store=b.store AND m.expires_sim>%s) AS memory_bytes,
             (SELECT coalesce(sum(t.observed_tools),0) FROM agent_event_budgets t
                 WHERE t.run_id=b.run_id AND t.store=b.store) AS committed_tool_calls

@@ -169,7 +169,13 @@ def test_complete_order_history_is_scoped_and_not_a_recent_event_window(
     assert all("lease_token" not in event for event in history["events"])
     assert all(fact["detail"]["order"] == order["id"] for fact in history["facts"])
     assert history["memory_history_complete"] and history["memory_history"]
-    assert all(write["key"] == f"last:{order['id']}" for write in history["memory_history"])
+    assert all(write["context_id"] == order["id"] for write in history["memory_history"])
+    assert history["typed_memory"] and all(
+        f["context_id"] == order["id"] for f in history["typed_memory"]
+    )
+    assert all(
+        f["event_id"] in {e["id"] for e in history["events"]} for f in history["typed_memory"]
+    )
     assert all("previous" in write for write in history["memory_history"])
     assert len(history["conversation"]) == len(history["events"])
     call = next(m for m in history["conversation"] if m["topic"] == "household.call")
@@ -188,9 +194,12 @@ def test_complete_order_history_is_scoped_and_not_a_recent_event_window(
     assert other["id"] not in {event["trace_id"] for event in history["events"]}
     # The recorded writes survive deletion of live TTL memory.
     with connect(supply_api.url) as conn:
-        conn.execute("DELETE FROM agent_memories WHERE run_id=%s", (run,))
+        conn.execute("DELETE FROM agent_memory_facts WHERE run_id=%s", (run,))
     retained = supply_api.client.get(f"/api/supply/runs/{run}/orders/{order['id']}").json()
-    assert not retained["memories"] and retained["memory_history"] == history["memory_history"]
+    assert not retained["memories"]
+    assert [w["body"] for w in retained["memory_history"]] == [
+        w["body"] for w in history["memory_history"]
+    ]
     assert "postgresql://" not in response.text and "password" not in response.text
 
 
@@ -387,7 +396,7 @@ def test_channels_require_operator_authorization_and_bind_bearers_to_run_and_age
         == 401
     )
     assert client.post(path + "/claim", headers=auth).json() == {"event": None}
-    assert client.get(path + "/memory", headers=auth).json()["memory"] == []
+    assert client.get(path + "/memory", headers=auth).status_code == 410
     token = auth["Authorization"].removeprefix("Bearer ")
     token_hash = hashlib.sha256(token.encode()).hexdigest()
     with supply._LOCK:
@@ -455,13 +464,13 @@ def test_calls_and_messages_accept_only_claimed_envelopes_and_queue_domain_repli
         ).status_code
         == 409
     )
-    own = client.get(home_path + "/memory", headers=auth[home.scope.agent_id]).json()["memory"]
+    own = client.get(f"/api/supply/runs/{run}/orders/{event['trace_id']}").json()["typed_memory"]
     assert own and own[0]["body"]["status"] == "calling"
     assert (
         client.get(
             root + peer.scope.agent_id + "/memory", headers=auth[peer.scope.agent_id]
-        ).json()["memory"]
-        == []
+        ).status_code
+        == 410
     )
     with connect(supply_api.url) as conn:
         outgoing = conn.execute(
@@ -522,6 +531,47 @@ def test_calls_and_messages_accept_only_claimed_envelopes_and_queue_domain_repli
             ).fetchone()["n"]
             == 0
         )
+
+
+def test_agent_recall_requires_current_lease_and_cannot_choose_another_order(
+    supply_api: SupplyAPI,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setenv("DELIVERY_OPERATOR_KEY", OPERATOR_KEY)
+    run = supply_api.start()
+    agents = supply.provision(run, supply_api.url)
+    home, peer = [a for a in agents.values() if a.role.name == "household"]
+    auth = supply_api.open(run, home)
+    other_auth = supply_api.open(run, peer)
+    supply_api.release(run)
+    event = supply_api.claim(run, home, auth)
+    other = supply_api.claim(run, peer, other_auth)
+    root = f"/api/supply/runs/{run}/agents/{home.scope.agent_id}"
+    client = supply_api.client
+    assert client.get(root + "/memory", headers=auth).status_code == 410
+    for body, expected in [
+        ({**envelope(event), "order": other["trace_id"]}, 422),
+        ({**envelope(event), "limit": 17}, 422),
+        ({**envelope(event), "limit": True}, 422),
+        ({**envelope(event), "kinds": ["market.request"]}, 422),
+        (envelope(other), 409),
+    ]:
+        assert client.post(root + "/memory/recall", json=body, headers=auth).status_code == expected
+    assert (
+        client.post(root + "/memory/recall", json=envelope(event), headers=other_auth).status_code
+        == 401
+    )
+    response = client.post(
+        root + "/memory/recall",
+        json={**envelope(event), "kinds": ["household.order"]},
+        headers=auth,
+    )
+    assert response.status_code == 200 and response.json()["memory"] == []
+    assert response.json()["scope"] == "current_incoming_order"
+    assert client.post(root + "/calls", json=envelope(event), headers=auth).json()["acknowledged"]
+    assert (
+        client.post(root + "/memory/recall", json=envelope(event), headers=auth).status_code == 409
+    )
 
 
 def test_agent_search_defaults_to_local_and_rejects_wrong_scope_and_arbitrary_arguments(
