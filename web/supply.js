@@ -299,6 +299,8 @@ async function startRun() {
     const result = await api('/api/supply/runs', {method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({revision: blueprint.revision})});
     runId = result.id;
     sessionStorage.setItem('supply-run-id', runId);
+    const url = new URL(location.href); url.searchParams.set('run', runId);
+    history.replaceState(null, '', url);
     snapshot = null;
     replay = null;
     inspection = null;
@@ -784,6 +786,49 @@ async function loadOrderHistory(orderId, row, force = false) {
   } finally { row.loading = false; }
 }
 
+function memoryValue(value, field = '') {
+  if (value === null) return 'None';
+  if (typeof value === 'boolean') return value ? 'Yes' : 'No';
+  if (Array.isArray(value)) return field === 'route' ? `${value.length} route waypoints` : value.map(item => memoryValue(item)).join(', ') || 'Empty list';
+  if (typeof value === 'object') return Object.entries(value).map(([key, item]) => `${readableAction(key)}: ${memoryValue(item, key)}`).join(' · ') || 'Empty record';
+  if (['sim_time', 'arrive_sim', 'deadline_sim', 'depart_sim'].includes(field) && Number.isFinite(value)) return formatHour(value);
+  if (['actor', 'courier', 'store'].includes(field)) return actorName(value);
+  return String(value).replaceAll('_', ' ');
+}
+
+function memoryCard(write, person) {
+  const card = element('div', null, `chat-memory memory-${write.mode}`);
+  const modes = {created: 'Memory created', updated: 'Memory updated', unchanged: 'Memory retained · no value changed', expired: 'Memory renewed · previous entry expired', unknown: 'Saved memory · previous value unavailable'};
+  card.append(element('strong', modes[write.mode] || 'Saved memory'));
+  if (person) card.append(element('p', `${person.name} · private ${person.role.toLowerCase()} memory`, 'memory-owner'));
+  const list = element('dl', null, 'memory-changes');
+  const metadata = new Set(['order', 'basket', 'actor', 'sim_time', 'fact_sequence']);
+  const appendChange = (change, target) => {
+    const row = element('div', null, 'memory-change');
+    row.append(element('dt', change.label));
+    const value = element('dd');
+    if (change.had_before && write.mode !== 'unknown') {
+      value.append(element('span', memoryValue(change.before, change.field), 'memory-before'), element('span', ' → ', 'memory-arrow'));
+    }
+    value.append(element('span', change.has_after ? memoryValue(change.after, change.field) : 'Removed', 'memory-after'));
+    row.append(value); target.append(row);
+  };
+  const secondary = change => metadata.has(change.field) || (['created', 'unknown'].includes(write.mode) && (change.field === 'action' || change.after === null));
+  const visible = write.changes.filter(change => !secondary(change));
+  if (write.mode === 'updated' && !visible.length) card.firstChild.textContent = 'Memory observation refreshed';
+  visible.forEach(change => appendChange(change, list));
+  if (visible.length) card.append(list);
+  const extra = write.changes.filter(secondary);
+  if (extra.length) {
+    const details = element('details', null, 'memory-metadata');
+    const values = element('dl', null, 'memory-changes');
+    extra.forEach(change => appendChange(change, values));
+    details.append(element('summary', 'Additional saved fields'), values); card.append(details);
+  }
+  card.append(element('p', `Observed ${formatHour(write.observed_sim)} · recall expires ${formatHour(write.expires_sim)}`, 'memory-validity'));
+  return card;
+}
+
 function renderOrderHistory(data, box, refresh) {
   box.replaceChildren();
   const header = element('div', null, 'order-history-heading');
@@ -791,11 +836,53 @@ function renderOrderHistory(data, box, refresh) {
   const button = element('button', 'Refresh history'); button.type = 'button'; button.addEventListener('click', refresh);
   header.append(button); box.append(header);
   if (data.order.reason) box.append(element('p', data.order.reason, 'order-outcome'));
-  if (data.call?.transcript) {
-    const call = element('section', null, 'order-section');
-    call.append(element('h3', 'Customer call'), element('p', data.call.transcript, 'order-transcript'));
-    box.append(call);
+  const chat = element('section', null, 'order-section order-conversation');
+  chat.append(element('h3', 'Order conversation'), element('p', 'Local simulation · named agents · simulation clock. Messages are readable renderings of recorded queue events; calls use the saved transcript.', 'conversation-note'));
+  if (data.decisions.length && !data.memory_history_complete) {
+    chat.append(element('p', 'This older run has incomplete memory history. Retained snapshots are shown where available; previous values were not recorded.', 'order-memory-note'));
   }
+  const messages = element('ol', null, 'chat-thread');
+  messages.setAttribute('aria-label', 'Recorded order conversation');
+  const eventById = new Map(data.events.map(event => [event.id, event]));
+  for (const message of data.conversation || []) {
+    const item = element('li', null, `chat-message chat-${message.sender.kind}`);
+    const avatar = element('span', message.sender.initials, 'chat-avatar'); avatar.setAttribute('aria-hidden', 'true');
+    const bubble = element('article', null, 'chat-bubble');
+    const heading = element('div', null, 'chat-heading');
+    const sender = element('div', null, 'chat-person');
+    sender.append(element('strong', message.sender.name), element('span', `${message.sender.role} · ${message.sender.entity}`));
+    const time = element('time', `${message.time_kind === 'due' ? 'Due ' : ''}${formatHour(message.sim_time)}`, 'chat-time mono');
+    time.title = message.time_kind === 'due' ? 'Scheduled queue delivery time; sent time was not recorded.' : 'Recorded simulation time when the sender queued this message.';
+    heading.append(sender, time);
+    bubble.append(heading, element('p', `To ${message.recipient.name} · ${message.recipient.entity}`, 'chat-recipient'), element('p', message.text, 'chat-text'));
+    const receipt = element('div', null, 'chat-receipt');
+    const waiting = ['ready', 'leased'].includes(message.state);
+    const receiptText = message.processed_sim !== null ? `${message.recipient.name} processed ${formatHour(message.processed_sim)}` : message.state === 'done' ? 'Queue acknowledged · no agent decision recorded' : `${waiting ? 'Awaiting processing' : 'No successful processing recorded'} · due ${formatHour(message.due_sim)}`;
+    receipt.append(stateBadge(message.state === 'done' ? 'processed' : message.state), element('span', receiptText));
+    if (message.attempts > 1) receipt.append(element('span', `${message.attempts} attempts`));
+    bubble.append(receipt);
+    if (message.outcome.action || message.outcome.status) {
+      const outcome = element('p', null, 'chat-outcome');
+      outcome.append(element('strong', `${message.recipient.name}: `), document.createTextNode(readableAction(message.outcome.action || message.outcome.status)));
+      if (message.outcome.status) outcome.append(document.createTextNode(' · '), stateBadge(message.outcome.status));
+      bubble.append(outcome);
+    }
+    if (message.outcome.reason) bubble.append(element('p', message.outcome.reason, 'chat-reason'));
+    const recordedError = eventById.get(message.event_id)?.error;
+    if (recordedError) bubble.append(element('p', `Message processing error: ${recordedError}`, 'chat-reason'));
+    for (const write of message.memory) bubble.append(memoryCard(write));
+    const evidence = jsonDetails(`Queue evidence · #${message.event_id} · ${message.topic}`, eventById.get(message.event_id));
+    evidence.classList.add('chat-evidence'); bubble.append(evidence);
+    if (message.sender.kind === 'system') {
+      const detail = element('details', null, 'chat-system-event');
+      const summary = element('summary', `${formatHour(message.sim_time)} · ${message.sender.name} → ${message.recipient.name} · ${readableAction(message.topic)}`);
+      detail.append(summary, bubble); item.append(avatar, detail);
+    } else item.append(avatar, bubble);
+    messages.append(item);
+  }
+  chat.append(messages);
+  if (!messages.childNodes.length) chat.append(element('p', 'No messages recorded yet.'));
+  box.append(chat);
   if (data.requests.length) {
     const ingredients = element('section', null, 'order-section');
     ingredients.append(element('h3', 'Ingredient requests · latest state'), table(['Ingredient', 'Quantity', 'Supermarket', 'Status'], data.requests.map(request => [request.ingredient, `${request.quantity} ${request.unit}`, entityName(request.market), stateBadge(request.status)])));
@@ -821,37 +908,16 @@ function renderOrderHistory(data, box, refresh) {
   }
   if (!timeline.length) steps.append(element('p', 'No steps recorded yet. This order may still be scheduled.'));
   box.append(steps);
-  const chat = element('section', null, 'order-section');
-  chat.append(element('h3', 'Calls & messages'), element('p', 'Recorded structured queue messages and simulated calls.'));
-  for (const event of data.events) {
-    const record = element('article', null, 'record');
-    const heading = element('div', null, 'record-head');
-    heading.append(element('time', formatHour(event.due_sim), 'mono'), element('strong', readableAction(event.topic)), stateBadge(event.state));
-    record.append(heading, element('p', `${actorName(event.sender)} → ${actorName(event.target_store || 'City audit')}`));
-    if (event.topic === 'household.call' && data.call?.transcript) record.append(element('p', data.call.transcript, 'order-transcript'));
-    record.append(jsonDetails(`Message #${event.id} · ${event.attempts} attempt(s)`, event.payload));
-    if (event.error) record.append(element('p', `Recorded error: ${event.error}`));
-    chat.append(record);
-  }
-  if (!data.events.length) chat.append(element('p', 'No messages recorded yet.'));
-  box.append(chat);
   const memory = element('section', null, 'order-section');
   memory.append(element('h3', 'Agent memory'));
-  if (data.decisions.length && !data.memory_history_complete) memory.append(element('p', 'This run predates complete memory history. Showing retained memory and the recorded decision context; earlier memory writes are unavailable.', 'order-memory-note'));
-  const writes = data.memory_history.length ? data.memory_history : data.memories;
-  for (const write of writes) {
-    const record = element('article', null, 'record');
-    record.append(element('p', `${formatHour(write.observed_sim)} · ${actorName(write.agent)} · ${write.key}`), jsonDetails('Recorded memory contents', write.body, true));
-    memory.append(record);
-  }
+  memory.append(element('p', 'Each card belongs to the receiving agent. Operator inspection does not grant other agents access to this memory.'));
+  const writes = (data.conversation || []).flatMap(message => message.memory.map(write => ({...write, person: message.recipient}))).sort((a, b) => a.observed_sim - b.observed_sim);
+  for (const write of writes) memory.append(memoryCard(write, write.person));
   if (!writes.length) memory.append(element('p', data.decisions.length ? 'No retained memory writes are available for this order.' : 'No agent has written memory for this order yet.'));
-  if (!data.memory_history_complete) {
-    for (const decision of data.decisions) memory.append(jsonDetails(`${formatHour(decision.sim_time)} · ${actorName(decision.agent)} · recorded context`, {memory_hits: decision.detail.memory_hits, observations: decision.detail.observed_state, rule: decision.detail.rule}));
-  }
   box.append(memory);
   const navigation = element('nav', null, 'order-history-navigation');
   navigation.setAttribute('aria-label', 'Order history sections');
-  for (const [label, section] of [['All steps', steps], ['Calls & messages', chat], ['Agent memory', memory]]) {
+  for (const [label, section] of [['Conversation', chat], ['All steps', steps], ['Agent memory', memory]]) {
     const link = element('button', label);
     link.type = 'button';
     link.addEventListener('click', () => section.scrollIntoView({block: 'start', behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'instant' : 'smooth'}));
@@ -989,7 +1055,7 @@ window.addEventListener('beforeunload', event => { if (draftDirty) { event.preve
     selectedId = draft.entities.find(entity => entity.kind === 'restaurant')?.id || draft.entities[0]?.id;
     agentEditScope = currentEntity()?.agent ? 'entity' : 'inherit';
     renderSettings(); renderEntityOptions(); renderEditor(); renderMetrics(); drawMap(true); updateButtons();
-    runId = sessionStorage.getItem('supply-run-id');
+    runId = new URLSearchParams(location.search).get('run') || sessionStorage.getItem('supply-run-id');
     if (runId) await pollRun();
   } catch (error) { showError(error); $('map-empty').textContent = 'City unavailable. Check the local API error above.'; }
 })();

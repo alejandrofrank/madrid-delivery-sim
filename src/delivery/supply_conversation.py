@@ -186,7 +186,11 @@ def conversation(data: dict[str, Any], entities: dict[str, dict[str, Any]]) -> l
             writes.setdefault(write["event_id"], []).append(memory_change(write))
     messages = []
     for event in data["events"]:
-        parent = decisions.get(event["parent_id"]) or facts.get(event["parent_id"])
+        parent = (
+            None
+            if event.get("producer") in _SYSTEM
+            else (decisions.get(event["parent_id"]) or facts.get(event["parent_id"]))
+        )
         decision = decisions.get(event["id"])
         fact = facts.get(event["id"])
         # Request details must come from the send-time after-image, never today's stock.

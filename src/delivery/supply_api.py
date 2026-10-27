@@ -137,7 +137,9 @@ def order_history(run: UUID, order_id: str = Path(min_length=1, max_length=200))
         assert session
         call = next((c for c in session["schedule"] if c["order_id"] == order_id), None)
         events = conn.execute(
-            "SELECT e.id,e.topic,e.producer,coalesce(p.target_store,e.producer) sender,"
+            "SELECT e.id,e.topic,e.producer,CASE WHEN e.producer IN "
+            "('lab_world','supply_ingress','lab_scenario') THEN e.producer "
+            "ELSE coalesce(p.target_store,e.producer) END sender,"
             "e.target_store,e.due_sim,e.state,e.trace_id,e.parent_id,e.payload,e.attempts,e.error "
             "FROM events e LEFT JOIN events p ON p.id=e.parent_id AND p.run_id=e.run_id "
             "WHERE e.run_id=%s AND (e.trace_id=%s OR e.payload->>'order'=%s "

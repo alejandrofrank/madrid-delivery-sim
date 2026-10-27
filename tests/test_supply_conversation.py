@@ -118,3 +118,8 @@ def test_conversation_uses_send_time_request_and_labels_unknown_timestamps() -> 
     assert message["memory"][0]["mode"] == "created"
     data["facts"] = []
     assert conversation(data, {})[1]["text"] == "Can you supply this ingredient request?"
+    # A world message's parent links its cause; it does not identify its sender/time.
+    data["events"][0]["producer"] = "lab_world"
+    data["decisions"].append({"event_id": 1, "sim_time": 10, "detail": {}})
+    assert conversation(data, {})[1]["time_kind"] == "due"
+    assert conversation(data, {})[1]["sim_time"] == 50

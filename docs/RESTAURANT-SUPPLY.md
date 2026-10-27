@@ -217,23 +217,42 @@ supports per-ingredient opening stock and per-entity or shared agent definitions
 
 Click the **Orders** metric to open all orders for the current run, independent of
 the map selection. Each order expands into its customer call, ingredient requests,
-complete timeline, queued messages and agent memory. Section buttons jump between
-steps, messages and memory; expanded orders stay open during live updates. Future
-calls are marked scheduled. The evidence download fetches the complete server
+complete timeline, queued messages and agent memory. The order opens with a chat:
+stable fictional agent names, entity/role labels, simulation timestamps, delivery
+receipts and readable memory changes. Raw queue evidence remains collapsed.
+Section buttons jump between conversation, steps and memory; expanded orders stay
+open during live updates. Future calls remain listed as scheduled before arrival.
+
+The run URL accepts `?run=<run UUID>` so a frozen conversation can be reopened.
+New runs update that URL. System scheduling and world events are compact
+disclosures; customer and agent messages display as chat bubbles. A queue ACK
+without an agent decision is labeled explicitly, rather than inventing a receipt
+time or memory change. Memory snapshots without a prior baseline are also labeled.
+
+Conversation verification on 2026-10-27: 32 focused runtime, API, presentation and
+supply tests passed. After correcting world-event sender attribution, the 11
+presentation/API checks passed again. Ruff, JavaScript syntax and mypy (35 source
+files) passed. Browser checks covered the existing 64-order run, persistent order
+expansion across entity selection, keyboard collapse, legacy memory labels and a
+fresh two-order run with named agents and visible before/after memory changes.
+Both fresh meals delivered; replay matched and stock conservation, nonnegative
+stock and canonical units passed. The provider remained disabled. No browser
+console errors or horizontal overflow were observed at the default viewport.
+
+See [memory architecture and next steps](AGENT-MEMORY.md) for enterprise references
+and the distinction between current working records and proposed long-term recall.
+
+The evidence download fetches the complete server
 bundle rather than exporting only the dashboard's recent window.
 
 From 2026-10-27, successful memory writes are retained in the same transaction as
 the decision and event acknowledgement. The order inspector can show those actual
 writes after live memory expires. Older runs show retained memory and recorded
 decision context, with an explicit notice when historical writes are unavailable.
+New writes also retain the prior same-key value and its expiry, so the UI can
+distinguish changes, unchanged values, expired entries and unknown baselines.
 The history belongs to the trusted operator view; agent recall tools retain their
 existing identity, scope and expiry rules.
-
-Order inspection was verified with seven API tests and 20 runtime/supply tests,
-plus lint and type checks. Browser checks on an existing 64-order run confirmed
-all orders remain visible across store selections, complete per-order steps and
-messages load, memory coverage is labeled accurately, and keyboard expansion and
-section shortcuts work without browser errors.
 
 The default Compose configuration binds the application to loopback, sets
 `LLM_PROVIDER=disabled`, and uses local services. No Jev, telephony, speech,

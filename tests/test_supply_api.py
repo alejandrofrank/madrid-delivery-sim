@@ -176,6 +176,9 @@ def test_complete_order_history_is_scoped_and_not_a_recent_event_window(
     assert call["text"] == history["call"]["transcript"]
     assert call["sender"]["role"] == "Customer agent" and call["time_kind"] == "sent"
     assert call["recipient"]["role"] == "Kitchen agent"
+    arrivals = [m for m in history["conversation"] if m["topic"] == "delivery.arrived"]
+    assert arrivals and all(m["sender"]["id"] == "lab_world" for m in arrivals)
+    assert all(m["time_kind"] == "due" for m in arrivals)
     changes = [w for m in history["conversation"] for w in m["memory"]]
     assert changes and any(w["mode"] == "created" for w in changes)
     assert any(w["mode"] == "updated" for w in changes)
