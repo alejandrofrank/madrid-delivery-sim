@@ -69,6 +69,9 @@ entries and 16,384 bytes; default TTL is one simulated hour. Canonical stock rem
 authoritative when memory is stale or poisoned. Vector retrieval and shared summaries
 are future work.
 
+See [memory implementation and enterprise references](AGENT-MEMORY.md) for the
+audited before/after writes, current limitations and proposed evaluation sequence.
+
 Default per-agent caps: 100 event attempts, eight reserved tool slots per attempt,
 400 slots per run. Aggregate caps are 500 attempts and 2,000 slots per run. The
 database durably reserves an attempt and its full slot allowance before handling.
