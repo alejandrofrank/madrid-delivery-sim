@@ -266,6 +266,17 @@ class ScopedTools:
             raise ValueError("Invalid memory key or TTL")
         if len(json.dumps(body, ensure_ascii=False).encode()) > 2048:
             raise ValueError("Memory entry exceeds byte limit")
+        # Read through the same authenticated connection and transaction as the write.
+        # Expired entries are not an active baseline, but retain that distinction for audit.
+        self.__conn.execute(
+            "SELECT pg_advisory_xact_lock(hashtextextended(%s,0))",
+            (f"memory:{self.scope.run}:{self.scope.store}:{key}",),
+        )
+        previous = self.__conn.execute(
+            "SELECT body,observed_sim,expires_sim,event_id FROM agent_memories "
+            "WHERE run_id=%s AND store=%s AND key=%s FOR UPDATE",
+            (self.scope.run, self.scope.store, key),
+        ).fetchone()
         self.__conn.execute(
             "DELETE FROM agent_memories WHERE run_id=%s AND store=%s AND expires_sim<=%s",
             (self.scope.run, self.scope.store, self.sim),
@@ -291,6 +302,7 @@ class ScopedTools:
                 "body": json.loads(json.dumps(body)),
                 "observed_sim": self.sim,
                 "expires_sim": self.sim + ttl_seconds,
+                "previous": previous,
             }
         )
 

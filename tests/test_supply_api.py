@@ -170,6 +170,15 @@ def test_complete_order_history_is_scoped_and_not_a_recent_event_window(
     assert all(fact["detail"]["order"] == order["id"] for fact in history["facts"])
     assert history["memory_history_complete"] and history["memory_history"]
     assert all(write["key"] == f"last:{order['id']}" for write in history["memory_history"])
+    assert all("previous" in write for write in history["memory_history"])
+    assert len(history["conversation"]) == len(history["events"])
+    call = next(m for m in history["conversation"] if m["topic"] == "household.call")
+    assert call["text"] == history["call"]["transcript"]
+    assert call["sender"]["role"] == "Customer agent" and call["time_kind"] == "sent"
+    assert call["recipient"]["role"] == "Kitchen agent"
+    changes = [w for m in history["conversation"] for w in m["memory"]]
+    assert changes and any(w["mode"] == "created" for w in changes)
+    assert any(w["mode"] == "updated" for w in changes)
     assert all(request["order_id"] == order["id"] for request in history["requests"])
     event_ids = {event["id"] for event in history["events"]}
     assert all(decision["event_id"] in event_ids for decision in history["decisions"])
@@ -193,6 +202,7 @@ def test_order_history_marks_legacy_memory_and_rejects_unknown_scopes(
     history = supply_api.client.get(f"/api/supply/runs/{run}/orders/{order_id}").json()
     assert not history["memory_history_complete"] and history["memory_history"] == []
     assert history["decisions"] and history["events"]
+    assert all(w["mode"] == "unknown" for m in history["conversation"] for w in m["memory"])
     for path in (
         f"/api/supply/runs/{uuid4()}/orders/{order_id}",
         f"/api/supply/runs/{run}/orders/unknown-order",

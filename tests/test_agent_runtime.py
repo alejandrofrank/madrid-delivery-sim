@@ -203,6 +203,45 @@ def test_memory_ttl_and_database_caps(db_url: str, fleet: Fleet) -> None:
         assert tools.invoke("memory.read") == []
 
 
+def test_memory_audit_captures_previous_value_and_rolls_back_with_the_write(
+    db_url: str, fleet: Fleet
+) -> None:
+    request(db_url, fleet)
+    agent = fleet.agents["store-1"]
+    event = claim(fleet)
+    assert agent.reserve_budget(event)
+    with connect(agent.dsn) as conn:
+        tools = ScopedTools(conn, agent.scope, agent.role, event)
+        body = {"status": "sourcing"}
+        tools.invoke("memory.write", key="order", body=body, ttl_seconds=10)
+        body["status"] = "mutated outside the tool"
+        assert tools.memory_writes[0]["previous"] is None
+        assert tools.memory_writes[0]["body"] == {"status": "sourcing"}
+    with connect(agent.dsn) as conn:
+        tools = ScopedTools(conn, agent.scope, agent.role, event)
+        with pytest.raises(RuntimeError), conn.transaction():
+            tools.invoke("memory.write", key="order", body={"status": "cooking"})
+            assert tools.memory_writes[0]["previous"]["body"] == {"status": "sourcing"}
+            raise RuntimeError("crash before commit")
+    with connect(db_url) as conn:
+        row = conn.execute(
+            "SELECT body FROM agent_memories WHERE run_id=%s AND key='order'", (fleet.run,)
+        ).fetchone()
+        assert row["body"] == {"status": "sourcing"}
+        assert (
+            conn.execute(
+                "SELECT count(*) n FROM decisions WHERE run_id=%s", (fleet.run,)
+            ).fetchone()["n"]
+            == 0
+        )
+        conn.execute("UPDATE runs SET sim_time=10 WHERE id=%s", (fleet.run,))
+    with connect(agent.dsn) as conn:
+        tools = ScopedTools(conn, agent.scope, agent.role, event)
+        tools.invoke("memory.write", key="order", body={"status": "ready"})
+        assert tools.memory_writes[0]["previous"]["expires_sim"] == 10
+        assert tools.memory_writes[0]["previous"]["body"] == {"status": "sourcing"}
+
+
 def test_role_is_frozen_and_budget_blocks_effects(db_url: str, fleet: Fleet) -> None:
     request(db_url, fleet)
     agent = fleet.agents["store-1"]

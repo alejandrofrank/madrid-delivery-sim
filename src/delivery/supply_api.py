@@ -25,6 +25,7 @@ from delivery.supply import (
     save_blueprint,
     supply_snapshot,
 )
+from delivery.supply_conversation import conversation
 from delivery.supply_models import SupplyConfig
 
 router = APIRouter()
@@ -145,7 +146,8 @@ def order_history(run: UUID, order_id: str = Path(min_length=1, max_length=200))
         ).fetchall()
         event_ids = [event["id"] for event in events]
         facts = conn.execute(
-            "SELECT sequence,event_id,actor,kind,sim_time,hash,payload->'detail' detail "
+            "SELECT sequence,event_id,actor,kind,sim_time,hash,payload->'detail' detail,"
+            "payload->'projection'->'requests' request_state "
             "FROM supply_facts WHERE run_id=%s AND order_id=%s ORDER BY sequence",
             (run, order_id),
         ).fetchall()
@@ -166,7 +168,17 @@ def order_history(run: UUID, order_id: str = Path(min_length=1, max_length=200))
             "SELECT * FROM supply_requests WHERE run_id=%s AND order_id=%s ORDER BY id",
             (run, order_id),
         ).fetchall()
-    return {
+        identities = {order["household"], order["restaurant"]}
+        for event in events:
+            for identity in (event["sender"], event["target_store"]):
+                if identity:
+                    identities.add(identity)
+                    identities.add(identity.split(":", 1)[-1])
+        entities = conn.execute(
+            "SELECT id,name,kind FROM supply_entities WHERE run_id=%s AND id=ANY(%s)",
+            (run, list(identities)),
+        ).fetchall()
+    result = {
         "order": order,
         "call": call,
         "events": events,
@@ -182,6 +194,8 @@ def order_history(run: UUID, order_id: str = Path(min_length=1, max_length=200))
         and all("memory_writes" in decision["detail"] for decision in decisions),
         "requests": requests,
     }
+    result["conversation"] = conversation(result, {e["id"]: e for e in entities})
+    return result
 
 
 @router.get("/api/supply/runs/{run}/agents/{agent_id}")
