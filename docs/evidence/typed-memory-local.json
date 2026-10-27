@@ -1,0 +1,134 @@
+{
+  "run": "e6c7ca97-3f43-43d7-86ba-750192a77dbc",
+  "delivered": 2,
+  "events": 48,
+  "dead_letters": 0,
+  "typed_revisions": 42,
+  "recalled_facts": 26,
+  "model_calls": 0,
+  "invariants": {
+    "stock_nonnegative": true,
+    "stock_conserved": true,
+    "canonical_units": true
+  },
+  "replay": {
+    "matches": true,
+    "hash_chain_valid": true,
+    "projections": {
+      "stock": true,
+      "orders": true,
+      "requests": true,
+      "allocations": true,
+      "delivery_jobs": true
+    },
+    "facts": 48,
+    "hash": "eaec338f134ce79d243a841575212dca695275e88ac7b7ce6a699673b619f6cc",
+    "counts": {
+      "stock": 68,
+      "orders": 2,
+      "requests": 8,
+      "allocations": 8,
+      "delivery_jobs": 2
+    },
+    "model_calls": 0
+  },
+  "verification_date": "2026-10-28",
+  "timezone": "Europe/Madrid",
+  "tests": {
+    "full_suite_passed": 307,
+    "ruff": "passed",
+    "javascript_syntax": "passed",
+    "mypy_source_files": 36
+  },
+  "browser": {
+    "new_order_recall": "passed",
+    "legacy_64_order_history": "passed",
+    "console_errors": 0,
+    "horizontal_overflow": false
+  },
+  "isolation_cases": [
+    "other order, role and store denied",
+    "market recall limited to current request",
+    "courier recall limited to addressed attempt",
+    "raw memory and decision table reads denied",
+    "expired/superseded revisions excluded",
+    "repeatable-read and serializable snapshots denied",
+    "source forgery and unknown fields denied",
+    "tool charges and capacity serialized",
+    "stale lease and ACK rejection fenced"
+  ],
+  "scope": "Local deterministic workers and exact indexed recall; no cloud or embedding service enabled",
+  "limits": [
+    "Trusted local operator and host can inspect all run evidence",
+    "Observations do not override transactional inventory/custody/consent",
+    "Semantic recall and comparative quality/latency benchmarks are future work",
+    "The scarce-stock default still has 57 failed meal orders, 21 open physical delivery jobs and three late physical deliveries; these are retained business outcomes, not memory or queue successes"
+  ],
+  "supplier_retention_seconds": {
+    "pending": 3600,
+    "finished_or_forwarded": 60
+  },
+  "regressions_found": [
+    {
+      "symptom": "Default city exhausted market-a live memory at 64 ingredient requests",
+      "fix": "Keep terminal supplier revisions for 60 simulated seconds of recall while retaining audit history; pending reservations retain 3600 seconds",
+      "capacity_increased": false,
+      "regression_test": "test_completed_supplier_memory_expires_but_keeps_revision_history"
+    }
+  ],
+  "default_city": {
+    "run": "50e08b0c-5ade-4361-9980-9fa82d65a7a5",
+    "metrics": {
+      "scheduled_calls": 64,
+      "events": 1762,
+      "dead_letters": 0,
+      "retries": 0,
+      "delivered": 7,
+      "unfinished_orders": 0,
+      "open_delivery_jobs": 21,
+      "late_physical_deliveries": 3,
+      "model_calls": 0,
+      "model_provider": "disabled",
+      "search_reserved_calls": 0,
+      "search_reserved_input_tokens": 0,
+      "search_unknown_usage_calls": 0,
+      "search_actual_input_tokens": null,
+      "search_actual_output_tokens": null,
+      "decision_mode": "local_rules",
+      "transport": "durable_queue",
+      "call_mode": "simulated_transcript",
+      "communication_latency_seconds": 5
+    },
+    "invariants": {
+      "stock_nonnegative": true,
+      "stock_conserved": true,
+      "canonical_units": true
+    },
+    "replay": {
+      "matches": true,
+      "hash_chain_valid": true,
+      "projections": {
+        "stock": true,
+        "orders": true,
+        "requests": true,
+        "allocations": true,
+        "delivery_jobs": true
+      },
+      "facts": 1791,
+      "hash": "50c02ca6f42c735dab00249136edcb5bc6ea157888edfec1b04140c8365e02c3",
+      "counts": {
+        "stock": 170,
+        "orders": 64,
+        "requests": 248,
+        "allocations": 125,
+        "delivery_jobs": 31
+      },
+      "model_calls": 0
+    },
+    "business_outcomes": {
+      "delivered": 7,
+      "failed": 57,
+      "unfinished_meal_orders": 0
+    }
+  }
+}

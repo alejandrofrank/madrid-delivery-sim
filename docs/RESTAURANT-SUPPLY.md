@@ -176,7 +176,8 @@ raw SQL, filesystem, arbitrary network, or code execution argument. Supply roles
 do not receive the general `queue.publish` capability.
 
 A market projection omits household identity, preferences, full menu, recipe, and
-restaurant pantry. Private memory uses the same authenticated namespace. The
+restaurant pantry. Typed private memory is bound to that identity's current leased
+order; markets are further restricted to the current ingredient request. The
 operator inspector can inspect each identity for debugging; that broader human
 view is not inserted into a market's context.
 
@@ -249,10 +250,13 @@ From 2026-10-27, successful memory writes are retained in the same transaction a
 the decision and event acknowledgement. The order inspector can show those actual
 writes after live memory expires. Older runs show retained memory and recorded
 decision context, with an explicit notice when historical writes are unavailable.
-New writes also retain the prior same-key value and its expiry, so the UI can
-distinguish changes, unchanged values, expired entries and unknown baselines.
-The history belongs to the trusted operator view; agent recall tools retain their
-existing identity, scope and expiry rules.
+Typed writes append revisions with source events, observation time and expiry.
+The operator reconstructs before/after changes from that ledger; agent write
+receipts do not disclose previous bodies. The memory section shows the actual
+fact IDs and revisions recalled for each decision. Live recall excludes other
+roles, orders, ingredient requests, expired facts and superseded revisions.
+The history belongs to the trusted operator view and is unavailable through agent
+table access or the retired broad memory endpoint.
 
 The default Compose configuration binds the application to loopback, sets
 `LLM_PROVIDER=disabled`, and uses local services. No Jev, telephony, speech,
@@ -270,7 +274,8 @@ or cloud model is enabled by starting a supply run.
 | `POST .../agents/{agent}/calls` | Process an owned household intent; the command queues its restaurant call |
 | `POST .../agents/{agent}/messages` | Process the exact owned event ID, lease token and attempt; arbitrary payloads/recipients are rejected |
 | `POST .../agents/{agent}/search` | Same lease envelope plus `query` and `mode`; fresh own-stock observations only |
-| `GET .../agents/{agent}/memory` | Bearer token and database role restrict retrieval to its own namespace |
+| `POST .../agents/{agent}/memory/recall` | Bearer token + current event lease; typed facts for own role/order/request, expiry and result bounds |
+| `GET .../agents/{agent}/memory` | Retired (410); broad namespace recall is unavailable |
 | `GET .../entities/{entity}/search?query=...` | Operator's free local ingredient search, available after a run finishes |
 | `GET .../replay`, `GET .../evidence` | Operator verification and complete JSON bundle |
 

@@ -62,15 +62,17 @@ M1 still uses its original shared database account.
 
 ## Memory and budgets
 
-Private JSON episodes carry run/store, source event, observed simulation time and
-expiry. Retrieval excludes expired entries. Writes enforce per-entry size, entry
+Private typed facts carry role, order, source event, revision, observed simulation
+time and expiry. Recall derives scope from the current incoming lease and excludes
+other orders, roles, expired facts and superseded revisions. Agents cannot browse
+the underlying history or decision bodies. Writes enforce per-entry size, entry
 count and aggregate bytes, including concurrent writes. Default caps are 32 live
 entries and 16,384 bytes; default TTL is one simulated hour. Canonical stock remains
 authoritative when memory is stale or poisoned. Vector retrieval and shared summaries
 are future work.
 
 See [memory implementation and enterprise references](AGENT-MEMORY.md) for the
-audited before/after writes, current limitations and proposed evaluation sequence.
+typed schemas, selective recall, audited history and proposed evaluation sequence.
 
 Default per-agent caps: 100 event attempts, eight reserved tool slots per attempt,
 400 slots per run. Aggregate caps are 500 attempts and 2,000 slots per run. The

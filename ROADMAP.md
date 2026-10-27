@@ -1,6 +1,14 @@
 # Roadmap: Bakiano delivery operations lab
 
-Updated 2026-10-26. Implemented slices are identified below; remaining milestones are planned.
+Updated 2026-10-28. Implemented slices are identified below; remaining milestones are planned.
+
+Typed memory slice: nine role-specific fact contracts now enforce source-event
+provenance, revision history and expiry. Recall derives the current order from a
+live incoming lease; markets see only the current ingredient request and couriers
+only the addressed assignment attempt. Private table/history browsing is denied.
+The order inspector shows what each decision actually recalled. This advances M6;
+semantic recall, consolidation and comparative decision-quality evals remain planned.
+See [memory boundaries and next steps](docs/AGENT-MEMORY.md).
 
 Restaurant supply slice: scheduled household meal calls now pass through isolated
 restaurant and market agents, ingredient reservation/forwarding, explicit household

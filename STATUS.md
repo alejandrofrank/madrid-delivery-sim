@@ -1,5 +1,18 @@
 # Status
 
+2026-10-28: Added nine typed memory contracts and selective recall bound to
+an authenticated incoming event lease. Role, order, market request and courier
+attempt boundaries are enforced in Postgres; source events, revision history,
+expiry, capacity and tool admission are retained. Raw memory/decision browsing
+and direct queue mutation are denied. The order inspector shows recalled facts
+with revisions and sources. Full local suite: 307 passed; Ruff, JavaScript syntax
+and mypy (36 source files) passed. Fresh smoke: two delivered meals, 48 events,
+42 memory revisions, 26 recalled facts, zero dead letters/model calls; replay and
+all inventory invariants passed. Default 64-order run: 1,762 events, zero retries/dead letters/model calls; replay
+matched, with the existing seven delivered/57 failed meal outcomes retained.
+Browser checked new and legacy histories.
+See docs/AGENT-MEMORY.md and docs/evidence/typed-memory-local.json.
+
 2026-10-25: Added one-command GCP judge start/stop/status while city/environment
 and event workers stay local. Verified a live start and two-phase stop: one
 private gateway/repository when active, no runtime and billing disabled at finish,

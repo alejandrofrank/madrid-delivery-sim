@@ -800,6 +800,7 @@ function memoryCard(write, person) {
   const card = element('div', null, `chat-memory memory-${write.mode}`);
   const modes = {created: 'Memory created', updated: 'Memory updated', unchanged: 'Memory retained · no value changed', expired: 'Memory renewed · previous entry expired', unknown: 'Saved memory · previous value unavailable'};
   card.append(element('strong', modes[write.mode] || 'Saved memory'));
+  if (write.kind) card.append(element('p', `${readableAction(write.kind)} · revision ${write.version} · source event #${write.event_id}`, 'memory-validity'));
   if (person) card.append(element('p', `${person.name} · private ${person.role.toLowerCase()} memory`, 'memory-owner'));
   const list = element('dl', null, 'memory-changes');
   const metadata = new Set(['order', 'basket', 'actor', 'sim_time', 'fact_sequence']);
@@ -914,6 +915,26 @@ function renderOrderHistory(data, box, refresh) {
   const writes = (data.conversation || []).flatMap(message => message.memory.map(write => ({...write, person: message.recipient}))).sort((a, b) => a.observed_sim - b.observed_sim);
   for (const write of writes) memory.append(memoryCard(write, write.person));
   if (!writes.length) memory.append(element('p', data.decisions.length ? 'No retained memory writes are available for this order.' : 'No agent has written memory for this order yet.'));
+  const recalled = element('details', null, 'memory-recall-audit');
+  recalled.append(element('summary', 'What agents recalled for this order'));
+  const people = new Map((data.conversation || []).map(message => [message.event_id, message.recipient]));
+  const factsById = new Map((data.typed_memory || []).map(fact => [fact.id, fact]));
+  for (const decision of data.decisions) {
+    for (const read of decision.detail.memory_reads || []) {
+      const item = element('article', null, 'record');
+      const person = people.get(decision.event_id);
+      item.append(element('p', `${formatHour(decision.sim_time)} · ${person?.name || actorName(decision.agent)} · ${read.facts.length} relevant fact(s)`));
+      for (const fact of read.facts) {
+        const saved = factsById.get(fact.fact_id);
+        item.append(element('p', `${readableAction(fact.kind)} · revision ${fact.version} · source event #${fact.event_id} · expires ${formatHour(fact.expires_sim)}`, 'memory-validity'));
+        if (saved) item.append(statList(Object.entries(saved.body).map(([key, value]) => [readableAction(key), memoryValue(value, key)])));
+      }
+      if (!read.facts.length) item.append(element('p', 'No live matching facts. Other orders, roles, expired values and older revisions are excluded.'));
+      recalled.append(item);
+    }
+  }
+  if (recalled.childNodes.length === 1) recalled.append(element('p', 'This run predates typed recall auditing.'));
+  memory.append(recalled);
   box.append(memory);
   const navigation = element('nav', null, 'order-history-navigation');
   navigation.setAttribute('aria-label', 'Order history sections');
