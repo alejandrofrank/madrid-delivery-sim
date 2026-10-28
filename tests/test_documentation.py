@@ -3,6 +3,7 @@
 import hashlib
 import json
 import runpy
+import xml.etree.ElementTree as ET
 from pathlib import Path
 
 import pytest
@@ -27,7 +28,7 @@ def test_reference_loads_without_database_or_provider_access(monkeypatch):
     assert response.status_code == 200
     body = response.json()
     ids = [page["id"] for page in body["pages"]]
-    assert len(ids) == len(set(ids)) == 18
+    assert len(ids) == len(set(ids)) == 19
     assert {"overview", "decisions", "capabilities", "enterprise-gcp", "memory"} <= set(ids)
     assert all(page["body"].startswith("# ") for page in body["pages"])
     assert "source_fingerprint" not in body  # Reference review is not a live health receipt.
@@ -106,3 +107,30 @@ def test_reviewed_links_match_the_explicit_source_catalogue():
     manifest = documentation.catalogue()
     assert checker["linked_sources"](manifest) == set(manifest["sources"])
     assert all(checker["public_source"](path) for path in manifest["sources"])
+
+
+def test_every_tool_generated_diagram_has_visible_labels_and_no_active_content():
+    directory = ROOT / "web/diagrams"
+    manifest = json.loads((directory / "manifest.json").read_text(encoding="utf-8"))
+    assert manifest["generator"] == {"name": "D2", "version": "0.9.0", "layout": "elk"}
+    client = TestClient(app)
+    labels = []
+    for diagram in manifest["diagrams"]:
+        response = client.get(diagram["asset"])
+        assert response.status_code == 200
+        assert hashlib.sha256(response.content).hexdigest() == diagram["svg_sha256"]
+        root = ET.fromstring(response.content)
+        visible = []
+        for node in root.iter():
+            tag = node.tag.rsplit("}", 1)[-1]
+            assert tag not in {"script", "foreignObject", "image", "a"}
+            if tag == "text":
+                visible.append(" ".join(node.itertext()).strip())
+        assert sum(bool(label) for label in visible) >= 3
+        labels.extend(visible)
+    assert any("Postgre" in label or "Postgres" in label for label in labels)
+    assert any("Cloud Run" in label for label in labels)
+    checker = runpy.run_path(str(ROOT / "scripts/render_documentation_diagrams.py"))
+    checker["validate_mapping"](
+        json.loads((ROOT / "docs/diagrams/catalogue.json").read_text()), False
+    )

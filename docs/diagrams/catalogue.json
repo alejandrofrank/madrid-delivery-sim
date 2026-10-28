@@ -1,0 +1,9 @@
+[
+  {"id":"system-boundary","page":"overview","index":0,"document":"docs/ARCHITECTURE-OVERVIEW.md","title":"System boundaries","description":"Local city, workers and PostgreSQL with the optional IAM-authenticated GCP judgement boundary."},
+  {"id":"meal-handoffs","page":"overview","index":1,"document":"docs/ARCHITECTURE-OVERVIEW.md","title":"Meal handoffs","description":"Queued household, restaurant, market, dispatcher and courier handoffs with explicit substitution consent and physical arrival."},
+  {"id":"agent-transaction","page":"agent-implementation","index":0,"document":"docs/AGENT-IMPLEMENTATION.md","title":"An agent's transaction","description":"A committed attempt reservation precedes the atomic transaction for tool effects, memory, outgoing events and ACK."},
+  {"id":"restaurant-supply","page":"restaurant-supply","index":0,"document":"docs/RESTAURANT-SUPPLY.md","title":"Restaurant supply and consent","description":"Ingredient sourcing and shortage forwarding return to the restaurant; substitutions require household approval."},
+  {"id":"delivery-queue","page":"delivery-flow","index":0,"document":"docs/DELIVERY-FLOW.md","title":"Delivery queue lineage","description":"Inventory, fulfillment, dispatch and physical world events pass through the PostgreSQL queue."},
+  {"id":"gcp-components","page":"gcp-components","index":0,"document":"docs/GCP-COMPONENTS.md","title":"GCP component boundary","description":"The scoped local workers invoke a dedicated GCP project through the CloudJudge client and Cloud Run IAM."},
+  {"id":"durable-inference","page":"durable-inference","index":0,"document":"docs/DURABLE-INFERENCE.md","title":"Durable inference lifecycle","description":"Short transactions persist request, dispatch and result around provider I/O. Fresh validation commits an approved or denied receipt, memory, outbox and ACK atomically; an uncertain dispatch is never automatically resent."}
+]

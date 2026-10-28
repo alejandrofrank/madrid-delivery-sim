@@ -1,0 +1,18 @@
+...@common
+shape: sequence_diagram
+scenario: Scenario
+queue: Postgres queue {class: durable}
+inventory: Inventory / own store
+fulfillment: Fulfillment / own store
+dispatcher: Dispatcher / run fleet
+world: Trusted physical world
+scenario -> queue: basket.requested
+queue -> inventory: Inventory handles the addressed event
+inventory -> queue: basket.reserved
+queue -> fulfillment: Fulfillment handles the addressed event
+fulfillment -> queue: basket.ready
+queue -> dispatcher: Dispatcher handles the addressed event
+dispatcher -> queue: delivery.assigned
+world -> queue: delivery.arrived
+dispatcher -> queue: delivery.completed
+(** -> **)[*].style: ${edge-style}

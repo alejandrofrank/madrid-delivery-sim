@@ -156,7 +156,9 @@ sequenceDiagram
 ```
 
 `LocalAgent.process` first commits the attempt/tool reservation. Optional GCP mode
-also commits its separate model reservation. Then `Queue.process` obtains the run
+then prepares a durable scoped request, commits its single-dispatch admission,
+closes the worker's database connection, invokes the provider and saves its result
+in a separate short transaction. Then `Queue.process` obtains the run
 advisory lock and event row lock, checks the fence, reloads the authoritative
 payload and invokes `handle`. The handler selects `InventoryPolicy`, `SupplyPolicy`
 or `WorkflowPolicy`/`FleetPolicy` and records the decision before ACK commits.
@@ -167,12 +169,16 @@ separately. Durable attempt/model reservations are not refunded. Deduplication
 and domain invariants provide idempotent business effects; they do not establish
 exactly-once external inference or billing. See [queue.py](../src/delivery/queue.py).
 
-**Current cloud limitation:** `FleetPolicy.cloud_judgement` performs remote I/O
-inside that effects transaction. Its model audit commits separately. There is no
-completed-response cache, and a later event attempt can reserve another call.
-Enterprise refactoring must persist a request, release locks, invoke, then apply
-a result after revalidating authoritative versions and deadlines. The optional
-ingredient search path already releases its database connections before I/O.
+**Durable cloud path:** `FleetPolicy.cloud_judgement` only consumes a saved result;
+it cannot invoke the provider. The effects transaction compares the saved context,
+proposal, memory and simulated time with current authoritative observations before
+SQL independently checks feasibility. A retry of the same source event reuses a
+saved result without another model charge. An abandoned in-flight invocation has
+an unknown outcome and fails closed rather than automatically resending. The
+request snapshot and its preparatory read/tool receipts commit independently of
+the final effects transaction. See [durable inference](DURABLE-INFERENCE.md),
+[orchestration](../src/delivery/durable_inference.py) and the
+[request state machine](../sql/migrations/016_durable_inference.sql).
 
 ## Permissions and memory are enforced outside the prompt
 

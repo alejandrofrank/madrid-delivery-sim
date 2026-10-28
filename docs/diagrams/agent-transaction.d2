@@ -1,0 +1,20 @@
+...@common
+shape: sequence_diagram
+controller: Trusted controller
+agent: Scoped LocalAgent
+queue: PostgreSQL queue
+tools: Domain tools + memory
+controller -> queue: Publish an addressed event
+agent -> queue: Claim with role subscriptions
+queue -> agent: Event + attempt + fenced lease token {style.stroke-dash: 4}
+reservation: Committed reservation {
+  agent -> queue: Reserve attempt + full tool allowance
+}
+effects: Effects transaction — commit or roll back together {
+  agent -> queue: Begin transaction + validate lease
+  agent -> tools: Read authoritative facts + current-context memory
+  agent -> tools: Allowed actions + append memory revisions
+  agent -> queue: Decision receipt + outgoing events
+  agent -> queue: ACK in the same transaction
+}
+(** -> **)[*].style: ${edge-style}

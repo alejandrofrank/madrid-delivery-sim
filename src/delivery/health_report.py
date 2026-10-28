@@ -50,6 +50,8 @@ SOURCE_SUFFIXES = {
     ".toml",
     ".lock",
     ".md",
+    ".svg",
+    ".d2",
     ".gz",
 }
 EXCLUDED_PARTS = {

@@ -18,7 +18,7 @@ An agent is a versioned identity with a goal, a bounded decision loop, observati
 permitted actions and durable accountability. Its lifecycle is:
 
 claim event -> verify authenticated scope -> commit durable attempt/tool allowance
--> reserve model allowance if enabled -> begin fenced effects transaction -> load
+-> prepare/invoke/save outside effects transaction if enabled -> begin fenced effects transaction -> load
 permitted facts/memory -> decide and execute permitted tools -> record outcome,
 memory and outgoing events -> commit those effects and ACK atomically.
 
@@ -186,17 +186,17 @@ it does not establish exactly-once business effects or external model billing.
 Sources: [ambient agents](https://adk.dev/runtime/ambient-agents/),
 [Pub/Sub delivery guarantees](https://docs.cloud.google.com/pubsub/docs/exactly-once-delivery).
 
-Required enterprise target, **not current GCP judge behavior**: model calls run
-outside long stock transactions. Reserve budget durably, create an
-invocation record, retrieve only scoped facts, invoke with bounded retries, validate
-structured output, recheck state versions, then apply domain effects and publish
-results atomically. Cache completed invocations. An ambiguous paid request must not
-automatically spend again after a crash. A stale proposal must revalidate or escalate.
-
-Currently the judge calls Cloud Run inside the queue effects transaction and holds
-run/event locks while waiting. Its reservation/audit is separately committed;
-completed responses are not reused, and a later event attempt can spend again.
-The enterprise guide prioritizes splitting this into durable request/result phases.
+Implemented for the optional judge: model calls run outside worker database
+connections. A fenced request snapshots scoped facts, local proposal, recall and
+identity. Before dispatch, current context/time/recall and remaining tool slots
+are checked; a single-dispatch marker and call/token allowance commit first.
+Structured results are saved separately. A fresh effects transaction revalidates
+the snapshot before applying domain effects, memory, outgoing events and ACK
+atomically. Reclaimed events reuse saved results without another call. An uncertain
+dispatch fails closed rather than automatically spending again. Legacy calls
+without a compatible durable snapshot are also denied without resend.
+See [durable inference](DURABLE-INFERENCE.md). Gateway-wide monetary admission,
+supervisor recovery and distributed tracing remain enterprise follow-up work.
 
 ## Next implementation gate
 

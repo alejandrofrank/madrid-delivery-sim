@@ -1,0 +1,31 @@
+...@common
+direction: down
+grid-columns: 2
+horizontal-gap: 300
+local: Local Docker environment {
+  direction: down
+  class: local
+  ui: "Operator UI\nTrusted controller"
+  agents: "Scoped Python\nRole workers"
+  db: "Postgres\nDomain · queue · memory\nBudgets · audit" {shape: cylinder}
+  caller: "CloudJudge client\nAudience-bound caller ID token"
+  ui -> agents
+  agents <-> db
+  agents -> caller: Optional judge policy only
+}
+gcp: Dedicated GCP project {
+  direction: down
+  class: cloud
+  iam: Cloud Run IAM invocation check
+  gateway: Cloud Run judgement service
+  vertex: "Google publisher model\nVertex REST"
+  registry: "Artifact Registry\nPinned gateway image"
+  logs: "Platform logs\nStructured gateway stdout"
+  iam <-> gateway
+  registry -> gateway: Image {style.stroke-dash: 4}
+  gateway -> vertex: Runtime service account ADC
+  gateway -> logs
+}
+local <-> gcp: "Client / IAM\nHTTPS · schema-validated verdict + usage"
+(** -> **)[*].style: ${edge-style}
+(** <-> **)[*].style: ${edge-style}

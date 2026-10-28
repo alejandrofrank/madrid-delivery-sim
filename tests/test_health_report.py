@@ -219,6 +219,8 @@ def test_fingerprint_covers_sources_and_ignores_runtime_private_and_cache_files(
         "tests/test_module.py",
         "sql/init.sql",
         "web/app.js",
+        "web/diagrams/graph.svg",
+        "web/diagrams/graph.d2",
         "config/agents/courier/SOUL.md",
         "data/evals/fixed.json",
         "data/meal-snapshot.json",

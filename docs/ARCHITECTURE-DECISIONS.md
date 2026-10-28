@@ -16,13 +16,15 @@ commit separately and survive failure.
 **Alternative.** Introduce a message broker as the authoritative work transport.
 **Why.** A stock change and its handoff can share a database transaction; a crash
 cannot commit consumption while losing its next event. **Trade-off.** Locks and
-database capacity constrain execution; current cloud inference holds those locks
-while waiting on network I/O. **Revisit when** measured queue load or independent
+database capacity constrain execution. Cloud inference now releases its connection
+between durable preparation and saved-result application; an uncertain dispatch
+fails closed rather than being resent. **Revisit when** measured queue load or independent
 consumers justify a broker. Use an outbox/inbox design and failure tests; a broker
 does not make external billing exactly once.
 
 Sources: [queue](../src/delivery/queue.py), [runtime](../src/delivery/agent_runtime.py),
-[queue boundary tests](../tests/test_agent_queue_boundary.py).
+[queue boundary tests](../tests/test_agent_queue_boundary.py),
+[durable request/result protocol](DURABLE-INFERENCE.md).
 
 ## 2. Use rules first, with an optional bounded recovery judge
 

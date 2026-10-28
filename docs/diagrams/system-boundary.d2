@@ -1,0 +1,34 @@
+...@common
+direction: down
+grid-columns: 2
+horizontal-gap: 260
+local: Local Docker environment {
+  direction: down
+  class: local
+  operator: "Operator UI\nTrusted controller"
+  world: "Synthetic city\nPhysical world engine"
+  workers: "Scoped Python\nLocalAgent workers"
+  db: "PostgreSQL\nDomain · queue · memory\nBudgets · audit" {shape: cylinder}
+  client: "Optional CloudJudge client\nAudience-bound ID token"
+  operator -> world
+  operator -> workers
+  world <-> db
+  workers <-> db
+  workers -> client: Explicit GCP judge mode
+}
+cloud: Optional GCP — Terraform-owned {
+  direction: down
+  class: cloud
+  iam: "Cloud Run IAM\nCaller identity"
+  gateway: "Cloud Run\nJudgement container"
+  model: "Google publisher model\nVertex REST"
+  image: "Artifact Registry\nImmutable image digest"
+  logs: "Platform logs\nStructured gateway stdout"
+  iam <-> gateway
+  image -> gateway: Image {style.stroke-dash: 4}
+  gateway -> model: Runtime service account ADC
+  gateway -> logs
+}
+local <-> cloud: "Client / IAM\nHTTPS · validated verdict + usage"
+(** -> **)[*].style: ${edge-style}
+(** <-> **)[*].style: ${edge-style}

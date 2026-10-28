@@ -2,24 +2,34 @@
 
 Updated 2026-10-28. Implemented slices are identified below; remaining milestones are planned.
 
-Architecture website slice: `/architecture` provides eighteen numbered chapters,
-full-text local search, an interactive component inspector, six rendered diagrams,
+Durable inference slice: the optional recovery judge now commits an immutable
+request, dispatch admission and saved result in short SQL phases. Provider I/O
+holds no worker database connection; application rechecks fresh facts and commits
+effects, memory, outbox and ACK together. Saved results survive worker death without
+another call or budget charge. Uncertain dispatches fail closed without automatic
+resend. Local verification includes physical process termination, concurrent owners,
+stale results, role isolation and legacy receipts, using a fake provider only.
+See [request protocol and recovery policy](docs/DURABLE-INFERENCE.md).
+
+Architecture website slice: `/architecture` provides nineteen numbered chapters,
+full-text local search, an interactive component inspector, seven rendered diagrams,
 source inspection and eight explicit architecture decision records. The six
 capability goals link to implementation, tests and known gaps. Content stays in
-repository Markdown; diagrams and dependencies work locally without a CDN.
-Verified 409 tests, browser behavior and unchanged local scenario outcomes.
+repository Markdown; pinned D2/ELK generates native-label SVGs with inspected
+source, zoom and expansion. The compact reference UI and all diagram assets work
+locally without a CDN. Browser checks cover all seven diagrams and chapter search.
 See [website maintenance and boundaries](docs/DOCUMENTATION-SITE.md).
 
 Enterprise GCP documentation slice: the source-reviewed
 [agent implementation](docs/AGENT-IMPLEMENTATION.md),
 [complete GCP inventory](docs/GCP-COMPONENTS.md) and
 [client architecture guide](docs/ENTERPRISE-GCP.md) now distinguish current behavior
-from proposed ADK/managed-runtime work. The next enterprise priorities are durable
-inference request/result phases outside SQL locks, gateway-wide idempotent monetary
-admission, controller recovery, workload identity/production API authorization,
+from proposed ADK/managed-runtime work. Local durable inference is implemented;
+the next enterprise priorities are gateway-wide idempotent monetary admission,
+controller recovery, workload identity/production API authorization,
 distributed observability and held-out release gates. Platform adoption requires
 Terraform lifecycle coverage and an explicit retention/cost policy. These are
-proposed changes; this documentation update deploys no infrastructure.
+proposed changes; the local inference and documentation work deploys no infrastructure.
 
 Role scenario evaluation slice: make eval-agents now runs a versioned local
 seed-731 battery twice: twelve scenarios, 49 criteria across inventory, restaurant,

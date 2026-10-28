@@ -31,7 +31,7 @@
         >
       </nav>
       <button id="open-search" class="search-trigger" aria-haspopup="dialog">
-        <span>Search documentation</span><kbd>Ctrl K</kbd>
+        <span>Search chapters</span><kbd>Ctrl K</kbd>
       </button>
     </header>
     <div class="layout">
@@ -93,8 +93,8 @@
           >
             <div class="explorer-heading">
               <div>
-                <span class="eyebrow">SELECT A COMPONENT</span>
-                <h2 id="explorer-title">Where the work happens</h2>
+                <span class="eyebrow">SYSTEM INDEX</span>
+                <h2 id="explorer-title">Inspect a component</h2>
               </div>
               <span class="legend"
                 ><i class="local-dot"></i> Local
@@ -103,51 +103,32 @@
             </div>
             <div class="explorer-workspace">
               <div
-                class="component-map"
+                class="component-map component-index"
                 role="group"
                 aria-label="System components"
               >
-                <div class="map-lane">LOCAL · YOUR COMPUTER</div>
-                <div class="map-row">
-                  <button data-component="city">
-                    <span class="node-icon">▦</span
-                    ><strong>City & operator</strong
-                    ><small>Demand, streets, incidents</small></button
-                  ><span class="map-arrow" aria-hidden="true">→</span
-                  ><button data-component="agents">
-                    <span class="node-icon">◈</span
-                    ><strong>Scoped role workers</strong
-                    ><small>Policy, tools, budgets</small>
-                  </button>
-                </div>
-                <div class="map-connector">
-                  <span>Commands & observations</span
-                  ><span aria-hidden="true">↓</span>
-                </div>
-                <button class="database-node" data-component="postgres">
-                  <span class="node-icon">▤</span><strong>Postgres</strong
-                  ><small>Domain facts · queue · memory · audit</small>
+                <div class="map-lane">LOCAL</div>
+                <button data-component="city">
+                  <strong>City & operator</strong
+                  ><small>Demand, streets, incidents</small>
                 </button>
-                <div class="boundary">
-                  <span
-                    >Judge client only · HTTPS + IAM · no database access</span
-                  ><span aria-hidden="true">↓</span>
-                </div>
-                <div class="map-lane cloud-label">
-                  GCP · SEPARATE TERRAFORM PROJECT
-                </div>
-                <div class="map-row">
-                  <button class="cloud-node" data-component="gateway">
-                    <span class="node-icon">◇</span
-                    ><strong>Cloud Run judge</strong
-                    ><small>Authenticated, bounded verdict</small></button
-                  ><span class="map-arrow" aria-hidden="true">→</span
-                  ><button class="cloud-node" data-component="model">
-                    <span class="node-icon">✳</span
-                    ><strong>Vertex model API</strong
-                    ><small>Decision only · no city tools</small>
-                  </button>
-                </div>
+                <button data-component="agents">
+                  <strong>Scoped role workers</strong
+                  ><small>Policy, tools, budgets</small>
+                </button>
+                <button data-component="postgres">
+                  <strong>Postgres</strong
+                  ><small>Facts, queue, memory, audit</small>
+                </button>
+                <div class="map-lane cloud-label">OPTIONAL GCP</div>
+                <button class="cloud-node" data-component="gateway">
+                  <strong>Cloud Run judge</strong
+                  ><small>Authenticated, bounded verdict</small>
+                </button>
+                <button class="cloud-node" data-component="model">
+                  <strong>Vertex model API</strong
+                  ><small>Decision only, no city tools</small>
+                </button>
               </div>
               <div
                 id="component-inspector"
@@ -156,9 +137,9 @@
               ></div>
             </div>
             <p class="explorer-footnote">
-              Logical component view. All agent-to-agent handoffs pass through
-              the durable queue; the model has no direct database access. GCP
-              availability is not checked by this page.
+              All agent-to-agent handoffs pass through the durable queue; the
+              model has no direct database access. GCP availability is not
+              checked by this page.
             </p>
           </section>
           <article id="chapter-body" class="prose"></article>
@@ -235,6 +216,8 @@
         <button id="diagram-out" aria-label="Zoom diagram out">−</button
         ><button id="diagram-reset">Fit diagram</button
         ><button id="diagram-in" aria-label="Zoom diagram in">+</button>
+        <output id="diagram-zoom" aria-live="polite">100%</output>
+        <a id="diagram-download" target="_blank" rel="noopener">Open SVG ↗</a>
       </div>
       <div id="diagram-large"></div>
     </dialog>

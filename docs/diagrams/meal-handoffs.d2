@@ -1,0 +1,24 @@
+...@common
+shape: sequence_diagram
+household: Household agent
+restaurant: Restaurant agent
+market: Market agent
+dispatcher: Dispatcher
+courier: Courier agent
+world: Physical world
+household -> restaurant: household.call for pizza
+restaurant -> market: market.request for missing ingredient
+market.stock: Reserve own stock or forward to an unvisited market
+market -> restaurant: ingredient.arrived after transfer
+consent: Explicit substitution consent {
+  restaurant -> household: Offer replacement
+  household -> restaurant: Explicit approval required
+}
+restaurant.stock: Cook only from arrived, reserved ingredients
+restaurant -> dispatcher: basket.ready
+dispatcher -> courier: courier.briefed
+courier -> dispatcher: courier.accepted
+world -> dispatcher: delivery.arrived after road traversal
+dispatcher -> dispatcher: dispatch.complete records delivered status
+household -> household: meal.delivery checks canonical job status
+(** -> **)[*].style: ${edge-style}

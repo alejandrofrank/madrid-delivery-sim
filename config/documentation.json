@@ -51,6 +51,14 @@
       "status": "Implementation detail"
     },
     {
+      "id": "durable-inference",
+      "title": "Durable inference & recovery",
+      "group": "Agent engineering",
+      "file": "docs/DURABLE-INFERENCE.md",
+      "summary": "Committed requests, network calls outside SQL, saved results and safe crash recovery.",
+      "status": "Local crash verified / fake provider"
+    },
+    {
       "id": "restaurant-supply",
       "title": "Calls, kitchens & markets",
       "group": "City & workflows",
@@ -177,10 +185,12 @@
     "scripts/gcp_demo.py",
     "sql/migrations/014_queue_capability.sql",
     "sql/migrations/015_typed_memory.sql",
+    "sql/migrations/016_durable_inference.sql",
     "src/delivery/agent_access.py",
     "src/delivery/agent_runtime.py",
     "src/delivery/agent_specs.py",
     "src/delivery/cloud_ai.py",
+    "src/delivery/durable_inference.py",
     "src/delivery/fleet_policy.py",
     "src/delivery/health.py",
     "src/delivery/queue.py",
@@ -202,6 +212,7 @@
     "tests/test_gateway_policy.py",
     "tests/test_gcp_demo_commands.py",
     "tests/test_health.py",
+    "tests/test_inference_crash_recovery.py",
     "tests/test_queue.py",
     "tests/test_scenario_evals.py",
     "tests/test_supply_delivery_facts.py",

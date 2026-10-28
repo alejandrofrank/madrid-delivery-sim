@@ -1,0 +1,53 @@
+# Shared visual language. D2/ELK owns placement and edge routing.
+vars: {
+  d2-config: {
+    layout-engine: elk
+    theme-id: 0
+    pad: 24
+  }
+  edge-style: {
+    stroke: "#70756D"
+    stroke-width: 1
+    border-radius: 0
+    font-color: "#59604F"
+    font-size: 16
+    italic: false
+    bold: false
+  }
+}
+style.fill: "#FFFFFF"
+***.class: state
+***.style: {
+  font-size: 18
+  font-color: "#20231F"
+  stroke-width: 1
+  border-radius: 0
+  shadow: false
+  bold: false
+}
+classes: {
+  local: {
+    label.near: top-left
+    style.fill: "#F4F5F0"
+    style.stroke: "#A9AFA2"
+    style.font-size: 18
+  }
+  cloud: {
+    label.near: top-left
+    style.fill: "#F3F0E8"
+    style.stroke: "#A99F87"
+    style.font-size: 18
+  }
+  state: {
+    style.fill: "#FFFFFF"
+    style.stroke: "#3C4339"
+  }
+  durable: {
+    style.fill: "#ECF3E7"
+    style.stroke: "#5D7650"
+  }
+  caution: {
+    style.fill: "#FFF2E5"
+    style.stroke: "#B27841"
+  }
+}

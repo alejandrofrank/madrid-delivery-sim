@@ -6,7 +6,7 @@ const reader = $("#chapter-body");
 let catalogue;
 let currentPage;
 let renderVersion = 0;
-let diagramLibrary;
+let diagramManifest;
 let headingObserver;
 let toastTimer;
 let sourceRequest = 0;
@@ -50,7 +50,7 @@ const components = {
     outputs:
       "Atomic effects + outgoing events + ACK; provenance and revision history.",
     boundary:
-      "Current cloud inference still holds an effects transaction open. Durable request/result phases are the first enterprise refactor.",
+      "Inference request, dispatch marker and result are committed in short transactions. Provider I/O holds no database connection; uncertain dispatch outcomes fail closed.",
     sources: ["src/delivery/queue.py", "sql/migrations/015_typed_memory.sql"],
     page: "memory",
   },
@@ -302,108 +302,142 @@ function enhanceBlocks() {
 }
 
 function loadDiagrams() {
-  if (diagramLibrary) return diagramLibrary;
-  diagramLibrary = new Promise((resolve, reject) => {
-    const script = document.createElement("script");
-    script.src = "/static/vendor/documentation/mermaid.tiny.js";
-    script.onload = () => {
-      mermaid.initialize({
-        startOnLoad: false,
-        securityLevel: "strict",
-        theme: "base",
-        fontFamily: "system-ui, sans-serif",
-        flowchart: { htmlLabels: false, curve: "linear", padding: 17 },
-        sequence: { useMaxWidth: true, wrap: true },
-        themeVariables: {
-          primaryColor: "#edf4ff",
-          primaryTextColor: "#243c5a",
-          primaryBorderColor: "#9eb7dc",
-          lineColor: "#758ba8",
-          secondaryColor: "#f4f7fb",
-          tertiaryColor: "#f9f5ec",
-          clusterBkg: "#f5f8fc",
-          clusterBorder: "#d0dceb",
-          fontSize: "13px",
-          actorBkg: "#edf4ff",
-          actorBorder: "#9eb7dc",
-          actorTextColor: "#243c5a",
-          signalColor: "#526b8a",
-          signalTextColor: "#334d6e",
-          noteBkgColor: "#fff8e8",
-          noteBorderColor: "#decea7",
-        },
-      });
-      resolve(mermaid);
-    };
-    script.onerror = () => {
-      diagramLibrary = null;
-      reject(new Error("Local diagram renderer is unavailable."));
-    };
-    document.head.append(script);
-  });
-  return diagramLibrary;
+  if (!diagramManifest) {
+    diagramManifest = getJSON("/static/diagrams/manifest.json").catch(
+      (error) => {
+        diagramManifest = null;
+        throw error;
+      },
+    );
+  }
+  return diagramManifest;
 }
 
 async function renderDiagrams(version) {
   const blocks = Array.from(reader.querySelectorAll("code.language-mermaid"));
   if (!blocks.length) return;
+  const page = currentPage;
   const cards = blocks.map((block, index) => {
     const source = block.textContent;
     const card = element("figure", undefined, "diagram-card");
-    const heading = element("div", undefined, "diagram-heading");
-    const title = `Diagram ${index + 1} · ${currentPage.title}`;
-    const expand = element("button", "Expand diagram");
+    const heading = element("figcaption", undefined, "diagram-heading");
+    const title = `Diagram ${index + 1} · ${page.title}`;
+    const expand = element("button", "Expand");
     expand.disabled = true;
     expand.setAttribute("aria-label", `Expand diagram ${index + 1}`);
-    heading.append(
-      element("span", `ARCHITECTURE / ${String(index + 1).padStart(2, "0")}`),
-      expand,
-    );
-    const canvas = element("div", "Rendering local diagram…", "diagram-render");
+    heading.append(element("span", title, "diagram-caption"), expand);
+    const canvas = element("div", "Loading local SVG…", "diagram-render");
+    canvas.tabIndex = 0;
+    canvas.setAttribute("role", "region");
+    canvas.setAttribute("aria-label", `Scrollable ${title.toLowerCase()}`);
     const details = element("details");
     const code = element("code", source);
     const pre = element("pre");
     pre.append(code);
-    details.append(element("summary", "Diagram source"), pre);
+    details.append(
+      element("summary", "Diagram source · Markdown reference"),
+      pre,
+    );
     card.append(heading, canvas, details);
     block.parentElement.replaceWith(card);
     expand.addEventListener("click", () => {
       $("#diagram-title").textContent = title;
-      $("#diagram-large").replaceChildren(
-        canvas.querySelector("svg").cloneNode(true),
-      );
-      activeDiagram = $("#diagram-large svg");
+      const image = canvas.querySelector("img");
+      if (!image) return;
+      $("#diagram-large").replaceChildren(image.cloneNode(true));
+      activeDiagram = $("#diagram-large img");
+      $("#diagram-download").href = image.src;
       diagramScale = 100;
-      scaleDiagram();
       $("#diagram-dialog").showModal();
+      // Open at a readable size; Fit remains an explicit full-graph view.
+      const fit = fittedDiagramWidth();
+      diagramScale = Math.min(
+        800,
+        Math.max(
+          100,
+          Math.ceil(
+            ((Number(activeDiagram.getAttribute("width")) * 0.9) / fit) * 4,
+          ) * 25,
+        ),
+      );
+      scaleDiagram();
     });
-    return { source, canvas, expand, title, id: `diagram-${version}-${index}` };
+    return { source, canvas, expand, title, details, heading, index };
   });
   try {
-    const renderer = await loadDiagrams();
+    const manifest = await loadDiagrams();
     for (const card of cards) {
       if (version !== renderVersion) return;
       try {
-        const result = await renderer.render(card.id, card.source);
-        if (version !== renderVersion) return;
-        card.canvas.innerHTML = DOMPurify.sanitize(result.svg, {
-          USE_PROFILES: { html: true, svg: true, svgFilters: true },
-          ADD_TAGS: ["foreignObject"],
+        const asset = manifest.diagrams.find(
+          (entry) => entry.page === page.id && entry.index === card.index,
+        );
+        if (
+          !asset ||
+          asset.reference !== card.source.trim() ||
+          !/^\/static\/diagrams\/[a-z0-9-]+\.svg$/.test(asset.asset)
+        )
+          throw new Error("Diagram asset is missing or stale.");
+        const image = element("img");
+        image.alt = `${asset.title}. ${asset.description}`;
+        image.width = asset.svg.width;
+        image.height = asset.svg.height;
+        image.decoding = "async";
+        image.style.minWidth = `${Math.ceil(asset.svg.width * 0.9)}px`;
+        image.addEventListener("load", () => {
+          card.expand.disabled = false;
         });
-        const svg = card.canvas.querySelector("svg");
-        if (!svg) throw new Error("No diagram was produced.");
-        svg.setAttribute("role", "img");
-        svg.setAttribute("aria-label", card.title);
-        card.expand.disabled = false;
+        image.addEventListener("error", () => {
+          card.canvas.replaceChildren(
+            element(
+              "p",
+              "The SVG is unavailable. Read its source below.",
+              "diagram-error",
+            ),
+          );
+        });
+        image.src = asset.asset;
+        card.canvas.replaceChildren(image);
+        card.heading.querySelector(".diagram-caption").textContent =
+          asset.title;
+        card.canvas.setAttribute(
+          "aria-label",
+          `Scrollable ${asset.title.toLowerCase()}`,
+        );
+        card.details.querySelector("summary").textContent =
+          "Diagram source · D2 / ELK";
+        const d2 = element("pre");
+        d2.append(
+          element(
+            "code",
+            `${asset.source}\n\n# Shared styles (common.d2)\n${asset.common_source}`,
+          ),
+        );
+        const reference = element("details", undefined, "diagram-reference");
+        const pre = element("pre");
+        pre.append(element("code", card.source));
+        reference.append(
+          element("summary", "Original Markdown reference"),
+          pre,
+        );
+        const source = element("a", "Open D2 source ↗", "diagram-source-link");
+        source.href = asset.source_asset;
+        source.target = "_blank";
+        source.rel = "noopener";
+        card.details.replaceChildren(
+          card.details.querySelector("summary"),
+          source,
+          d2,
+          reference,
+        );
       } catch {
         card.canvas.replaceChildren(
           element(
             "p",
-            "This diagram could not be rendered. Its complete source is available below.",
+            "The diagram needs a local rebuild. Its complete Markdown source is available below.",
             "diagram-error",
           ),
         );
-        document.getElementById(`d${card.id}`)?.remove();
       }
     }
   } catch {
@@ -411,7 +445,7 @@ async function renderDiagrams(version) {
       card.canvas.replaceChildren(
         element(
           "p",
-          "The local diagram renderer is unavailable. Read the source below.",
+          "The local diagram catalogue is unavailable. Read the source below.",
           "diagram-error",
         ),
       ),
@@ -419,8 +453,24 @@ async function renderDiagrams(version) {
   }
 }
 
+function fittedDiagramWidth() {
+  if (!activeDiagram) return 1;
+  const viewport = $("#diagram-large");
+  const ratio =
+    Number(activeDiagram.getAttribute("width")) /
+    Number(activeDiagram.getAttribute("height"));
+  return Math.max(
+    1,
+    Math.min(viewport.clientWidth - 24, (viewport.clientHeight - 24) * ratio),
+  );
+}
+
 function scaleDiagram() {
-  if (activeDiagram) activeDiagram.style.width = `${diagramScale}%`;
+  if (!activeDiagram) return;
+  const fit = fittedDiagramWidth();
+  activeDiagram.style.minWidth = "0";
+  activeDiagram.style.width = `${Math.max(1, (fit * diagramScale) / 100)}px`;
+  $("#diagram-zoom").textContent = `${diagramScale}%`;
 }
 
 function pagination(index) {
@@ -674,7 +724,7 @@ $("#toggle-topics").addEventListener("click", () => {
   $("#toggle-topics").setAttribute("aria-expanded", String(expanded));
 });
 $("#diagram-in").addEventListener("click", () => {
-  diagramScale = Math.min(400, diagramScale + 25);
+  diagramScale = Math.min(800, diagramScale + 25);
   scaleDiagram();
 });
 $("#diagram-out").addEventListener("click", () => {
@@ -684,6 +734,9 @@ $("#diagram-out").addEventListener("click", () => {
 $("#diagram-reset").addEventListener("click", () => {
   diagramScale = 100;
   scaleDiagram();
+});
+window.addEventListener("resize", () => {
+  if ($("#diagram-dialog").open) scaleDiagram();
 });
 
 (async () => {

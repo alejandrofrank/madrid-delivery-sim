@@ -161,11 +161,15 @@ and custody checks. Authentication, transport or validation failure denies the
 AI-enabled retry. No silent switch to local approval is made within that run.
 
 The configured cumulative allowance is six calls/50,688 tokens per run. Each
-admitted attempt separately reserves 8,448 tokens; the whole allowance is not
+newly dispatched request reserves 8,448 tokens; saved-result replay does not reserve
+another call. The whole allowance is not
 reserved upfront. This does not enforce a project-wide currency budget,
 block another authorized direct caller, or guarantee exactly-once model billing.
-The cloud judge currently waits inside the local queue effects transaction;
-see the explicit [implementation limitation](AGENT-IMPLEMENTATION.md).
+The local judge adapter now commits a request and dispatch marker, closes its
+database connection for remote I/O, saves the result and applies it in a fresh
+fenced transaction. Reclaimed events reuse completed results; uncertain abandoned
+invocations fail closed without automatic resend. This changes local orchestration,
+not the deployed Terraform resource inventory. See [durable inference](DURABLE-INFERENCE.md).
 
 ## Observability and its current limits
 

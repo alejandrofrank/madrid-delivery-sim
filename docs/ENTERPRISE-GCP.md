@@ -40,7 +40,7 @@ city supplies test incidents; it does not define an enterprise client's SLOs.
 
 | Option | Use when | Our decision / limitation |
 | --- | --- | --- |
-| Cloud Run service | Bounded, stateless HTTP decisions; variable demand; explicit container/network controls | Implemented for the judge. Suitable first ADK pilot after the transaction refactor |
+| Cloud Run service | Bounded, stateless HTTP decisions; variable demand; explicit container/network controls | Implemented for the judge, with local durable inference phases. Candidate for a separately evaluated ADK pilot |
 | Cloud Run job | Finite evaluations, imports or migrations | Proposed for an explicitly cloud-enabled benchmark; current benchmark stays local |
 | Cloud Run worker pool | Continuous pull consumers without an inbound HTTP API | Candidate for production queue workers; provisioned instance lifetime is billable |
 | Managed Agent Runtime | Managed agent hosting, sessions, identity/governance and lifecycle capabilities materially reduce client operations | Evaluate against the same workload and permissions before choosing it |
@@ -143,27 +143,28 @@ workload credentials, not a hard-coded model API key.
 [Google pipeline identity guidance](https://docs.cloud.google.com/iam/docs/best-practices-for-using-service-accounts-in-deployment-pipelines),
 [federation setup](https://docs.cloud.google.com/iam/docs/workload-identity-federation-with-deployment-pipelines).
 
-## Durable execution: first enterprise implementation priority
+## Durable execution: implemented local phases and remaining gaps
 
-The existing local worker atomically commits state, memory, decision, outbox and
-ACK. Its separate attempt/model reservations survive rollback. **The cloud judge
-currently performs network I/O while the effects transaction and run/event locks
-remain open.** There is no gateway-wide idempotency ledger or completed-response
-reuse. A subsequent event attempt can incur another bounded model call.
+The local worker atomically commits state, memory, decision, outbox and ACK.
+The optional judge now uses a separate durable request/result protocol:
 
-Refactor that paid decision into these durable phases before increasing load:
+1. In a short fenced transaction, save the authenticated event, scoped observations,
+   relevant recall, frozen identity and local proposal as an immutable request.
+2. Commit a single-dispatch marker and call/token admission, then close the worker
+   database connection before authentication or provider I/O.
+3. Save a validated result in its own short transaction. Reclaiming the same event
+   reuses that result. A crash with an in-flight outcome fails closed rather than
+   resending: the provider does not offer a proven exactly-once billing contract.
+4. In the effects transaction, re-read current state and compare the saved facts,
+   proposal, recall and time. SQL independently rechecks feasibility; effects,
+   memory, outgoing events and ACK commit together or roll back together.
 
-1. Validate scope/deadline, snapshot permitted evidence and reserve a pessimistic
-   call/token/currency allowance in a short transaction. Persist a versioned request
-   with a stable business idempotency key and state such as `reserved`.
-2. Commit, release database locks and invoke the approved model endpoint. Propagate
-   a sanitized correlation ID separately from model business content. Bound elapsed
-   time and all retries; uncertain outcomes retain their reservation.
-3. Persist the validated result/usage and enqueue its completion. Reuse a completed
-   result for duplicate work; never equate a timeout with proof of no spend.
-4. In a new short transaction, recheck order version, assignment attempt, consent,
-   custody, current stock and deadline. Apply the authorized result and publish the
-   next event atomically, or reject a stale proposal.
+See [durable inference and crash boundaries](DURABLE-INFERENCE.md). This is a local
+single-dispatch ledger, not a shared gateway-wide currency cap or a durable cloud
+supervisor. Prepared work can resume; saved results can be reapplied safely;
+uncertain invocations retain their charge and need explicit reconciliation rather
+than hidden retries. Future distributed completion wakeups and tracing propagation
+must preserve the same queue-only contract.
 
 Add durable controller ownership/checkpoints and an orphan-identity reaper.
 Kill the controller and the inference worker separately; prove recovery before
@@ -309,7 +310,7 @@ cost floor; the local city's zero-cloud-cost development mode remains available.
 | Step | Scope | Acceptance evidence |
 | --- | --- | --- |
 | 1. Preserve local baseline | Versioned roles, business rules, queues and scenarios | Current isolation/regression receipts remain reproducible without credentials |
-| 2. Harden paid decisions | Split remote I/O from SQL transactions; durable inference request/result/admission ledger; supervisor recovery | Crash/duplicate/timeout/concurrency tests and measured p95; no double business effect |
+| 2. Harden paid decisions | Local durable request/result phases implemented; next: gateway-wide monetary admission and supervisor recovery | Local crash/duplicate/timeout checks plus future measured p95 and controller recovery; no double business effect |
 | 3. Pilot one ADK role | Same approved tools and role contract, smallest passing model, explicit deployment identity | Same safety suite plus held-out quality/latency/cost comparison |
 | 4. Select GCP hosting/governance | Cloud Run or managed runtime; networking, identity, memory and Terraform coverage based on client constraints | Reviewed threat/data-flow model, least-privilege negative tests and complete stop/retention inventory |
 | 5. Operate and promote | Shadow evaluation, explicitly assigned canary, rollback and incident ownership | Agreed business/quality/SLO/cost gates and a signed-off handover |

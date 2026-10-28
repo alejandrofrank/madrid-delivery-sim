@@ -138,6 +138,7 @@ authority. Compare those observations with [local scenario evaluations](AGENT-EV
 For implementation, continue through [agent internals](AGENT-IMPLEMENTATION.md),
 [memory](AGENT-MEMORY.md) and [GCP components](GCP-COMPONENTS.md). For a client or
 interview discussion, use the [decision records](ARCHITECTURE-DECISIONS.md) and
-[enterprise roadmap](ENTERPRISE-GCP.md): durable inference outside SQL locks,
-controller recovery, workload identity, retention and measured release gates are
-proposed work, not completed enterprise guarantees.
+[enterprise roadmap](ENTERPRISE-GCP.md). [Durable inference](DURABLE-INFERENCE.md)
+now saves requests/results and invokes outside SQL connections, with local crash
+verification. Controller recovery, workload identity, retention and measured
+production release gates remain proposed work.

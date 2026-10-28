@@ -1,0 +1,21 @@
+...@common
+shape: sequence_diagram
+household: Household
+restaurant: Restaurant
+market: Nearest market
+other: Another market
+delivery: Dispatcher + courier
+household -> restaurant: Queued meal call
+restaurant -> market: Ingredient request
+market -> other: Shortage forwarding
+stock: Reserved stock transfers from the eligible source {
+  market -> restaurant: Reserved, then arrived
+  other -> restaurant: Reserved, then arrived if forwarded
+}
+consent: Explicit substitution consent {
+  restaurant -> household: Substitution offer
+  household -> restaurant: Explicit approval
+}
+restaurant -> delivery: Cook from arrived stock
+delivery -> household: Confirmed delivery
+(** -> **)[*].style: ${edge-style}

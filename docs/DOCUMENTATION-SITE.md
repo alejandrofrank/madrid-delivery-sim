@@ -7,7 +7,7 @@ existing `/docs` API reference remains available.
 
 ## Reading and inspection
 
-Eighteen numbered chapters cover architecture decisions, the agent factory,
+Nineteen numbered chapters cover architecture decisions, the agent factory,
 authenticated scope, SOUL, tools, memory, queue transactions, city workflows,
 declared GCP resources, enterprise alternatives, operations and evaluations.
 The structure follows Scrapmarket's topic-oriented engineering documentation:
@@ -15,8 +15,9 @@ examples, choices, limits and inspectable sources. This site has its own content
 and shares no deployment or Terraform state with Scrapmarket.
 
 The overview's component explorer shows responsibilities, inputs, outputs, trust
-boundaries and implementation links. Mermaid source fences become local SVG
-diagrams with expand/zoom controls and a source disclosure. Search matches all
+boundaries and implementation links. Reviewed D2 sources become local SVG
+diagrams with native text, ELK orthogonal routing, expand/zoom controls and source
+disclosures. Mermaid fences remain a readable repository reference. Search matches all
 chapter titles and text in the browser; Ctrl/Cmd+K opens it. Direct chapter and
 section links, back/forward navigation, a page outline, previous/next chapters,
 Markdown inspection, code copy and chapter printing support longer reviews.
@@ -41,14 +42,17 @@ local operator application; it is not an enterprise authentication layer.
 
 The source viewer returns text and inserts it with `textContent`. Markdown output
 is sanitized with DOMPurify. Raw forms, scripts, styles and images are disabled in
-chapter content. Mermaid uses strict mode; diagrams cannot invoke node callbacks.
+chapter content. Diagrams are local image assets, with no active node callbacks,
+scripts or HTML labels. The offline diagram checker rejects external resources.
 Relative links resolve to another chapter, an explicitly catalogued source, or a
 manual link to the private GitHub repository. Only the viewer can open the latter.
 The UI does not fetch those external references or send search terms to them.
 
 Browser bundles are checked in under `web/vendor/documentation/`, with exact npm
 versions, SHA512 package integrity, local SHA256 hashes and license notices.
-Mermaid is loaded only for chapters with diagrams; no external chunks, CDN,
+The current reader uses Marked and DOMPurify; the older pinned Mermaid bundle is
+retained for provenance but is no longer loaded. D2 is a checksum-pinned development
+tool and is not needed in the application image. No external chunks, CDN,
 fonts or tile services are required. Vendoring does not replace dependency review;
 review pins and licenses when updating them.
 
@@ -62,6 +66,7 @@ python3 scripts/check_documentation.py --update
 python3 scripts/check_documentation.py
 python3 scripts/vendor_documentation.py --check
 node --check web/documentation.js
+python3 scripts/render_documentation_diagrams.py --check
 ```
 
 Updating source names happens only in the authoring script, never from a browser

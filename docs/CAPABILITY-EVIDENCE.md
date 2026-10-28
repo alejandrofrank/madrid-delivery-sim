@@ -32,8 +32,10 @@ includes a real worker-process crash before acknowledgement.
 **Limit:** domain effects, memory, decision, outbox and ACK are atomic in the fixed
 worker. This does not promise exactly-once inference or billing. Sustained
 throughput/backpressure, durable controller restart and orphan-login recovery
-remain unmeasured or unfinished. Cloud judge network I/O still holds the effects
-transaction open. [Implementation details](AGENT-IMPLEMENTATION.md).
+remain unmeasured or unfinished. The optional judge now invokes outside database
+connections, reuses saved results, and fails closed on uncertain abandoned calls.
+[Real process-crash tests](../tests/test_inference_crash_recovery.py) verify those
+boundaries without paid inference. [Implementation details](DURABLE-INFERENCE.md).
 
 ## 2. Hierarchy, coordination and authority
 
@@ -81,8 +83,8 @@ policy. [Memory contracts](AGENT-MEMORY.md).
 
 **Implemented proof:** [runtime tests](../tests/test_agent_runtime.py) exercise
 concurrent durable reservations and exhausted limits. Optional judge tests verify
-six calls/50,688 reserved tokens per run, with 8,448 tokens reserved per attempt
-and no reuse of that attempt reservation. [Cloud request tests](../tests/test_cloud_ai.py)
+six calls/50,688 reserved tokens per run, with 8,448 tokens reserved per dispatch
+and no new call charge for a saved-result replay. [Cloud request tests](../tests/test_cloud_ai.py)
 enforce a bounded numeric context; [gateway tests](../tests/test_gateway_policy.py)
 deny invalid or infeasible requests before model invocation.
 [Search tests](../tests/test_supply_search_service.py) retain admission reservations
