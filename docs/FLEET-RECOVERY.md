@@ -37,18 +37,38 @@ agent reads its current briefing and sends `courier.accepted`. Physical departur
 cannot precede acknowledgement. If acknowledgement is delayed, departure, pickup
 and arrival times move together rather than inventing travel during that delay.
 
-Recovery follows:
+Recovery follows this queue and physical-custody boundary. The fixed scenario
+uses local rules. A separately enabled judge can consume a saved provider verdict
+through the [durable inference protocol](DURABLE-INFERENCE.md); the same execution
+gates remain in force.
 
-```text
-world: delivery.failed
-  -> judge: current route/deadline/cost review
-  -> recovery.reviewed
-  -> dispatcher: apply approved review or abandon
-  -> dispatch.retry
-  -> atomic courier assignment + courier.briefed
-  -> courier.accepted
-  -> world movement and delivery.arrived
-  -> dispatcher: delivery.completed
+```mermaid
+flowchart TB
+    subgraph Review["01 / Judge review"]
+        Failure["World failure: parcel retained at safe checkpoint"]
+        Candidate["Scoped judge computes local courier and route candidate"]
+        Verdict["Local rules or saved optional provider verdict; SQL persists bounded review"]
+        Failure -->|"Queued delivery.failed"| Candidate
+        Candidate --> Verdict
+    end
+    subgraph Decision["02 / Dispatcher decision"]
+        Apply["Apply matching current-attempt review"]
+        Held["Denied: abandoned; parcel stays at checkpoint"]
+        Retry["Queued dispatch.retry; wait if fleet is busy"]
+        Gate["Fresh SQL checks: approved review, free online courier, route, deadline and retry limits"]
+        Apply -->|"Denied"| Held
+        Apply -->|"Approved"| Retry
+        Retry --> Gate
+    end
+    subgraph Movement["03 / Physical handoff"]
+        Assign["Atomic new attempt, courier assignment and scoped briefing"]
+        Accept["Queued courier.briefed and courier.accepted before departure"]
+        Travel["Collect same parcel at checkpoint; world records delivery.arrived"]
+        Complete["Dispatcher confirms delivery.completed"]
+        Assign --> Accept --> Travel --> Complete
+    end
+    Verdict -->|"Queued recovery.reviewed"| Apply
+    Gate -->|"All checks pass"| Assign
 ```
 
 All role-to-role handoffs use the durable event queue. A self-queued dispatch retry
@@ -118,6 +138,6 @@ still controls scheduling. Wall-clock retry backoff and leases remain enforced.
 This prevents transaction timestamps or clock adjustments from making fresh events
 temporarily invisible and changing a seeded run's initial assignments.
 
-Still deferred: real voice calls, LLM judgement, live traffic, arbitrary incidents,
+Still deferred for this fixed scenario: real voice calls, live traffic, arbitrary incidents,
 road-capacity queues, cargo/energy constraints, cancellation/returns, controller
 restart recovery, full replay and published multi-seed architecture comparisons.

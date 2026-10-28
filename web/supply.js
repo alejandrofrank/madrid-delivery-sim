@@ -5,7 +5,7 @@ const $ = id => document.getElementById(id);
 const clone = value => JSON.parse(JSON.stringify(value));
 const pretty = value => JSON.stringify(value, null, 2);
 const roles = {household: 'Household', restaurant: 'Restaurant', market: 'Supermarket'};
-const colors = {household: '#9baec6', restaurant: '#f4bb70', market: '#6ed1b1'};
+const colors = {household: '#68737e', restaurant: '#9b4c28', market: '#2b6755'};
 const budgetLabels = {
   events_per_run: ['Events / run', 1, 1000],
   tool_calls_per_event: ['Tool calls / event', 1, 16],
@@ -416,20 +416,20 @@ function drawMap(force = false) {
     const fabric = svgNode('g', {'aria-hidden': 'true', 'pointer-events': 'none'});
     const spacing = Number(city.spacing_m || 500);
     for (const area of city.neighborhoods || []) {
-      fabric.append(svgNode('rect', {x: Number(area.x) / spacing, y: Number(area.y) / spacing, width: Number(area.width) / spacing, height: Number(area.height) / spacing, fill: '#0e1926', stroke: '#253248', 'stroke-width': '.03'}));
+      fabric.append(svgNode('rect', {x: Number(area.x) / spacing, y: Number(area.y) / spacing, width: Number(area.width) / spacing, height: Number(area.height) / spacing, fill: '#f1f2f3', stroke: '#d4d8dc', 'stroke-width': '.03'}));
       const label = svgNode('text', {x: Number(area.x) / spacing + .5, y: Number(area.y) / spacing + .75, class: 'district-label'});
       label.textContent = area.name;
       fabric.append(label);
     }
     for (const building of city.buildings || []) {
       if (['home', 'apartment'].includes(building.kind)) continue;
-      fabric.append(svgNode('rect', {x: Number(building.x) / spacing, y: Number(building.y) / spacing, width: Math.max(.2, Number(building.width) / spacing), height: Math.max(.2, Number(building.height) / spacing), rx: '.05', fill: building.kind === 'park' ? '#1b3a32' : '#253248'}));
+      fabric.append(svgNode('rect', {x: Number(building.x) / spacing, y: Number(building.y) / spacing, width: Math.max(.2, Number(building.width) / spacing), height: Math.max(.2, Number(building.height) / spacing), rx: '.05', fill: building.kind === 'park' ? '#e5ece7' : '#d4d8dc'}));
     }
     svg.append(fabric);
     const roads = svgNode('g', {'aria-hidden': 'true', 'pointer-events': 'none'});
     for (let n = 0; n < 32; n++) {
-      roads.append(svgNode('line', {x1: 0, x2: 31, y1: n, y2: n, stroke: n % 4 ? '#1b2b3e' : '#2d3e54', 'stroke-width': n % 4 ? '.045' : '.08'}));
-      roads.append(svgNode('line', {y1: 0, y2: 31, x1: n, x2: n, stroke: n % 4 ? '#1b2b3e' : '#2d3e54', 'stroke-width': n % 4 ? '.045' : '.08'}));
+      roads.append(svgNode('line', {x1: 0, x2: 31, y1: n, y2: n, stroke: n % 4 ? '#dfe2e5' : '#b6bdc3', 'stroke-width': n % 4 ? '.045' : '.08'}));
+      roads.append(svgNode('line', {y1: 0, y2: 31, x1: n, x2: n, stroke: n % 4 ? '#dfe2e5' : '#b6bdc3', 'stroke-width': n % 4 ? '.045' : '.08'}));
     }
     svg.append(roads, svgNode('g', {id: 'activity-routes', 'aria-hidden': 'true'}));
     const markers = svgNode('g');
@@ -447,8 +447,8 @@ function drawMap(force = false) {
       if (entity.kind === 'household') shape = svgNode('path', {d: `M${x - radius},${y - .02}L${x},${y - radius}L${x + radius},${y - .02}V${y + radius}H${x - radius}Z`});
       else if (entity.kind === 'restaurant') shape = svgNode('rect', {x: x - radius, y: y - radius, width: radius * 2, height: radius * 2, rx: '.11'});
       else shape = svgNode('path', {d: `M${x},${y - radius - .06}L${x + radius + .06},${y}L${x},${y + radius + .06}L${x - radius - .06},${y}Z`});
-      shape.setAttribute('fill', colors[entity.kind] || '#82b7ff');
-      shape.setAttribute('stroke', '#0b1522');
+      shape.setAttribute('fill', colors[entity.kind] || '#3d596c');
+      shape.setAttribute('stroke', '#ffffff');
       shape.setAttribute('stroke-width', '.075');
       shape.setAttribute('class', 'marker-body');
       group.append(shape);

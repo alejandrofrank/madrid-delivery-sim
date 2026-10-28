@@ -1,18 +1,27 @@
 ...@common
 shape: sequence_diagram
 scenario: Scenario
-queue: Postgres queue {class: durable}
-inventory: Inventory / own store
-fulfillment: Fulfillment / own store
-dispatcher: Dispatcher / run fleet
-world: Trusted physical world
-scenario -> queue: basket.requested
-queue -> inventory: Inventory handles the addressed event
-inventory -> queue: basket.reserved
-queue -> fulfillment: Fulfillment handles the addressed event
-fulfillment -> queue: basket.ready
-queue -> dispatcher: Dispatcher handles the addressed event
-dispatcher -> queue: delivery.assigned
-world -> queue: delivery.arrived
-dispatcher -> queue: delivery.completed
-(** -> **)[*].style: ${edge-style}
+queue: "PostgreSQL\nqueue"
+inventory: "Inventory\nOwn store"
+fulfillment: "Fulfillment\nOwn store"
+dispatcher: "Dispatcher\nRun fleet"
+world: "Trusted\nphysical world"
+reserve: 01 / Reserve stock {
+  class: local
+  scenario -> queue: basket.requested
+  queue -> inventory: Addressed event
+  inventory -> queue: basket.reserved
+}
+fulfill: 02 / Prepare basket {
+  class: local
+  queue -> fulfillment: Addressed event
+  fulfillment -> queue: basket.ready
+}
+deliver: 03 / Assign + arrive {
+  class: local
+  queue -> dispatcher: Addressed event
+  dispatcher -> queue: delivery.assigned
+  world -> queue: delivery.arrived
+  dispatcher -> queue: delivery.completed
+}
+(** -> **)[*].style: {...${edge-style}}

@@ -1,53 +1,1577 @@
-:root{color-scheme:dark;--bg:#080c13;--panel:#0e1520;--raised:#141e2c;--line:#263346;--muted:#91a1b7;--text:#e6edf7;--blue:#82b7ff;--green:#6ed1b1;--orange:#f4bb70;--red:#f58a94;font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;font-size:13px;color:var(--text);background:var(--bg)}
-*{box-sizing:border-box}body{margin:0}button,input,textarea,select{font:inherit;color:inherit}button,input,textarea,select{border:1px solid #35445a;border-radius:5px;background:var(--raised)}button{padding:8px 11px;cursor:pointer;line-height:1.25}button:hover{border-color:#7894b8;background:#1c2a3e}button:disabled{opacity:.45;cursor:default}button.primary{background:var(--blue);border-color:var(--blue);color:#071425;font-weight:700}input,select{min-height:34px;padding:6px 8px;min-width:0}textarea{padding:9px;line-height:1.5;resize:vertical;min-width:0}input[type=checkbox]{width:15px;height:15px;min-height:15px;accent-color:var(--blue)}input:disabled,textarea:disabled{opacity:.6}button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,select:focus-visible,summary:focus-visible{outline:2px solid var(--blue);outline-offset:3px}a{color:var(--blue);text-underline-offset:3px}h1,h2,h3,p{margin:0}h1{font-size:18px;font-weight:650;letter-spacing:-.3px}h2{font-size:14px;font-weight:650}h3{font-size:13px;font-weight:650}p{line-height:1.55;color:var(--muted)}.subtle,small{color:var(--muted);font-size:11px}.mono{font-family:ui-monospace,SFMono-Regular,Consolas,monospace;font-variant-numeric:tabular-nums}.app-header{display:flex;align-items:center;gap:14px;padding:15px 22px;border-bottom:1px solid var(--line);background:var(--panel)}.brand{background:#c9424b;color:white;width:32px;height:32px;display:grid;place-items:center;font-size:24px;font-weight:800;border-radius:6px;text-decoration:none}.title p{font-size:11px;margin-top:3px}.local-badge{font-size:11px;border:1px solid #2f5f53;color:var(--green);padding:5px 8px;border-radius:4px;margin-left:auto;white-space:nowrap}.app-header nav{display:flex;gap:14px;font-size:12px}.app-header nav a{text-decoration:none}main{max-width:1900px;margin:0 auto;padding:0 22px}.toolbar{display:flex;align-items:center;flex-wrap:wrap;gap:10px;padding:14px 0}.toolbar-spacer{flex:1}.inline-label{display:flex;align-items:center;gap:7px;font-size:11px;color:var(--muted)}#playback-control{width:65px}.toolbar #run-state{font-size:11px;max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.toolbar #sim-clock{font-size:14px;min-width:72px}.notice{padding:10px 12px;border:1px solid #3d6583;background:#11243a;color:#c1ddff;margin:0 0 12px;border-radius:5px;white-space:pre-wrap;overflow-wrap:anywhere}.notice.error{background:#2a1720;color:#ffc0c7;border-color:#803a4a}.settings-panel{border:1px solid var(--line);background:var(--panel);border-radius:6px;margin-bottom:12px}.settings-panel summary{cursor:pointer;padding:11px 13px;font-size:12px;list-style-position:inside}.settings-panel summary .subtle{margin-left:10px}.settings-grid{display:grid;grid-template-columns:repeat(4,minmax(130px,1fr));gap:13px;padding:3px 14px 12px}.settings-grid label,.editor-form label,.advanced label{display:grid;gap:6px;font-size:11px;color:var(--muted)}.settings-grid input{width:100%}.settings-note{font-size:11px;padding:0 14px 13px}.metrics{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));border:1px solid var(--line);background:var(--panel);border-radius:6px;margin:0 0 13px}.metric{padding:11px 15px;min-height:80px;border-right:1px solid var(--line)}.metric:last-child{border-right:0}.metric>span{display:block;color:var(--muted);font-size:10px;text-transform:uppercase;letter-spacing:.65px}.metric strong{font-size:23px;line-height:1.5;font-variant-numeric:tabular-nums;font-weight:550}.metric small{display:block;font-size:10px}.workspace{display:grid;grid-template-columns:minmax(420px,1fr) 390px;gap:13px;align-items:start}.panel{border:1px solid var(--line);background:var(--panel);border-radius:6px;min-width:0;overflow:hidden}.panel-heading{padding:13px 15px;display:flex;align-items:center;gap:12px;border-bottom:1px solid var(--line)}.panel-heading>div:first-child{flex:1;min-width:0}.panel-heading p{font-size:11px;margin-top:4px;overflow-wrap:anywhere}.map-wrap{position:relative;background:#0a111a;isolation:isolate}.map-wrap svg{display:block;width:100%;height:clamp(450px,calc(100dvh - 325px),760px)}.map-key{position:absolute;bottom:10px;left:12px;right:12px;display:flex;gap:14px;flex-wrap:wrap;pointer-events:none;font-size:10px;color:#b0bed0;background:#0a111ade;padding:8px 10px;border:1px solid #253345;border-radius:4px;width:fit-content}.map-key span{display:flex;gap:6px;align-items:center}.key{display:inline-block;width:8px;height:8px;border-radius:2px}.key.household{background:#9baec6}.key.restaurant{background:var(--orange)}.key.market{background:var(--green)}.key.activity{background:var(--blue);border-radius:50%}.map-empty{position:absolute;inset:0;display:grid;place-items:center;color:var(--muted);pointer-events:none}.map-footer{display:flex;justify-content:space-between;gap:10px;padding:10px 14px;color:var(--muted);font-size:10px;border-top:1px solid var(--line)}.inspector{max-height:calc(100dvh - 196px);min-height:615px;overflow-y:auto;scrollbar-color:#415574 transparent}.entity-picker{display:flex;align-items:center;gap:12px;padding:12px 14px;font-size:11px;color:var(--muted)}.entity-picker select{width:100%;font-size:12px}.pill{display:inline-block;font-size:10px;border:1px solid #41516a;background:#172235;border-radius:4px;padding:4px 6px;white-space:nowrap;color:#a8c5eb}.tab-row{display:flex;gap:1px;padding:0 12px;border-bottom:1px solid var(--line)}.tab-row>button{border:0;border-radius:0;background:transparent;color:var(--muted);padding:11px 10px;font-size:11px;border-bottom:2px solid transparent}.tab-row>button[aria-selected=true]{color:var(--blue);border-bottom-color:var(--blue);background:#131f2f}.tab-row>button:hover{color:var(--text)}.scope-note{font-size:11px;padding:11px 14px;line-height:1.55}.editor-form{display:grid;gap:11px;padding:0 14px 14px}.editor-form input:not([type=checkbox]),.editor-form textarea,.editor-form select{width:100%}.field-pair{display:grid;grid-template-columns:1fr 1fr;gap:10px}.editor-form .checkbox-label{display:flex;align-items:center;gap:8px}.section-rule{border-top:1px solid var(--line);padding-top:15px;margin-top:2px;display:flex;justify-content:space-between;gap:10px}.budget-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}.budget-grid input{width:100%}.editor-form .scope-note{padding:0}.advanced{border-top:1px solid var(--line);padding:0 14px 14px}.advanced summary{padding:12px 0;cursor:pointer;font-size:11px;color:var(--blue)}.advanced label{margin-bottom:11px}.json-editor{width:100%;font:11px/1.55 ui-monospace,SFMono-Regular,Consolas,monospace;tab-size:2}.advanced button{font-size:11px}.advanced .scope-note{padding:9px 0 0}.evidence{margin-top:13px}.evidence .panel-heading{border-bottom:0}.evidence .panel-heading>button{font-size:11px}.evidence-content{min-height:150px;max-height:440px;overflow:auto;padding:0 15px 15px;scrollbar-color:#415574 transparent}.evidence-content:has(table){padding-top:6px}.evidence-tabs{padding:0 15px}.count{font-size:10px;margin-left:5px;border-radius:3px;background:#223148;padding:2px 5px;color:#c8dbf4}table{border-collapse:collapse;width:100%;font-size:11px}th,td{padding:10px 7px;text-align:left;border-bottom:1px solid var(--line);vertical-align:top;overflow-wrap:anywhere}th{font-weight:500;color:var(--muted);font-size:10px;text-transform:uppercase;letter-spacing:.4px;position:sticky;top:0;background:var(--panel);z-index:1}td small{display:block;margin-top:4px;font-size:10px}td button{font-size:11px;padding:0;text-align:left;border:0;background:transparent;color:var(--blue)}td button:hover{background:transparent;text-decoration:underline;border:0}.state{display:inline-block;border:1px solid #3b4d66;color:#aac4e7;background:#16243a;padding:3px 6px;border-radius:4px;font-size:10px;white-space:nowrap}.state.good{border-color:#2d6457;background:#102d27;color:#83d7bc}.state.bad{border-color:#713c49;background:#321c26;color:#ffabb5}.state.pending{border-color:#715839;background:#30271c;color:#f0c58e}.empty{color:var(--muted);font-size:12px;padding:24px 0;line-height:1.7}.record{border-bottom:1px solid var(--line);padding:12px 0;font-size:11px}.record:last-child{border-bottom:0}.record-head{display:flex;align-items:center;gap:9px;flex-wrap:wrap;margin-bottom:5px}.record-head strong{font-size:12px;font-weight:550}.record-head .mono{font-size:10px;color:var(--muted)}.record p{font-size:11px;white-space:pre-wrap;overflow-wrap:anywhere}.record details{margin-top:8px}.record summary{cursor:pointer;color:var(--blue);font-size:10px}.record pre,pre{white-space:pre-wrap;overflow-wrap:anywhere;background:#0a111b;border:1px solid #233249;border-radius:4px;padding:9px;font:10px/1.6 ui-monospace,SFMono-Regular,Consolas,monospace;color:#b8cbe4;max-height:350px;overflow:auto;margin:8px 0 0}.inspector-section{padding:0 14px 13px}.inspector-section h3{margin:9px 0}.inspector-section>p{font-size:11px}.inspector-section details{margin-top:10px}.inspector-section summary{font-size:11px;cursor:pointer;color:var(--blue)}.stat-list{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--line);border:1px solid var(--line);border-radius:4px;overflow:hidden}.stat-list div{background:#101b29;padding:9px}.stat-list dt{font-size:10px;color:var(--muted)}.stat-list dd{margin:5px 0 0;font-size:11px;overflow-wrap:anywhere}.replay-actions{display:flex;align-items:center;gap:12px;padding:17px 0 10px}.replay-actions span{font-size:11px;color:var(--muted)}#invariant-results{display:flex;flex-wrap:wrap;gap:7px;padding-top:6px}footer{display:flex;justify-content:space-between;gap:20px;padding:15px 0 20px;color:var(--muted);font-size:10px;line-height:1.7}svg .entity{cursor:pointer}svg .entity:focus{outline:none}svg .entity:focus .marker-body{stroke:#fff;stroke-width:.18}svg .selected-ring{fill:none;stroke:#e9f2ff;stroke-width:.1;stroke-dasharray:.2 .11}svg .entity-label{font-size:.37px;fill:#e6edf7;paint-order:stroke;stroke:#0a111b;stroke-width:.12;pointer-events:none}svg .district-label{font-size:.58px;font-weight:600;letter-spacing:.09px;fill:#60748d;pointer-events:none}svg .activity-route{fill:none;stroke:#82b7ff;stroke-width:.055;stroke-dasharray:.13 .2;opacity:.65;pointer-events:none}svg .activity-dot{fill:#a2cbff;stroke:#0a111b;stroke-width:.06;pointer-events:none}[hidden]{display:none!important}
-@media(min-width:1600px){.workspace{grid-template-columns:minmax(420px,1fr) 430px}.map-wrap svg{height:clamp(550px,calc(100dvh - 315px),850px)}}
-@media(max-width:1050px){main{padding:0 14px}.app-header{padding:13px 14px}.workspace{grid-template-columns:minmax(350px,1fr) 340px;gap:10px}.metrics{grid-template-columns:repeat(3,1fr)}.metric:nth-child(3){border-right:0}.metric:nth-child(-n+3){border-bottom:1px solid var(--line)}.metric{min-height:68px;padding:8px 12px}.metric strong{font-size:21px}.settings-grid{grid-template-columns:repeat(4,1fr)}.settings-grid label{font-size:10px}.map-wrap svg{height:600px}.inspector{max-height:690px;min-height:600px}.map-key{gap:9px;font-size:9px}.local-badge{font-size:10px}.evidence-tabs{overflow-x:auto;white-space:nowrap}.toolbar-spacer{display:none}.toolbar{gap:8px}.toolbar #run-state{margin-left:auto}.toolbar .inline-label{margin-left:0}}
-@media(max-width:760px){h1{font-size:16px}.app-header{gap:10px;flex-wrap:wrap}.title p{font-size:10px}.local-badge{margin-left:0}.app-header nav{margin-left:auto}.workspace{grid-template-columns:1fr}.inspector{max-height:none;min-height:0}.map-wrap svg{height:520px}.settings-grid{grid-template-columns:repeat(2,1fr)}.metrics{margin-bottom:10px}.map-panel .panel-heading{padding:11px 12px}.toolbar #run-state{margin-left:0;flex:1;min-width:90px}.toolbar .inline-label{margin-left:auto}.evidence .panel-heading{flex-wrap:wrap;gap:10px}.evidence .panel-heading>div:first-child{flex-basis:100%}.panel-heading .inline-label{font-size:10px}.evidence-content{max-height:420px}.map-footer{font-size:9px}footer{display:block}footer span{display:block}.settings-panel summary .subtle{display:block;margin-top:5px;margin-left:16px}}
-@media(max-width:760px){.map-wrap svg{height:auto;aspect-ratio:1}}
-svg .entity{pointer-events:bounding-box}
-.call-transcript{margin-top:7px;max-width:390px}.call-transcript summary{font-size:10px;color:var(--blue);cursor:pointer}.call-transcript p{margin-top:6px;white-space:pre-wrap;font-size:11px;line-height:1.6}
-.ingredient-search{margin:0 14px 14px;padding:10px 11px 12px;border:1px solid #304862;border-radius:5px;background:#101c2b}.search-heading{display:flex;flex-wrap:wrap;align-items:center;gap:5px 10px;margin-bottom:9px}.search-heading h3{margin:0}.local-search-label{color:var(--green);font-size:9px}.ingredient-search form>label{display:block;font-size:10px;color:var(--muted);margin-bottom:6px}.search-controls{display:flex;gap:7px}.search-controls input{width:100%;min-width:0}.search-controls button{font-size:11px}.ingredient-search .search-state{margin-top:9px;font-size:10px;line-height:1.6}.ingredient-search table{margin-top:8px;font-size:10px}.ingredient-search th,.ingredient-search td{padding:8px 4px}.search-empty{padding:10px 0;font-size:11px}.search-provider-note,.search-reviews{margin-top:10px}.search-provider-note summary,.search-reviews summary{font-size:10px;color:var(--blue);cursor:pointer}.search-provider-note p{font-size:10px;margin-top:7px;line-height:1.7}
-@media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important}}
-.metric.metric-action{border:0;border-right:1px solid var(--line);border-radius:0;background:transparent;text-align:left;width:100%;color:var(--text)}.metric.metric-action:hover{background:#17263a}.metric.metric-action:focus-visible{outline-offset:-3px}.metric.metric-action:disabled{opacity:1;color:var(--muted)}#run-evidence{scroll-margin-top:14px}#orders-panel{max-height:75dvh;padding-top:12px}.order-book-note{font-size:11px;padding:0 0 12px}.order-record{border:1px solid var(--line);border-radius:5px;margin-bottom:8px;background:#101a28}.order-summary{display:grid;grid-template-columns:16px minmax(150px,1.2fr) minmax(160px,1.3fr) 100px 75px;align-items:center;gap:12px;padding:13px;cursor:pointer;list-style:none}.order-summary::-webkit-details-marker{display:none}.order-summary:hover{background:#18263a}.order-disclosure{font-size:22px;color:var(--blue);text-align:center;transition:transform .12s}.order-record[open]>.order-summary .order-disclosure{transform:rotate(90deg)}.order-title strong{display:block;font-size:12px;font-weight:600}.order-title small{display:block;margin-top:4px;font-size:10px;overflow-wrap:anywhere}.order-parties{font-size:11px;line-height:1.6;color:#c3d0e1}.order-time{font-size:11px;color:var(--muted)}.order-history{border-top:1px solid var(--line);padding:14px;background:#0c1420;overflow-wrap:anywhere}.order-history-heading{display:flex;align-items:center;justify-content:space-between;gap:12px}.order-history-heading p{font-size:11px}.order-history-heading button{font-size:11px;flex-shrink:0}.order-section{margin-top:20px;padding-top:15px;border-top:1px solid var(--line)}.order-section>h3{margin-bottom:9px}.order-section>p{font-size:11px;line-height:1.7}.order-section>details{margin-top:8px}.order-section summary{font-size:11px;color:var(--blue);cursor:pointer}.order-step{border-left:2px solid #395d85;padding-left:12px}.order-transcript{white-space:pre-wrap;color:#cfdaea}.order-outcome,.order-memory-note{padding:9px 11px;background:#30271c;border:1px solid #715839;border-radius:4px;margin-top:12px;font-size:11px;color:#f0c58e}.order-load-state{font-size:12px;padding:12px 0}.order-section .record pre{max-height:300px}
-@media(max-width:760px){.order-summary{grid-template-columns:14px minmax(0,1fr) auto;gap:8px;padding:11px}.order-summary .order-title{grid-column:2}.order-summary .state{grid-column:3;grid-row:1}.order-parties{grid-column:2;grid-row:2;font-size:10px}.order-time{grid-column:3;grid-row:2;font-size:10px}.order-history{padding:11px}.order-history-heading{align-items:flex-start;flex-direction:column}#orders-panel{max-height:80dvh}.order-history table{font-size:10px}.order-history th,.order-history td{padding:8px 4px}}
-.order-history-heading{position:sticky;top:0;z-index:2;flex-wrap:wrap;background:#0c1420;padding:8px 0;border-bottom:1px solid var(--line)}.order-history-navigation{display:flex;gap:7px;flex-wrap:wrap;flex-basis:100%}.order-history-navigation button{font-size:11px}.order-section{scroll-margin-top:125px}
+:where(body[data-page="restaurants"]) {
+  color-scheme: light;
+  --bg: var(--ui-bg, #f5f5f5);
+  --panel: var(--ui-surface, #ffffff);
+  --raised: var(--ui-surface, #ffffff);
+  --line: var(--ui-line, #d9dbde);
+  --muted: var(--ui-muted, #53565a);
+  --text: var(--ui-ink, #18191b);
+  --blue: var(--ui-accent, #c9322c);
+  --green: var(--ui-positive, #25634b);
+  --red: var(--ui-negative, #a02e2e);
+  --orange: var(--ui-warning, #855819);
+  --amber: var(--ui-warning, #855819);
+  font:
+    14px/1.5 Arial,
+    sans-serif;
+  color: var(--text);
+  background: var(--bg);
+  margin: 0;
+}
+:where(body[data-page="restaurants"]) * {
+  box-sizing: border-box;
+}
+:where(body[data-page="restaurants"]) button,
+:where(body[data-page="restaurants"]) input,
+:where(body[data-page="restaurants"]) textarea,
+:where(body[data-page="restaurants"]) select {
+  font:
+    14px/1.5 Arial,
+    sans-serif;
+  color: inherit;
+}
+:where(body[data-page="restaurants"]) button,
+:where(body[data-page="restaurants"]) input,
+:where(body[data-page="restaurants"]) textarea,
+:where(body[data-page="restaurants"]) select {
+  border: 1px solid var(--line);
+  border-radius: 2px;
+  background: var(--raised);
+}
+:where(body[data-page="restaurants"]) button {
+  padding: 8px 12px;
+  cursor: pointer;
+  line-height: 1.25;
+  min-height: 36px;
+  font-weight: 600;
+}
+:where(body[data-page="restaurants"]) button:hover {
+  border-color: var(--ui-strong-line, #9b9fa4);
+  background: #f5f5f5;
+}
+:where(body[data-page="restaurants"]) button:disabled {
+  opacity: 1;
+  cursor: not-allowed;
+  color: var(--muted);
+  background: #f0f0f1;
+  border-color: var(--line);
+}
+:where(body[data-page="restaurants"]) button.primary {
+  background: var(--blue);
+  border-color: var(--blue);
+  color: #fff;
+  font-weight: 600;
+}
+:where(body[data-page="restaurants"]) input,
+:where(body[data-page="restaurants"]) select {
+  min-height: 36px;
+  padding: 8px 8px;
+  min-width: 0;
+}
+:where(body[data-page="restaurants"]) textarea {
+  padding: 8px;
+  line-height: 1.5;
+  resize: vertical;
+  min-width: 0;
+}
+:where(body[data-page="restaurants"]) input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  min-height: 16px;
+  accent-color: var(--blue);
+}
+:where(body[data-page="restaurants"]) input:disabled,
+:where(body[data-page="restaurants"]) textarea:disabled {
+  opacity: 0.6;
+}
+:where(body[data-page="restaurants"]) button:focus-visible,
+:where(body[data-page="restaurants"]) a:focus-visible,
+:where(body[data-page="restaurants"]) input:focus-visible,
+:where(body[data-page="restaurants"]) textarea:focus-visible,
+:where(body[data-page="restaurants"]) select:focus-visible,
+:where(body[data-page="restaurants"]) summary:focus-visible {
+  outline: 2px solid var(--blue);
+  outline-offset: 3px;
+}
+:where(body[data-page="restaurants"]) a {
+  color: var(--blue);
+  text-underline-offset: 3px;
+}
+:where(body[data-page="restaurants"]) h1,
+:where(body[data-page="restaurants"]) h2,
+:where(body[data-page="restaurants"]) h3,
+:where(body[data-page="restaurants"]) p {
+  margin: 0;
+}
+:where(body[data-page="restaurants"]) h1 {
+  font-size: 20px;
+  font-weight: 600;
+  letter-spacing: -0.2px;
+}
+:where(body[data-page="restaurants"]) h2 {
+  font-size: 15px;
+  font-weight: 600;
+}
+:where(body[data-page="restaurants"]) h3 {
+  font-size: 14px;
+  font-weight: 600;
+}
+:where(body[data-page="restaurants"]) p {
+  line-height: 1.55;
+  color: var(--muted);
+}
+:where(body[data-page="restaurants"]) .subtle,
+:where(body[data-page="restaurants"]) small {
+  color: var(--muted);
+  font-size: 12px;
+}
+:where(body[data-page="restaurants"]) .mono {
+  font-family: var(
+    --ui-mono,
+    ui-monospace,
+    SFMono-Regular,
+    Consolas,
+    monospace
+  );
+  font-variant-numeric: tabular-nums;
+  font-size: 12px;
+}
+:where(body[data-page="restaurants"]) main {
+  max-width: 1800px;
+  margin: 0 auto;
+  padding: 24px 24px 0;
+  min-width: 0;
+}
+:where(body[data-page="restaurants"]) .toolbar {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  padding: 16px 0;
+}
+:where(body[data-page="restaurants"]) .toolbar-spacer {
+  flex: 1;
+}
+:where(body[data-page="restaurants"]) .inline-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  color: var(--muted);
+}
+:where(body[data-page="restaurants"]) #playback-control {
+  width: 65px;
+}
+:where(body[data-page="restaurants"]) .toolbar #run-state {
+  font-size: 12px;
+  max-width: 200px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+:where(body[data-page="restaurants"]) .toolbar #sim-clock {
+  font-size: 14px;
+  min-width: 72px;
+}
+:where(body[data-page="restaurants"]) .notice {
+  padding: 12px 12px;
+  border: 1px solid var(--line);
+  background: var(--panel);
+  color: var(--text);
+  margin: 0 0 12px;
+  border-radius: 2px;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+:where(body[data-page="restaurants"]) .notice.error {
+  background: #fbf1f0;
+  color: var(--red);
+  border-color: #ddb4b2;
+}
+:where(body[data-page="restaurants"]) .settings-panel {
+  border: 1px solid var(--line);
+  background: var(--panel);
+  border-radius: 2px;
+  margin-bottom: 12px;
+}
+:where(body[data-page="restaurants"]) .settings-panel summary {
+  cursor: pointer;
+  padding: 12px 12px;
+  font-size: 12px;
+  list-style-position: inside;
+}
+:where(body[data-page="restaurants"]) .settings-panel summary .subtle {
+  margin-left: 12px;
+}
+:where(body[data-page="restaurants"]) .settings-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(130px, 1fr));
+  gap: 12px;
+  padding: 4px 16px 12px;
+}
+:where(body[data-page="restaurants"]) .settings-grid label,
+:where(body[data-page="restaurants"]) .editor-form label,
+:where(body[data-page="restaurants"]) .advanced label {
+  display: grid;
+  gap: 8px;
+  font-size: 12px;
+  color: var(--muted);
+}
+:where(body[data-page="restaurants"]) .settings-grid input {
+  width: 100%;
+}
+:where(body[data-page="restaurants"]) .settings-note {
+  font-size: 12px;
+  padding: 0 16px 12px;
+}
+:where(body[data-page="restaurants"]) .metrics {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  border: 1px solid var(--line);
+  background: var(--panel);
+  border-radius: 2px;
+  margin: 0 0 12px;
+}
+:where(body[data-page="restaurants"]) .metric {
+  padding: 12px 16px;
+  min-height: 80px;
+  border-right: 1px solid var(--line);
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+:where(body[data-page="restaurants"]) .metric:last-child {
+  border-right: 0;
+}
+:where(body[data-page="restaurants"]) .metric > span {
+  display: block;
+  color: var(--muted);
+  font-size: 12px;
+  text-transform: none;
+  letter-spacing: 0;
+}
+:where(body[data-page="restaurants"]) .metric strong {
+  font-size: 24px;
+  line-height: 1.4;
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+  font-family: var(
+    --ui-mono,
+    ui-monospace,
+    SFMono-Regular,
+    Consolas,
+    monospace
+  );
+}
+:where(body[data-page="restaurants"]) .metric small {
+  display: block;
+  font-size: 12px;
+}
+:where(body[data-page="restaurants"]) .workspace {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 390px;
+  gap: 12px;
+  align-items: start;
+}
+:where(body[data-page="restaurants"]) .panel {
+  border: 1px solid var(--line);
+  background: var(--panel);
+  border-radius: 2px;
+  min-width: 0;
+  overflow: hidden;
+}
+:where(body[data-page="restaurants"]) .panel-heading {
+  padding: 12px 16px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  border-bottom: 1px solid var(--line);
+}
+:where(body[data-page="restaurants"]) .panel-heading > div:first-child {
+  flex: 1;
+  min-width: 0;
+}
+:where(body[data-page="restaurants"]) .panel-heading p {
+  font-size: 12px;
+  margin-top: 4px;
+  overflow-wrap: anywhere;
+}
+:where(body[data-page="restaurants"]) .map-wrap {
+  position: relative;
+  background: var(--bg);
+  isolation: isolate;
+}
+:where(body[data-page="restaurants"]) .map-wrap svg {
+  display: block;
+  width: 100%;
+  height: clamp(440px, calc(100dvh - 344px), 760px);
+}
+:where(body[data-page="restaurants"]) .map-key {
+  position: absolute;
+  bottom: 12px;
+  left: 12px;
+  right: 12px;
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+  pointer-events: none;
+  font-size: 12px;
+  color: var(--text);
+  background: var(--panel);
+  padding: 8px 12px;
+  border: 1px solid var(--line);
+  border-radius: 2px;
+  width: fit-content;
+  max-width: calc(100% - 24px);
+}
+:where(body[data-page="restaurants"]) .map-key span {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+:where(body[data-page="restaurants"]) .key {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 2px;
+}
+:where(body[data-page="restaurants"]) .key.household {
+  background: var(--muted);
+}
+:where(body[data-page="restaurants"]) .key.restaurant {
+  background: var(--orange);
+}
+:where(body[data-page="restaurants"]) .key.market {
+  background: var(--green);
+}
+:where(body[data-page="restaurants"]) .key.activity {
+  background: var(--blue);
+  border-radius: 2px;
+}
+:where(body[data-page="restaurants"]) .map-empty {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  color: var(--muted);
+  pointer-events: none;
+}
+:where(body[data-page="restaurants"]) .map-footer {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 16px;
+  color: var(--muted);
+  font-size: 12px;
+  border-top: 1px solid var(--line);
+  flex-wrap: wrap;
+  overflow-wrap: anywhere;
+}
+:where(body[data-page="restaurants"]) .inspector {
+  max-height: calc(100dvh - 96px);
+  min-height: 0;
+  overflow-y: auto;
+  scrollbar-color: var(--ui-strong-line, #9b9fa4) transparent;
+}
+:where(body[data-page="restaurants"]) .entity-picker {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  font-size: 12px;
+  color: var(--muted);
+}
+:where(body[data-page="restaurants"]) .entity-picker select {
+  width: 100%;
+  font-size: 12px;
+}
+:where(body[data-page="restaurants"]) .pill {
+  display: inline-block;
+  font-size: 12px;
+  border: 1px solid var(--line);
+  background: #ffffff;
+  border-radius: 2px;
+  padding: 4px 8px;
+  white-space: nowrap;
+  color: var(--muted);
+  font-family: var(
+    --ui-mono,
+    ui-monospace,
+    SFMono-Regular,
+    Consolas,
+    monospace
+  );
+}
+:where(body[data-page="restaurants"]) .tab-row {
+  display: flex;
+  gap: 1px;
+  padding: 0 12px;
+  border-bottom: 1px solid var(--line);
+}
+:where(body[data-page="restaurants"]) .tab-row > button {
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  color: var(--muted);
+  padding: 12px 12px;
+  font-size: 12px;
+  border-bottom: 2px solid transparent;
+  flex: 0 0 auto;
+}
+:where(body[data-page="restaurants"]) .tab-row > button[aria-selected="true"] {
+  color: var(--blue);
+  border-bottom-color: var(--blue);
+  background: var(--panel);
+}
+:where(body[data-page="restaurants"]) .tab-row > button:hover {
+  color: var(--text);
+}
+:where(body[data-page="restaurants"]) .scope-note {
+  font-size: 12px;
+  padding: 12px 16px;
+  line-height: 1.55;
+}
+:where(body[data-page="restaurants"]) .editor-form {
+  display: grid;
+  gap: 12px;
+  padding: 0 16px 16px;
+}
+:where(body[data-page="restaurants"]) .editor-form input:not([type="checkbox"]),
+:where(body[data-page="restaurants"]) .editor-form textarea,
+:where(body[data-page="restaurants"]) .editor-form select {
+  width: 100%;
+}
+:where(body[data-page="restaurants"]) .field-pair {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+:where(body[data-page="restaurants"]) .editor-form .checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+:where(body[data-page="restaurants"]) .section-rule {
+  border-top: 1px solid var(--line);
+  padding-top: 16px;
+  margin-top: 2px;
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+}
+:where(body[data-page="restaurants"]) .budget-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+:where(body[data-page="restaurants"]) .budget-grid input {
+  width: 100%;
+}
+:where(body[data-page="restaurants"]) .editor-form .scope-note {
+  padding: 0;
+}
+:where(body[data-page="restaurants"]) .advanced {
+  border-top: 1px solid var(--line);
+  padding: 0 16px 16px;
+}
+:where(body[data-page="restaurants"]) .advanced summary {
+  padding: 12px 0;
+  cursor: pointer;
+  font-size: 12px;
+  color: var(--blue);
+}
+:where(body[data-page="restaurants"]) .advanced label {
+  margin-bottom: 12px;
+}
+:where(body[data-page="restaurants"]) .json-editor {
+  width: 100%;
+  font: 12px/1.6
+    var(--ui-mono, ui-monospace, SFMono-Regular, Consolas, monospace);
+  tab-size: 2;
+}
+:where(body[data-page="restaurants"]) .advanced button {
+  font-size: 12px;
+}
+:where(body[data-page="restaurants"]) .advanced .scope-note {
+  padding: 8px 0 0;
+}
+:where(body[data-page="restaurants"]) .evidence {
+  margin-top: 12px;
+}
+:where(body[data-page="restaurants"]) .evidence .panel-heading {
+  border-bottom: 0;
+}
+:where(body[data-page="restaurants"]) .evidence .panel-heading > button {
+  font-size: 12px;
+}
+:where(body[data-page="restaurants"]) .evidence-content {
+  min-height: 150px;
+  max-height: 440px;
+  overflow: auto;
+  padding: 0 16px 16px;
+  scrollbar-color: var(--ui-strong-line, #9b9fa4) transparent;
+}
+:where(body[data-page="restaurants"]) .evidence-content:has(table) {
+  padding-top: 8px;
+}
+:where(body[data-page="restaurants"]) .evidence-tabs {
+  padding: 0 16px;
+  overflow-x: auto;
+  min-width: 0;
+}
+:where(body[data-page="restaurants"]) .count {
+  font-size: 12px;
+  margin-left: 4px;
+  border-radius: 2px;
+  background: #ececed;
+  padding: 2px 4px;
+  color: var(--muted);
+  font-family: var(
+    --ui-mono,
+    ui-monospace,
+    SFMono-Regular,
+    Consolas,
+    monospace
+  );
+}
+:where(body[data-page="restaurants"]) table {
+  border-collapse: collapse;
+  width: 100%;
+  font-size: 12px;
+}
+:where(body[data-page="restaurants"]) th,
+:where(body[data-page="restaurants"]) td {
+  padding: 12px 8px;
+  text-align: left;
+  border-bottom: 1px solid var(--line);
+  vertical-align: top;
+  overflow-wrap: anywhere;
+}
+:where(body[data-page="restaurants"]) th {
+  font-weight: 600;
+  color: var(--muted);
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  position: sticky;
+  top: 0;
+  background: var(--panel);
+  z-index: 1;
+}
+:where(body[data-page="restaurants"]) td small {
+  display: block;
+  margin-top: 4px;
+  font-size: 12px;
+}
+:where(body[data-page="restaurants"]) td button {
+  font-size: 12px;
+  padding: 0;
+  text-align: left;
+  border: 0;
+  background: transparent;
+  color: var(--blue);
+}
+:where(body[data-page="restaurants"]) td button:hover {
+  background: transparent;
+  text-decoration: underline;
+  border: 0;
+}
+:where(body[data-page="restaurants"]) .state {
+  display: inline-block;
+  border: 1px solid var(--line);
+  color: var(--muted);
+  background: #ffffff;
+  padding: 4px 8px;
+  border-radius: 2px;
+  font-size: 12px;
+  white-space: nowrap;
+  font-family: var(
+    --ui-mono,
+    ui-monospace,
+    SFMono-Regular,
+    Consolas,
+    monospace
+  );
+}
+:where(body[data-page="restaurants"]) .state.good {
+  border-color: #b8cec2;
+  background: #f0f6f2;
+  color: var(--green);
+}
+:where(body[data-page="restaurants"]) .state.bad {
+  border-color: #ddb4b2;
+  background: #fbf1f0;
+  color: var(--red);
+}
+:where(body[data-page="restaurants"]) .state.pending {
+  border-color: #d8c5a6;
+  background: #fbf6ed;
+  color: var(--orange);
+}
+:where(body[data-page="restaurants"]) .empty {
+  color: var(--muted);
+  font-size: 12px;
+  padding: 24px 0;
+  line-height: 1.7;
+}
+:where(body[data-page="restaurants"]) .record {
+  border-bottom: 1px solid var(--line);
+  padding: 12px 0;
+  font-size: 12px;
+}
+:where(body[data-page="restaurants"]) .record:last-child {
+  border-bottom: 0;
+}
+:where(body[data-page="restaurants"]) .record-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 4px;
+}
+:where(body[data-page="restaurants"]) .record-head strong {
+  font-size: 12px;
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+:where(body[data-page="restaurants"]) .record-head .mono {
+  font-size: 12px;
+  color: var(--muted);
+}
+:where(body[data-page="restaurants"]) .record p {
+  font-size: 12px;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+:where(body[data-page="restaurants"]) .record details {
+  margin-top: 8px;
+}
+:where(body[data-page="restaurants"]) .record summary {
+  cursor: pointer;
+  color: var(--blue);
+  font-size: 12px;
+}
+:where(body[data-page="restaurants"]) .record pre,
+:where(body[data-page="restaurants"]) pre {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  background: #f5f5f5;
+  border: 1px solid var(--line);
+  border-radius: 2px;
+  padding: 8px;
+  font: 12px/1.6
+    var(--ui-mono, ui-monospace, SFMono-Regular, Consolas, monospace);
+  color: var(--text);
+  max-height: 350px;
+  overflow: auto;
+  margin: 8px 0 0;
+}
+:where(body[data-page="restaurants"]) .inspector-section {
+  padding: 0 16px 12px;
+}
+:where(body[data-page="restaurants"]) .inspector-section h3 {
+  margin: 8px 0;
+}
+:where(body[data-page="restaurants"]) .inspector-section > p {
+  font-size: 12px;
+}
+:where(body[data-page="restaurants"]) .inspector-section details {
+  margin-top: 12px;
+}
+:where(body[data-page="restaurants"]) .inspector-section summary {
+  font-size: 12px;
+  cursor: pointer;
+  color: var(--blue);
+}
+:where(body[data-page="restaurants"]) .stat-list {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1px;
+  background: var(--line);
+  border: 1px solid var(--line);
+  border-radius: 2px;
+  overflow: hidden;
+}
+:where(body[data-page="restaurants"]) .stat-list div {
+  background: #f5f5f5;
+  padding: 8px;
+}
+:where(body[data-page="restaurants"]) .stat-list dt {
+  font-size: 12px;
+  color: var(--muted);
+}
+:where(body[data-page="restaurants"]) .stat-list dd {
+  margin: 4px 0 0;
+  font-size: 12px;
+  overflow-wrap: anywhere;
+}
+:where(body[data-page="restaurants"]) .replay-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px 0 12px;
+}
+:where(body[data-page="restaurants"]) .replay-actions span {
+  font-size: 12px;
+  color: var(--muted);
+}
+:where(body[data-page="restaurants"]) #invariant-results {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding-top: 8px;
+}
+:where(body[data-page="restaurants"]) footer {
+  display: flex;
+  justify-content: space-between;
+  gap: 24px;
+  padding: 16px 0 24px;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.7;
+  overflow-wrap: anywhere;
+}
+:where(body[data-page="restaurants"]) svg .entity {
+  cursor: pointer;
+}
+:where(body[data-page="restaurants"]) svg .entity:focus {
+  outline: none;
+}
+:where(body[data-page="restaurants"]) svg .entity:focus .marker-body {
+  stroke: var(--text);
+  stroke-width: 0.18;
+}
+:where(body[data-page="restaurants"]) svg .selected-ring {
+  fill: none;
+  stroke: var(--blue);
+  stroke-width: 0.1;
+  stroke-dasharray: 0.2 0.11;
+}
+:where(body[data-page="restaurants"]) svg .entity-label {
+  font-size: 0.37px;
+  fill: var(--text);
+  paint-order: stroke;
+  stroke: var(--bg);
+  stroke-width: 0.12;
+  pointer-events: none;
+}
+:where(body[data-page="restaurants"]) svg .district-label {
+  font-size: 0.58px;
+  font-weight: 600;
+  letter-spacing: 0.09px;
+  fill: #6a6e73;
+  pointer-events: none;
+}
+:where(body[data-page="restaurants"]) svg .activity-route {
+  fill: none;
+  stroke: var(--blue);
+  stroke-width: 0.055;
+  stroke-dasharray: 0.13 0.2;
+  opacity: 0.65;
+  pointer-events: none;
+}
+:where(body[data-page="restaurants"]) svg .activity-dot {
+  fill: var(--blue);
+  stroke: var(--panel);
+  stroke-width: 0.06;
+  pointer-events: none;
+}
+:where(body[data-page="restaurants"]) [hidden] {
+  display: none !important;
+}
+@media (min-width: 1600px) {
+  :where(body[data-page="restaurants"]) .workspace {
+    grid-template-columns: minmax(0, 1fr) 340px;
+  }
+  :where(body[data-page="restaurants"]) .map-wrap svg {
+    height: clamp(550px, calc(100dvh - 315px), 850px);
+  }
+}
+@media (max-width: 1050px) {
+  :where(body[data-page="restaurants"]) main {
+    padding: 16px 16px 0;
+    max-width: 1800px;
+    margin: 0 auto;
+    min-width: 0;
+  }
+  :where(body[data-page="restaurants"]) .workspace {
+    grid-template-columns: minmax(0, 1fr) 340px;
+    gap: 12px;
+  }
+  :where(body[data-page="restaurants"]) .metrics {
+    grid-template-columns: repeat(3, 1fr);
+  }
+  :where(body[data-page="restaurants"]) .metric:nth-child(3) {
+    border-right: 0;
+  }
+  :where(body[data-page="restaurants"]) .metric:nth-child(-n + 3) {
+    border-bottom: 1px solid var(--line);
+  }
+  :where(body[data-page="restaurants"]) .metric {
+    min-height: 68px;
+    padding: 8px 12px;
+    min-width: 0;
+    overflow-wrap: anywhere;
+  }
+  :where(body[data-page="restaurants"]) .metric strong {
+    font-size: 22px;
+    font-family: var(
+      --ui-mono,
+      ui-monospace,
+      SFMono-Regular,
+      Consolas,
+      monospace
+    );
+    font-weight: 600;
+    line-height: 1.4;
+  }
+  :where(body[data-page="restaurants"]) .settings-grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+  :where(body[data-page="restaurants"]) .settings-grid label {
+    font-size: 12px;
+  }
+  :where(body[data-page="restaurants"]) .map-wrap svg {
+    height: 600px;
+  }
+  :where(body[data-page="restaurants"]) .inspector {
+    max-height: 690px;
+    min-height: 0;
+  }
+  :where(body[data-page="restaurants"]) .map-key {
+    gap: 8px;
+    font-size: 12px;
+    color: var(--text);
+    background: var(--panel);
+    max-width: calc(100% - 24px);
+    bottom: 12px;
+  }
+  :where(body[data-page="restaurants"]) .evidence-tabs {
+    overflow-x: auto;
+    white-space: nowrap;
+    min-width: 0;
+  }
+  :where(body[data-page="restaurants"]) .toolbar-spacer {
+    display: none;
+  }
+  :where(body[data-page="restaurants"]) .toolbar {
+    gap: 8px;
+  }
+  :where(body[data-page="restaurants"]) .toolbar #run-state {
+    margin-left: auto;
+  }
+  :where(body[data-page="restaurants"]) .toolbar .inline-label {
+    margin-left: 0;
+  }
+}
+@media (max-width: 760px) {
+  :where(body[data-page="restaurants"]) h1 {
+    font-size: 20px;
+    letter-spacing: -0.2px;
+  }
+  :where(body[data-page="restaurants"]) .workspace {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  :where(body[data-page="restaurants"]) .inspector {
+    max-height: none;
+    min-height: 0;
+  }
+  :where(body[data-page="restaurants"]) .map-wrap svg {
+    height: 520px;
+  }
+  :where(body[data-page="restaurants"]) .settings-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  :where(body[data-page="restaurants"]) .metrics {
+    margin-bottom: 12px;
+  }
+  :where(body[data-page="restaurants"]) .map-panel .panel-heading {
+    padding: 12px 12px;
+  }
+  :where(body[data-page="restaurants"]) .toolbar #run-state {
+    margin-left: 0;
+    flex: 1;
+    min-width: 90px;
+  }
+  :where(body[data-page="restaurants"]) .toolbar .inline-label {
+    margin-left: auto;
+  }
+  :where(body[data-page="restaurants"]) .evidence .panel-heading {
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+  :where(body[data-page="restaurants"])
+    .evidence
+    .panel-heading
+    > div:first-child {
+    flex-basis: 100%;
+  }
+  :where(body[data-page="restaurants"]) .panel-heading .inline-label {
+    font-size: 12px;
+  }
+  :where(body[data-page="restaurants"]) .evidence-content {
+    max-height: 420px;
+  }
+  :where(body[data-page="restaurants"]) .map-footer {
+    font-size: 12px;
+    flex-wrap: wrap;
+    overflow-wrap: anywhere;
+  }
+  :where(body[data-page="restaurants"]) footer {
+    display: block;
+    overflow-wrap: anywhere;
+  }
+  :where(body[data-page="restaurants"]) footer span {
+    display: block;
+  }
+  :where(body[data-page="restaurants"]) .settings-panel summary .subtle {
+    display: block;
+    margin-top: 4px;
+    margin-left: 16px;
+  }
+}
+@media (max-width: 760px) {
+  :where(body[data-page="restaurants"]) .map-wrap svg {
+    height: auto;
+    aspect-ratio: 1;
+  }
+}
+:where(body[data-page="restaurants"]) svg .entity {
+  pointer-events: bounding-box;
+}
+:where(body[data-page="restaurants"]) .call-transcript {
+  margin-top: 8px;
+  max-width: 390px;
+}
+:where(body[data-page="restaurants"]) .call-transcript summary {
+  font-size: 12px;
+  color: var(--blue);
+  cursor: pointer;
+}
+:where(body[data-page="restaurants"]) .call-transcript p {
+  margin-top: 8px;
+  white-space: pre-wrap;
+  font-size: 12px;
+  line-height: 1.6;
+}
+:where(body[data-page="restaurants"]) .ingredient-search {
+  margin: 0 16px 16px;
+  padding: 12px 12px 12px;
+  border: 1px solid var(--line);
+  border-radius: 2px;
+  background: #ffffff;
+}
+:where(body[data-page="restaurants"]) .search-heading {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 12px;
+  margin-bottom: 8px;
+}
+:where(body[data-page="restaurants"]) .search-heading h3 {
+  margin: 0;
+}
+:where(body[data-page="restaurants"]) .local-search-label {
+  color: var(--green);
+  font-size: 12px;
+}
+:where(body[data-page="restaurants"]) .ingredient-search form > label {
+  display: block;
+  font-size: 12px;
+  color: var(--muted);
+  margin-bottom: 8px;
+}
+:where(body[data-page="restaurants"]) .search-controls {
+  display: flex;
+  gap: 8px;
+}
+:where(body[data-page="restaurants"]) .search-controls input {
+  width: 100%;
+  min-width: 0;
+}
+:where(body[data-page="restaurants"]) .search-controls button {
+  font-size: 12px;
+}
+:where(body[data-page="restaurants"]) .ingredient-search .search-state {
+  margin-top: 8px;
+  font-size: 12px;
+  line-height: 1.6;
+}
+:where(body[data-page="restaurants"]) .ingredient-search table {
+  margin-top: 8px;
+  font-size: 12px;
+}
+:where(body[data-page="restaurants"]) .ingredient-search th,
+:where(body[data-page="restaurants"]) .ingredient-search td {
+  padding: 8px 4px;
+}
+:where(body[data-page="restaurants"]) .search-empty {
+  padding: 12px 0;
+  font-size: 12px;
+}
+:where(body[data-page="restaurants"]) .search-provider-note,
+:where(body[data-page="restaurants"]) .search-reviews {
+  margin-top: 12px;
+}
+:where(body[data-page="restaurants"]) .search-provider-note summary,
+:where(body[data-page="restaurants"]) .search-reviews summary {
+  font-size: 12px;
+  color: var(--blue);
+  cursor: pointer;
+}
+:where(body[data-page="restaurants"]) .search-provider-note p {
+  font-size: 12px;
+  margin-top: 8px;
+  line-height: 1.7;
+}
+@media (prefers-reduced-motion: reduce) {
+  :where(body[data-page="restaurants"]) * {
+    scroll-behavior: auto !important;
+  }
+}
+:where(body[data-page="restaurants"]) .metric.metric-action {
+  border: 0;
+  border-right: 1px solid var(--line);
+  border-radius: 0;
+  background: transparent;
+  text-align: left;
+  width: 100%;
+  color: var(--text);
+}
+:where(body[data-page="restaurants"]) .metric.metric-action:hover {
+  background: #f5f5f5;
+}
+:where(body[data-page="restaurants"]) .metric.metric-action:focus-visible {
+  outline-offset: -3px;
+}
+:where(body[data-page="restaurants"]) .metric.metric-action:disabled {
+  opacity: 1;
+  color: var(--muted);
+}
+:where(body[data-page="restaurants"]) #run-evidence {
+  scroll-margin-top: 80px;
+}
+:where(body[data-page="restaurants"]) #orders-panel {
+  max-height: 75dvh;
+  padding-top: 12px;
+}
+:where(body[data-page="restaurants"]) .order-book-note {
+  font-size: 12px;
+  padding: 0 0 12px;
+}
+:where(body[data-page="restaurants"]) .order-record {
+  border: 1px solid var(--line);
+  border-radius: 2px;
+  margin-bottom: 8px;
+  background: #ffffff;
+}
+:where(body[data-page="restaurants"]) .order-summary {
+  display: grid;
+  grid-template-columns:
+    16px minmax(150px, 1.2fr) minmax(160px, 1.3fr)
+    100px 75px;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  cursor: pointer;
+  list-style: none;
+}
+:where(body[data-page="restaurants"]) .order-summary::-webkit-details-marker {
+  display: none;
+}
+:where(body[data-page="restaurants"]) .order-summary:hover {
+  background: #f5f5f5;
+}
+:where(body[data-page="restaurants"]) .order-disclosure {
+  font-size: 22px;
+  color: var(--blue);
+  text-align: center;
+  transition: transform 0.12s;
+}
+:where(body[data-page="restaurants"])
+  .order-record[open]
+  > .order-summary
+  .order-disclosure {
+  transform: rotate(90deg);
+}
+:where(body[data-page="restaurants"]) .order-title strong {
+  display: block;
+  font-size: 12px;
+  font-weight: 600;
+}
+:where(body[data-page="restaurants"]) .order-title small {
+  display: block;
+  margin-top: 4px;
+  font-size: 12px;
+  overflow-wrap: anywhere;
+}
+:where(body[data-page="restaurants"]) .order-parties {
+  font-size: 12px;
+  line-height: 1.6;
+  color: var(--text);
+  overflow-wrap: anywhere;
+}
+:where(body[data-page="restaurants"]) .order-time {
+  font-size: 12px;
+  color: var(--muted);
+  overflow-wrap: anywhere;
+}
+:where(body[data-page="restaurants"]) .order-history {
+  border-top: 1px solid var(--line);
+  padding: 16px;
+  background: #ffffff;
+  overflow-wrap: anywhere;
+}
+:where(body[data-page="restaurants"]) .order-history-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+:where(body[data-page="restaurants"]) .order-history-heading p {
+  font-size: 12px;
+}
+:where(body[data-page="restaurants"]) .order-history-heading button {
+  font-size: 12px;
+  flex-shrink: 0;
+}
+:where(body[data-page="restaurants"]) .order-section {
+  margin-top: 24px;
+  padding-top: 16px;
+  border-top: 1px solid var(--line);
+}
+:where(body[data-page="restaurants"]) .order-section > h3 {
+  margin-bottom: 8px;
+}
+:where(body[data-page="restaurants"]) .order-section > p {
+  font-size: 12px;
+  line-height: 1.7;
+}
+:where(body[data-page="restaurants"]) .order-section > details {
+  margin-top: 8px;
+}
+:where(body[data-page="restaurants"]) .order-section summary {
+  font-size: 12px;
+  color: var(--blue);
+  cursor: pointer;
+}
+:where(body[data-page="restaurants"]) .order-step {
+  border-left: 2px solid var(--line);
+  padding-left: 12px;
+}
+:where(body[data-page="restaurants"]) .order-transcript {
+  white-space: pre-wrap;
+  color: var(--text);
+}
+:where(body[data-page="restaurants"]) .order-outcome,
+:where(body[data-page="restaurants"]) .order-memory-note {
+  padding: 8px 12px;
+  background: #fbf6ed;
+  border: 1px solid #d8c5a6;
+  border-radius: 2px;
+  margin-top: 12px;
+  font-size: 12px;
+  color: var(--orange);
+}
+:where(body[data-page="restaurants"]) .order-load-state {
+  font-size: 12px;
+  padding: 12px 0;
+}
+:where(body[data-page="restaurants"]) .order-section .record pre {
+  max-height: 300px;
+}
+@media (max-width: 760px) {
+  :where(body[data-page="restaurants"]) .order-summary {
+    grid-template-columns: 14px minmax(0, 1fr) auto;
+    gap: 8px;
+    padding: 12px;
+  }
+  :where(body[data-page="restaurants"]) .order-summary .order-title {
+    grid-column: 2;
+  }
+  :where(body[data-page="restaurants"]) .order-summary .state {
+    grid-column: 3;
+    grid-row: 1;
+  }
+  :where(body[data-page="restaurants"]) .order-parties {
+    grid-column: 2;
+    grid-row: 2;
+    font-size: 12px;
+    overflow-wrap: anywhere;
+  }
+  :where(body[data-page="restaurants"]) .order-time {
+    grid-column: 3;
+    grid-row: 2;
+    font-size: 12px;
+    overflow-wrap: anywhere;
+  }
+  :where(body[data-page="restaurants"]) .order-history {
+    padding: 12px;
+  }
+  :where(body[data-page="restaurants"]) .order-history-heading {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+  :where(body[data-page="restaurants"]) #orders-panel {
+    max-height: 80dvh;
+  }
+  :where(body[data-page="restaurants"]) .order-history table {
+    font-size: 12px;
+  }
+  :where(body[data-page="restaurants"]) .order-history th,
+  :where(body[data-page="restaurants"]) .order-history td {
+    padding: 8px 4px;
+  }
+}
+:where(body[data-page="restaurants"]) .order-history-heading {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  flex-wrap: wrap;
+  background: #ffffff;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--line);
+}
+:where(body[data-page="restaurants"]) .order-history-navigation {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  flex-basis: 100%;
+}
+:where(body[data-page="restaurants"]) .order-history-navigation button {
+  font-size: 12px;
+}
+:where(body[data-page="restaurants"]) .order-section {
+  scroll-margin-top: 144px;
+}
 
-.order-conversation{border-top:0;margin-top:12px;padding-top:5px}
-.conversation-note{color:var(--muted);max-width:780px}
-.chat-thread{list-style:none;padding:18px 0 0;margin:0;display:grid;gap:18px;max-width:950px}
-.chat-message{display:grid;grid-template-columns:34px minmax(0,1fr);gap:10px;align-items:start}
-.chat-avatar{display:grid;place-items:center;width:34px;height:34px;border-radius:50%;background:#25364c;color:#d1dfef;border:1px solid #50647e;font-size:11px;font-weight:650}
-.chat-bubble{border:1px solid #33465f;background:#121f2f;border-radius:0 9px 9px 9px;padding:13px 15px;min-width:0}
-.chat-household{margin-left:40px}
-.chat-household .chat-avatar{background:#1b3a58;border-color:#5f8cba}
-.chat-household .chat-bubble{background:#132a40;border-color:#355d7e}
-.chat-market .chat-avatar{background:#183c32;border-color:#448c75;color:#ace3cd}
-.chat-restaurant .chat-avatar{background:#48311c;border-color:#a77740;color:#f0d1a9}
-.chat-system .chat-bubble{background:#111923;border-style:dashed}
-.chat-system .chat-avatar{border-radius:8px;color:var(--muted)}
-.chat-system-event{min-width:0;padding-top:7px}.order-section .chat-system-event>summary{font-size:10px;color:#9cb0c8;cursor:pointer;line-height:1.8}.chat-system-event>.chat-bubble{margin-top:10px}
-.chat-heading{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
-.chat-person{display:grid;gap:4px;min-width:0}
-.chat-person strong{font-size:12px;font-weight:650;color:#edf3fc}
-.chat-person>span,.chat-recipient{font-size:10px;color:#a8b9ce;line-height:1.6}
-.chat-time{font-size:10px;color:#b3c3d7;white-space:nowrap;padding-top:1px}
-.chat-recipient{margin:7px 0 0}
-.chat-text{font-size:13px;line-height:1.8;white-space:pre-wrap;margin:12px 0;overflow-wrap:anywhere;color:#e0e9f5}
-.chat-receipt{display:flex;align-items:center;flex-wrap:wrap;gap:8px;color:#a8b9ce;font-size:10px}
-.chat-outcome{font-size:11px;line-height:1.7;margin:12px 0 0;color:#cad8e9}
-.chat-reason{font-size:11px;line-height:1.7;color:#efbd91;margin:7px 0 0}
-.chat-memory{border:1px solid #315746;border-left:3px solid #61ac8c;border-radius:4px;background:#10231f;padding:10px 12px;margin-top:12px;font-size:11px;overflow-wrap:anywhere}
-.chat-memory>strong{font-size:10px;color:#95d4b7;font-weight:600}
-.chat-memory.memory-unknown{border-color:#655333;border-left-color:#bd9b58;background:#252218}
-.chat-memory.memory-unknown>strong{color:#e1cb9e}
-.chat-memory.memory-unchanged{border-color:#364b61;border-left-color:#71869e;background:#142130}
-.memory-changes{display:grid;gap:7px;margin:9px 0 0}
-.memory-change{display:grid;grid-template-columns:minmax(75px,.25fr) minmax(0,1fr);gap:12px;line-height:1.7}
-.memory-change dt{color:#afc1ba;font-size:10px}
-.memory-change dd{margin:0;min-width:0;color:#dce9e2}
-.memory-before{color:#a7b9af}.memory-arrow{color:#81bfa0}.memory-after{color:#dcefe1}
-.memory-validity,.memory-owner{font-size:10px;color:#a6b8ae;line-height:1.7;margin:7px 0 0}
-.memory-metadata{margin-top:8px}.memory-metadata summary,.order-section .chat-evidence>summary{font-size:10px;color:#a3bad4;cursor:pointer;line-height:1.6}
-.chat-evidence{margin-top:10px}.chat-evidence pre{margin-top:8px}
-.order-section>.chat-memory{max-width:900px}
-@media(max-width:760px){.chat-message{grid-template-columns:28px minmax(0,1fr);gap:7px}.chat-avatar{width:28px;height:28px;font-size:9px}.chat-household{margin-left:8px}.chat-bubble{padding:11px}.chat-heading{gap:6px;flex-wrap:wrap}.chat-text{font-size:12px}.memory-change{grid-template-columns:1fr;gap:1px}.chat-memory{padding:9px}.chat-thread{gap:13px}}
+:where(body[data-page="restaurants"]) .order-conversation {
+  border-top: 0;
+  margin-top: 12px;
+  padding-top: 4px;
+}
+:where(body[data-page="restaurants"]) .conversation-note {
+  color: var(--muted);
+  max-width: 780px;
+}
+:where(body[data-page="restaurants"]) .chat-thread {
+  list-style: none;
+  padding: 16px 0 0;
+  margin: 0;
+  display: grid;
+  gap: 16px;
+  max-width: 950px;
+}
+:where(body[data-page="restaurants"]) .chat-message {
+  display: grid;
+  grid-template-columns: 34px minmax(0, 1fr);
+  gap: 12px;
+  align-items: start;
+}
+:where(body[data-page="restaurants"]) .chat-avatar {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 2px;
+  background: #f5f5f5;
+  color: var(--muted);
+  border: 1px solid var(--line);
+  font-size: 12px;
+  font-weight: 600;
+}
+:where(body[data-page="restaurants"]) .chat-bubble {
+  border: 1px solid var(--line);
+  background: #ffffff;
+  border-radius: 2px;
+  padding: 12px 16px;
+  min-width: 0;
+}
+:where(body[data-page="restaurants"]) .chat-household {
+  margin-left: 32px;
+}
+:where(body[data-page="restaurants"]) .chat-household .chat-avatar {
+  background: #f5f5f5;
+  border-color: var(--line);
+}
+:where(body[data-page="restaurants"]) .chat-household .chat-bubble {
+  background: #f5f5f5;
+  border-color: var(--line);
+}
+:where(body[data-page="restaurants"]) .chat-market .chat-avatar {
+  background: #f0f6f2;
+  border-color: #b8cec2;
+  color: var(--green);
+}
+:where(body[data-page="restaurants"]) .chat-restaurant .chat-avatar {
+  background: #fbf6ed;
+  border-color: #d8c5a6;
+  color: var(--orange);
+}
+:where(body[data-page="restaurants"]) .chat-system .chat-bubble {
+  background: #ffffff;
+  border-style: dashed;
+}
+:where(body[data-page="restaurants"]) .chat-system .chat-avatar {
+  border-radius: 2px;
+  color: var(--muted);
+}
+:where(body[data-page="restaurants"]) .chat-system-event {
+  min-width: 0;
+  padding-top: 8px;
+}
+:where(body[data-page="restaurants"])
+  .order-section
+  .chat-system-event
+  > summary {
+  font-size: 12px;
+  color: var(--muted);
+  cursor: pointer;
+  line-height: 1.8;
+}
+:where(body[data-page="restaurants"]) .chat-system-event > .chat-bubble {
+  margin-top: 12px;
+}
+:where(body[data-page="restaurants"]) .chat-heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+:where(body[data-page="restaurants"]) .chat-person {
+  display: grid;
+  gap: 4px;
+  min-width: 0;
+}
+:where(body[data-page="restaurants"]) .chat-person strong {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text);
+}
+:where(body[data-page="restaurants"]) .chat-person > span,
+:where(body[data-page="restaurants"]) .chat-recipient {
+  font-size: 12px;
+  color: var(--muted);
+  line-height: 1.6;
+  font-family: var(
+    --ui-mono,
+    ui-monospace,
+    SFMono-Regular,
+    Consolas,
+    monospace
+  );
+}
+:where(body[data-page="restaurants"]) .chat-time {
+  font-size: 12px;
+  color: var(--muted);
+  white-space: nowrap;
+  padding-top: 1px;
+  font-family: var(
+    --ui-mono,
+    ui-monospace,
+    SFMono-Regular,
+    Consolas,
+    monospace
+  );
+}
+:where(body[data-page="restaurants"]) .chat-recipient {
+  margin: 8px 0 0;
+}
+:where(body[data-page="restaurants"]) .chat-text {
+  font-size: 14px;
+  line-height: 1.8;
+  white-space: pre-wrap;
+  margin: 12px 0;
+  overflow-wrap: anywhere;
+  color: var(--text);
+}
+:where(body[data-page="restaurants"]) .chat-receipt {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  color: var(--muted);
+  font-size: 12px;
+}
+:where(body[data-page="restaurants"]) .chat-outcome {
+  font-size: 12px;
+  line-height: 1.7;
+  margin: 12px 0 0;
+  color: var(--text);
+}
+:where(body[data-page="restaurants"]) .chat-reason {
+  font-size: 12px;
+  line-height: 1.7;
+  color: var(--orange);
+  margin: 8px 0 0;
+}
+:where(body[data-page="restaurants"]) .chat-memory {
+  border: 1px solid #b8cec2;
+  border-left: 2px solid var(--green);
+  border-radius: 2px;
+  background: #f0f6f2;
+  padding: 12px 12px;
+  margin-top: 12px;
+  font-size: 12px;
+  overflow-wrap: anywhere;
+  border-left-width: 2px;
+  border-left-color: var(--green);
+}
+:where(body[data-page="restaurants"]) .chat-memory > strong {
+  font-size: 12px;
+  color: var(--green);
+  font-weight: 600;
+}
+:where(body[data-page="restaurants"]) .chat-memory.memory-unknown {
+  border-color: #d8c5a6;
+  border-left-color: var(--orange);
+  background: #fbf6ed;
+  border-left-width: 2px;
+}
+:where(body[data-page="restaurants"]) .chat-memory.memory-unknown > strong {
+  color: var(--orange);
+}
+:where(body[data-page="restaurants"]) .chat-memory.memory-unchanged {
+  border-color: var(--line);
+  border-left-color: var(--ui-strong-line, #9b9fa4);
+  background: var(--bg);
+  border-left-width: 2px;
+}
+:where(body[data-page="restaurants"]) .memory-changes {
+  display: grid;
+  gap: 8px;
+  margin: 8px 0 0;
+}
+:where(body[data-page="restaurants"]) .memory-change {
+  display: grid;
+  grid-template-columns: minmax(75px, 0.25fr) minmax(0, 1fr);
+  gap: 12px;
+  line-height: 1.7;
+}
+:where(body[data-page="restaurants"]) .memory-change dt {
+  color: var(--muted);
+  font-size: 12px;
+}
+:where(body[data-page="restaurants"]) .memory-change dd {
+  margin: 0;
+  min-width: 0;
+  color: var(--text);
+}
+:where(body[data-page="restaurants"]) .memory-before {
+  color: var(--text);
+}
+:where(body[data-page="restaurants"]) .memory-arrow {
+  color: var(--muted);
+}
+:where(body[data-page="restaurants"]) .memory-after {
+  color: var(--text);
+}
+:where(body[data-page="restaurants"]) .memory-validity,
+:where(body[data-page="restaurants"]) .memory-owner {
+  font-size: 12px;
+  color: var(--muted);
+  line-height: 1.7;
+  margin: 8px 0 0;
+  font-family: var(
+    --ui-mono,
+    ui-monospace,
+    SFMono-Regular,
+    Consolas,
+    monospace
+  );
+}
+:where(body[data-page="restaurants"]) .memory-metadata {
+  margin-top: 8px;
+}
+:where(body[data-page="restaurants"]) .memory-metadata summary,
+:where(body[data-page="restaurants"]) .order-section .chat-evidence > summary {
+  font-size: 12px;
+  color: var(--muted);
+  cursor: pointer;
+  line-height: 1.6;
+}
+:where(body[data-page="restaurants"]) .chat-evidence {
+  margin-top: 12px;
+}
+:where(body[data-page="restaurants"]) .chat-evidence pre {
+  margin-top: 8px;
+}
+:where(body[data-page="restaurants"]) .order-section > .chat-memory {
+  max-width: 900px;
+}
+@media (max-width: 760px) {
+  :where(body[data-page="restaurants"]) .chat-message {
+    grid-template-columns: 28px minmax(0, 1fr);
+    gap: 8px;
+  }
+  :where(body[data-page="restaurants"]) .chat-avatar {
+    width: 28px;
+    height: 28px;
+    font-size: 12px;
+  }
+  :where(body[data-page="restaurants"]) .chat-household {
+    margin-left: 8px;
+  }
+  :where(body[data-page="restaurants"]) .chat-bubble {
+    padding: 12px;
+  }
+  :where(body[data-page="restaurants"]) .chat-heading {
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+  :where(body[data-page="restaurants"]) .chat-text {
+    font-size: 14px;
+  }
+  :where(body[data-page="restaurants"]) .memory-change {
+    grid-template-columns: 1fr;
+    gap: 1px;
+  }
+  :where(body[data-page="restaurants"]) .chat-memory {
+    padding: 8px;
+    border-left-width: 2px;
+    border-left-color: var(--green);
+  }
+  :where(body[data-page="restaurants"]) .chat-thread {
+    gap: 12px;
+  }
+}
+:where(body[data-page="restaurants"]) .chat-memory.memory-unchanged > strong {
+  color: var(--muted);
+}
+@media (max-width: 1050px) {
+  :where(body[data-page="restaurants"]) .metrics .metric:nth-child(3n) {
+    border-right: 0;
+  }
+}
+@media (max-width: 420px) {
+  :where(body[data-page="restaurants"]) .toolbar .inline-label {
+    width: 100%;
+    margin-left: 0;
+  }
+  :where(body[data-page="restaurants"]) .metrics {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  :where(body[data-page="restaurants"]) .metrics .metric:nth-child(3n) {
+    border-right: 1px solid var(--line);
+  }
+  :where(body[data-page="restaurants"]) .metrics .metric:nth-child(2n) {
+    border-right: 0;
+  }
+  :where(body[data-page="restaurants"]) .metrics .metric:nth-child(-n + 4) {
+    border-bottom: 1px solid var(--line);
+  }
+  :where(body[data-page="restaurants"]) .map-panel .panel-heading {
+    flex-wrap: wrap;
+  }
+  :where(body[data-page="restaurants"])
+    .map-panel
+    .panel-heading
+    > div:first-child {
+    flex-basis: 100%;
+  }
+  :where(body[data-page="restaurants"]) .map-panel .inline-label {
+    width: 100%;
+  }
+  :where(body[data-page="restaurants"]) .map-panel .inline-label select {
+    flex: 1;
+  }
+}

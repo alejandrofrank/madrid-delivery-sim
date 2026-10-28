@@ -1,20 +1,25 @@
 ...@common
 shape: sequence_diagram
-controller: Trusted controller
-agent: Scoped LocalAgent
-queue: PostgreSQL queue
-tools: Domain tools + memory
-controller -> queue: Publish an addressed event
-agent -> queue: Claim with role subscriptions
-queue -> agent: Event + attempt + fenced lease token {style.stroke-dash: 4}
-reservation: Committed reservation {
-  agent -> queue: Reserve attempt + full tool allowance
+controller: "Trusted\ncontroller"
+agent: "Scoped\nLocalAgent"
+queue: "PostgreSQL\nqueue"
+tools: "Domain tools\n+ memory"
+claim: 01 / Address + claim {
+  class: local
+  controller -> queue: Addressed event
+  agent -> queue: "Claim with\nrole subscriptions"
+  queue -> agent: "Event + attempt\n+ fenced lease token" {style.stroke-dash: 4}
 }
-effects: Effects transaction — commit or roll back together {
-  agent -> queue: Begin transaction + validate lease
-  agent -> tools: Read authoritative facts + current-context memory
-  agent -> tools: Allowed actions + append memory revisions
-  agent -> queue: Decision receipt + outgoing events
-  agent -> queue: ACK in the same transaction
+reservation: 02 / Committed reservation {
+  class: local
+  agent -> queue: "Reserve attempt +\nfull tool allowance"
 }
-(** -> **)[*].style: ${edge-style}
+effects: 03 / Atomic effects · commit or roll back {
+  class: local
+  agent -> queue: "Begin transaction\nValidate lease"
+  agent -> tools: "Authoritative facts\n+ current-context memory"
+  agent -> tools: "Allowed actions\n+ memory revisions"
+  agent -> queue: "Decision receipt\n+ outgoing events"
+  agent -> queue: ACK in same transaction
+}
+(** -> **)[*].style: {...${edge-style}}

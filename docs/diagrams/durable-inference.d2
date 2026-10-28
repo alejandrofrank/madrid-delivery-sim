@@ -1,28 +1,28 @@
 ...@common
 direction: down
 grid-columns: 2
-horizontal-gap: 280
-execution: 01 / Persist and call {
+horizontal-gap: 168
+execution: 01 / Persist + invoke {
   class: local
   prepare: "PREPARED\nImmutable request + proposal\nPrecondition hash committed" {class: durable}
-  dispatch: "IN_FLIGHT\nDispatch marker + one-call budget\nCommitted before provider I/O" {class: caution}
-  provider: "Provider I/O\nNo database connection held" {class: state}
+  dispatch: "IN_FLIGHT\nDispatch marker + one-call budget\nCommit before provider I/O" {class: caution}
+  provider: "Provider I/O\nDatabase connection closed"
   result: "SUCCEEDED\nValidated result saved\nShort transaction" {class: durable}
   unknown: "UNKNOWN / FAIL CLOSED\nNever resend automatically\nApply a denied review" {class: caution}
-  prepare -> dispatch: Prepared retry is safe
-  dispatch -> provider: Commit + close connection
-  provider -> result: Save validated response
-  dispatch -> unknown: Crash after marker
-  provider -> unknown: Unconfirmed outcome
+  prepare -> dispatch: "Safe prepared\nretry"
+  dispatch -> provider: "Commit + close\nconnection"
+  provider -> result: "Validated\nresponse"
+  dispatch -> unknown: "Crash after\nmarker"
+  provider -> unknown: "Unconfirmed\noutcome"
 }
 application: 02 / Fresh fenced application {
   class: local
-  validate: "Fresh Queue.process transaction\nRecheck saved result, facts\nDeadline + candidate" {class: state}
+  validate: "Fresh Queue.process transaction\nRecheck saved result + facts\nDeadline + candidate"
   deny: "DENIED / NO RETRY\nStale, unknown or refused\nNo reassignment" {class: caution}
-  commit: "APPLIED\nApproved OR denied receipt\nEffects + memory + outbox + ACK\nOne atomic transaction" {class: durable}
+  commit: "APPLIED\nApproved or denied receipt\nEffects + memory + outbox + ACK\nOne atomic transaction" {class: durable}
   validate -> commit: "Gates pass\nApproved retry"
-  validate -> deny: Gate fails or outcome unknown
-  deny -> commit: Denied review is committed
+  validate -> deny: "Gate fails /\noutcome unknown"
+  deny -> commit: "Commit denied\nreview"
 }
-execution -> application: "Saved result or unknown\nReuse result without a new call"
-(** -> **)[*].style: ${edge-style}
+execution -> application: "Reuse\nNo call"
+(** -> **)[*].style: {...${edge-style}}

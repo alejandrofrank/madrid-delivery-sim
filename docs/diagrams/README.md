@@ -12,6 +12,12 @@ size with pan and zoom; Fit explicitly shows the whole diagram. The cloud and
 durable-state views use D2's automatic two-column composition, with ELK routing
 inside each boundary or phase and a horizontal connection between them.
 Diagrams scroll within their panels to keep small labels readable.
+The eight views share white nodes, pale neutral boundaries, graphite connectors
+and native mono text for event names. Numbered phases describe execution order;
+colour is reserved for an actual warning or outcome. Layered graphs use 1px
+connectors; sequence lifelines retain D2's dashed defaults. Node text is 18px
+and message labels are 16px in the source SVG. Long sequences retain vertical
+scrolling rather than shrinking every message to fit one viewport.
 The D2 source, shared styles and original Markdown reference are inspectable
 under every diagram. All viewing works without a CDN or renderer service.
 
@@ -58,6 +64,7 @@ reader to show the source and a rebuild notice instead of a stale diagram.
 | `delivery-flow` | 0 | `delivery-queue` |
 | `gcp-components` | 0 | `gcp-components` |
 | `durable-inference` | 0 | `durable-inference` |
+| `fleet-recovery` | 0 | `fleet-recovery` |
 
 Outputs live in `web/diagrams/`: SVGs, published D2 source copies, shared styles
 and `manifest.json`. The manifest includes SHA256 asset checksums, exact source

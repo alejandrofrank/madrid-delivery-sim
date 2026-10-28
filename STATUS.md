@@ -1,5 +1,18 @@
 # Status
 
+2026-10-28: Unified all six local workspaces around one navigation shell, shared
+visual tokens, control states and responsive menu. Light maps and compact neutral
+panels replace the separate dark/blue themes. Retained every existing form field
+and element ID; order conversations, memory, couriers, stock and evals remain
+inspectable. Content digests version local CSS/JS and diagram URLs; documentation
+JSON is refreshed so labels and source versions stay aligned. Eight D2 diagrams
+now share native labels, numbered phases and graphite connectors, with visible
+space between cross-phase labels and arrowheads. Added a recovery diagram to
+the fleet chapter. Browser checks cover all six pages at desktop and 375px,
+mobile menu/Escape, pinned navigation, populated chat/memory, courier inspection,
+health filters, chapter search/source and all eight expanded diagrams. See
+docs/DESIGN-SYSTEM.md for the researched guidance and maintenance contract.
+
 2026-10-28: Closed the first enterprise inference gap for the optional recovery
 judge. Immutable requests, single dispatch admission, saved results and fenced
 application now surround provider I/O with short committed phases; the network

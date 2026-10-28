@@ -1,24 +1,31 @@
 ...@common
 shape: sequence_diagram
-household: Household agent
-restaurant: Restaurant agent
-market: Market agent
+household: Household
+restaurant: Restaurant
+market: Market
 dispatcher: Dispatcher
-courier: Courier agent
-world: Physical world
-household -> restaurant: household.call for pizza
-restaurant -> market: market.request for missing ingredient
-market.stock: Reserve own stock or forward to an unvisited market
-market -> restaurant: ingredient.arrived after transfer
-consent: Explicit substitution consent {
-  restaurant -> household: Offer replacement
-  household -> restaurant: Explicit approval required
+courier: Courier
+world: "Physical\nworld"
+sourcing: 01 / Source ingredients {
+  class: local
+  household -> restaurant: household.call
+  restaurant -> market: market.request
+  market.stock: "Reserve own stock or\nforward to unvisited market"
+  market -> restaurant: ingredient.arrived
 }
-restaurant.stock: Cook only from arrived, reserved ingredients
-restaurant -> dispatcher: basket.ready
-dispatcher -> courier: courier.briefed
-courier -> dispatcher: courier.accepted
-world -> dispatcher: delivery.arrived after road traversal
-dispatcher -> dispatcher: dispatch.complete records delivered status
-household -> household: meal.delivery checks canonical job status
-(** -> **)[*].style: ${edge-style}
+consent: 02 / Substitution + cooking {
+  class: local
+  restaurant -> household: Replacement offer
+  household -> restaurant: Explicit approval
+  restaurant.stock: "Cook from arrived,\nreserved ingredients"
+}
+delivery: 03 / Brief + deliver {
+  class: local
+  restaurant -> dispatcher: basket.ready
+  dispatcher -> courier: courier.briefed
+  courier -> dispatcher: courier.accepted
+  world -> dispatcher: "delivery.arrived\nAfter road traversal"
+  dispatcher -> dispatcher: "dispatch.complete\nRecord delivered"
+  household -> household: "meal.delivery\nCheck canonical job"
+}
+(** -> **)[*].style: {...${edge-style}}

@@ -126,7 +126,10 @@ async function copy(text) {
 }
 
 async function getJSON(url) {
-  const response = await fetch(url, { credentials: "same-origin" });
+  const response = await fetch(url, {
+    credentials: "same-origin",
+    cache: "no-store",
+  });
   if (!response.ok)
     throw new Error(`Reference unavailable (${response.status}).`);
   return response.json();
@@ -375,7 +378,8 @@ async function renderDiagrams(version) {
         if (
           !asset ||
           asset.reference !== card.source.trim() ||
-          !/^\/static\/diagrams\/[a-z0-9-]+\.svg$/.test(asset.asset)
+          !/^\/static\/diagrams\/[a-z0-9-]+\.svg$/.test(asset.asset) ||
+          !/^[a-f0-9]{64}$/.test(asset.svg_sha256)
         )
           throw new Error("Diagram asset is missing or stale.");
         const image = element("img");
@@ -396,7 +400,7 @@ async function renderDiagrams(version) {
             ),
           );
         });
-        image.src = asset.asset;
+        image.src = `${asset.asset}?v=${asset.svg_sha256.slice(0, 12)}`;
         card.canvas.replaceChildren(image);
         card.heading.querySelector(".diagram-caption").textContent =
           asset.title;

@@ -5,6 +5,13 @@ part of the existing FastAPI application, not a separate hosted product. It does
 not start infrastructure, invoke a model or read the simulation database. The
 existing `/docs` API reference remains available.
 
+Restaurants, delivery, inventory, health, architecture and the Madrid baseline
+share the same [workspace shell](../web/workspace.js) and
+[visual tokens and controls](../web/workspace.css). The navigation keeps every
+workspace reachable through a disclosure menu on smaller screens. See the
+[design system](DESIGN-SYSTEM.md) for the design sources, maintenance contract
+and browser acceptance checks.
+
 ## Reading and inspection
 
 Nineteen numbered chapters cover architecture decisions, the agent factory,
@@ -67,6 +74,8 @@ python3 scripts/check_documentation.py
 python3 scripts/vendor_documentation.py --check
 node --check web/documentation.js
 python3 scripts/render_documentation_diagrams.py --check
+python3 scripts/version_web_assets.py --write
+python3 scripts/version_web_assets.py
 ```
 
 Updating source names happens only in the authoring script, never from a browser

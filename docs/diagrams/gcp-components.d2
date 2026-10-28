@@ -1,31 +1,31 @@
 ...@common
 direction: down
 grid-columns: 2
-horizontal-gap: 300
-local: Local Docker environment {
+horizontal-gap: 168
+local: 01 / Local Docker {
   direction: down
   class: local
   ui: "Operator UI\nTrusted controller"
   agents: "Scoped Python\nRole workers"
-  db: "Postgres\nDomain · queue · memory\nBudgets · audit" {shape: cylinder}
-  caller: "CloudJudge client\nAudience-bound caller ID token"
+  db: "PostgreSQL\nDomain · queue · memory\nBudgets · audit" {shape: cylinder}
+  caller: "CloudJudge client\nAudience-bound ID token\nValidated verdict + usage"
   ui -> agents
   agents <-> db
-  agents -> caller: Optional judge policy only
+  agents -> caller: "Optional\njudge policy"
 }
-gcp: Dedicated GCP project {
+gcp: 02 / Dedicated GCP project {
   direction: down
   class: cloud
-  iam: Cloud Run IAM invocation check
-  gateway: Cloud Run judgement service
+  iam: "Cloud Run IAM\nInvocation check"
+  gateway: "Cloud Run\nJudgement service"
   vertex: "Google publisher model\nVertex REST"
   registry: "Artifact Registry\nPinned gateway image"
   logs: "Platform logs\nStructured gateway stdout"
-  iam <-> gateway
+  iam -> gateway
   registry -> gateway: Image {style.stroke-dash: 4}
-  gateway -> vertex: Runtime service account ADC
+  gateway -> vertex: "Runtime service\naccount ADC"
   gateway -> logs
 }
-local <-> gcp: "Client / IAM\nHTTPS · schema-validated verdict + usage"
-(** -> **)[*].style: ${edge-style}
-(** <-> **)[*].style: ${edge-style}
+local <-> gcp: HTTPS
+(** -> **)[*].style: {...${edge-style}}
+(** <-> **)[*].style: {...${edge-style}}

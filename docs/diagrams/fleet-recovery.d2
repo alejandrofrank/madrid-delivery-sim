@@ -1,0 +1,36 @@
+...@common
+direction: down
+grid-columns: 3
+horizontal-gap: 152
+review: 01 / Judge review {
+  direction: down
+  class: local
+  failure: "World failure\nParcel at safe checkpoint"
+  candidate: "Scoped judge\nLocal courier + route\ncandidate"
+  verdict: "recovery.reviewed\nPersist bounded SQL review\nLocal rules / optional\nsaved provider verdict\nFeasibility checked"
+  failure -> candidate: "delivery.failed\nQueued"
+  candidate -> verdict
+}
+decision: 02 / Dispatcher decision {
+  direction: down
+  class: local
+  apply: "Apply current-attempt review\nDenied: abandon at checkpoint"
+  retry: "dispatch.retry\nQueued · wait if fleet busy"
+  gate: "Fresh SQL assignment checks\nReview · free online courier\nRoute · deadline · retry limits"
+  apply -> retry: Approved
+  retry -> gate
+}
+movement: 03 / Physical handoff {
+  direction: down
+  class: local
+  assign: "Atomic assignment\nNew attempt + scoped briefing"
+  accept: "courier.briefed\ncourier.accepted\nBefore departure"
+  travel: "Collect same parcel\nat checkpoint\nWorld: delivery.arrived"
+  complete: "Dispatcher confirms\ndelivery.completed" {class: durable}
+  assign -> accept
+  accept -> travel
+  travel -> complete
+}
+review -> decision: Queued
+decision -> movement: "Gates\npass"
+(** -> **)[*].style: {...${edge-style}}

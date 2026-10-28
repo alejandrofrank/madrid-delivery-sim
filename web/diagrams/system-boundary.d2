@@ -1,22 +1,22 @@
 ...@common
 direction: down
 grid-columns: 2
-horizontal-gap: 260
-local: Local Docker environment {
+horizontal-gap: 168
+local: 01 / Local Docker {
   direction: down
   class: local
   operator: "Operator UI\nTrusted controller"
   world: "Synthetic city\nPhysical world engine"
   workers: "Scoped Python\nLocalAgent workers"
   db: "PostgreSQL\nDomain · queue · memory\nBudgets · audit" {shape: cylinder}
-  client: "Optional CloudJudge client\nAudience-bound ID token"
+  client: "CloudJudge client\nAudience-bound ID token\nValidated verdict + usage"
   operator -> world
   operator -> workers
   world <-> db
   workers <-> db
-  workers -> client: Explicit GCP judge mode
+  workers -> client: "Explicit GCP\njudge mode"
 }
-cloud: Optional GCP — Terraform-owned {
+cloud: 02 / Optional GCP · Terraform {
   direction: down
   class: cloud
   iam: "Cloud Run IAM\nCaller identity"
@@ -24,11 +24,11 @@ cloud: Optional GCP — Terraform-owned {
   model: "Google publisher model\nVertex REST"
   image: "Artifact Registry\nImmutable image digest"
   logs: "Platform logs\nStructured gateway stdout"
-  iam <-> gateway
+  iam -> gateway
   image -> gateway: Image {style.stroke-dash: 4}
-  gateway -> model: Runtime service account ADC
+  gateway -> model: "Runtime service\naccount ADC"
   gateway -> logs
 }
-local <-> cloud: "Client / IAM\nHTTPS · validated verdict + usage"
-(** -> **)[*].style: ${edge-style}
-(** <-> **)[*].style: ${edge-style}
+local <-> cloud: HTTPS
+(** -> **)[*].style: {...${edge-style}}
+(** <-> **)[*].style: {...${edge-style}}

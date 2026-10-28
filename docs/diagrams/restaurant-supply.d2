@@ -2,20 +2,25 @@
 shape: sequence_diagram
 household: Household
 restaurant: Restaurant
-market: Nearest market
-other: Another market
-delivery: Dispatcher + courier
-household -> restaurant: Queued meal call
-restaurant -> market: Ingredient request
-market -> other: Shortage forwarding
-stock: Reserved stock transfers from the eligible source {
-  market -> restaurant: Reserved, then arrived
-  other -> restaurant: Reserved, then arrived if forwarded
+market: "Nearest\nmarket"
+other: "Another\nmarket"
+delivery: "Dispatcher\n+ courier"
+sourcing: 01 / Source + reserve {
+  class: local
+  household -> restaurant: Queued meal call
+  restaurant -> market: Ingredient request
+  market -> other: Shortage forwarding
+  market -> restaurant: "Reserved stock\nthen arrival"
+  other -> restaurant: "Reserved + arrived\nif forwarded"
 }
-consent: Explicit substitution consent {
+consent: 02 / Explicit substitution consent {
+  class: local
   restaurant -> household: Substitution offer
   household -> restaurant: Explicit approval
 }
-restaurant -> delivery: Cook from arrived stock
-delivery -> household: Confirmed delivery
-(** -> **)[*].style: ${edge-style}
+fulfill: 03 / Cook + deliver {
+  class: local
+  restaurant -> delivery: Cook from arrived stock
+  delivery -> household: Confirmed delivery
+}
+(** -> **)[*].style: {...${edge-style}}

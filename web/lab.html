@@ -1,43 +1,170 @@
 <!doctype html>
 <html lang="en">
-<head>
-  <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Inventory lab · Delivery Sim</title>
-  <link rel="icon" href="data:,">
-  <link rel="stylesheet" href="/static/lab.css">
-  <script defer src="/static/lab.js"></script>
-</head>
-<body>
-  <header><div><h1>Inventory operations lab</h1><p>M2 first slice · Fictional city · Synthetic stock</p></div><nav><a href="/delivery-lab">Basket delivery ↗</a> · <a href="/">Madrid baseline ↗</a> · <a href="/health">Health &amp; evals ↗</a> · <a href="/architecture">Architecture ↗</a></nav></header>
-  <main>
-    <section class="controls" aria-label="Scenario controls">
-      <label>Catalogue <select id="catalogue"><option value="fixture">Offline synthetic products</option></select></label>
-      <label>Seed <input id="seed" type="number" min="0" max="2147483647" value="42"></label>
-      <button id="start">Run last-unit scenario</button>
-      <span id="status" role="status">Loading</span>
-    </section>
-    <p id="history-coverage">Checking local dated samples…</p>
-    <p id="error" role="alert" hidden></p>
-    <p class="brief">Two baskets request the last unit. A worker exits after an uncommitted write. Its lease expires, another worker recovers the event, and a delayed shipment arrives at minute 15 instead of minute 5. No model calls.</p>
-    <section class="metrics" aria-label="Inventory evidence">
-      <article><span>Available now</span><strong id="available">—</strong><small id="product">Scenario product</small></article>
-      <article><span>Reserved</span><strong id="reserved">—</strong><small>Confirmed stock only</small></article>
-      <article><span>Incoming</span><strong id="incoming">—</strong><small id="eta">Forecast, not sellable</small></article>
-      <article><span>Stock invariants</span><strong id="invariants">—</strong><small>Ledger conservation + nonnegative availability</small></article>
-    </section>
-    <section class="controls" aria-label="Evidence playback">
-      <label>Inspect <select id="checkpoint"><option value="live">Live / final state</option></select></label>
-      <span id="clock">Simulation minute 0</span><a id="download" hidden>Download evidence JSON ↗</a>
-    </section>
-    <div class="workspace">
-      <section class="panel"><h2>Fictional service area</h2><p>Three supermarkets, two retail stores. Select a store to inspect its stock. Roads are a generated fixture; traffic and courier movement are later milestones.</p><svg id="city" viewBox="-160 -160 1900 1900" role="img" aria-label="Fictional city and five stores"></svg></section>
-      <section class="panel"><h2>Availability by product</h2><label>Store <select id="store"></select></label><div class="scroll"><table><thead><tr><th>Product</th><th>On hand</th><th>Reserved</th><th>Available</th><th>Version</th></tr></thead><tbody id="stock"></tbody></table></div><p id="provenance"></p><h2>Inventory agent boundary</h2><p id="agent-scope">No agent provisioned for this run yet.</p><p id="agent-budget"></p><p id="agent-memory"></p><details><summary>Frozen role, tools and soul</summary><pre id="agent-role"></pre></details><details><summary>Snapshot provenance and hashes</summary><pre id="manifest"></pre></details></section>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Inventory operations · Bakiano</title>
+    <link rel="icon" href="data:," />
+    <link rel="stylesheet" href="/static/lab.css?v=9c908032c987" />
+    <link rel="stylesheet" href="/static/workspace.css?v=6c6854d75885" />
+    <script defer src="/static/workspace.js?v=887294277a47"></script>
+    <script defer src="/static/lab.js?v=987950f319d7"></script>
+  </head>
+  <body data-page="inventory">
+    <div id="workspace-shell">
+      <noscript
+        ><nav class="workspace-noscript" aria-label="Workspaces">
+          <a href="/restaurant-lab">Restaurants</a
+          ><a href="/delivery-lab">Delivery</a><a href="/lab">Inventory</a
+          ><a href="/health">Health &amp; evals</a
+          ><a href="/architecture">Architecture</a
+          ><a href="/">Madrid baseline</a>
+        </nav></noscript
+      >
     </div>
-    <div class="workspace">
-      <section class="panel"><h2>Basket outcomes</h2><div id="baskets">Start a scenario to create baskets.</div><h2>Decision evidence</h2><div id="decisions"></div></section>
-      <section class="panel"><h2>Queue and crash recovery</h2><p id="recovery">The crash leaves a leased event and rolls back stock, outgoing messages and decision records.</p><div class="scroll"><table><thead><tr><th>Event</th><th>State</th><th>Attempts</th><th>Due minute</th></tr></thead><tbody id="events"></tbody></table></div></section>
-    </div>
-    <footer id="run-info">All locations and quantities are simulated. Imported prices retain their observation dates.</footer>
-  </main>
-</body>
+
+    <main id="main" tabindex="-1">
+      <div class="page-title">
+        <div>
+          <h1>Inventory operations</h1>
+          <p>
+            Last-unit contention, delayed replenishment and worker recovery.
+          </p>
+        </div>
+        <span class="page-context">Synthetic stock · local rules</span>
+      </div>
+      <section class="controls" aria-label="Scenario controls">
+        <label
+          >Catalogue
+          <select id="catalogue">
+            <option value="fixture">Offline synthetic products</option>
+          </select></label
+        >
+        <label
+          >Seed
+          <input id="seed" type="number" min="0" max="2147483647" value="42"
+        /></label>
+        <button id="start">Run last-unit scenario</button>
+        <span id="status" role="status">Loading</span>
+      </section>
+      <p id="history-coverage">Checking local dated samples…</p>
+      <p id="error" role="alert" hidden></p>
+      <p class="brief">
+        Two baskets request the last unit. A worker exits after an uncommitted
+        write. Its lease expires, another worker recovers the event, and a
+        delayed shipment arrives at minute 15 instead of minute 5. No model
+        calls.
+      </p>
+      <section class="metrics" aria-label="Inventory evidence">
+        <article>
+          <span>Available now</span><strong id="available">—</strong
+          ><small id="product">Scenario product</small>
+        </article>
+        <article>
+          <span>Reserved</span><strong id="reserved">—</strong
+          ><small>Confirmed stock only</small>
+        </article>
+        <article>
+          <span>Incoming</span><strong id="incoming">—</strong
+          ><small id="eta">Forecast, not sellable</small>
+        </article>
+        <article>
+          <span>Stock invariants</span><strong id="invariants">—</strong
+          ><small>Ledger conservation + nonnegative availability</small>
+        </article>
+      </section>
+      <section class="controls" aria-label="Evidence playback">
+        <label
+          >Inspect
+          <select id="checkpoint">
+            <option value="live">Live / final state</option>
+          </select></label
+        >
+        <span id="clock">Simulation minute 0</span
+        ><a id="download" hidden>Download evidence JSON ↗</a>
+      </section>
+      <div class="workspace">
+        <section class="panel">
+          <h2>Fictional service area</h2>
+          <p>
+            Three supermarkets, two retail stores. Select a store to inspect its
+            stock. Roads are a generated fixture; traffic and courier movement
+            are later milestones.
+          </p>
+          <svg
+            id="city"
+            viewBox="-160 -160 1900 1900"
+            role="img"
+            aria-label="Fictional city and five stores"
+          ></svg>
+        </section>
+        <section class="panel">
+          <h2>Availability by product</h2>
+          <label
+            >Store
+            <select id="store"></select
+          ></label>
+          <div class="scroll">
+            <table>
+              <thead>
+                <tr>
+                  <th>Product</th>
+                  <th>On hand</th>
+                  <th>Reserved</th>
+                  <th>Available</th>
+                  <th>Version</th>
+                </tr>
+              </thead>
+              <tbody id="stock"></tbody>
+            </table>
+          </div>
+          <p id="provenance"></p>
+          <h2>Inventory agent boundary</h2>
+          <p id="agent-scope">No agent provisioned for this run yet.</p>
+          <p id="agent-budget"></p>
+          <p id="agent-memory"></p>
+          <details>
+            <summary>Frozen role, tools and soul</summary>
+            <pre id="agent-role"></pre>
+          </details>
+          <details>
+            <summary>Snapshot provenance and hashes</summary>
+            <pre id="manifest"></pre>
+          </details>
+        </section>
+      </div>
+      <div class="workspace">
+        <section class="panel">
+          <h2>Basket outcomes</h2>
+          <div id="baskets">Start a scenario to create baskets.</div>
+          <h2>Decision evidence</h2>
+          <div id="decisions"></div>
+        </section>
+        <section class="panel">
+          <h2>Queue and crash recovery</h2>
+          <p id="recovery">
+            The crash leaves a leased event and rolls back stock, outgoing
+            messages and decision records.
+          </p>
+          <div class="scroll">
+            <table>
+              <thead>
+                <tr>
+                  <th>Event</th>
+                  <th>State</th>
+                  <th>Attempts</th>
+                  <th>Due minute</th>
+                </tr>
+              </thead>
+              <tbody id="events"></tbody>
+            </table>
+          </div>
+        </section>
+      </div>
+      <footer id="run-info">
+        All locations and quantities are simulated. Imported prices retain their
+        observation dates.
+      </footer>
+    </main>
+  </body>
 </html>

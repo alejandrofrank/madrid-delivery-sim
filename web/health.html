@@ -5,23 +5,25 @@
     <meta name="viewport" content="width=device-width,initial-scale=1" />
     <title>Health & evaluations · Bakiano</title>
     <link rel="icon" href="data:," />
-    <link rel="stylesheet" href="/static/health.css" />
-    <script defer src="/static/health.js"></script>
+    <link rel="stylesheet" href="/static/health.css?v=e1a198452355" />
+    <link rel="stylesheet" href="/static/workspace.css?v=6c6854d75885" />
+    <script defer src="/static/workspace.js?v=887294277a47"></script>
+    <script defer src="/static/health.js?v=a5a779c54462"></script>
   </head>
-  <body>
-    <aside class="rail">
-      <a class="brand" href="/delivery-lab" aria-label="Bakiano operations"
-        >b.</a
-      ><span class="rail-label">OPERATIONS LAB</span>
-      <nav aria-label="Workspaces">
-        <a href="/delivery-lab">Delivery</a
-        ><a href="/restaurant-lab">Restaurants</a><a href="/lab">Inventory</a
-        ><a class="active" href="/health" aria-current="page">Health & evals</a>
-        <a href="/architecture">Architecture</a>
-      </nav>
-      <span class="local">LOCAL ENVIRONMENT</span>
-    </aside>
-    <main>
+  <body data-page="health">
+    <div id="workspace-shell">
+      <noscript
+        ><nav class="workspace-noscript" aria-label="Workspaces">
+          <a href="/restaurant-lab">Restaurants</a
+          ><a href="/delivery-lab">Delivery</a><a href="/lab">Inventory</a
+          ><a href="/health">Health &amp; evals</a
+          ><a href="/architecture">Architecture</a
+          ><a href="/">Madrid baseline</a>
+        </nav></noscript
+      >
+    </div>
+
+    <main id="main" tabindex="-1">
       <header>
         <div>
           <h1>Health & evaluations</h1>

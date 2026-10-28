@@ -1,4 +1,4 @@
-# Shared visual language. D2/ELK owns placement and edge routing.
+# Precise monochrome system. D2 owns all placement and connector routing.
 vars: {
   d2-config: {
     layout-engine: elk
@@ -6,11 +6,12 @@ vars: {
     pad: 24
   }
   edge-style: {
-    stroke: "#70756D"
+    stroke: "#353535"
     stroke-width: 1
     border-radius: 0
-    font-color: "#59604F"
+    font-color: "#262626"
     font-size: 16
+    font: mono
     italic: false
     bold: false
   }
@@ -18,8 +19,7 @@ vars: {
 style.fill: "#FFFFFF"
 ***.class: state
 ***.style: {
-  font-size: 18
-  font-color: "#20231F"
+  font-color: "#171717"
   stroke-width: 1
   border-radius: 0
   shadow: false
@@ -28,26 +28,32 @@ style.fill: "#FFFFFF"
 classes: {
   local: {
     label.near: top-left
-    style.fill: "#F4F5F0"
-    style.stroke: "#A9AFA2"
-    style.font-size: 18
+    style.fill: "#FAFAFA"
+    style.stroke: "#CECECE"
+    style.font: mono
+    style.font-size: 16
   }
   cloud: {
     label.near: top-left
-    style.fill: "#F3F0E8"
-    style.stroke: "#A99F87"
-    style.font-size: 18
+    style.fill: "#FAFAFA"
+    style.stroke: "#CECECE"
+    style.font: mono
+    style.font-size: 16
   }
   state: {
+    style.font-size: 18
     style.fill: "#FFFFFF"
-    style.stroke: "#3C4339"
+    style.stroke: "#686868"
   }
   durable: {
-    style.fill: "#ECF3E7"
-    style.stroke: "#5D7650"
+    style.font-size: 18
+    style.fill: "#FFFFFF"
+    style.stroke: "#353535"
   }
   caution: {
-    style.fill: "#FFF2E5"
-    style.stroke: "#B27841"
+    style.font-size: 18
+    style.fill: "#FFFFFF"
+    style.stroke: "#353535"
+    style.stroke-dash: 4
   }
 }

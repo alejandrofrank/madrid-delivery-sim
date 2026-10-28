@@ -37,16 +37,16 @@ function drawCity(state) {
   const padding = 200 * scale;
   svg.setAttribute("viewBox", `${minX-padding} ${minY-padding} ${maxX-minX+2*padding} ${maxY-minY+2*padding}`);
   function label(x, y, text, anchor = "start") {
-    return shape("text", {x,y,"text-anchor":anchor,style:`font-size:${40*scale}px;paint-order:stroke;stroke:#f8fafb;stroke-width:${8*scale}px;stroke-linejoin:round`}, text);
+    return shape("text", {x,y,"text-anchor":anchor,style:`font-size:${40*scale}px;paint-order:stroke;stroke:#ffffff;stroke-width:${8*scale}px;stroke-linejoin:round`}, text);
   }
   state.city.edges.forEach(edge => {
     const a = nodes.get(edge.from), b = nodes.get(edge.to);
-    svg.append(shape("line", {x1:a.x,y1:a.y,x2:b.x,y2:b.y,stroke:"#cbd7dc","stroke-width":6*scale}));
+    svg.append(shape("line", {x1:a.x,y1:a.y,x2:b.x,y2:b.y,stroke:"#c4cad0","stroke-width":6*scale}));
   });
   state.city.stores.forEach(store => {
     const point = nodes.get(store.node);
     const group = shape("g", {class:"store",tabindex:0,role:"button","aria-label":`Inspect ${store.name}`});
-    group.append(shape("circle", {cx:point.x,cy:point.y,r:24*scale,fill:store.id===activeStore?"#c08317":"#176c60"}));
+    group.append(shape("circle", {cx:point.x,cy:point.y,r:24*scale,fill:store.id===activeStore?"#c9322c":"#3d596c"}));
     const anchor = point.x > (minX+maxX)/2 ? "end" : "start";
     group.append(label(point.x, point.y-45*scale, store.name, anchor));
     function choose() { activeStore = store.id; render(); }
@@ -56,7 +56,7 @@ function drawCity(state) {
   });
   state.city.facilities.forEach(facility => {
     const point = nodes.get(facility.node);
-    svg.append(shape("rect", {x:point.x-15*scale,y:point.y-15*scale,width:30*scale,height:30*scale,fill:"#718795"}));
+    svg.append(shape("rect", {x:point.x-15*scale,y:point.y-15*scale,width:30*scale,height:30*scale,fill:"#818b95"}));
     const anchor = point.x > (minX+maxX)/2 ? "end" : "start";
     svg.append(label(point.x+(anchor === "end" ? -30 : 30)*scale, point.y+15*scale, facility.kind, anchor));
   });

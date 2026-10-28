@@ -15,6 +15,10 @@ project and free IAM. [Setup and cost boundaries](docs/GCP-AI.md).
 
 ## Agent architecture and GCP client documentation
 
+All six local workspaces share navigation, visual tokens, controls and mobile
+behaviour. The [shared design contract](docs/DESIGN-SYSTEM.md) records the design
+sources, diagram conventions and content-versioning workflow for future changes.
+
 Open the local [Architecture website](http://localhost:8010/architecture) for a
 searchable, nineteen-chapter engineering reference. It includes an interactive
 component explorer, rendered diagrams, architecture decision records, the six

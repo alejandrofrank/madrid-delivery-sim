@@ -2,6 +2,15 @@
 
 Updated 2026-10-28. Implemented slices are identified below; remaining milestones are planned.
 
+Shared UI slice: restaurants, delivery, inventory, health, architecture and the
+Madrid baseline now use one local workspace shell, visual tokens and control
+states. Responsive navigation retains every workspace on a small screen. Maps,
+entity definitions, order chats, memory, health filters and code inspection remain
+in their working layouts. Content versions prevent stale CSS/JavaScript/SVGs from
+surviving an updated shell. Eight monochrome D2 diagrams include recovery review,
+dispatch gates and physical handoff, with labels separated from arrowheads.
+See [design sources and maintenance](docs/DESIGN-SYSTEM.md).
+
 Durable inference slice: the optional recovery judge now commits an immutable
 request, dispatch admission and saved result in short SQL phases. Provider I/O
 holds no worker database connection; application rechecks fresh facts and commits
@@ -14,12 +23,12 @@ twice with matching outcomes and six offline judge cases; no paid calls were mad
 See [request protocol and recovery policy](docs/DURABLE-INFERENCE.md).
 
 Architecture website slice: `/architecture` provides nineteen numbered chapters,
-full-text local search, an interactive component inspector, seven rendered diagrams,
+full-text local search, an interactive component inspector, eight rendered diagrams,
 source inspection and eight explicit architecture decision records. The six
 capability goals link to implementation, tests and known gaps. Content stays in
 repository Markdown; pinned D2/ELK generates native-label SVGs with inspected
 source, zoom and expansion. The compact reference UI and all diagram assets work
-locally without a CDN. Browser checks cover all seven diagrams and chapter search.
+locally without a CDN. Browser checks cover all eight diagrams and chapter search.
 See [website maintenance and boundaries](docs/DOCUMENTATION-SITE.md).
 
 Enterprise GCP documentation slice: the source-reviewed

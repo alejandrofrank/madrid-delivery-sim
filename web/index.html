@@ -1,64 +1,248 @@
 <!doctype html>
 <html lang="en">
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Madrid Delivery Sim</title>
-  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%231c6e62'/%3E%3Cpath d='M7 23V9l9 10 9-10v14' fill='none' stroke='white' stroke-width='3'/%3E%3C/svg%3E">
-  <link rel="stylesheet" href="/static/vendor/leaflet/leaflet.css">
-  <link rel="stylesheet" href="/static/style.css">
-  <script defer src="/static/vendor/leaflet/leaflet.js"></script>
-  <script defer src="/static/app.js"></script>
-</head>
-<body>
-  <header>
-    <div class="brand"><span class="brand-icon" aria-hidden="true">M</span><div><h1>Madrid Delivery Sim</h1><p>Local operations lab <span>/</span> Milestone 01</p></div></div>
-    <div class="health"><span id="connection" class="dot"></span><span id="connection-text">Connecting</span><a href="/lab">Inventory lab ↗</a><a href="/delivery-lab">Basket delivery ↗</a><a href="/architecture">Architecture ↗</a><a href="/docs" target="_blank" rel="noreferrer">API ↗</a></div>
-  </header>
-  <main>
-    <section class="toolbar" aria-label="Simulation controls">
-      <div class="clock"><span class="eyebrow">MADRID · SIMULATED TIME</span><strong id="clock">10:00</strong><span id="run-status" class="badge">READY</span></div>
-      <div class="controls">
-        <label>Run <select id="run-select"><option value="">Latest run</option></select></label>
-        <label>Seed <input id="seed" type="number" value="42" min="0" max="2147483647"></label>
-        <label>Playback <select id="duration"><option value="600">10 minutes · 72×</option><option value="60">1 minute · 720×</option></select></label>
-        <button id="start" class="primary">Start day <span aria-hidden="true">↗</span></button>
-      </div>
-    </section>
-    <div id="error" role="alert" hidden></div>
-    <section class="kpis" aria-label="Delivery performance">
-      <article><span>Delivered / orders</span><strong id="kpi-delivered">0 <small>/ 0</small></strong><p id="kpi-active">No active deliveries</p></article>
-      <article><span>On time</span><strong id="kpi-ontime">—</strong><p>Delivered within 30 minutes</p></article>
-      <article><span>Cost / delivery</span><strong id="kpi-cost">—</strong><p>Simulated operating cost</p></article>
-      <article><span>LLM usage</span><strong id="kpi-llm">$0.0000</strong><p id="kpi-tokens">0 tokens · 0 calls</p></article>
-      <article><span>Complaints</span><strong id="kpi-complaints">0</strong><p id="kpi-approvals">0 awaiting approval</p></article>
-      <article><span>Queue backlog</span><strong id="kpi-queue">0</strong><p id="kpi-dead">0 dead letters</p></article>
-    </section>
-    <div class="workspace">
-      <section class="map-panel panel" aria-label="Live Madrid delivery map">
-        <div class="panel-title"><h2>Service area</h2><span>Chamberí · Retiro · Vallecas</span><button id="fit-map" class="text-button">Reset view</button></div>
-        <div id="map" aria-label="Map of Madrid streets, couriers and delivery orders"></div>
-        <div class="map-options"><div class="legend"><span><i class="legend-hub"></i>Hub</span><span><i class="legend-bike"></i>Bike</span><span><i class="legend-moto"></i>Moto</span><span><i class="legend-van"></i>Van</span><span><i class="legend-order"></i>Order</span><span><i class="legend-late"></i>Late</span></div><label><input id="show-stores" type="checkbox" checked> Pickups</label><label><input id="show-complete" type="checkbox"> Delivered</label></div>
-        <div class="map-footer"><span id="graph-info">Loading local OSM graph…</span><span>Road geometry cached locally</span></div>
-      </section>
-      <aside class="panel inspector" aria-label="Agent inspector">
-        <div class="panel-title"><h2>Agent inspector</h2><button id="clear-selection" class="text-button">Clear selection</button></div>
-        <div class="selection" id="selection"><span class="eyebrow">FLEET OVERVIEW</span><strong>18 couriers / 3 hubs</strong><p>Select a courier or order to inspect its decisions.</p></div>
-        <div class="tabs" role="tablist" aria-label="Inspector view">
-          <button role="tab" id="tab-fleet" aria-selected="true" data-tab="fleet" aria-controls="fleet">Fleet</button>
-          <button role="tab" id="tab-decisions" aria-selected="false" data-tab="decisions" aria-controls="decisions">Decisions</button>
-          <button role="tab" id="tab-service" aria-selected="false" data-tab="service" aria-controls="service">Service</button>
-        </div>
-        <div id="fleet" class="tab-content" role="tabpanel" aria-labelledby="tab-fleet"></div>
-        <div id="decisions" class="tab-content" role="tabpanel" aria-labelledby="tab-decisions" hidden><p class="empty">Agent decisions appear as orders are processed.</p></div>
-        <div id="service" class="tab-content" role="tabpanel" aria-labelledby="tab-service" hidden><p class="empty">Complaint events arrive during the simulated day.</p></div>
-      </aside>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Madrid baseline · Bakiano</title>
+    <link
+      rel="icon"
+      href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%231c6e62'/%3E%3Cpath d='M7 23V9l9 10 9-10v14' fill='none' stroke='white' stroke-width='3'/%3E%3C/svg%3E"
+    />
+    <link
+      rel="stylesheet"
+      href="/static/vendor/leaflet/leaflet.css?v=a78371028241"
+    />
+    <link rel="stylesheet" href="/static/style.css?v=52ae0834995b" />
+    <link rel="stylesheet" href="/static/workspace.css?v=6c6854d75885" />
+    <script defer src="/static/workspace.js?v=887294277a47"></script>
+    <script
+      defer
+      src="/static/vendor/leaflet/leaflet.js?v=db49d009c841"
+    ></script>
+    <script defer src="/static/app.js?v=67f76011c0c8"></script>
+  </head>
+  <body data-page="baseline">
+    <div id="workspace-shell">
+      <noscript
+        ><nav class="workspace-noscript" aria-label="Workspaces">
+          <a href="/restaurant-lab">Restaurants</a
+          ><a href="/delivery-lab">Delivery</a><a href="/lab">Inventory</a
+          ><a href="/health">Health &amp; evals</a
+          ><a href="/architecture">Architecture</a
+          ><a href="/">Madrid baseline</a>
+        </nav></noscript
+      >
     </div>
-    <section class="panel ledger">
-      <div class="panel-title"><h2>Order ledger</h2><span id="order-count">Waiting for a run</span><label class="filter-label">View <select id="order-filter"><option value="active">Active & pending</option><option value="all">All orders</option><option value="late">Late orders</option></select></label></div>
-      <div class="table-scroll"><table><thead><tr><th>Order</th><th>Pickup</th><th>Courier</th><th>Placed</th><th>Due</th><th>Status</th></tr></thead><tbody id="orders"><tr><td colspan="6" class="empty">Start a day to generate orders.</td></tr></tbody></table></div>
-    </section>
-    <footer><span>Rule-based dispatch + couriers · LLM customer service · Postgres event queues</span><span id="run-info">Deterministic world seed · 10:00–22:00</span></footer>
-  </main>
-</body>
+
+    <main id="main" tabindex="-1">
+      <div class="page-title">
+        <div>
+          <h1>Madrid baseline</h1>
+          <p>Street-network dispatch, courier activity and service evidence.</p>
+        </div>
+        <div class="connection-state">
+          <span id="connection" class="dot"></span
+          ><span id="connection-text">Connecting</span>
+        </div>
+      </div>
+      <section class="toolbar" aria-label="Simulation controls">
+        <div class="clock">
+          <span class="eyebrow">MADRID · SIMULATED TIME</span
+          ><strong id="clock">10:00</strong
+          ><span id="run-status" class="badge">READY</span>
+        </div>
+        <div class="controls">
+          <label
+            >Run
+            <select id="run-select">
+              <option value="">Latest run</option>
+            </select></label
+          >
+          <label
+            >Seed
+            <input id="seed" type="number" value="42" min="0" max="2147483647"
+          /></label>
+          <label
+            >Playback
+            <select id="duration">
+              <option value="600">10 minutes · 72×</option>
+              <option value="60">1 minute · 720×</option>
+            </select></label
+          >
+          <button id="start" class="primary">
+            Start day <span aria-hidden="true">↗</span>
+          </button>
+        </div>
+      </section>
+      <div id="error" role="alert" hidden></div>
+      <section class="kpis" aria-label="Delivery performance">
+        <article>
+          <span>Delivered / orders</span
+          ><strong id="kpi-delivered">0 <small>/ 0</small></strong>
+          <p id="kpi-active">No active deliveries</p>
+        </article>
+        <article>
+          <span>On time</span><strong id="kpi-ontime">—</strong>
+          <p>Delivered within 30 minutes</p>
+        </article>
+        <article>
+          <span>Cost / delivery</span><strong id="kpi-cost">—</strong>
+          <p>Simulated operating cost</p>
+        </article>
+        <article>
+          <span>LLM usage</span><strong id="kpi-llm">$0.0000</strong>
+          <p id="kpi-tokens">0 tokens · 0 calls</p>
+        </article>
+        <article>
+          <span>Complaints</span><strong id="kpi-complaints">0</strong>
+          <p id="kpi-approvals">0 awaiting approval</p>
+        </article>
+        <article>
+          <span>Queue backlog</span><strong id="kpi-queue">0</strong>
+          <p id="kpi-dead">0 dead letters</p>
+        </article>
+      </section>
+      <div class="workspace">
+        <section class="map-panel panel" aria-label="Live Madrid delivery map">
+          <div class="panel-title">
+            <h2>Service area</h2>
+            <span>Chamberí · Retiro · Vallecas</span
+            ><button id="fit-map" class="text-button">Reset view</button>
+          </div>
+          <div
+            id="map"
+            aria-label="Map of Madrid streets, couriers and delivery orders"
+          ></div>
+          <div class="map-options">
+            <div class="legend">
+              <span><i class="legend-hub"></i>Hub</span
+              ><span><i class="legend-bike"></i>Bike</span
+              ><span><i class="legend-moto"></i>Moto</span
+              ><span><i class="legend-van"></i>Van</span
+              ><span><i class="legend-order"></i>Order</span
+              ><span><i class="legend-late"></i>Late</span>
+            </div>
+            <label
+              ><input id="show-stores" type="checkbox" checked /> Pickups</label
+            ><label
+              ><input id="show-complete" type="checkbox" /> Delivered</label
+            >
+          </div>
+          <div class="map-footer">
+            <span id="graph-info">Loading local OSM graph…</span
+            ><span>Road geometry cached locally</span>
+          </div>
+        </section>
+        <aside class="panel inspector" aria-label="Agent inspector">
+          <div class="panel-title">
+            <h2>Agent inspector</h2>
+            <button id="clear-selection" class="text-button">
+              Clear selection
+            </button>
+          </div>
+          <div class="selection" id="selection">
+            <span class="eyebrow">FLEET OVERVIEW</span
+            ><strong>18 couriers / 3 hubs</strong>
+            <p>Select a courier or order to inspect its decisions.</p>
+          </div>
+          <div class="tabs" role="tablist" aria-label="Inspector view">
+            <button
+              role="tab"
+              id="tab-fleet"
+              aria-selected="true"
+              data-tab="fleet"
+              aria-controls="fleet"
+            >
+              Fleet
+            </button>
+            <button
+              role="tab"
+              id="tab-decisions"
+              aria-selected="false"
+              data-tab="decisions"
+              aria-controls="decisions"
+            >
+              Decisions
+            </button>
+            <button
+              role="tab"
+              id="tab-service"
+              aria-selected="false"
+              data-tab="service"
+              aria-controls="service"
+            >
+              Service
+            </button>
+          </div>
+          <div
+            id="fleet"
+            class="tab-content"
+            role="tabpanel"
+            aria-labelledby="tab-fleet"
+          ></div>
+          <div
+            id="decisions"
+            class="tab-content"
+            role="tabpanel"
+            aria-labelledby="tab-decisions"
+            hidden
+          >
+            <p class="empty">Agent decisions appear as orders are processed.</p>
+          </div>
+          <div
+            id="service"
+            class="tab-content"
+            role="tabpanel"
+            aria-labelledby="tab-service"
+            hidden
+          >
+            <p class="empty">
+              Complaint events arrive during the simulated day.
+            </p>
+          </div>
+        </aside>
+      </div>
+      <section class="panel ledger">
+        <div class="panel-title">
+          <h2>Order ledger</h2>
+          <span id="order-count">Waiting for a run</span
+          ><label class="filter-label"
+            >View
+            <select id="order-filter">
+              <option value="active">Active & pending</option>
+              <option value="all">All orders</option>
+              <option value="late">Late orders</option>
+            </select></label
+          >
+        </div>
+        <div class="table-scroll">
+          <table>
+            <thead>
+              <tr>
+                <th>Order</th>
+                <th>Pickup</th>
+                <th>Courier</th>
+                <th>Placed</th>
+                <th>Due</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody id="orders">
+              <tr>
+                <td colspan="6" class="empty">
+                  Start a day to generate orders.
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+      <footer>
+        <span
+          >Rule-based dispatch + couriers · LLM customer service · Postgres
+          event queues</span
+        ><span id="run-info">Deterministic world seed · 10:00–22:00</span>
+      </footer>
+    </main>
+  </body>
 </html>
