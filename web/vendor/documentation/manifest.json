@@ -1,0 +1,87 @@
+{
+  "schema_version": 1,
+  "generated_by": "scripts/vendor_documentation.py",
+  "packages": [
+    {
+      "name": "marked",
+      "version": "18.1.2",
+      "metadata_url": "https://registry.npmjs.org/marked/18.1.2",
+      "tarball_url": "https://registry.npmjs.org/marked/-/marked-18.1.2.tgz",
+      "integrity": "sha512-DfOnvLAQ6WYeWxWO1u4RyFOeqyHup6dks5PPqnoFiooU7ipRvidO/2j8plhAHIiZg574E9ZlzSjUiPMLAzFkgg==",
+      "license": "MIT",
+      "browser_global": "marked",
+      "files": [
+        {
+          "path": "marked.umd.js",
+          "source": "package/lib/marked.umd.js",
+          "bytes": 49207,
+          "sha256": "9eb730d2362ae1a8c6201698f17009e16671be6946d3d06503ddc0575283db7c"
+        },
+        {
+          "path": "marked.LICENSE",
+          "source": "package/LICENSE",
+          "bytes": 2942,
+          "sha256": "8e3a3f82f59a60958f56ca08f445647c32a4733dc7ca6c2c46f6eb898471ab9c"
+        }
+      ]
+    },
+    {
+      "name": "dompurify",
+      "version": "3.4.17",
+      "metadata_url": "https://registry.npmjs.org/dompurify/3.4.17",
+      "tarball_url": "https://registry.npmjs.org/dompurify/-/dompurify-3.4.17.tgz",
+      "integrity": "sha512-B/pSlYVHQ58kqISD/yDjuJ1yfzI34m1gF4lAod2bwSRhiN4K5Cl3H8Af7hqB2PmTL911tdEudnnXn5FnhRoz0w==",
+      "license": "(MPL-2.0 OR Apache-2.0)",
+      "browser_global": "DOMPurify",
+      "files": [
+        {
+          "path": "purify.min.js",
+          "source": "package/dist/purify.min.js",
+          "bytes": 29828,
+          "sha256": "cd37898f9782adf54820c413191b5691803f0f137c799d6edcfd38523b4c2c31"
+        },
+        {
+          "path": "dompurify.LICENSE",
+          "source": "package/LICENSE",
+          "bytes": 11358,
+          "sha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30"
+        },
+        {
+          "path": "dompurify.LICENSE-MPL",
+          "source": "package/LICENSE-MPL",
+          "bytes": 16726,
+          "sha256": "fab3dd6bdab226f1c08630b1dd917e11fcb4ec5e1e020e2c16f83a0a13863e85"
+        }
+      ]
+    },
+    {
+      "name": "@mermaid-js/tiny",
+      "version": "12.2.0",
+      "metadata_url": "https://registry.npmjs.org/%40mermaid-js%2Ftiny/12.2.0",
+      "tarball_url": "https://registry.npmjs.org/@mermaid-js/tiny/-/tiny-12.2.0.tgz",
+      "integrity": "sha512-9bEE+R974NTh1YJlfc6ztgwhy6+9sE+wAFiFrqvSdtlJHdxGfLytQmHYHNpFKmj94+Z+uMicYrQeGXnTTjILAQ==",
+      "license": "MIT",
+      "browser_global": "mermaid",
+      "files": [
+        {
+          "path": "mermaid.tiny.js",
+          "source": "package/dist/mermaid.tiny.js",
+          "bytes": 2811424,
+          "sha256": "ea0cdf04eb31907eb20d956a34fe300095365c876887b54ffa29f1f847f56d00"
+        },
+        {
+          "path": "mermaid.LICENSE",
+          "source": "package/LICENSE",
+          "bytes": 1089,
+          "sha256": "ec9fb67dcb25eccc416ed56e1aab819222c805a2a4bfe4cb19e7556bf2ffde80"
+        },
+        {
+          "path": "mermaid.BUNDLED-LICENSES.txt",
+          "source": "package/dist/mermaid.tiny.js#bundled-license-information",
+          "bytes": 727,
+          "sha256": "b2bdf7f7221af2c818ed300bc3d0922bca6313a65492efb7d8db8836879ec7c3"
+        }
+      ]
+    }
+  ]
+}
