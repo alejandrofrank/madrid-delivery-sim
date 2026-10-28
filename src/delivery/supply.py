@@ -486,7 +486,17 @@ def supply_snapshot(run: str, url: str | None = None) -> dict[str, Any]:
             (run,),
         ).fetchone()
         assert search_usage
+        adk_usage = conn.execute(
+            "SELECT count(*) calls,coalesce(sum(m.reserved_tokens),0) reserved_tokens "
+            "FROM restaurant_model_calls m JOIN restaurant_turns t USING(event_id) "
+            "WHERE t.run_id=%s",
+            (run,),
+        ).fetchone()
+        assert adk_usage
         state["metrics"] = {
+            "adk_offline_calls": adk_usage["calls"],
+            "adk_reserved_tokens": int(adk_usage["reserved_tokens"]),
+            "adk_paid_calls": 0,
             "scheduled_calls": len(session["config"]["schedule"]),
             "events": counts["events"],
             "dead_letters": counts["dead_letters"],

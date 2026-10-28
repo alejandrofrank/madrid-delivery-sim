@@ -8,6 +8,7 @@ from psycopg import sql
 from psycopg.conninfo import make_conninfo
 from psycopg.types.json import Jsonb
 
+from delivery.adk_contracts import RESTAURANT_TOOLS
 from delivery.agent_specs import RoleSpec, load_inventory_role
 from delivery.config import settings
 from delivery.db import connect
@@ -289,17 +290,22 @@ def supply_access(run: str, name: str, url: str | None = None) -> dict[str, Agen
             (run, name),
         ).fetchall():
             settings_data = entity["definition"].get("agent") or session["config"]["agents"][name]
+            brain = settings_data.get("brain")
+            tools = AUTHORITY[name]["tools"]
+            if name == "restaurant" and brain is None:
+                tools = tools - (RESTAURANT_TOOLS - {"memory.read", "memory.write"})
             role = RoleSpec.model_validate(
                 dict(
                     schema_version=1,
                     role=name,
                     version="supply-v1",
-                    policy="deterministic",
+                    policy="adk" if brain else "deterministic",
+                    brain=brain,
                     soul_file="SOUL.md",
                     soul=settings_data["soul"],
                     accepts=tuple(sorted(AUTHORITY[name]["accepts"])),
                     emits=tuple(sorted(AUTHORITY[name]["emits"])),
-                    tools=tuple(sorted(AUTHORITY[name]["tools"])),
+                    tools=tuple(sorted(brain["tools"] if brain else tools)),
                     limits=settings_data["limits"],
                 )
             )
@@ -312,7 +318,10 @@ def supply_access(run: str, name: str, url: str | None = None) -> dict[str, Agen
                     "NOREPLICATION NOBYPASSRLS PASSWORD {}"
                 ).format(sql.Identifier(login), sql.Literal(password))
             )
-            conn.execute(sql.SQL("GRANT lab_supply_executor TO {}").format(sql.Identifier(login)))
+            group = "lab_restaurant_adk_executor" if brain else "lab_supply_executor"
+            conn.execute(
+                sql.SQL("GRANT {} TO {}").format(sql.Identifier(group), sql.Identifier(login))
+            )
             conn.execute(
                 "INSERT INTO agent_bindings VALUES (%s,%s,%s,%s,%s,%s)",
                 (

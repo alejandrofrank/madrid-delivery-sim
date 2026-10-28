@@ -455,7 +455,39 @@ class LocalAgent:
             from delivery.durable_inference import saved_result
 
             tools.inference_receipt = saved_result(conn, self, event)
-        if self.role.name in {"household", "restaurant", "market"}:
+        if self.role.policy == "adk":
+            from delivery.typed_memory import outcome_fact
+
+            row = conn.execute(
+                "SELECT public.restaurant_apply(%s,%s,%s) AS data",
+                (event.id, event.token, event.attempts),
+            ).fetchone()
+            assert row
+            detail = dict(row["data"])
+            detail["policy"] = "google_adk_offline"
+            tools.memory_reads.append(
+                {
+                    "event_id": event.id,
+                    "limit": 8,
+                    "kinds": None,
+                    "facts": [
+                        {
+                            key: fact[key]
+                            for key in (
+                                "fact_id",
+                                "kind",
+                                "version",
+                                "event_id",
+                                "context_id",
+                                "expires_sim",
+                            )
+                        }
+                        for fact in detail["adk"]["memory"]
+                    ],
+                }
+            )
+            tools.invoke("memory.write", **outcome_fact("restaurant", event.topic, detail))
+        elif self.role.name in {"household", "restaurant", "market"}:
             from delivery.supply_policy import SupplyPolicy
 
             detail = SupplyPolicy().decide(event, tools)
@@ -519,6 +551,15 @@ class LocalAgent:
         if self.role.policy == "gcp_ai":
             try:
                 if not ensure_result(self, event, fault=fault):
+                    return False
+            except Exception as exc:
+                Queue(self.dsn).fail(event, type(exc).__name__)
+                return False
+        if self.role.policy == "adk":
+            from delivery.adk_restaurant import ensure_restaurant_result
+
+            try:
+                if not ensure_restaurant_result(self, event, fault=fault):
                     return False
             except Exception as exc:
                 Queue(self.dsn).fail(event, type(exc).__name__)

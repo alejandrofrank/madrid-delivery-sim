@@ -20,6 +20,7 @@ from pydantic import (
     model_validator,
 )
 
+from delivery.adk_contracts import RestaurantBrain
 from delivery.agent_specs import RoleLimits
 from delivery.city import fake_city
 from delivery.meal_snapshot import IngredientId, RecipeId, load_meal_snapshot
@@ -94,6 +95,7 @@ class SearchSettings(FrozenDefinition):
 class AgentDefinition(FrozenDefinition):
     display_name: str = Field(min_length=1, max_length=80)
     soul: str = Field(min_length=1, max_length=8192)
+    brain: RestaurantBrain | None = None
     latency_seconds: int = Field(default=5, ge=0, le=120, strict=True)
     search: SearchSettings = Field(default_factory=SearchSettings)
     limits: RoleLimits = Field(
@@ -148,6 +150,7 @@ class EntityDefinition(FrozenDefinition):
     name: str = Field(min_length=1, max_length=100)
     kind: AgentRole
     node: int = Field(ge=0, le=1023, strict=True)
+    procurement_fee_cents: int = Field(default=100, ge=0, le=100000, strict=True)
     recipe_ids: tuple[RecipeId, ...] = Field(default=(), max_length=7)
     opening_hours: Hours = Field(default_factory=Hours)
     order_hours: tuple[Hours, ...] = Field(
@@ -296,6 +299,12 @@ class SupplyConfig(FrozenDefinition):
             raise ValueError("Entity IDs must be unique")
         if {entity.kind for entity in self.entities} != AGENT_ROLES:
             raise ValueError("Include at least one household, restaurant and market")
+        for role, agent in self.agents.items():
+            if agent.brain is not None and role != "restaurant":
+                raise ValueError("Only restaurant definitions support the ADK template")
+        for entity in self.entities:
+            if entity.agent and entity.agent.brain is not None and entity.kind != "restaurant":
+                raise ValueError("ADK template requires a restaurant entity")
         return self
 
     @property

@@ -7,6 +7,8 @@ from typing import Literal
 
 from pydantic import BaseModel, ConfigDict, Field, ValidationInfo, field_validator, model_validator
 
+from delivery.adk_contracts import RESTAURANT_TOOLS, RestaurantBrain
+
 INVENTORY_ACCEPTS = frozenset(
     {"basket.requested", "shipment.delayed", "shipment.received", "reservation.expire"}
 )
@@ -118,6 +120,8 @@ for _supply_role, _topics in SUPPLY_ACCEPTS.items():
         ),
     }
 
+AUTHORITY["restaurant"]["tools"] |= RESTAURANT_TOOLS
+
 
 class RoleLimits(BaseModel):
     model_config = ConfigDict(extra="forbid", frozen=True)
@@ -147,7 +151,8 @@ class _RoleConfig(BaseModel):
         "market",
     ]
     version: str = Field(min_length=1, max_length=64)
-    policy: Literal["deterministic", "gcp_ai"]
+    policy: Literal["deterministic", "gcp_ai", "adk"]
+    brain: RestaurantBrain | None = None
     soul_file: Literal["SOUL.md"]
     accepts: tuple[str, ...]
     emits: tuple[str, ...]
@@ -156,6 +161,13 @@ class _RoleConfig(BaseModel):
 
     @model_validator(mode="after")
     def model_authority(self) -> "_RoleConfig":
+        if self.policy == "adk":
+            if self.role != "restaurant" or self.brain is None:
+                raise ValueError("ADK requires a restaurant template")
+            if set(self.tools) != set(self.brain.tools) or "supply.command" in self.tools:
+                raise ValueError("ADK tools must match the frozen granular template")
+        elif self.brain is not None:
+            raise ValueError("A reasoning template requires ADK policy")
         if self.policy == "gcp_ai":
             if self.role != "judge" or not self.limits.model_calls or not self.limits.model_tokens:
                 raise ValueError("Only the bounded recovery judge may use GCP AI")
@@ -184,7 +196,10 @@ class RoleSpec(_RoleConfig):
 
     @property
     def digest(self) -> str:
-        payload = json.dumps(self.model_dump(mode="json"), sort_keys=True, separators=(",", ":"))
+        definition = self.model_dump(mode="json")
+        if self.brain is None:
+            definition.pop("brain")  # Preserve hashes of previously frozen definitions.
+        payload = json.dumps(definition, sort_keys=True, separators=(",", ":"))
         return hashlib.sha256(payload.encode("utf-8")).hexdigest()
 
 
