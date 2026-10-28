@@ -57,7 +57,11 @@ def test_peak_demand_and_refund_gate() -> None:
         Advice(category="execute_sql", reply="bad")  # type: ignore[arg-type]
 
 
-@pytest.mark.parametrize("body", ["\U0001f6b2" * 1000, "\x00" * 1000, '\\"' * 1000])
+@pytest.mark.parametrize(
+    "body",
+    ["\U0001f6b2" * 1000, "\x00" * 1000, '\\"' * 1000],
+    ids=["large-unicode", "null-bytes", "escaped-quotes"],
+)
 def test_adversarial_text_cannot_expand_prompt_past_reservation(body: str) -> None:
     prompt = complaint_prompt(body, "assigned")
     assert len(prompt.encode("utf-8")) <= 1024

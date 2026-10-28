@@ -15,9 +15,7 @@ jobs:
         run: make setup
       - name: Typed Python and failure tests
         run: |
-          docker compose exec -T app ruff check src tests
-          docker compose exec -T app mypy --cache-dir=/tmp/mypy-cache src
-          docker compose exec -T app pytest -q
+          docker compose exec -T -e DELIVERY_SOURCE_REVISION="$GITHUB_SHA" app python scripts/health_check.py
       - name: Full seeded day without paid calls
         run: docker compose exec -T app delivery demo --wall-seconds 0
       - name: Verify demo invariants
@@ -25,11 +23,14 @@ jobs:
       - name: Inventory race, delayed supply and real worker crash
         run: docker compose exec -T app delivery lab-demo
       - uses: actions/upload-artifact@v4
+        if: always()
         with:
           name: simulation-results
           path: |
             artifacts/run-*.json
             artifacts/lab-*.json
+            artifacts/health/*.json
+            artifacts/health/runs/*.json
       - name: Stop services
         if: always()
         run: docker compose down
