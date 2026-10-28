@@ -454,7 +454,7 @@ def test_effective_prompt_reaches_adk_without_history_from_other_orders(adk_city
     assert ensure_restaurant_result(agent, event, model=model)
     assert all(agent.role.soul in text for text in model.instructions)
     assert all(agent.role.brain.instructions in text for text in model.instructions)
-    assert all(event.payload["order"] in text for text in model.user_messages)
+    assert all(str(event.id) in text for text in model.user_messages)
 
 
 @pytest.mark.integration
@@ -624,3 +624,27 @@ def test_vertex_price_reservation_is_durable_and_unpriced_bypass_is_denied(adk_c
             "SELECT * FROM restaurant_model_calls WHERE event_id=%s", (event.id,)
         ).fetchone()
         assert receipt["provider"] == "vertex" and receipt["reserved_usd"] == Decimal("0.005024")
+
+
+@pytest.mark.integration
+def test_forged_event_body_does_not_reach_the_model_or_change_the_order(adk_city):
+    from dataclasses import replace
+
+    from delivery.adk_offline import OfflineRestaurantModel
+    from delivery.adk_restaurant import ensure_restaurant_result
+
+    class CaptureModel(OfflineRestaurantModel):
+        async def generate_content_async(self, llm_request, stream=False):
+            assert "FOREIGN_ORDER_DO_NOT_SEND" not in str(llm_request.contents)
+            async for response in super().generate_content_async(llm_request, stream):
+                yield response
+
+    city = adk_city()
+    agent, event = first_call(city)
+    forged = replace(event, topic="restaurant.cook", payload={"order": "FOREIGN_ORDER_DO_NOT_SEND"})
+    assert agent.reserve_budget(forged)
+    assert ensure_restaurant_result(agent, forged, model=CaptureModel())
+    assert agent.process(forged)
+    with connect(city.url) as conn:
+        row = conn.execute("SELECT * FROM supply_orders WHERE run_id=%s", (city.run,)).fetchone()
+        assert row["id"] == event.payload["order"] and row["status"] == "sourcing"

@@ -254,8 +254,8 @@ class RestaurantTurn:
                         types.Part(
                             text=json.dumps(
                                 {
-                                    "event": self.event.topic,
-                                    "order": self.event.payload["order"],
+                                    "event_id": self.event.id,
+                                    "task": "Inspect this order through scoped tools.",
                                 }
                             )
                         )
