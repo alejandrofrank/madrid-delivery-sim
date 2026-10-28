@@ -2,6 +2,17 @@
 
 Updated 2026-10-28. Implemented slices are identified below; remaining milestones are planned.
 
+Enterprise GCP documentation slice: the source-reviewed
+[agent implementation](docs/AGENT-IMPLEMENTATION.md),
+[complete GCP inventory](docs/GCP-COMPONENTS.md) and
+[client architecture guide](docs/ENTERPRISE-GCP.md) now distinguish current behavior
+from proposed ADK/managed-runtime work. The next enterprise priorities are durable
+inference request/result phases outside SQL locks, gateway-wide idempotent monetary
+admission, controller recovery, workload identity/production API authorization,
+distributed observability and held-out release gates. Platform adoption requires
+Terraform lifecycle coverage and an explicit retention/cost policy. These are
+proposed changes; this documentation update deploys no infrastructure.
+
 Role scenario evaluation slice: make eval-agents now runs a versioned local
 seed-731 battery twice: twelve scenarios, 49 criteria across inventory, restaurant,
 dispatcher and courier agents. The health dashboard shows scores, failed cases,

@@ -1,5 +1,17 @@
 # Status
 
+2026-10-28: Added exact agent construction/lifecycle and GCP resource documentation,
+and refreshed the enterprise client architecture against current official Google
+guidance. Inventory covers ten Terraform resource blocks/six APIs, twelve parked
+foundation resources and fifteen fully enabled resources, with caller/runtime IAM,
+model-data boundaries, sizing, cost and shutdown semantics. Corrected older claims
+about SOUL interpretation, zero-dollar enforcement, model I/O transaction placement
+and deferred cloud support. Enterprise targets cover ADK/runtime selection, managed
+identity/governance, durable inference, memory, evals, observability and Terraform
+ownership. Documentation links/configuration arithmetic were checked; the existing
+392-test runtime baseline was not rerun for this docs-only change. No deployments,
+cloud status queries, credential reads or model calls were performed.
+
 2026-10-28: Added twelve reproducible local role scenarios with 49 declared criteria
 for inventory, restaurant, dispatcher and courier agents. Real scoped queue workers
 exercise last-unit scarcity, delayed supply/process crash, sourcing/consent,

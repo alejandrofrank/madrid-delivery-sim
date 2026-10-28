@@ -1,6 +1,6 @@
 ﻿# Madrid Delivery Sim
 
-A local operations lab for queue-driven delivery agents, with a Madrid baseline and a fictional-city inventory lab. Default demos use local databases and make no provider calls. An optional private GCP recovery judge deploys through a separate Terraform root; the simulation stays local. Deployment and teardown were verified on October 24–25, 2026; the cloud demo is currently off. The restored project is retained with billing disabled; routine shutdown removes runtime resources and keeps the project.
+A local operations lab for queue-driven delivery agents, with a Madrid baseline and a fictional-city inventory lab. Default demos use local databases and make no provider calls. An optional IAM-authenticated GCP recovery judge deploys through a separate Terraform root; the simulation stays local. The last live lifecycle check on October 25, 2026 found the restored project retained, billing disabled and demo runtime removed. Routine shutdown keeps the project and IAM; use the status command for a later session's live state.
 
 The city runs locally. Enable the optional paid judge only for agent tests:
 
@@ -12,6 +12,19 @@ python3 scripts/gcp_demo.py stop
 
 Stop removes billable runtime resources and disables billing while retaining the
 project and free IAM. [Setup and cost boundaries](docs/GCP-AI.md).
+
+## Agent architecture and GCP client documentation
+
+| Read in order | What it explains |
+| --- | --- |
+| [Agent implementation](docs/AGENT-IMPLEMENTATION.md) | Exact factory, editable definitions/SOUL, role tools, authenticated scopes, event transactions, memory and budgets |
+| [GCP components](docs/GCP-COMPONENTS.md) | Every Terraform resource, authentication/model request path, service sizing and retained-vs-billable lifecycle |
+| [Enterprise architecture](docs/ENTERPRISE-GCP.md) | Current Google guidance, ADK/runtime choices, security/governance, durable execution, cost, eval/release gates and prioritized gaps |
+| [Operations and live evidence](docs/GCP-AI.md) | Start/status/stop and dated verification, with no claim that a past receipt is current cloud status |
+
+The guides distinguish implemented behavior from proposed enterprise work. They
+were reviewed against source and official Google documentation on 2026-10-28;
+reading them requires no cloud deployment or paid inference.
 
 
 Milestone 1 includes 18 bike, moto, and van couriers across Chamberí, Retiro, and Puente de Vallecas; 24 real OSM pickup locations; 180 synthetic customers; and a seeded 10:00 to 22:00 service day. The map renders cached street geometry with no tile API key or external map requests.
