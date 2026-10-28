@@ -17,6 +17,7 @@ from starlette.responses import Response
 
 from delivery.city_config import CitySettings
 from delivery.db import connect
+from delivery.health import router as health_router
 from delivery.history import history_catalogue, history_manifest
 from delivery.lab import create_lab, export_slice, lab_snapshot
 from delivery.simulation import Simulation, create_run, initialize, snapshot
@@ -223,13 +224,13 @@ async def local_mutations(
     request: Request, call_next: Callable[[Request], Awaitable[Response]]
 ) -> Response:
     origin = request.headers.get("origin")
-    if request.url.path.startswith("/api/supply") and request.url.hostname not in {
+    if request.url.path.startswith(("/api/supply", "/api/health")) and request.url.hostname not in {
         "localhost",
         "127.0.0.1",
         "::1",
         "testserver",
     }:
-        return JSONResponse({"detail": "Supply endpoints are local-only"}, status_code=403)
+        return JSONResponse({"detail": "Operator endpoints are local-only"}, status_code=403)
     if (
         request.method in {"POST", "PUT", "PATCH", "DELETE"}
         and origin
@@ -325,4 +326,5 @@ def favicon() -> None:
 
 
 app.include_router(supply_router)
+app.include_router(health_router)
 app.mount("/static", StaticFiles(directory="web"), name="static")

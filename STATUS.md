@@ -1,5 +1,17 @@
 # Status
 
+2026-10-28: Added the local /health dashboard, following Scrapmarket's category
+and run-history pattern. Browse individual parameter cases across ten categories,
+inspect six capability regression groups and six offline judge cases, and probe
+local services, per-run queues and durable budgets. Opt-in pytest reporting and
+make health record safe source-fingerprinted receipts; missing, partial, skipped,
+interrupted, stale and changed-source evidence cannot become a full pass.
+The checker binds all subprocesses to delivery_test and leaves running services
+untouched. Verified 353 tests (46 new health checks), Ruff, mypy over 38 modules,
+host JavaScript syntax and browser filtering/drill-down/refresh/history. Zero
+model calls; Python-only container reports Node syntax as unavailable. CI publishes
+safe reports even on failure. See docs/HEALTH.md and docs/evidence/local-health.json.
+
 2026-10-28: Added nine typed memory contracts and selective recall bound to
 an authenticated incoming event lease. Role, order, market request and courier
 attempt boundaries are enforced in Postgres; source events, revision history,

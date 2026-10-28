@@ -20,6 +20,14 @@ Milestone 1 includes 18 bike, moto, and van couriers across Chamberí, Retiro, a
 
 ## Run locally
 
+### Health and evaluations
+
+Open [Health & evals](http://localhost:8010/health) to browse every test by category,
+result and source case, inspect capability regressions and the offline judge
+baseline, and check local services, queues and budgets. From Bash, run `make health`
+after starting the stack to refresh the evidence. Partial, skipped, missing and
+outdated results stay visible. See [health evidence and limits](docs/HEALTH.md).
+
 ### M2 inventory slice
 
 The fictional-city inventory lab is at **http://localhost:8010/lab** after starting

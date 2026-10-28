@@ -1,0 +1,185 @@
+{
+  "schema_version": 1,
+  "categories": [
+    {
+      "id": "agents",
+      "name": "Agent identity & safety",
+      "description": "Roles, frozen permissions, environment isolation and unsafe instructions",
+      "files": [
+        "tests/test_agent_specs.py",
+        "tests/test_agent_runtime.py",
+        "tests/test_safety.py"
+      ]
+    },
+    {
+      "id": "queues",
+      "name": "Queues & recovery",
+      "description": "Leases, retries, dead letters, priorities, deduplication and rollback",
+      "files": [
+        "tests/test_queue.py",
+        "tests/test_agent_queue_boundary.py"
+      ]
+    },
+    {
+      "id": "memory",
+      "name": "Typed memory & recall",
+      "description": "Source events, current-order recall, expiry, history and capacity",
+      "files": [
+        "tests/test_typed_memory.py"
+      ]
+    },
+    {
+      "id": "inventory",
+      "name": "Inventory & source data",
+      "description": "Stock conservation, real worker crashes, catalogue units and dated snapshots",
+      "files": [
+        "tests/test_inventory.py",
+        "tests/test_lab.py",
+        "tests/test_history.py",
+        "tests/test_history_api.py",
+        "tests/test_catalogue_variety.py",
+        "tests/test_catalogue_city.py",
+        "tests/test_meal_snapshot.py"
+      ]
+    },
+    {
+      "id": "supply",
+      "name": "Restaurants & sourcing",
+      "description": "Demand, ingredient requests, consent, cooking and delivery facts",
+      "files": [
+        "tests/test_supply_models.py",
+        "tests/test_supply_integration.py",
+        "tests/test_supply_delivery_facts.py"
+      ]
+    },
+    {
+      "id": "delivery",
+      "name": "City & fulfillment",
+      "description": "Directed roads, dispatch, courier competition, traffic and dropouts",
+      "files": [
+        "tests/test_delivery_flow.py",
+        "tests/test_fleet_recovery.py",
+        "tests/test_running_city.py",
+        "tests/test_simulation.py",
+        "tests/test_city_expanded.py",
+        "tests/test_urban_city.py"
+      ]
+    },
+    {
+      "id": "search",
+      "name": "Ingredient search",
+      "description": "Scoped local search, optional review admission, cache and failure handling",
+      "files": [
+        "tests/test_supply_search.py",
+        "tests/test_supply_search_service.py"
+      ]
+    },
+    {
+      "id": "interface",
+      "name": "Operator interface",
+      "description": "API contracts, channels, complete order history and readable conversations",
+      "files": [
+        "tests/test_api.py",
+        "tests/test_delivery_api.py",
+        "tests/test_supply_api.py",
+        "tests/test_supply_conversation.py"
+      ]
+    },
+    {
+      "id": "cost",
+      "name": "Models & cost controls",
+      "description": "Gateway boundaries, durable budgets, offline judge cases and deployment commands",
+      "files": [
+        "tests/test_cloud_ai.py",
+        "tests/test_cloud_runtime.py",
+        "tests/test_gateway_policy.py",
+        "tests/test_judge_evals.py",
+        "tests/test_gcp_demo_commands.py",
+        "tests/test_local_defaults.py"
+      ]
+    },
+    {
+      "id": "health",
+      "name": "Health reporting",
+      "description": "Report integrity, evidence freshness and health APIs",
+      "files": [
+        "tests/test_health.py",
+        "tests/test_health_report.py"
+      ]
+    }
+  ],
+  "capabilities": [
+    {
+      "id": "queues",
+      "name": "Queue resilience",
+      "description": "Retry, fencing, concurrent claims and transactional recovery.",
+      "selectors": [
+        "tests/test_queue.py",
+        "tests/test_agent_queue_boundary.py"
+      ],
+      "limits": "Local failure regressions; throughput and sustained backpressure benchmarks are not measured."
+    },
+    {
+      "id": "coordination",
+      "name": "Coordination & authority",
+      "description": "Competing dispatchers, courier handoff, approval gates and isolated roles.",
+      "selectors": [
+        "tests/test_fleet_recovery.py",
+        "tests/test_delivery_flow.py::test_actual_role_connections_deny_other_domains",
+        "tests/test_safety.py::test_injection_cannot_bypass_refund_approval"
+      ],
+      "limits": "Flat vs hierarchical vs planner-executor comparisons are not implemented."
+    },
+    {
+      "id": "memory",
+      "name": "Memory isolation",
+      "description": "Role/order/request/attempt boundaries, provenance, expiry and stale observations.",
+      "selectors": [
+        "tests/test_typed_memory.py",
+        "tests/test_supply_integration.py::test_supplier_recall_is_restricted_to_the_current_ingredient_request",
+        "tests/test_fleet_recovery.py::test_courier_memory_does_not_cross_assignment_attempts",
+        "tests/test_supply_integration.py::test_completed_supplier_memory_expires_but_keeps_revision_history"
+      ],
+      "limits": "Exact filtered recall. Semantic recall and held-out decision-quality comparisons are not measured."
+    },
+    {
+      "id": "budgets",
+      "name": "Cost & tool admission",
+      "description": "Concurrent reservations, bounded external context, exhausted budgets and uncertain calls.",
+      "selectors": [
+        "tests/test_agent_runtime.py::test_concurrent_budget_reservation_is_durable_and_idempotent",
+        "tests/test_agent_runtime.py::test_role_is_frozen_and_budget_blocks_effects",
+        "tests/test_safety.py::test_concurrent_llm_budget_is_durable",
+        "tests/test_cloud_ai.py::test_only_bounded_numeric_facts_leave_machine",
+        "tests/test_cloud_runtime.py::test_model_reservation_is_durable_scoped_and_never_reused",
+        "tests/test_supply_search_service.py::test_failed_reviews_keep_full_durable_reservation_and_never_cache"
+      ],
+      "limits": "Offline/mocked provider regressions. These do not estimate live model cost or quality."
+    },
+    {
+      "id": "failures",
+      "name": "Disrupted city scenarios",
+      "description": "Scarce ingredients, delayed replenishment, traffic, dropouts, consent and retry judgment.",
+      "selectors": [
+        "tests/test_lab.py::test_real_process_crash_and_delayed_supply",
+        "tests/test_inventory.py",
+        "tests/test_fleet_recovery.py::test_multi_basket_traffic_dropouts_and_judged_recovery",
+        "tests/test_supply_integration.py::test_two_orders_cannot_reserve_the_last_recipe_twice",
+        "tests/test_supply_integration.py::test_shortage_requires_household_and_restaurant_approval_and_respects_exclusions"
+      ],
+      "limits": "Fixed development scenarios; held-out architecture/model evaluation remains planned."
+    },
+    {
+      "id": "audit",
+      "name": "Traceability & replay",
+      "description": "Atomic evidence, complete order history, replay and corruption detection.",
+      "selectors": [
+        "tests/test_supply_integration.py::test_complete_run_replays_without_agents_and_detects_fact_hash_corruption",
+        "tests/test_supply_delivery_facts.py",
+        "tests/test_supply_api.py::test_complete_order_history_is_scoped_and_not_a_recent_event_window",
+        "tests/test_agent_runtime.py::test_memory_audit_captures_previous_value_and_rolls_back_with_the_write"
+      ],
+      "limits": "Business-state replay and recorded receipts; no claim to expose private model reasoning."
+    }
+  ]
+}

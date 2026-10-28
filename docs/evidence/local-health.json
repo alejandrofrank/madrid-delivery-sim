@@ -1,0 +1,367 @@
+{
+  "verified_at": "2026-10-28T00:11:59.991665+00:00",
+  "source_fingerprint": "b9fb55b866b14cf5d8ef5edb66bc7a890e6f099b6f631a910f8e6d1d3f3439fa",
+  "tests": {
+    "total": 353,
+    "passed": 353,
+    "failed": 0,
+    "skipped": 0,
+    "xfailed": 0,
+    "xpassed": 0,
+    "not_run": 0
+  },
+  "test_files": 36,
+  "categories": [
+    {
+      "id": "agents",
+      "counts": {
+        "total": 32,
+        "passed": 32,
+        "failed": 0,
+        "skipped": 0,
+        "xfailed": 0,
+        "xpassed": 0,
+        "not_run": 0
+      }
+    },
+    {
+      "id": "queues",
+      "counts": {
+        "total": 18,
+        "passed": 18,
+        "failed": 0,
+        "skipped": 0,
+        "xfailed": 0,
+        "xpassed": 0,
+        "not_run": 0
+      }
+    },
+    {
+      "id": "memory",
+      "counts": {
+        "total": 12,
+        "passed": 12,
+        "failed": 0,
+        "skipped": 0,
+        "xfailed": 0,
+        "xpassed": 0,
+        "not_run": 0
+      }
+    },
+    {
+      "id": "inventory",
+      "counts": {
+        "total": 38,
+        "passed": 38,
+        "failed": 0,
+        "skipped": 0,
+        "xfailed": 0,
+        "xpassed": 0,
+        "not_run": 0
+      }
+    },
+    {
+      "id": "supply",
+      "counts": {
+        "total": 48,
+        "passed": 48,
+        "failed": 0,
+        "skipped": 0,
+        "xfailed": 0,
+        "xpassed": 0,
+        "not_run": 0
+      }
+    },
+    {
+      "id": "delivery",
+      "counts": {
+        "total": 35,
+        "passed": 35,
+        "failed": 0,
+        "skipped": 0,
+        "xfailed": 0,
+        "xpassed": 0,
+        "not_run": 0
+      }
+    },
+    {
+      "id": "search",
+      "counts": {
+        "total": 66,
+        "passed": 66,
+        "failed": 0,
+        "skipped": 0,
+        "xfailed": 0,
+        "xpassed": 0,
+        "not_run": 0
+      }
+    },
+    {
+      "id": "interface",
+      "counts": {
+        "total": 14,
+        "passed": 14,
+        "failed": 0,
+        "skipped": 0,
+        "xfailed": 0,
+        "xpassed": 0,
+        "not_run": 0
+      }
+    },
+    {
+      "id": "cost",
+      "counts": {
+        "total": 44,
+        "passed": 44,
+        "failed": 0,
+        "skipped": 0,
+        "xfailed": 0,
+        "xpassed": 0,
+        "not_run": 0
+      }
+    },
+    {
+      "id": "health",
+      "counts": {
+        "total": 46,
+        "passed": 46,
+        "failed": 0,
+        "skipped": 0,
+        "xfailed": 0,
+        "xpassed": 0,
+        "not_run": 0
+      }
+    }
+  ],
+  "capabilities": [
+    {
+      "id": "queues",
+      "counts": {
+        "total": 18,
+        "passed": 18,
+        "failed": 0,
+        "skipped": 0,
+        "xfailed": 0,
+        "xpassed": 0,
+        "not_run": 0
+      },
+      "status": "passed"
+    },
+    {
+      "id": "coordination",
+      "counts": {
+        "total": 8,
+        "passed": 8,
+        "failed": 0,
+        "skipped": 0,
+        "xfailed": 0,
+        "xpassed": 0,
+        "not_run": 0
+      },
+      "status": "passed"
+    },
+    {
+      "id": "memory",
+      "counts": {
+        "total": 15,
+        "passed": 15,
+        "failed": 0,
+        "skipped": 0,
+        "xfailed": 0,
+        "xpassed": 0,
+        "not_run": 0
+      },
+      "status": "passed"
+    },
+    {
+      "id": "budgets",
+      "counts": {
+        "total": 7,
+        "passed": 7,
+        "failed": 0,
+        "skipped": 0,
+        "xfailed": 0,
+        "xpassed": 0,
+        "not_run": 0
+      },
+      "status": "passed"
+    },
+    {
+      "id": "failures",
+      "counts": {
+        "total": 8,
+        "passed": 8,
+        "failed": 0,
+        "skipped": 0,
+        "xfailed": 0,
+        "xpassed": 0,
+        "not_run": 0
+      },
+      "status": "passed"
+    },
+    {
+      "id": "audit",
+      "counts": {
+        "total": 7,
+        "passed": 7,
+        "failed": 0,
+        "skipped": 0,
+        "xfailed": 0,
+        "xpassed": 0,
+        "not_run": 0
+      },
+      "status": "passed"
+    }
+  ],
+  "judge": {
+    "available": true,
+    "created_at": "2026-10-28T00:10:54.421715+00:00",
+    "freshness": "current",
+    "mode": "offline-baseline",
+    "fixture_version": "recovery-judge-v1",
+    "missing_cases": [],
+    "rows": [
+      {
+        "case_id": "timely-feasible",
+        "expected_decision": "approve_retry",
+        "actual_decision": "approve_retry",
+        "status": "ok",
+        "passed": true,
+        "hard_policy_violation": false,
+        "latency_ms": 0.032,
+        "input_tokens": 0,
+        "output_tokens": 0
+      },
+      {
+        "case_id": "deadline-exceeded",
+        "expected_decision": "deny_retry",
+        "actual_decision": "deny_retry",
+        "status": "ok",
+        "passed": true,
+        "hard_policy_violation": false,
+        "latency_ms": 0.008,
+        "input_tokens": 0,
+        "output_tokens": 0
+      },
+      {
+        "case_id": "cost-cap-exceeded",
+        "expected_decision": "deny_retry",
+        "actual_decision": "deny_retry",
+        "status": "ok",
+        "passed": true,
+        "hard_policy_violation": false,
+        "latency_ms": 0.005,
+        "input_tokens": 0,
+        "output_tokens": 0
+      },
+      {
+        "case_id": "retry-exhausted",
+        "expected_decision": "deny_retry",
+        "actual_decision": "deny_retry",
+        "status": "ok",
+        "passed": true,
+        "hard_policy_violation": false,
+        "latency_ms": 0.004,
+        "input_tokens": 0,
+        "output_tokens": 0
+      },
+      {
+        "case_id": "no-available-courier",
+        "expected_decision": "deny_retry",
+        "actual_decision": "deny_retry",
+        "status": "ok",
+        "passed": true,
+        "hard_policy_violation": false,
+        "latency_ms": 0.004,
+        "input_tokens": 0,
+        "output_tokens": 0
+      },
+      {
+        "case_id": "missing-required-facts",
+        "expected_decision": "deny_retry",
+        "actual_decision": "deny_retry",
+        "status": "ok",
+        "passed": true,
+        "hard_policy_violation": false,
+        "latency_ms": 0.004,
+        "input_tokens": 0,
+        "output_tokens": 0
+      }
+    ],
+    "counts": {
+      "total": 6,
+      "passed": 6
+    },
+    "note": "Rules oracle compared with itself; validates the harness, not model quality."
+  },
+  "code_checks": [
+    {
+      "id": "pytest",
+      "label": "Full test suite",
+      "status": "passed",
+      "duration_seconds": 183.304401,
+      "exit_code": 0
+    },
+    {
+      "id": "ruff",
+      "label": "Ruff",
+      "status": "passed",
+      "duration_seconds": 0.129477,
+      "exit_code": 0
+    },
+    {
+      "id": "mypy",
+      "label": "Mypy",
+      "status": "passed",
+      "duration_seconds": 11.898327,
+      "exit_code": 0
+    },
+    {
+      "id": "javascript",
+      "label": "JavaScript syntax",
+      "status": "unavailable",
+      "duration_seconds": 0.0,
+      "exit_code": null
+    },
+    {
+      "id": "evals",
+      "label": "Offline recovery baseline",
+      "status": "passed",
+      "duration_seconds": 0.351525,
+      "exit_code": 0
+    }
+  ],
+  "services": [
+    {
+      "id": "postgres",
+      "name": "Postgres / PostGIS",
+      "status": "passed",
+      "latency_ms": 6.8
+    },
+    {
+      "id": "redis",
+      "name": "Redis (baseline support)",
+      "status": "passed",
+      "latency_ms": 1.2
+    }
+  ],
+  "default_provider_mode": "disabled",
+  "no_service_restart": true,
+  "verification_date": "2026-10-28",
+  "timezone": "Europe/Madrid",
+  "browser": {
+    "case_search": "passed",
+    "category_filter": "passed",
+    "expanded_case_survives_refresh": "passed",
+    "capability_drill_down_cases": 15,
+    "historical_dead_letter_detected": 1,
+    "console_errors": 0,
+    "horizontal_overflow": false
+  },
+  "limits": [
+    "Capability regressions overlap and are not independent quality scores",
+    "The six-case rules baseline compares the oracle with itself; no model was called",
+    "JavaScript syntax is unavailable in the Python-only checker image; host Node syntax and browser checks passed",
+    "Local receipts are not signed attestations; the trusted host can edit them"
+  ]
+}

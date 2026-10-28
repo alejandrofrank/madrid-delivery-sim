@@ -2,6 +2,13 @@
 
 Updated 2026-10-28. Implemented slices are identified below; remaining milestones are planned.
 
+Local health slice: `/health` now exposes the categorized test catalogue, source
+and run history, six capability regression groups, the offline recovery baseline,
+service probes and per-run queue/budget diagnostics. `make health` records actual
+case results and code checks without paid inference. Gaps and stale/partial
+evidence remain explicit. This adds inspectable regression evidence for M6/M7; held-out model and
+architecture comparisons remain planned. See [health evidence](docs/HEALTH.md).
+
 Typed memory slice: nine role-specific fact contracts now enforce source-event
 provenance, revision history and expiry. Recall derives the current order from a
 live incoming lease; markets see only the current ingredient request and couriers

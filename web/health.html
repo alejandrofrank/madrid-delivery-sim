@@ -1,0 +1,241 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Health & evaluations · Bakiano</title>
+    <link rel="icon" href="data:," />
+    <link rel="stylesheet" href="/static/health.css" />
+    <script defer src="/static/health.js"></script>
+  </head>
+  <body>
+    <aside class="rail">
+      <a class="brand" href="/delivery-lab" aria-label="Bakiano operations"
+        >b.</a
+      ><span class="rail-label">OPERATIONS LAB</span>
+      <nav aria-label="Workspaces">
+        <a href="/delivery-lab">Delivery</a
+        ><a href="/restaurant-lab">Restaurants</a><a href="/lab">Inventory</a
+        ><a class="active" href="/health" aria-current="page">Health & evals</a>
+      </nav>
+      <span class="local">LOCAL ENVIRONMENT</span>
+    </aside>
+    <main>
+      <header>
+        <div>
+          <h1>Health & evaluations</h1>
+          <p>
+            Explore the checks, their evidence and what still needs measuring.
+          </p>
+        </div>
+        <div class="actions">
+          <button id="copy-command">Copy check command</button
+          ><button id="refresh">Refresh results</button>
+        </div>
+      </header>
+      <p id="notice" class="notice" role="status" hidden></p>
+      <p id="error" class="notice danger" role="alert" hidden></p>
+      <div id="provenance" class="provenance">Loading local evidence…</div>
+      <section
+        id="metrics"
+        class="metrics"
+        aria-label="Health summary"
+      ></section>
+      <nav class="tabs" role="tablist" aria-label="Health views">
+        <button
+          id="tests-tab"
+          role="tab"
+          aria-selected="true"
+          aria-controls="tests-panel"
+        >
+          Test catalogue
+        </button>
+        <button
+          id="evals-tab"
+          role="tab"
+          aria-selected="false"
+          aria-controls="evals-panel"
+          tabindex="-1"
+        >
+          Agent evals
+        </button>
+        <button
+          id="city-tab"
+          role="tab"
+          aria-selected="false"
+          aria-controls="city-panel"
+          tabindex="-1"
+        >
+          City health
+        </button>
+        <button
+          id="history-tab"
+          role="tab"
+          aria-selected="false"
+          aria-controls="history-panel"
+          tabindex="-1"
+        >
+          Run history
+        </button>
+      </nav>
+      <section id="tests-panel" role="tabpanel" aria-labelledby="tests-tab">
+        <div class="catalogue">
+          <aside class="categories">
+            <h2>Test categories</h2>
+            <div id="categories"></div>
+            <p>
+              Explicit categories. New files stay visible under “Needs
+              classification”.
+            </p>
+          </aside>
+          <div class="test-workspace">
+            <div class="filters">
+              <label class="search-label"
+                >Find a check<input
+                  id="search"
+                  type="search"
+                  placeholder="Order isolation, retry, memory, test ID…" /></label
+              ><label
+                >Result<select id="status-filter">
+                  <option value="all">All results</option>
+                  <option value="failed">Failed</option>
+                  <option value="passed">Passed</option>
+                  <option value="skipped">Skipped / expected failure</option>
+                  <option value="not_run">Not run</option>
+                </select></label
+              ><label
+                >Kind<select id="kind-filter">
+                  <option value="all">All checks</option>
+                  <option value="integration">Postgres integration</option>
+                  <option value="unit">Other checks</option>
+                </select></label
+              >
+            </div>
+            <div id="selection-note" class="selection-note" hidden></div>
+            <p id="result-count" class="subtle" role="status"></p>
+            <div id="test-list"></div>
+          </div>
+        </div>
+      </section>
+      <section
+        id="evals-panel"
+        role="tabpanel"
+        aria-labelledby="evals-tab"
+        hidden
+      >
+        <div class="section-heading">
+          <div>
+            <h2>Agent capability regressions</h2>
+            <p>
+              Selected behavioral checks from the suite. Categories overlap;
+              these counts are not independent quality scores.
+            </p>
+          </div>
+          <span class="tag">Local / rules / mocked providers</span>
+        </div>
+        <div id="capabilities" class="capability-grid"></div>
+        <section class="panel">
+          <div class="section-heading">
+            <div>
+              <h2>Recovery judge · rules baseline</h2>
+              <p>
+                Fixed cases validate the evaluation harness against its rules
+                oracle. No model is called.
+              </p>
+            </div>
+            <span id="judge-status"></span>
+          </div>
+          <div id="judge"></div>
+        </section>
+        <div class="gaps">
+          <article>
+            <span class="badge neutral">Not measured</span>
+            <h3>Live model quality & cost</h3>
+            <p>
+              Held-out prompts, real provider latency, failure rates and cost
+              per decision need an explicitly enabled model evaluation.
+            </p>
+          </article>
+          <article>
+            <span class="badge neutral">Not measured</span>
+            <h3>Architecture & memory comparisons</h3>
+            <p>
+              Flat vs hierarchical vs planner-executor, semantic recall and
+              compact summaries still need paired scenario results.
+            </p>
+          </article>
+        </div>
+      </section>
+      <section
+        id="city-panel"
+        role="tabpanel"
+        aria-labelledby="city-tab"
+        hidden
+      >
+        <div class="section-heading">
+          <div>
+            <h2>Local services</h2>
+            <p>
+              Read-only probes. A failed order is a business outcome, separate
+              from infrastructure health.
+            </p>
+          </div>
+          <span id="runtime-time" class="subtle"></span>
+        </div>
+        <div id="services" class="service-grid"></div>
+        <section class="panel">
+          <div class="section-heading">
+            <div>
+              <h2>Queue & budget diagnostics</h2>
+              <p>
+                Selected simulation only. Reservations are commitments, not an
+                estimate of provider charges.
+              </p>
+            </div>
+            <label
+              >Simulation<select
+                id="city-run"
+                aria-label="Simulation for health diagnostics"
+              ></select
+            ></label>
+          </div>
+          <div id="diagnostics"></div>
+        </section>
+        <section class="panel">
+          <h2>Code checks</h2>
+          <p class="subtle">
+            Recorded by the local check command, with the same source
+            fingerprint as the tests.
+          </p>
+          <div id="checks"></div>
+        </section>
+      </section>
+      <section
+        id="history-panel"
+        role="tabpanel"
+        aria-labelledby="history-tab"
+        hidden
+      >
+        <div class="section-heading">
+          <div>
+            <h2>Recent test runs</h2>
+            <p>
+              Last 12 local receipts. Filtered, skipped, interrupted and
+              outdated runs keep their own status.
+            </p>
+          </div>
+          <button id="latest">View latest run</button>
+        </div>
+        <div id="history"></div>
+      </section>
+      <footer>
+        <span id="footer-state"
+          >Local evidence · no checks run from this page</span
+        ><span
+          >Run <code>make health</code> to refresh tests, code checks and the
+          offline judge baseline.</span
+        >
+      </footer>
+    </main>
+  </body>
+</html>
