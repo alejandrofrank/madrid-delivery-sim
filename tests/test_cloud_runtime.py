@@ -1,143 +1,87 @@
-from contextlib import contextmanager
 from types import SimpleNamespace
 from unittest.mock import Mock
 
 import pytest
 
+from delivery.durable_inference import local_proposal
 from delivery.fleet_policy import cloud_judgement
 
 
-@pytest.mark.parametrize("decision,approved", [("approve_retry", True), ("deny_retry", False)])
-def test_cloud_can_only_veto_local_candidate(monkeypatch, decision, approved):
-    audit_conn = Mock()
-
-    @contextmanager
-    def connection(_):
-        yield audit_conn
-
-    provider = Mock()
-    provider.review.return_value = SimpleNamespace(
-        decision=decision,
-        model_dump=lambda: {
-            "decision": decision,
-            "model": "test",
-            "input_tokens": 5,
-            "output_tokens": 3,
-            "reason": "bounded",
-        },
-    )
-    monkeypatch.setattr("delivery.cloud_ai.CloudJudge", lambda _: provider)
-    monkeypatch.setattr("delivery.fleet_policy.connect", connection)
-    tools = SimpleNamespace(cloud_endpoint="https://judge.run.app", cloud_dsn="private", sim=10)
+def saved_judgement(decision="approve_retry", state="succeeded"):
     context = {
-        "job": {"deadline_sim": 100},
-        "roads": {"edges": [{"from": 1, "to": 2, "travel_seconds": 20}]},
+        "job": {"deadline_sim": 100, "pickup_node": 1, "customer_node": 2},
+        "roads": {"edges": [{"from": 1, "to": 2, "travel_seconds": 20, "modes": ["bike"]}]},
+        "fleet": [{"id": "bike-1", "node": 1, "busy_basket": None}],
     }
-    courier, route, audit = cloud_judgement(
-        SimpleNamespace(id=1, attempts=1), tools, context, [], "bike-1", [1, 2]
+    event = SimpleNamespace(id=1, payload={"basket": "private", "attempt": 1})
+    receipt = {
+        "id": "request-1",
+        "event_id": 1,
+        "event_payload": event.payload,
+        "request_hash": "digest",
+        "definition_hash": "role",
+        "context": context,
+        "memory": [],
+        "sim_time": 10,
+        "proposal": local_proposal(context, 10),
+        "state": state,
+        "dispatch_attempt": 1,
+        "prepared_attempt": 1,
+        "result": {"decision": decision, "fallback": None, "provider": "gcp_ai"},
+    }
+    tools = SimpleNamespace(
+        inference_receipt=receipt, sim=10, scope=SimpleNamespace(definition_hash="role")
     )
+    return event, tools, context
+
+
+@pytest.mark.parametrize("decision,approved", [("approve_retry", True), ("deny_retry", False)])
+def test_cloud_receipt_can_only_veto_local_candidate(monkeypatch, decision, approved):
+    network = Mock(side_effect=AssertionError("policy must never invoke network"))
+    monkeypatch.setattr("delivery.cloud_ai.CloudJudge.review", network)
+    event, tools, context = saved_judgement(decision)
+    courier, route, audit = cloud_judgement(event, tools, context, [], "bike-1", [1, 2])
     assert (courier, route) == (("bike-1", [1, 2]) if approved else (None, None))
-    assert provider.review.call_args.kwargs["candidate"]["estimated_seconds"] == 20
-    assert audit["fallback"] is None
-    audit_conn.execute.assert_called_once()
+    assert audit["request_id"] == "request-1" and audit["fallback"] is None
+    network.assert_not_called()
 
 
-def test_cloud_failure_denies_and_audits_without_error_text(monkeypatch):
-    audit_conn = Mock()
-
-    @contextmanager
-    def connection(_):
-        yield audit_conn
-
-    provider = Mock()
-    provider.review.side_effect = RuntimeError("secret credential")
-    monkeypatch.setattr("delivery.cloud_ai.CloudJudge", lambda _: provider)
-    monkeypatch.setattr("delivery.fleet_policy.connect", connection)
-    tools = SimpleNamespace(cloud_endpoint="https://judge.run.app", cloud_dsn="private", sim=10)
-    courier, route, audit = cloud_judgement(
-        SimpleNamespace(id=1, attempts=1), tools, {}, [], None, None
-    )
+def test_unknown_outcome_is_fail_closed_without_network(monkeypatch):
+    network = Mock(side_effect=AssertionError("unknown cannot be retried"))
+    monkeypatch.setattr("delivery.cloud_ai.CloudJudge.review", network)
+    event, tools, context = saved_judgement(state="unknown")
+    tools.inference_receipt["result"] = {
+        "provider": "gcp_ai",
+        "error": "RuntimeError",
+        "fallback": "fail_closed",
+    }
+    courier, route, audit = cloud_judgement(event, tools, context, [], "bike-1", [1, 2])
     assert courier is None and route is None
     assert audit["error"] == "RuntimeError" and audit["fallback"] == "fail_closed"
-    assert "secret" not in str(audit)
-    audit_conn.execute.assert_called_once()
+    network.assert_not_called()
 
 
-@pytest.mark.integration
-def test_model_reservation_is_durable_scoped_and_never_reused(db_url):
-    from delivery.agent_access import retire_inventory_access, role_access
-    from delivery.agent_runtime import create_agent
-    from delivery.db import connect
-    from delivery.delivery_flow import new_delivery
-    from delivery.queue import publish
+@pytest.mark.parametrize("changed", ["memory", "sim", "proposal", "payload", "role"])
+def test_incompatible_saved_approval_is_fail_closed(changed):
+    event, tools, context = saved_judgement()
+    if changed == "memory":
+        tools.inference_receipt["memory"] = [{"body": "changed"}]
+    elif changed == "sim":
+        tools.sim = 11
+    elif changed == "proposal":
+        tools.inference_receipt["proposal"] = {"courier": "other"}
+    elif changed == "payload":
+        tools.inference_receipt["event_payload"] = {"basket": "another", "attempt": 1}
+    else:
+        tools.scope.definition_hash = "different-role"
+    courier, route, audit = cloud_judgement(event, tools, context, [], "bike-1", [1, 2])
+    assert courier is None and route is None
+    assert audit["error"] == "PreconditionsChanged"
+    assert tools.inference_receipt["result"]["decision"] == "approve_retry"
 
-    run = new_delivery(url=db_url)
-    try:
-        access = role_access(run, "judge", db_url, agent_mode="gcp_ai")["fleet"]
-        agent = create_agent(
-            access.dsn, agent_mode="gcp_ai", cloud_endpoint="https://judge.run.app"
-        )
-        with connect(db_url) as conn:
-            publish(
-                conn,
-                run_id=run,
-                producer="lab_world",
-                topic="delivery.failed",
-                payload={"basket": "test", "attempt": 1},
-                key="test",
-                trace_id="test",
-                target_store="judge:fleet",
-            )
-        event = agent.claim()
-        assert event and agent.reserve_budget(event)
-        with connect(access.dsn) as conn:
-            assert conn.execute(
-                "SELECT agent_reserve_model(%s,%s,%s) AS ok",
-                (event.id, event.token, event.attempts),
-            ).fetchone()["ok"]
-        # A second connection sees the charged reservation after the first committed.
-        with connect(access.dsn) as conn:
-            assert not conn.execute(
-                "SELECT agent_reserve_model(%s,%s,%s) AS ok",
-                (event.id, event.token, event.attempts),
-            ).fetchone()["ok"]
-        with connect(db_url) as conn:
-            row = conn.execute(
-                "SELECT reserved_tokens,status FROM agent_model_calls WHERE event_id=%s",
-                (event.id,),
-            ).fetchone()
-            assert row == {"reserved_tokens": 8448, "status": "reserved"}
-        for index in range(1, 7):
-            with connect(db_url) as conn:
-                publish(
-                    conn,
-                    run_id=run,
-                    producer="lab_world",
-                    topic="delivery.failed",
-                    payload={"basket": f"budget-{index}", "attempt": 1},
-                    key=f"budget-{index}",
-                    trace_id=f"budget-{index}",
-                    target_store="judge:fleet",
-                )
-            next_event = agent.claim()
-            assert next_event and agent.reserve_budget(next_event)
-            with connect(access.dsn) as conn:
-                reserved = conn.execute(
-                    "SELECT agent_reserve_model(%s,%s,%s) AS ok",
-                    (next_event.id, next_event.token, next_event.attempts),
-                ).fetchone()["ok"]
-                assert reserved is (index < 6)
-        with connect(db_url) as conn:
-            count = conn.execute(
-                "SELECT count(*) AS n,sum(reserved_tokens) AS tokens "
-                "FROM agent_model_calls WHERE run_id=%s",
-                (run,),
-            ).fetchone()
-            assert count == {"n": 6, "tokens": 50688}
-        with pytest.raises(ValueError, match="frozen"):
-            role_access(run, "judge", db_url)
-    finally:
-        retire_inventory_access(run, db_url)
-        with connect(db_url) as conn:
-            conn.execute("DELETE FROM events WHERE run_id=%s", (run,))
-            conn.execute("DELETE FROM runs WHERE id=%s", (run,))
+
+def test_direct_policy_without_saved_receipt_has_no_provider_capability():
+    event, tools, context = saved_judgement()
+    tools.inference_receipt = None
+    with pytest.raises(PermissionError, match="durable"):
+        cloud_judgement(event, tools, context, [], "bike-1", [1, 2])

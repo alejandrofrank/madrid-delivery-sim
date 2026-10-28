@@ -66,8 +66,7 @@ class ScopedTools:
         self.calls: list[str] = []
         self.memory_writes: list[dict[str, Any]] = []
         self.memory_reads: list[dict[str, Any]] = []
-        self.cloud_endpoint: str | None = None
-        self.cloud_dsn: str | None = None
+        self.inference_receipt: dict[str, Any] | None = None
         ticket = conn.execute(
             """SELECT b.slots FROM agent_event_budgets b JOIN events e
             ON e.id=b.event_id WHERE b.event_id=%s AND b.attempt=%s AND e.state='leased'
@@ -453,14 +452,9 @@ class LocalAgent:
             raise BudgetExceeded("A durable budget reservation is required")
         tools = ScopedTools(conn, self.scope, self.role, event)
         if self.role.policy == "gcp_ai":
-            model_ticket = conn.execute(
-                "SELECT public.agent_model_reserved(%s,%s,%s) AS reserved",
-                (event.id, event.token, event.attempts),
-            ).fetchone()
-            if not model_ticket or not model_ticket["reserved"]:
-                raise BudgetExceeded("A durable model reservation is required")
-            tools.cloud_endpoint = self.cloud_endpoint
-            tools.cloud_dsn = self.dsn
+            from delivery.durable_inference import saved_result
+
+            tools.inference_receipt = saved_result(conn, self, event)
         if self.role.name in {"household", "restaurant", "market"}:
             from delivery.supply_policy import SupplyPolicy
 
@@ -476,6 +470,32 @@ class LocalAgent:
         # inspection survives TTL cleanup without changing agent recall access.
         detail["memory_writes"] = tools.memory_writes
         detail["memory_reads"] = tools.memory_reads
+        if tools.inference_receipt is not None:
+            from delivery.durable_inference import apply_receipt
+
+            receipt = tools.inference_receipt
+            detail["inference_prepare_reads"] = {
+                "request_id": receipt["id"],
+                "request_hash": receipt["request_hash"],
+                "event_id": receipt["event_id"],
+                "attempt": receipt["prepared_attempt"],
+                "tools": ["judge.read", "memory.read"],
+                "facts": [
+                    {
+                        key: fact[key]
+                        for key in (
+                            "fact_id",
+                            "kind",
+                            "version",
+                            "event_id",
+                            "context_id",
+                            "expires_sim",
+                        )
+                    }
+                    for fact in receipt["memory"]
+                ],
+            }
+            apply_receipt(conn, event, tools.inference_receipt)
         conn.execute(
             """INSERT INTO decisions(run_id,sim_time,agent,order_id,event_id,action,detail)
             VALUES (%s,%s,%s,%s,%s,%s,%s)""",
@@ -490,20 +510,29 @@ class LocalAgent:
             ),
         )
 
-    def process(self, event: Event) -> bool:
+    def process(self, event: Event, *, fault: Callable[[str], None] | None = None) -> bool:
+        from delivery.durable_inference import checkpoint, ensure_result
+
         if not self.reserve_budget(event):
             Queue(self.dsn).fail(event, "BudgetExceeded")
             return False
         if self.role.policy == "gcp_ai":
-            with connect(self.dsn) as conn:
-                row = conn.execute(
-                    "SELECT public.agent_reserve_model(%s,%s,%s) AS reserved",
-                    (event.id, event.token, event.attempts),
-                ).fetchone()
-            if not row or not row["reserved"]:
-                Queue(self.dsn).fail(event, "ModelBudgetExceeded")
+            try:
+                if not ensure_result(self, event, fault=fault):
+                    return False
+            except Exception as exc:
+                Queue(self.dsn).fail(event, type(exc).__name__)
                 return False
-        return Queue(self.dsn).process(event, self.handle)
+        checkpoint(fault, "before_apply")
+
+        def apply(conn: Connection, current: Event) -> None:
+            self.handle(conn, current)
+            checkpoint(fault, "after_apply_before_ack")
+
+        processed = Queue(self.dsn).process(event, apply)
+        if processed:
+            checkpoint(fault, "after_apply")
+        return processed
 
 
 def create_agent(

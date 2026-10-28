@@ -93,6 +93,8 @@
       "files": [
         "tests/test_cloud_ai.py",
         "tests/test_cloud_runtime.py",
+        "tests/test_durable_inference.py",
+        "tests/test_inference_crash_recovery.py",
         "tests/test_gateway_policy.py",
         "tests/test_judge_evals.py",
         "tests/test_gcp_demo_commands.py",

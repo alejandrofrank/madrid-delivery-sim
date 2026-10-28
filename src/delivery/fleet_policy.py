@@ -2,11 +2,9 @@
 
 from typing import Any
 
-from psycopg.types.json import Jsonb
 from pydantic import BaseModel, ConfigDict, Field
 
 from delivery.agent_runtime import BasketRef, ScopedTools
-from delivery.db import connect
 from delivery.queue import Event
 from delivery.typed_memory import outcome_fact
 from delivery.workflow_policy import route_plan
@@ -177,37 +175,34 @@ def cloud_judgement(
     courier: str | None,
     route: list[int] | None,
 ) -> tuple[str | None, list[int] | None, dict[str, Any]]:
-    """Model can veto a local candidate; SQL still owns every feasibility gate."""
-    from delivery.cloud_ai import CloudJudge
+    """Use a saved bounded veto; provider I/O is unavailable inside this policy."""
+    from delivery.durable_inference import local_proposal
 
-    candidate = None
-    if route is not None:
-        edges = {(e["from"], e["to"]): e["travel_seconds"] for e in context["roads"]["edges"]}
-        candidate = {
-            "estimated_seconds": sum(edges[a, b] for a, b in zip(route, route[1:], strict=False)),
-            "remaining_seconds": context["job"]["deadline_sim"] - tools.sim,
-            "route_nodes": len(route),
-        }
-    audit: dict[str, Any] = {"provider": "gcp_ai", "fallback": "fail_closed"}
-    try:
-        if not tools.cloud_endpoint:
-            raise ValueError("Cloud endpoint required")
-        model_context = {**context, "job": {**context.get("job", {}), "sim_time": tools.sim}}
-        judgement = CloudJudge(tools.cloud_endpoint).review(
-            model_context, memory, candidate=candidate
-        )
-        audit.update(judgement.model_dump())
-        audit["fallback"] = None
-        if judgement.decision != "approve_retry":
-            courier, route = None, None
-    except Exception as exc:
-        audit["error"] = type(exc).__name__
+    receipt = tools.inference_receipt
+    if receipt is None or receipt["state"] not in {"succeeded", "failed", "unknown"}:
+        raise PermissionError("A completed durable inference receipt is required")
+    compatible = (
+        receipt["event_id"] == event.id
+        and receipt["event_payload"] == event.payload
+        and receipt["definition_hash"] == tools.scope.definition_hash
+        and receipt["context"] == context
+        and receipt["memory"] == memory
+        and receipt["sim_time"] == tools.sim
+        and receipt["proposal"] == local_proposal(context, tools.sim)
+    )
+    audit = {
+        **receipt["result"],
+        "request_id": receipt["id"],
+        "request_hash": receipt["request_hash"],
+        "dispatch_attempt": receipt["dispatch_attempt"],
+        "prepared_attempt": receipt["prepared_attempt"],
+    }
+    if not compatible:
+        audit.update(fallback="fail_closed", error="PreconditionsChanged")
+    if (
+        not compatible
+        or receipt["state"] != "succeeded"
+        or audit.get("decision") != "approve_retry"
+    ):
         courier, route = None, None
-    if tools.cloud_dsn is None:
-        raise PermissionError("Durable cloud audit connection required")
-    with connect(tools.cloud_dsn) as conn:
-        conn.execute(
-            "SELECT public.agent_record_model(%s,%s,%s)",
-            (event.id, event.attempts, Jsonb(audit)),
-        )
     return courier, route, audit
