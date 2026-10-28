@@ -17,6 +17,7 @@ from starlette.responses import Response
 
 from delivery.city_config import CitySettings
 from delivery.db import connect
+from delivery.documentation import router as documentation_router
 from delivery.health import router as health_router
 from delivery.history import history_catalogue, history_manifest
 from delivery.lab import create_lab, export_slice, lab_snapshot
@@ -327,4 +328,5 @@ def favicon() -> None:
 
 app.include_router(supply_router)
 app.include_router(health_router)
+app.include_router(documentation_router)
 app.mount("/static", StaticFiles(directory="web"), name="static")

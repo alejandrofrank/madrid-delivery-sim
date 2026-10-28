@@ -1,0 +1,38 @@
+{
+  "verified_at": "2026-10-28T17:13:59.113494+00:00",
+  "mode": "local-only",
+  "source_fingerprint": "f735a7b30245624cc77697fb176f2f579a129b78d21fb12546e80cdc2dd61b5d",
+  "source_changed_during_checks": false,
+  "test_receipt_id": "fda17694-5462-4f04-becd-12c3c3dc5b1c",
+  "tests": {"total": 409, "passed": 409, "failed": 0, "skipped": 0},
+  "documentation_tests": 17,
+  "ruff": "passed",
+  "mypy": {"status": "passed", "source_modules": 41},
+  "host_javascript_syntax": "passed",
+  "python_image_javascript_check": "unavailable: Node is not installed; host syntax and browser checks passed",
+  "role_scenarios": {"passed": 12, "total": 12, "criteria": 49, "seed": 731, "repetitions": 2, "business_outcomes_match": true},
+  "offline_judge_baseline": {"passed": 6, "total": 6, "model_calls": 0, "hard_policy_violations": 0},
+  "documentation": {"chapters": 18, "decision_records": 8, "catalogued_source_files": 54, "local_links": "resolved", "vendor_hashes": "passed"},
+  "browser": {
+    "component_inspector": "passed",
+    "local_terraform_source_view": "passed",
+    "full_text_search_and_chapter_navigation": "passed",
+    "rendered_diagrams": 6,
+    "diagram_render_failures": 0,
+    "diagram_expansion_and_zoom": "passed",
+    "invalid_chapter_back_forward_recovery": "passed",
+    "horizontal_overflow": false,
+    "console_errors": 0,
+    "external_stylesheet_or_script_assets": 0,
+    "preview": "artifacts/architecture-documentation.png"
+  },
+  "cloud_resources_created": 0,
+  "paid_model_calls": 0,
+  "limits": [
+    "Reference dates and historical cloud receipts are not live cloud status",
+    "Local role scenarios evaluate deterministic policies, not live model quality",
+    "The local operator host and committed documentation catalogue remain trusted",
+    "Mobile layout and print styles are provided; browser interaction checks used the desktop viewport",
+    "Local receipts are not signed attestations"
+  ]
+}

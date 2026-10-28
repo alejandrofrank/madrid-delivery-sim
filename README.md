@@ -15,6 +15,15 @@ project and free IAM. [Setup and cost boundaries](docs/GCP-AI.md).
 
 ## Agent architecture and GCP client documentation
 
+Open the local [Architecture website](http://localhost:8010/architecture) for a
+searchable, eighteen-chapter engineering reference. It includes an interactive
+component explorer, rendered diagrams, architecture decision records, the six
+capability evidence map and an allowlisted local code reader. Diagrams and search
+work without external services. The existing `/docs` remains the API reference.
+See [maintaining the documentation website](docs/DOCUMENTATION-SITE.md).
+The [local website verification record](docs/evidence/documentation-local.json)
+retains the 409-test source fingerprint, scenario results and browser checks.
+
 | Read in order | What it explains |
 | --- | --- |
 | [Agent implementation](docs/AGENT-IMPLEMENTATION.md) | Exact factory, editable definitions/SOUL, role tools, authenticated scopes, event transactions, memory and budgets |

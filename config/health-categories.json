@@ -80,6 +80,7 @@
       "description": "API contracts, channels, complete order history and readable conversations",
       "files": [
         "tests/test_api.py",
+        "tests/test_documentation.py",
         "tests/test_delivery_api.py",
         "tests/test_supply_api.py",
         "tests/test_supply_conversation.py"

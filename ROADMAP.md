@@ -2,6 +2,14 @@
 
 Updated 2026-10-28. Implemented slices are identified below; remaining milestones are planned.
 
+Architecture website slice: `/architecture` provides eighteen numbered chapters,
+full-text local search, an interactive component inspector, six rendered diagrams,
+source inspection and eight explicit architecture decision records. The six
+capability goals link to implementation, tests and known gaps. Content stays in
+repository Markdown; diagrams and dependencies work locally without a CDN.
+Verified 409 tests, browser behavior and unchanged local scenario outcomes.
+See [website maintenance and boundaries](docs/DOCUMENTATION-SITE.md).
+
 Enterprise GCP documentation slice: the source-reviewed
 [agent implementation](docs/AGENT-IMPLEMENTATION.md),
 [complete GCP inventory](docs/GCP-COMPONENTS.md) and

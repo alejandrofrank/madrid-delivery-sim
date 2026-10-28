@@ -1,0 +1,249 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <meta
+      name="description"
+      content="Bakiano agent engineering: architecture decisions, role isolation, event queues, memory, GCP components and reproducible evidence."
+    />
+    <meta name="referrer" content="no-referrer" />
+    <title>Architecture · Bakiano engineering</title>
+    <link rel="icon" href="data:," />
+    <link rel="stylesheet" href="/static/documentation.css" />
+    <script defer src="/static/vendor/documentation/marked.umd.js"></script>
+    <script defer src="/static/vendor/documentation/purify.min.js"></script>
+    <script defer src="/static/documentation.js"></script>
+  </head>
+  <body>
+    <a class="skip-link" href="#reader">Skip to documentation</a>
+    <header class="topbar">
+      <a class="brand" href="/architecture"
+        ><span class="brand-mark">b.</span
+        ><span>BAKIANO <small>ENGINEERING</small></span></a
+      >
+      <nav aria-label="Workspaces">
+        <a class="selected" href="/architecture" aria-current="page"
+          >Architecture</a
+        ><a href="/health">Health & evals</a
+        ><a href="/delivery-lab"
+          >Open city <span aria-hidden="true">↗</span></a
+        >
+      </nav>
+      <button id="open-search" class="search-trigger" aria-haspopup="dialog">
+        <span>Search documentation</span><kbd>Ctrl K</kbd>
+      </button>
+    </header>
+    <div class="layout">
+      <aside class="sidebar" aria-label="Documentation navigation">
+        <div class="sidebar-heading">
+          <span>TECHNICAL REFERENCE</span
+          ><button
+            id="toggle-topics"
+            aria-expanded="false"
+            aria-controls="topics"
+          >
+            Topics
+          </button>
+        </div>
+        <nav id="topics" aria-label="Architecture topics"></nav>
+        <div class="sidebar-footer">
+          <span class="local-dot"></span> Local documentation<br /><small
+            >No infrastructure is started here.</small
+          ><a href="/docs">API reference ↗</a>
+        </div>
+      </aside>
+      <main id="reader" tabindex="-1">
+        <div id="loading" class="loading" role="status">
+          Loading the engineering reference…
+        </div>
+        <p id="error" role="alert" hidden></p>
+        <div id="document" hidden>
+          <div class="breadcrumb">
+            <span>Engineering</span><span aria-hidden="true">/</span
+            ><span id="breadcrumb-topic"></span>
+          </div>
+          <header class="chapter-header">
+            <div>
+              <div class="eyebrow" id="chapter-number"></div>
+              <h1 id="chapter-title"></h1>
+              <p id="chapter-summary"></p>
+            </div>
+            <div class="page-actions">
+              <button id="copy-link" title="Copy a direct link to this chapter">
+                Copy link</button
+              ><button id="print-page">Print</button>
+            </div>
+          </header>
+          <div class="review-strip">
+            <span id="chapter-status" class="status-chip"></span
+            ><span id="review-date"></span><span id="reading-time"></span
+            ><a id="markdown-link" href="#">View Markdown</a>
+          </div>
+          <div class="reference-note">
+            Repository reference, not a live cloud inventory. Historical
+            receipts retain their dates.
+            <a href="/health">Inspect local health evidence ↗</a>
+          </div>
+          <section
+            id="system-explorer"
+            class="explorer"
+            aria-labelledby="explorer-title"
+            hidden
+          >
+            <div class="explorer-heading">
+              <div>
+                <span class="eyebrow">SELECT A COMPONENT</span>
+                <h2 id="explorer-title">Where the work happens</h2>
+              </div>
+              <span class="legend"
+                ><i class="local-dot"></i> Local
+                <i class="cloud-dot"></i> Optional GCP</span
+              >
+            </div>
+            <div class="explorer-workspace">
+              <div
+                class="component-map"
+                role="group"
+                aria-label="System components"
+              >
+                <div class="map-lane">LOCAL · YOUR COMPUTER</div>
+                <div class="map-row">
+                  <button data-component="city">
+                    <span class="node-icon">▦</span
+                    ><strong>City & operator</strong
+                    ><small>Demand, streets, incidents</small></button
+                  ><span class="map-arrow" aria-hidden="true">→</span
+                  ><button data-component="agents">
+                    <span class="node-icon">◈</span
+                    ><strong>Scoped role workers</strong
+                    ><small>Policy, tools, budgets</small>
+                  </button>
+                </div>
+                <div class="map-connector">
+                  <span>Commands & observations</span
+                  ><span aria-hidden="true">↓</span>
+                </div>
+                <button class="database-node" data-component="postgres">
+                  <span class="node-icon">▤</span><strong>Postgres</strong
+                  ><small>Domain facts · queue · memory · audit</small>
+                </button>
+                <div class="boundary">
+                  <span
+                    >Judge client only · HTTPS + IAM · no database access</span
+                  ><span aria-hidden="true">↓</span>
+                </div>
+                <div class="map-lane cloud-label">
+                  GCP · SEPARATE TERRAFORM PROJECT
+                </div>
+                <div class="map-row">
+                  <button class="cloud-node" data-component="gateway">
+                    <span class="node-icon">◇</span
+                    ><strong>Cloud Run judge</strong
+                    ><small>Authenticated, bounded verdict</small></button
+                  ><span class="map-arrow" aria-hidden="true">→</span
+                  ><button class="cloud-node" data-component="model">
+                    <span class="node-icon">✳</span
+                    ><strong>Vertex model API</strong
+                    ><small>Decision only · no city tools</small>
+                  </button>
+                </div>
+              </div>
+              <div
+                id="component-inspector"
+                class="component-inspector"
+                aria-live="polite"
+              ></div>
+            </div>
+            <p class="explorer-footnote">
+              Logical component view. All agent-to-agent handoffs pass through
+              the durable queue; the model has no direct database access. GCP
+              availability is not checked by this page.
+            </p>
+          </section>
+          <article id="chapter-body" class="prose"></article>
+          <nav
+            id="chapter-pagination"
+            class="pagination"
+            aria-label="Chapter navigation"
+          ></nav>
+          <footer class="reader-footer">
+            <span>Versioned with the application · Read-only reference</span
+            ><a href="/health">Verify the implementation ↗</a>
+          </footer>
+        </div>
+      </main>
+      <aside class="on-this-page">
+        <span class="eyebrow">ON THIS PAGE</span>
+        <nav id="table-of-contents" aria-label="On this page"></nav>
+        <div class="evidence-link">
+          <strong>Read the evidence</strong>
+          <p>
+            Results, source fingerprints and failed cases live in the health
+            workspace.
+          </p>
+          <a href="/health">Health & evaluations ↗</a>
+        </div>
+      </aside>
+    </div>
+    <dialog id="search-dialog" aria-labelledby="search-title">
+      <div class="dialog-heading">
+        <h2 id="search-title">Search the engineering reference</h2>
+        <button data-close="search-dialog" aria-label="Close search">✕</button>
+      </div>
+      <label class="search-field"
+        >Search all chapters<input
+          id="search-input"
+          type="search"
+          placeholder="Role isolation, Cloud Run, memory, retries…"
+          autocomplete="off"
+      /></label>
+      <p id="search-count" role="status"></p>
+      <div id="search-results"></div>
+      <p class="dialog-hint">
+        Search runs on your computer. Enter opens the first result; Escape
+        closes search.
+      </p>
+    </dialog>
+    <dialog
+      id="source-dialog"
+      class="source-dialog"
+      aria-labelledby="source-title"
+    >
+      <div class="dialog-heading">
+        <div>
+          <span class="eyebrow">IMPLEMENTATION SOURCE · READ ONLY</span>
+          <h2 id="source-title"></h2>
+        </div>
+        <button data-close="source-dialog" aria-label="Close source">✕</button>
+      </div>
+      <p id="source-note"></p>
+      <pre id="source-code" tabindex="0"></pre>
+    </dialog>
+    <dialog
+      id="diagram-dialog"
+      class="diagram-dialog"
+      aria-labelledby="diagram-title"
+    >
+      <div class="dialog-heading">
+        <h2 id="diagram-title">Architecture diagram</h2>
+        <button data-close="diagram-dialog" aria-label="Close diagram">
+          ✕
+        </button>
+      </div>
+      <div class="diagram-actions">
+        <button id="diagram-out" aria-label="Zoom diagram out">−</button
+        ><button id="diagram-reset">Fit diagram</button
+        ><button id="diagram-in" aria-label="Zoom diagram in">+</button>
+      </div>
+      <div id="diagram-large"></div>
+    </dialog>
+    <div id="toast" class="toast" role="status" hidden></div>
+    <noscript
+      ><p class="noscript">
+        Enable JavaScript to use this local documentation reader. The same
+        guides are available in the repository’s docs directory.
+      </p></noscript
+    >
+  </body>
+</html>

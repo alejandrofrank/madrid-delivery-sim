@@ -1,5 +1,19 @@
 # Status
 
+2026-10-28: Added the local architecture website at `/architecture`, following
+Scrapmarket's topic-oriented engineering reference. Eighteen searchable chapters,
+an interactive component inspector, six rendered diagrams, eight decision records,
+the six-capability proof map and a fixed-catalogue source reader explain implemented
+behavior and proposed enterprise GCP work. Markdown remains the content source;
+browser dependencies are integrity-pinned and hosted locally. Verified 409 tests
+(17 documentation checks), Ruff, mypy over 41 modules, host JavaScript syntax,
+local asset hashes and browser navigation/search/source/diagram/history behavior.
+Twelve role scenarios/49 criteria passed twice with matching outcomes; no model
+calls or cloud resources were used. Private source/traversal/symlink/size denial
+cases pass. Python-only health image still reports Node syntax as unavailable;
+host syntax and browser checks passed. See docs/DOCUMENTATION-SITE.md and
+docs/evidence/documentation-local.json.
+
 2026-10-28: Added exact agent construction/lifecycle and GCP resource documentation,
 and refreshed the enterprise client architecture against current official Google
 guidance. Inventory covers ten Terraform resource blocks/six APIs, twelve parked

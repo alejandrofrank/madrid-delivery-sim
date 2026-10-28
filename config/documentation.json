@@ -1,0 +1,213 @@
+{
+  "schema_version": 1,
+  "reviewed_at": "2026-10-28",
+  "pages": [
+    {
+      "id": "overview",
+      "title": "System overview",
+      "group": "Start here",
+      "file": "docs/ARCHITECTURE-OVERVIEW.md",
+      "summary": "The city, the agent contract and the optional cloud boundary.",
+      "status": "Implemented + roadmap"
+    },
+    {
+      "id": "decisions",
+      "title": "Why this architecture",
+      "group": "Start here",
+      "file": "docs/ARCHITECTURE-DECISIONS.md",
+      "summary": "Choices, alternatives, trade-offs and the conditions for changing them.",
+      "status": "Decision records"
+    },
+    {
+      "id": "capabilities",
+      "title": "Six capabilities & proof",
+      "group": "Start here",
+      "file": "docs/CAPABILITY-EVIDENCE.md",
+      "summary": "What we can demonstrate, what the evidence proves and what remains open.",
+      "status": "Evidence guide"
+    },
+    {
+      "id": "agent-implementation",
+      "title": "Anatomy of an agent",
+      "group": "Agent engineering",
+      "file": "docs/AGENT-IMPLEMENTATION.md",
+      "summary": "Factory, identity, SOUL, tools, permissions, event processing and limits.",
+      "status": "Implemented"
+    },
+    {
+      "id": "memory",
+      "title": "Typed memory & recall",
+      "group": "Agent engineering",
+      "file": "docs/AGENT-MEMORY.md",
+      "summary": "Role and order scope, provenance, expiry, revision history and retention.",
+      "status": "Implemented + next steps"
+    },
+    {
+      "id": "agent-runtime",
+      "title": "Runtime & isolation",
+      "group": "Agent engineering",
+      "file": "docs/AGENT-RUNTIME.md",
+      "summary": "The shared local runtime, scoped tools and queue-only cooperation.",
+      "status": "Implementation detail"
+    },
+    {
+      "id": "restaurant-supply",
+      "title": "Calls, kitchens & markets",
+      "group": "City & workflows",
+      "file": "docs/RESTAURANT-SUPPLY.md",
+      "summary": "Demand schedules, ingredients, sourcing, substitution consent and search.",
+      "status": "Implemented"
+    },
+    {
+      "id": "delivery-flow",
+      "title": "Reservation to delivery",
+      "group": "City & workflows",
+      "file": "docs/DELIVERY-FLOW.md",
+      "summary": "Inventory, fulfillment, dispatch and courier handoffs with queue lineage.",
+      "status": "Seeded slice"
+    },
+    {
+      "id": "fleet-recovery",
+      "title": "Dropout & judged recovery",
+      "group": "City & workflows",
+      "file": "docs/FLEET-RECOVERY.md",
+      "summary": "Courier competition, queued briefings, relevant memory and retry gates.",
+      "status": "Implemented"
+    },
+    {
+      "id": "running-city",
+      "title": "A configurable city",
+      "group": "City & workflows",
+      "file": "docs/RUNNING-CITY.md",
+      "summary": "32 \u00d7 32 streets, shops, households, traffic and courier inspection.",
+      "status": "Implemented"
+    },
+    {
+      "id": "gcp-components",
+      "title": "GCP component inventory",
+      "group": "Google Cloud",
+      "file": "docs/GCP-COMPONENTS.md",
+      "summary": "Every Terraform resource, identity, sizing decision and model payload.",
+      "status": "Declared + dated live evidence"
+    },
+    {
+      "id": "enterprise-gcp",
+      "title": "Enterprise design on GCP",
+      "group": "Google Cloud",
+      "file": "docs/ENTERPRISE-GCP.md",
+      "summary": "Cloud Run versus managed runtime, ADK, governance, durability and release gates.",
+      "status": "Implemented vs proposed"
+    },
+    {
+      "id": "gcp-operations",
+      "title": "Start, inspect & park",
+      "group": "Google Cloud",
+      "file": "docs/GCP-AI.md",
+      "summary": "Local-first lifecycle commands and the retained project/IAM boundary.",
+      "status": "Operator runbook"
+    },
+    {
+      "id": "gcp-verification",
+      "title": "Cloud verification record",
+      "group": "Google Cloud",
+      "file": "docs/GCP-VERIFICATION.md",
+      "summary": "Dated live results, initial failures and lifecycle evidence. Not live status.",
+      "status": "Historical evidence"
+    },
+    {
+      "id": "evals",
+      "title": "Role scenario evaluations",
+      "group": "Verification & operations",
+      "file": "docs/AGENT-EVALS.md",
+      "summary": "Inventory, restaurant, dispatcher and courier criteria and repeatability.",
+      "status": "Local / no model calls"
+    },
+    {
+      "id": "health",
+      "title": "Health & test catalogue",
+      "group": "Verification & operations",
+      "file": "docs/HEALTH.md",
+      "summary": "Evidence freshness, test categories, failed cases and unmeasured gaps.",
+      "status": "Local evidence"
+    },
+    {
+      "id": "local-data",
+      "title": "Data & privacy boundaries",
+      "group": "Verification & operations",
+      "file": "docs/LOCAL-DATA.md",
+      "summary": "Synthetic fixtures and local Bakiano snapshots with source provenance.",
+      "status": "Data contract"
+    },
+    {
+      "id": "validation",
+      "title": "Inventory failure validation",
+      "group": "Verification & operations",
+      "file": "docs/M2-VALIDATION.md",
+      "summary": "Last-unit contention, delayed replenishment and real worker crash recovery.",
+      "status": "Seeded slice"
+    }
+  ],
+  "supplementary": [
+    "docs/AGENT-FOUNDATION.md",
+    "docs/VALIDATION.md",
+    "ROADMAP.md",
+    "STATUS.md",
+    "README.md"
+  ],
+  "sources": [
+    "compose.yaml",
+    "config/agents/judge-gcp/role.json",
+    "docs/evidence/agent-scenarios-local.json",
+    "docs/evidence/gcp-demo-commands.json",
+    "docs/evidence/gcp-iam-recovered.json",
+    "docs/evidence/gcp-judge-guarded.json",
+    "docs/evidence/gcp-judge-initial.json",
+    "docs/evidence/gcp-negative-checks.json",
+    "docs/evidence/gcp-project-restored.json",
+    "docs/evidence/gcp-switch-verification.json",
+    "docs/evidence/gcp-teardown-plan.json",
+    "docs/evidence/gcp-teardown-result.json",
+    "docs/evidence/local-health.json",
+    "docs/evidence/restaurant-supply-local.json",
+    "docs/evidence/typed-memory-local.json",
+    "infra/gcp-ai/Dockerfile",
+    "infra/gcp-ai/gateway.py",
+    "infra/gcp-ai/main.tf",
+    "infra/gcp-ai/variables.tf",
+    "scripts/gcp_demo.py",
+    "sql/migrations/014_queue_capability.sql",
+    "sql/migrations/015_typed_memory.sql",
+    "src/delivery/agent_access.py",
+    "src/delivery/agent_runtime.py",
+    "src/delivery/agent_specs.py",
+    "src/delivery/cloud_ai.py",
+    "src/delivery/fleet_policy.py",
+    "src/delivery/health.py",
+    "src/delivery/queue.py",
+    "src/delivery/running_city.py",
+    "src/delivery/scenario_evals.py",
+    "src/delivery/scenario_report.py",
+    "src/delivery/supply.py",
+    "src/delivery/supply_api.py",
+    "src/delivery/supply_models.py",
+    "src/delivery/supply_policy.py",
+    "src/delivery/supply_search_service.py",
+    "src/delivery/typed_memory.py",
+    "tests/test_agent_queue_boundary.py",
+    "tests/test_agent_runtime.py",
+    "tests/test_cloud_ai.py",
+    "tests/test_cloud_runtime.py",
+    "tests/test_delivery_flow.py",
+    "tests/test_fleet_recovery.py",
+    "tests/test_gateway_policy.py",
+    "tests/test_gcp_demo_commands.py",
+    "tests/test_health.py",
+    "tests/test_queue.py",
+    "tests/test_scenario_evals.py",
+    "tests/test_supply_delivery_facts.py",
+    "tests/test_supply_integration.py",
+    "tests/test_supply_models.py",
+    "tests/test_supply_search_service.py",
+    "tests/test_typed_memory.py"
+  ]
+}
