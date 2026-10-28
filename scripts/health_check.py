@@ -121,9 +121,23 @@ def main() -> int:
         (
             "ruff",
             "Ruff",
-            [sys.executable, "-m", "ruff", "check", "src", "tests", "scripts/health_check.py"],
+            [
+                sys.executable,
+                "-m",
+                "ruff",
+                "check",
+                "src",
+                "tests",
+                "scripts/health_check.py",
+                "scripts/eval_agents.py",
+            ],
         ),
         ("mypy", "Mypy", [sys.executable, "-m", "mypy", "src"]),
+        (
+            "agent-scenarios",
+            "Local role scenarios · two reproducibility runs",
+            [sys.executable, str(ROOT / "scripts/eval_agents.py")],
+        ),
     ]
     for identifier, label, command in commands:
         checks.append(run_check(identifier, label, command, environment))

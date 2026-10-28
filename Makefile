@@ -21,9 +21,11 @@ down:
 	$(DOCKER) compose down
 
 # Read-only dashboard at /health; checks use delivery_test and zero model calls.
-.PHONY: health
+.PHONY: health eval-agents
 health:
 	$(DOCKER) compose run --rm --no-deps --build -e DELIVERY_SOURCE_REVISION=$$(git rev-parse HEAD) app python scripts/health_check.py
+eval-agents:
+	$(DOCKER) compose run --rm --no-deps --build app python scripts/eval_agents.py
 
 # City development remains local. These explicitly opt into/out of the paid judge.
 .PHONY: gcp-start gcp-stop gcp-status

@@ -1,0 +1,359 @@
+{
+  "version": "agent-scenarios-v1",
+  "seed": 731,
+  "cases": [
+    {
+      "id": "inventory.last-unit",
+      "role": "inventory",
+      "fixture": "inventory-crash",
+      "name": "Two baskets, one unit",
+      "description": "Two queued baskets compete for one physical unit. Incoming supply cannot be sold early.",
+      "checks": [
+        {
+          "id": "winners",
+          "label": "Baskets reserved from the last unit",
+          "expected": 1
+        },
+        {
+          "id": "rejected",
+          "label": "Competing baskets safely rejected",
+          "expected": 1
+        },
+        {
+          "id": "nonnegative",
+          "label": "Available stock stays nonnegative",
+          "expected": true
+        },
+        {
+          "id": "isolated",
+          "label": "Inventory sees only its own run and store stock",
+          "expected": true
+        }
+      ]
+    },
+    {
+      "id": "inventory.delayed-supply",
+      "role": "inventory",
+      "fixture": "inventory-crash",
+      "name": "Delayed replenishment",
+      "description": "A shipment moves from minute 5 to minute 15. Inspect availability at the original ETA and receipt at the revised ETA.",
+      "checks": [
+        {
+          "id": "on_hand_at_300",
+          "label": "Physical units at the original ETA",
+          "expected": 1
+        },
+        {
+          "id": "available_at_300",
+          "label": "Sellable units at the original ETA",
+          "expected": 0
+        },
+        {
+          "id": "revised_eta",
+          "label": "Revised shipment ETA in simulated seconds",
+          "expected": 900
+        },
+        {
+          "id": "final_available",
+          "label": "Available units after expiry and actual receipt",
+          "expected": 6
+        }
+      ]
+    },
+    {
+      "id": "inventory.worker-crash",
+      "role": "inventory",
+      "fixture": "inventory-crash",
+      "name": "Crash before acknowledgement",
+      "description": "A real worker process exits after writing stock but before committing. Its lease expires and another worker retries.",
+      "checks": [
+        {
+          "id": "rolled_back",
+          "label": "Stock, basket and decision writes rolled back",
+          "expected": true
+        },
+        {
+          "id": "recovered_attempts",
+          "label": "Attempts for the recovered request",
+          "expected": 2
+        },
+        {
+          "id": "receipts",
+          "label": "Physical replenishment receipts",
+          "expected": 1
+        },
+        {
+          "id": "queue_drained",
+          "label": "All queued events acknowledged",
+          "expected": true
+        }
+      ]
+    },
+    {
+      "id": "restaurant.pantry",
+      "role": "restaurant",
+      "fixture": "pantry",
+      "name": "Cook from available pantry",
+      "description": "One household calls for pizza. A stocked kitchen should avoid unnecessary supermarket requests.",
+      "checks": [
+        {
+          "id": "delivered",
+          "label": "Meal orders delivered",
+          "expected": 1
+        },
+        {
+          "id": "requests",
+          "label": "Ingredient requests emitted",
+          "expected": 0
+        },
+        {
+          "id": "conserved",
+          "label": "Ingredient quantities conserved",
+          "expected": true
+        },
+        {
+          "id": "no_external_calls",
+          "label": "No model or paid search reservations",
+          "expected": true
+        }
+      ]
+    },
+    {
+      "id": "restaurant.market-forward",
+      "role": "restaurant",
+      "fixture": "market-forward",
+      "name": "Source from another market",
+      "description": "The closest market has no flour. Queued sourcing forwards to the next market before cooking can start.",
+      "checks": [
+        {
+          "id": "delivered",
+          "label": "Meal orders delivered",
+          "expected": 1
+        },
+        {
+          "id": "forwarded",
+          "label": "Flour request visits market A then market B",
+          "expected": true
+        },
+        {
+          "id": "arrival_before_cook",
+          "label": "All ingredient arrivals precede meal readiness",
+          "expected": true
+        },
+        {
+          "id": "replay_matches",
+          "label": "Facts replay into the same business state",
+          "expected": true
+        },
+        {
+          "id": "isolated",
+          "label": "Kitchen login denied raw stock table access",
+          "expected": true
+        }
+      ]
+    },
+    {
+      "id": "restaurant.substitution-declined",
+      "role": "restaurant",
+      "fixture": "substitution-declined",
+      "name": "Respect a declined replacement",
+      "description": "No market has beef. The household refuses chicken as a burger replacement; the kitchen must reject the order safely.",
+      "checks": [
+        {
+          "id": "rejected",
+          "label": "Orders safely rejected",
+          "expected": 1
+        },
+        {
+          "id": "declined",
+          "label": "Household refusal recorded",
+          "expected": true
+        },
+        {
+          "id": "meals_ready",
+          "label": "Meals cooked after refusal",
+          "expected": 0
+        },
+        {
+          "id": "consumed",
+          "label": "Ingredient allocations consumed",
+          "expected": 0
+        }
+      ]
+    },
+    {
+      "id": "restaurant.substitution-approved",
+      "role": "restaurant",
+      "fixture": "substitution-approved",
+      "name": "Obtain replacement consent",
+      "description": "Beef is unavailable. A chicken replacement requires household consent followed by restaurant approval before cooking.",
+      "checks": [
+        {
+          "id": "delivered",
+          "label": "Meal orders delivered",
+          "expected": 1
+        },
+        {
+          "id": "ordered_consent",
+          "label": "Household and restaurant approvals precede cooking",
+          "expected": true
+        },
+        {
+          "id": "conserved",
+          "label": "Ingredient quantities conserved",
+          "expected": true
+        }
+      ]
+    },
+    {
+      "id": "dispatcher.assignment-race",
+      "role": "dispatcher",
+      "fixture": "assignment-race",
+      "name": "Competing dispatch workers",
+      "description": "Two real dispatcher workers claim different queued jobs concurrently while only one courier is online. The winner may vary.",
+      "checks": [
+        {
+          "id": "assigned",
+          "label": "Jobs assigned to the available courier",
+          "expected": 1
+        },
+        {
+          "id": "deferred",
+          "label": "Jobs deferred without double booking",
+          "expected": 1
+        },
+        {
+          "id": "busy",
+          "label": "Couriers holding a live assignment",
+          "expected": 1
+        },
+        {
+          "id": "isolated",
+          "label": "Dispatcher login denied raw stock table access",
+          "expected": true
+        }
+      ]
+    },
+    {
+      "id": "dispatcher.traffic-recovery",
+      "role": "dispatcher",
+      "fixture": "fleet",
+      "name": "Traffic and judged retry",
+      "description": "Congestion doubles traversal time and two couriers drop out. Only a feasible approved retry should receive another courier.",
+      "checks": [
+        {
+          "id": "delivered",
+          "label": "Feasible deliveries completed",
+          "expected": 5
+        },
+        {
+          "id": "abandoned",
+          "label": "Infeasible delivery safely abandoned",
+          "expected": 1
+        },
+        {
+          "id": "approved_retries",
+          "label": "Every retry has a preceding approval",
+          "expected": true
+        },
+        {
+          "id": "traffic_applied",
+          "label": "Every route uses the seeded traffic durations",
+          "expected": true
+        },
+        {
+          "id": "unique_assignments",
+          "label": "No courier double booked at any checkpoint",
+          "expected": true
+        }
+      ]
+    },
+    {
+      "id": "courier.authority",
+      "role": "courier",
+      "fixture": "courier-authority",
+      "name": "Accept only your own briefing",
+      "description": "A second courier tries to inspect and accept another courier assignment. Movement must wait for the assigned courier acknowledgement.",
+      "checks": [
+        {
+          "id": "foreign_brief_denied",
+          "label": "Other courier briefing and acceptance denied",
+          "expected": true
+        },
+        {
+          "id": "foreign_memory_denied",
+          "label": "Other courier memory recall denied",
+          "expected": true
+        },
+        {
+          "id": "ack_wait",
+          "label": "World motion waits for courier acknowledgement",
+          "expected": true
+        },
+        {
+          "id": "isolated",
+          "label": "Courier login denied raw stock table access",
+          "expected": true
+        }
+      ]
+    },
+    {
+      "id": "courier.dropout-handoff",
+      "role": "courier",
+      "fixture": "fleet",
+      "name": "Brief the replacement courier",
+      "description": "An approved retry carries the actual parcel checkpoint, prior courier and source events into its bounded handoff memory.",
+      "checks": [
+        {
+          "id": "dropouts",
+          "label": "Injected courier dropouts observed",
+          "expected": 2
+        },
+        {
+          "id": "checkpoint_matches",
+          "label": "Handoff parcel checkpoint matches the dropout",
+          "expected": true
+        },
+        {
+          "id": "brief_sources",
+          "label": "Replacement brief includes source events and approval",
+          "expected": true
+        },
+        {
+          "id": "denied_arrivals",
+          "label": "Arrivals fabricated for the abandoned order",
+          "expected": 0
+        }
+      ]
+    },
+    {
+      "id": "courier.physical-arrival",
+      "role": "courier",
+      "fixture": "fleet",
+      "name": "Finish only after physical arrival",
+      "description": "Couriers acknowledge their jobs and the trusted city advances them along roads. Delivery completion requires an arrival event.",
+      "checks": [
+        {
+          "id": "arrivals",
+          "label": "Physical courier arrivals",
+          "expected": 5
+        },
+        {
+          "id": "completion_evidence",
+          "label": "Every completed delivery has an arrival event",
+          "expected": true
+        },
+        {
+          "id": "route_durations",
+          "label": "Route ETA equals the sum of edge durations",
+          "expected": true
+        },
+        {
+          "id": "queue_drained",
+          "label": "Every scenario event acknowledged",
+          "expected": true
+        }
+      ]
+    }
+  ]
+}

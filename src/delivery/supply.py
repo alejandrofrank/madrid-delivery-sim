@@ -72,6 +72,17 @@ def save_blueprint(config: SupplyConfig, revision: str, url: str | None = None) 
 
 def new_supply(config: SupplyConfig, url: str | None = None) -> str:
     run = new_delivery(config.seed, url)
+    try:
+        return _initialize_supply(run, config, url)
+    except Exception:
+        # The base city is already committed. Failed definition/schedule/bootstrap
+        # work must not strand it before the caller can track its run ID.
+        with connect(url) as conn:
+            conn.execute("DELETE FROM runs WHERE id=%s", (run,))
+        raise
+
+
+def _initialize_supply(run: str, config: SupplyConfig, url: str | None = None) -> str:
     city = city_for(config)
     schedule = demand_schedule(config)
     frozen = {**config.model_dump(mode="json"), "recipes": recipes(), "schedule": schedule}

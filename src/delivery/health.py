@@ -16,6 +16,7 @@ from pydantic import AwareDatetime, BaseModel, Field, ValidationError, model_val
 from delivery.config import settings
 from delivery.db import connect
 from delivery.health_report import source_fingerprint
+from delivery.scenario_report import load_manifest, summarize, validate_receipt
 
 ROOT = Path(__file__).resolve().parents[2]
 REPORTS = ROOT / "artifacts/health"
@@ -297,6 +298,20 @@ def health_page() -> FileResponse:
     return FileResponse(ROOT / "web/health.html")
 
 
+def scenario_evidence(current: str) -> dict[str, Any]:
+    manifest = load_manifest()
+    try:
+        receipt = validate_receipt(read_json(REPORTS / "latest-scenarios.json"), manifest)
+    except (OSError, ValueError, TypeError):
+        return {**summarize(manifest, None), "freshness": "unavailable"}
+    return {
+        **summarize(manifest, receipt),
+        "freshness": freshness(
+            receipt.created_at, receipt.source_fingerprint, current, receipt.source_changed
+        ),
+    }
+
+
 @router.get("/api/health/evidence")
 def evidence(test_run: UUID | None = None) -> dict[str, Any]:
     current = source_fingerprint(ROOT)
@@ -313,6 +328,7 @@ def evidence(test_run: UUID | None = None) -> dict[str, Any]:
         "capabilities": capability_evidence([], config),
         "static_checks": static_checks(current),
         "judge": judge_evidence(current),
+        "scenarios": scenario_evidence(current),
         "refresh_command": "make health",
         "test_run": None,
     }

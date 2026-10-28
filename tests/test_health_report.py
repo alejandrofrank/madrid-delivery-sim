@@ -353,18 +353,19 @@ def test_runner_keeps_fixed_offline_commands_and_publishes_after_failure(
 
     monkeypatch.setattr(runner.subprocess, "run", run)
     assert runner.main() == expected_exit
-    assert len(commands) == 4
+    assert len(commands) == 5
     checks = json.loads((tmp_path / "artifacts/health/latest-checks.json").read_text())
     assert checks["source_changed"] is source_changed
     assert [row["id"] for row in checks["checks"]] == [
         "pytest",
         "ruff",
         "mypy",
+        "agent-scenarios",
         "javascript",
         "evals",
     ]
     assert checks["checks"][0]["status"] == ("failed" if pytest_exit else "passed")
-    assert checks["checks"][3]["status"] == "unavailable"
+    assert checks["checks"][4]["status"] == "unavailable"
     if write_eval:
         evaluations = json.loads((tmp_path / "artifacts/health/latest-evals.json").read_text())
         assert evaluations["report"]["mode"] == "offline-baseline"

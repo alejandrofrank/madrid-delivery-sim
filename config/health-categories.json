@@ -104,7 +104,8 @@
       "description": "Report integrity, evidence freshness and health APIs",
       "files": [
         "tests/test_health.py",
-        "tests/test_health_report.py"
+        "tests/test_health_report.py",
+        "tests/test_scenario_evals.py"
       ]
     }
   ],
