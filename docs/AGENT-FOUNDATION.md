@@ -1,5 +1,11 @@
 # Shared local inventory agent foundation
 
+This is the original inventory-slice reference, with later memory clarifications.
+For the complete source-reviewed eight-role implementation and optional cloud
+judge, read [Agent implementation](AGENT-IMPLEMENTATION.md) and
+[GCP component inventory](GCP-COMPONENTS.md). The original 10×10 city and test counts
+below describe that historical checkpoint, not today's complete 32×32 demo.
+
 The shared factory also powers courier and judge roles in the
 [expanded fleet recovery scenario](FLEET-RECOVERY.md), with scoped exported briefings
 kept separate from private memory.
@@ -74,7 +80,7 @@ are future work.
 See [memory implementation and enterprise references](AGENT-MEMORY.md) for the
 typed schemas, selective recall, audited history and proposed evaluation sequence.
 
-Default per-agent caps: 100 event attempts, eight reserved tool slots per attempt,
+Original inventory per-agent caps: 100 event attempts, eight reserved tool slots per attempt,
 400 slots per run. Aggregate caps are 500 attempts and 2,000 slots per run. The
 database durably reserves an attempt and its full slot allowance before handling.
 Crashes do not refund reservations; repeated reservation of the same attempt is
@@ -83,7 +89,9 @@ Actual committed tool calls are recorded separately from reserved capacity.
 
 Tools require a live fenced lease and budget ticket. Waiting for locks cannot
 extend authority beyond lease expiry. Budget denial produces no inventory effects.
-No model adapter is enabled; the role schema rejects nonzero model budgets.
+The inventory profile requires zero model budgets. The optional `judge-gcp` profile
+is a separate supported exception with durable call/token admission; its
+`model_usd: 0` field must not be presented as a monetary spending ceiling.
 
 ## City and inspection
 
@@ -98,7 +106,8 @@ Private Bakiano sample rows remain ignored and are not included in Git or images
 
 ## Verified evidence and remaining work
 
-The Linux Compose suite passes **67 tests**, Ruff and mypy. Real non-superuser
+At the original inventory checkpoint, the Linux Compose suite passed **67 tests**,
+Ruff and mypy. Real non-superuser
 connections test cross-store/run reads and writes, forged scope, forbidden tables,
 role switching, budget modification, private memory, concurrent budget reservation,
 TTL/capacity, poisoned memory, definition freezing and replay charging. Worker tests
@@ -108,7 +117,10 @@ The dated local Bakiano CLI scenario recovered exit 73 on attempt two and passed
 stock and budget invariants. Chrome checks passed for map edges, store-specific
 agent inspection, crash/race/delay checkpoints and desktop/mobile layout.
 
-Still deferred: controller restart/resumption and cleanup after abrupt controller
-death, independently supervised continuous workers, additional business roles, configurable
-hierarchies, pgvector, model adapters, full replay and multi-seed architecture evals.
-GCP remains an optional later deployment adapter.
+Still deferred: durable controller restart/resumption and abrupt-death cleanup,
+independently supervised continuous workers, configurable hierarchies, pgvector,
+ADK and held-out architecture/model comparisons. Additional delivery/supply roles,
+typed memory, supply business-state replay and an optional GCP judge are now
+implemented slices. Current [role eval evidence](AGENT-EVALS.md) records 392 passing
+tests and twelve reproducible local scenarios; broader production readiness is
+not established by those results.

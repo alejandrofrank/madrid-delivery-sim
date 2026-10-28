@@ -1,5 +1,12 @@
 # Optional GCP judgement gateway
 
+Architecture reading order: [exact agent implementation](AGENT-IMPLEMENTATION.md),
+[Terraform/GCP component inventory](GCP-COMPONENTS.md), then
+[enterprise decisions and gaps](ENTERPRISE-GCP.md). This document is the operations
+runbook. Parked status below is the last live verification on 2026-10-25, not a
+fresh status query on each documentation update. "Private" means IAM-authenticated
+invocation here; the current service has network-reachable ingress.
+
 The local city works without GCP. The optional switch sends only a bounded retry judgement to a private Cloud Run gateway using Vertex AI. Inventory, fulfillment, dispatch, couriers, movement, custody and SQL policy enforcement remain local and deterministic. This is a hosted judgement role, not a hosted fleet. A live deployment and UI verification were completed on 2026-10-24, followed by verified teardown on 2026-10-25. The project was restored on 2026-10-25 and is parked with billing disabled. The cloud demo is currently off; see [verification](GCP-VERIFICATION.md).
 
 `infra/gcp-ai` is a standalone Terraform root with its own local state. It owns

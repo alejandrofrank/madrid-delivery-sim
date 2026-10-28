@@ -1,9 +1,12 @@
 # Local agent foundation and optional GCP portability
 
-Decision updated: 2026-10-23. All execution and development are local for now.
-Polish the local lab and shared agent factory before considering an optional GCP
-adapter. Default demos require no deployments, provider calls, cloud credentials or
-cloud services. The M2 inventory slice remains a deterministic local worker.
+Original design: 2026-10-23; implementation clarifications: 2026-10-28. Default city
+development remains local, without provider calls or cloud credentials. The optional
+Cloud Run/Vertex recovery judge has since been implemented and live-verified;
+Google ADK and a fully cloud-hosted business runtime remain proposed adapters.
+Use [the exact implementation](AGENT-IMPLEMENTATION.md),
+[current GCP inventory](GCP-COMPONENTS.md) and
+[enterprise decisions](ENTERPRISE-GCP.md) for the current source-reviewed contract.
 
 The inventory implementation is now available: see [implemented foundation](AGENT-FOUNDATION.md)
 for actual modules, permissions, budgets and verification. The proposed ADK-specific
@@ -14,9 +17,10 @@ shape and example contract below remain future design, not the executable role s
 An agent is a versioned identity with a goal, a bounded decision loop, observations,
 permitted actions and durable accountability. Its lifecycle is:
 
-receive event -> verify identity/schema/scope -> load permitted facts -> reserve
-budget -> decide -> validate proposal -> execute permitted tools -> commit effects
-and outgoing events -> acknowledge -> record outcome.
+claim event -> verify authenticated scope -> commit durable attempt/tool allowance
+-> reserve model allowance if enabled -> begin fenced effects transaction -> load
+permitted facts/memory -> decide and execute permitted tools -> record outcome,
+memory and outgoing events -> commit those effects and ACK atomically.
 
 A prompt or SOUL.md supplies behavioral guidance. It does not provide security,
 durability, memory isolation, approvals or cost enforcement. A deterministic policy
@@ -29,8 +33,8 @@ the experiment can measure whether model judgment helps.
 | --- | --- | --- |
 | ADK on Cloud Run | Open-source agent framework with local and cloud deployment. Cloud Run has services for request-driven work, worker pools for continuous queue consumers and jobs for finite tasks. | Deferred portability candidate after local acceptance. Research suggests explicit control over our queue contract and a shared image; jobs, worker pools and services are possible future adapters, not current implementation requirements. |
 | Managed Agent Runtime | Managed agent deployment, scaling, security and framework integration. Current docs place it under Gemini Enterprise Agent Platform; ReasoningEngine remains an API resource name for compatibility. | Keep as a deployment adapter option when managed operations justify it. It does not replace business transactions, queue semantics or our scoped memory experiment. |
-| Managed Agents API | Config-driven autonomous agents in sandbox environments; currently Preview with restrictions on confidential data and production use. | Evaluate only on synthetic fixtures if useful. Do not send private Bakiano exports there under the current documented restrictions. |
-| ADK Agent Config | YAML-based role/workflow assembly; currently documented as experimental. | Use our own small validated role contract and a Python factory over pinned ADK APIs. Do not make experimental YAML semantics our durable application or authorization contract. |
+| Managed Agents API | Config-driven autonomous agents in sandbox environments; launch stage and data-handling terms need review for the chosen feature/version. | Evaluate only on synthetic fixtures first; private Bakiano exports are outside the current approved model data contract. |
+| ADK Agent Config | Version-sensitive configuration-based role/workflow assembly. | Preserve our small validated role contract and use a future adapter over tested, pinned ADK APIs; framework configuration is not the durable authorization contract. |
 
 Sources: [ADK overview](https://docs.cloud.google.com/gemini-enterprise-agent-platform/build/adk),
 [Cloud Run resource choices](https://docs.cloud.google.com/run/docs/ai-agents),
@@ -72,7 +76,8 @@ inventory foundation uses `src/delivery/agent_runtime.py`, `agent_access.py` and
 `agent_specs.py`, plus the inventory role/soul paths shown above.
 Build and validate one shared factory locally, with deterministic policies and scripted
 model adapters. ADK is optional behind these contracts; default demos make no provider
-calls. Cloud packaging and a GCP adapter remain deferred until the local lab is polished.
+calls. ADK packaging and cloud business-worker hosting remain proposed; the bounded
+Cloud Run/Vertex judge and its standalone Terraform root are already implemented.
 Copy a role configuration and soul file, not the worker implementation. Instantiate
 inventory roles with store-specific scope. Configuration is developer-controlled,
 immutable during a run, validated at startup and hashed into every decision record.
@@ -104,9 +109,10 @@ Example project role contract (illustrative, not directly executable ADK config)
 
 Budget/model/deadline references resolve to trusted versioned policies with numeric
 caps. The tool list is intersected with server-side policy for the authenticated
-principal; editing JSON cannot grant new authority. Soul text may change tone,
-priorities and decision guidance within that authority. It cannot raise the budget
-or remove approval requirements.
+principal; editing JSON cannot grant new authority. In a future reasoning adapter,
+trusted SOUL text can guide model decisions within that authority. Current local
+policies do not interpret SOUL, and the GCP gateway uses its own fixed prompt rather
+than the local role SOUL. Neither can raise budgets or remove approval requirements.
 
 Example inventory soul:
 
@@ -153,8 +159,9 @@ Sources: [Agent Identity](https://docs.cloud.google.com/gemini-enterprise-agent-
 
 Keep Postgres as the authoritative business store and durable event queue initially.
 GCP can host it in Cloud SQL, subject to deployment/extension checks. The local Docker
-backend remains the offline reference. pgvector episodes remain a separate scoped
-memory feature so comparisons do not silently switch memory systems.
+backend remains the offline reference. Current memory uses typed facts and exact
+SQL filters. Any future pgvector adapter must be a separately evaluated scoped
+memory mode so comparisons do not silently switch memory systems.
 
 For persistent workers, Cloud Run worker pools can consume the existing queue. For
 finite experiments, a run-to-completion job can drive the simulation. Do not move
@@ -179,34 +186,40 @@ it does not establish exactly-once business effects or external model billing.
 Sources: [ambient agents](https://adk.dev/runtime/ambient-agents/),
 [Pub/Sub delivery guarantees](https://docs.cloud.google.com/pubsub/docs/exactly-once-delivery).
 
-Model calls run outside long stock transactions: reserve budget durably, create an
+Required enterprise target, **not current GCP judge behavior**: model calls run
+outside long stock transactions. Reserve budget durably, create an
 invocation record, retrieve only scoped facts, invoke with bounded retries, validate
 structured output, recheck state versions, then apply domain effects and publish
 results atomically. Cache completed invocations. An ambiguous paid request must not
 automatically spend again after a crash. A stale proposal must revalidate or escalate.
 
+Currently the judge calls Cloud Run inside the queue effects transaction and holds
+run/event locks while waiting. Its reservation/audit is separately committed;
+completed responses are not reused, and a later event attempt can spend again.
+The enterprise guide prioritizes splitting this into durable request/result phases.
+
 ## Next implementation gate
 
 Before adding more reasoning roles:
 
-1. Implemented for inventory: strict role schema, fixed tool registry and factory with no-LLM default.
-2. Implemented for five inventory store scopes: existing slice uses the shared worker;
-   real non-superuser database tests prove cross-store and cross-run denial.
-3. Add optional reasoning adapters using scripted/fake-model tests locally; keep
-   the default factory and demo free of provider calls and cloud dependencies.
-4. Test prompt changes cannot grant tools, memory access, spending or approvals;
-   test direct handoff is unavailable and all messages retain lineage.
+1. Implemented for eight role kinds: strict schema, fixed tools and shared factory;
+   deterministic policies are the default and the optional GCP judge is bounded.
+2. Real non-superuser tests exercise store/run/role/order/request/attempt isolation;
+   twelve local role scenarios now have explicit scores and repeated receipts.
+3. Add an ADK reasoning adapter only behind the tested event/tool contracts; keep
+   routine city development independent of cloud deployments and inference.
+4. Extend adversarial tests for every new model/tool integration; prompts cannot
+   grant tools, memory, spending or approval authority, and cooperation stays queued.
 5. Replace the in-process controller with durable ownership and checkpoints. Kill
    controller and worker separately and demonstrate local recovery from both.
-6. Polish local setup, sample provenance, controls, inspection and repeatable evidence
-   before opening any cloud work. Verify the ten-date sample coverage and explicit
-   missing-day manifest without fabricating historical observations.
+6. Preserve sample provenance, explicit missing days and the local baseline while
+   separately evaluating any paid cloud decision or proposed hosting change.
 
-## Deferred optional GCP adapter
+## Deferred ADK and cloud-worker adapters
 
-Only after the local acceptance gates pass, reconsider a GCP adapter against the
-research above. Infrastructure as code, deployments, workload identities, cloud
-secrets, provider smoke tests and cost checks are future work requiring a separate
-explicit decision. Preserve the shared factory and event/tool contracts so a later
-adapter does not fork business behavior. No deployment or provider call is part of
-the current local development plan or default demo.
+The existing standalone Terraform root, keyless Cloud Run judge and start/status/
+stop commands are implemented; they do not host the city, business workers or
+memory in GCP. ADK, managed agent hosting, cloud business storage and broader
+governance remain separate proposed changes. Preserve the shared contracts and
+prove reliability/cost gates before adopting them. No deployment or provider call
+is required by routine local development or by this documentation review.
