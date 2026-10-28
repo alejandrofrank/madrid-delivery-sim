@@ -1,0 +1,33 @@
+{
+  "verified_on": "2026-10-28",
+  "scope": "Madrid baseline map navigation only",
+  "backend_suite_rerun": false,
+  "new_simulations": 0,
+  "paid_calls": 0,
+  "cloud_operations": 0,
+  "checks": {
+    "javascript_syntax": "passed",
+    "css_parse": "passed",
+    "asset_versions_six_workspaces": "passed",
+    "diff_whitespace": "passed",
+    "local_app_rebuild_and_health": "passed",
+    "overview_wheel_scrolls_page": "passed",
+    "explore_wheel_zooms_map": "passed",
+    "repeated_drag_stops_at_service_bounds": "passed",
+    "escape_exits_explore_and_returns_map_focus_to_toggle": "passed",
+    "selection_enables_frame_and_clear_disables_it": "passed",
+    "reset_restores_overview_extent": "passed"
+  },
+  "browser": {
+    "url": "http://localhost:8010/",
+    "widths_checked": [375, 1280],
+    "horizontal_page_overflow": false,
+    "console_errors": 0,
+    "screenshot": "artifacts/madrid-map-navigation.png"
+  },
+  "limitations": [
+    "No road dataset or simulation logic changed.",
+    "Inspector and ledger retain their existing nested scroll containers.",
+    "Saved completed-run data was used for UI verification."
+  ]
+}

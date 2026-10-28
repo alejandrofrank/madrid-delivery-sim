@@ -2,13 +2,21 @@
 "use strict";
 const $ = (id) => document.getElementById(id);
 const colors = {bike: "#168570", moto: "#3881c4", van: "#7a638e"};
-const map = L.map("map", {preferCanvas: true, zoomControl: true, zoomSnap:.25, zoomDelta:.5}).setView([40.416, -3.687], 13);
+const serviceBounds = L.latLngBounds([[40.375,-3.73],[40.455,-3.64]]);
+const navigationBounds = serviceBounds.pad(.12);
+const map = L.map("map", {
+  preferCanvas:true, zoomControl:true, zoomSnap:.25, zoomDelta:.5,
+  minZoom:11, maxZoom:17, maxBounds:navigationBounds, maxBoundsViscosity:1,
+  dragging:false, inertia:false, scrollWheelZoom:false, doubleClickZoom:false,
+  touchZoom:false, boxZoom:false, keyboard:false
+}).setView([40.416, -3.687], 13);
 map.attributionControl.addAttribution('<a href="https://www.openstreetmap.org/copyright">© OpenStreetMap contributors</a>');
 const roads = L.layerGroup().addTo(map), hubs = L.layerGroup().addTo(map);
 const stores = L.layerGroup().addTo(map), ordersLayer = L.layerGroup().addTo(map);
 const courierMarkers = new Map();
 let routeLine = null, state = null, selected = null, runId = "", lastPacket = 0, traceRows = [];
 let tab = "fleet", busy = false, pollCount = 0, traceBusy = false;
+let exploringMap = false;
 const escape = (s) => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const clock = (seconds) => `${String(10 + Math.floor(seconds / 3600)).padStart(2,"0")}:${String(Math.floor(seconds % 3600 / 60)).padStart(2,"0")}`;
 const human = (s) => String(s).replaceAll("_", " ");
@@ -27,13 +35,45 @@ function setTab(next) {
   });
 }
 document.querySelectorAll("[data-tab]").forEach(button => button.onclick = () => setTab(button.dataset.tab));
-$("fit-map").onclick = () => map.fitBounds([[40.375,-3.73],[40.455,-3.64]], {padding:[8,8]});
+function updateMapMinZoom() {
+  map.setMinZoom(11);
+  map.setMinZoom(Math.min(map.options.maxZoom, map.getBoundsZoom(serviceBounds, false, [24,24])));
+}
+function setMapExploration(active) {
+  exploringMap = active;
+  for (const handler of [map.dragging, map.scrollWheelZoom, map.doubleClickZoom, map.touchZoom, map.boxZoom, map.keyboard]) {
+    if (active) handler.enable(); else handler.disable();
+  }
+  $("explore-map").setAttribute("aria-pressed", String(active));
+  $("map-mode").textContent = active
+    ? "Explore · Drag to pan; scroll to zoom. Press Esc or toggle off to exit."
+    : "Overview · Use +/− to zoom. Scroll to move the page.";
+}
+$("explore-map").onclick = () => setMapExploration(!exploringMap);
+document.addEventListener("keydown", (event) => {
+  if (event.key !== "Escape" || !exploringMap) return;
+  setMapExploration(false);
+  if ($("map").contains(document.activeElement)) $("explore-map").focus();
+});
+$("fit-map").onclick = () => {
+  updateMapMinZoom();
+  map.fitBounds(serviceBounds, {padding:[12,12], animate:false});
+};
+map.on("resize", () => {
+  updateMapMinZoom();
+  map.panInsideBounds(navigationBounds, {animate:false});
+});
+$("frame-selection").onclick = () => {
+  const bounds = selectedMapBounds();
+  if (bounds) map.fitBounds(bounds, {padding:[28,28], maxZoom:16, animate:false});
+};
 $("show-stores").onchange = (e) => e.target.checked ? stores.addTo(map) : map.removeLayer(stores);
 $("show-complete").onchange = () => state && renderOrders();
 $("order-filter").onchange = () => state && renderLedger();
 $("clear-selection").onclick = () => { selected = null; traceRows = []; renderInspector(); renderRoute(); };
 $("run-select").onchange = () => {
   runId = $("run-select").value; selected = null; traceRows = [];
+  renderRoute();
   for (const marker of courierMarkers.values()) marker.remove();
   courierMarkers.clear(); poll();
 };
@@ -42,7 +82,7 @@ $("start").onclick = async () => {
   try {
     const result = await api("/api/runs", {method:"POST", headers:{"Content-Type":"application/json"},
       body:JSON.stringify({seed:Number($("seed").value), wall_seconds:Number($("duration").value)})});
-    runId = result.id; selected = null; traceRows = [];
+    runId = result.id; selected = null; traceRows = []; renderRoute();
     await refreshRuns(); await poll(); error("");
   } catch (e) { error(e.message); }
   finally { $("start").disabled = state?.run?.status === "running"; }
@@ -66,8 +106,23 @@ async function refreshTrace() {
     if (selected === selection) { traceRows = data.decisions; renderDecisions(); }
   } finally { traceBusy = false; }
 }
+function selectedMapBounds() {
+  if (!state?.run || !selected) return null;
+  const courier = selected.kind === "courier" ? state.couriers.find(c => c.id === selected.id)
+    : state.couriers.find(c => c.order_id === selected.id);
+  const order = selected.kind === "order" ? state.orders.find(o => o.id === selected.id) : null;
+  const points = [];
+  const include = (lat, lon) => {
+    if (Number.isFinite(lat) && Number.isFinite(lon) && navigationBounds.contains([lat,lon])) points.push([lat,lon]);
+  };
+  for (const point of courier?.route?.points || []) include(point[1], point[0]);
+  if (courier) include(courier.lat, courier.lon);
+  if (order) include(order.lat, order.lon);
+  return points.length ? L.latLngBounds(points) : null;
+}
 function renderRoute() {
   if (routeLine) { routeLine.remove(); routeLine = null; }
+  $("frame-selection").disabled = !selectedMapBounds();
   if (!state?.run || !selected) return;
   const courier = selected.kind === "courier" ? state.couriers.find(c => c.id === selected.id)
     : state.couriers.find(c => c.order_id === selected.id);

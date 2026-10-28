@@ -265,9 +265,38 @@ select {
   color: var(--ui-ink, #18191b);
   background: transparent;
 }
+.map-panel {
+  align-self: start;
+}
+.map-navigation {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  border-bottom: 1px solid var(--line);
+}
+.map-navigation button {
+  font-size: 12px;
+}
+.map-navigation button[aria-pressed="true"] {
+  background: #e8e9eb;
+  border-color: var(--ui-ink, #18191b);
+  font-weight: 700;
+}
+#map-mode {
+  flex: 1 1 220px;
+  color: var(--muted);
+  font-size: 12px;
+}
 #map {
-  height: 480px;
+  height: clamp(240px, 48vh, 480px);
+  height: clamp(240px, 48dvh, 480px);
   background: #f0f1f1;
+}
+#map:focus-visible {
+  outline: 2px solid var(--ui-accent, #c9322c);
+  outline-offset: -2px;
 }
 .leaflet-container {
   font:
@@ -662,9 +691,6 @@ footer {
   font-size: 14px;
 }
 @media (min-width: 1550px) {
-  #map {
-    height: 560px;
-  }
   .tab-content {
     height: 478px;
   }
@@ -703,7 +729,8 @@ footer {
     width: 100%;
   }
   #map {
-    height: 460px;
+    height: clamp(220px, 42vh, 400px);
+    height: clamp(220px, 42dvh, 400px);
   }
   .tab-content {
     height: 340px;
@@ -765,9 +792,6 @@ footer {
   .kpis strong {
     font-size: 24px;
   }
-  #map {
-    height: 420px;
-  }
   .panel-title {
     padding: 12px;
     gap: 8px;
@@ -778,6 +802,9 @@ footer {
   }
   .map-options {
     padding: 12px;
+  }
+  .map-navigation {
+    padding: 8px 12px;
   }
   .legend {
     gap: 8px 12px;

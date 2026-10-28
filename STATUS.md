@@ -1,5 +1,16 @@
 # Status
 
+2026-10-28: Replaced unbounded Madrid map gestures with an explicit Overview /
+Explore interaction. Overview preserves normal page scrolling and marker clicks;
+Explore enables bounded pan/zoom and Escape exits without resetting the view.
+Added Frame selection, retained Reset view, and adapted map height/minimum zoom
+to the viewport. Verified actual wheel behavior, repeated panning at the boundary,
+selection framing/clearing, keyboard exit/focus, desktop and 375px layouts, zero
+browser console errors, JavaScript syntax, CSS parsing and content-version checks.
+Rebuilt only the local app; no new simulations, paid calls or cloud operations.
+This map-only change did not rerun the 442-test backend suite; its earlier receipt
+remains historical evidence. See docs/evidence/madrid-map-navigation-local.json.
+
 2026-10-28: Unified all six local workspaces around one navigation shell, shared
 visual tokens, control states and responsive menu. Light maps and compact neutral
 panels replace the separate dark/blue themes. Retained every existing form field

@@ -12,14 +12,14 @@
       rel="stylesheet"
       href="/static/vendor/leaflet/leaflet.css?v=a78371028241"
     />
-    <link rel="stylesheet" href="/static/style.css?v=52ae0834995b" />
+    <link rel="stylesheet" href="/static/style.css?v=80566ea289d0" />
     <link rel="stylesheet" href="/static/workspace.css?v=6c6854d75885" />
     <script defer src="/static/workspace.js?v=887294277a47"></script>
     <script
       defer
       src="/static/vendor/leaflet/leaflet.js?v=db49d009c841"
     ></script>
-    <script defer src="/static/app.js?v=67f76011c0c8"></script>
+    <script defer src="/static/app.js?v=4e880dca86f4"></script>
   </head>
   <body data-page="baseline">
     <div id="workspace-shell">
@@ -109,9 +109,29 @@
             <span>Chamberí · Retiro · Vallecas</span
             ><button id="fit-map" class="text-button">Reset view</button>
           </div>
+          <div class="map-navigation" role="group" aria-label="Map navigation">
+            <button
+              id="explore-map"
+              type="button"
+              aria-pressed="false"
+              aria-controls="map"
+              aria-describedby="map-mode"
+            >
+              Explore map
+            </button>
+            <button id="frame-selection" type="button" disabled>
+              Frame selection
+            </button>
+            <span id="map-mode" role="status" aria-live="polite"
+              >Overview · Use +/− to zoom. Scroll to move the page.</span
+            >
+          </div>
           <div
             id="map"
+            role="region"
+            tabindex="0"
             aria-label="Map of Madrid streets, couriers and delivery orders"
+            aria-describedby="map-mode"
           ></div>
           <div class="map-options">
             <div class="legend">

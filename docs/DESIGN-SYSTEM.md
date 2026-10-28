@@ -57,6 +57,25 @@ The second command checks all six pages for stale URLs and missing assets. This
 keeps an older cached page theme from surviving an updated HTML shell. Asset
 versioning changes no API endpoint, simulation definition or permissions.
 
+## Madrid map navigation
+
+Madrid opens in Overview: the wheel scrolls the document, markers remain
+selectable, and the visible zoom buttons work. Explore map explicitly enables
+dragging, wheel/touch zoom and keyboard navigation; Escape returns to Overview
+without changing the view. There is no automatic following or inertial panning.
+
+Navigation is bounded to the existing service rectangle with 12% padding. The
+minimum zoom adapts to the viewport; maximum zoom is 17. Reset view frames the
+service area. Frame selection is enabled only when the selected courier/order
+has a valid point or route within those bounds; framing caps zoom at 16. Map
+height follows the viewport rather than imposing a tall scrolling surface.
+This changes navigation, not the road dataset or simulation behavior.
+
+Browser verification covers page scrolling over Overview, wheel zoom in Explore,
+repeated panning stopping at the bounds, Escape/focus, selection framing and
+clearing, Reset, and 375px reflow. The inspector and ledger retain their existing
+scroll containers; their interaction and pagination are separate work.
+
 ## Diagrams
 
 Eight diagrams share D2 0.9.0 sources and generated local SVGs. ELK owns layered
