@@ -464,7 +464,8 @@ class LocalAgent:
             ).fetchone()
             assert row
             detail = dict(row["data"])
-            detail["policy"] = "google_adk_offline"
+            assert self.role.brain
+            detail["policy"] = f"google_adk_{self.role.brain.provider}"
             tools.memory_reads.append(
                 {
                     "event_id": event.id,

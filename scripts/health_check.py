@@ -34,6 +34,8 @@ def local_environment() -> dict[str, str]:
         **os.environ,
         "DATABASE_URL": test_url,
         "LLM_PROVIDER": "disabled",
+        "DELIVERY_ADK_VERTEX_ENABLED": "0",
+        "DELIVERY_ADK_VERTEX_PROFILE": "",
         "PYTEST_ADDOPTS": "",
     }
 

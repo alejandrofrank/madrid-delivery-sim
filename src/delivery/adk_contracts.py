@@ -26,11 +26,24 @@ RESTAURANT_TOOLS = frozenset(
 )
 
 
+class VertexProfile(BaseModel):
+    """Operator-approved deployment profile; contains no keys or arbitrary endpoints."""
+
+    model_config = ConfigDict(extra="forbid", frozen=True, allow_inf_nan=False)
+    project: str = Field(pattern=r"^[a-z][a-z0-9-]{4,28}[a-z0-9]$")
+    location: str = Field(pattern=r"^(global|[a-z]+-[a-z]+[0-9])$")
+    model: str = Field(pattern=r"^gemini-[a-z0-9.-]{1,80}$")
+    input_usd_per_million: float = Field(gt=0, le=1000)
+    output_usd_per_million: float = Field(gt=0, le=1000)
+
+
 class RestaurantBrain(BaseModel):
     model_config = ConfigDict(extra="forbid", frozen=True)
 
     template: Literal["restaurant-v1"] = "restaurant-v1"
-    provider: Literal["offline"] = "offline"
+    provider: Literal["offline", "vertex"] = "offline"
+    vertex: VertexProfile | None = None
+    usd_limit: float = Field(default=0, ge=0, le=10, allow_inf_nan=False)
     instructions: str = Field(min_length=1, max_length=8192)
     model_calls_per_event: int = Field(default=4, ge=1, le=8)
     model_calls_per_run: int = Field(default=32, ge=1, le=100)
@@ -42,6 +55,11 @@ class RestaurantBrain(BaseModel):
 
     @model_validator(mode="after")
     def capabilities(self) -> "RestaurantBrain":
+        if self.provider == "vertex":
+            if self.vertex is None or self.usd_limit <= 0:
+                raise ValueError("Vertex requires an approved profile and positive monetary budget")
+        elif self.vertex is not None or self.usd_limit:
+            raise ValueError("Offline templates cannot reserve money or configure Vertex")
         if len(set(self.tools)) != len(self.tools) or not set(self.tools) <= RESTAURANT_TOOLS:
             raise ValueError("Unknown or duplicate restaurant capability")
         if not {"restaurant.finish", "memory.write"} <= set(self.tools):

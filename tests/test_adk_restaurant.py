@@ -1,5 +1,6 @@
 """Real ADK loop with offline models and actual restricted PostgreSQL identities."""
 
+import json
 from collections.abc import Callable, Iterator
 from dataclasses import dataclass
 from typing import Any
@@ -517,3 +518,109 @@ def test_real_process_death_reuses_saved_adk_plan(adk_city):
             ).fetchone()["n"]
             == 4
         )
+
+
+VERTEX_PROFILE = {
+    "project": "bakiano-test-only",
+    "location": "europe-west1",
+    "model": "gemini-2.5-flash-lite",
+    "input_usd_per_million": 1.0,
+    "output_usd_per_million": 2.0,
+}
+
+
+def vertex_brain() -> RestaurantBrain:
+    brain, _ = restaurant_template()
+    return RestaurantBrain.model_validate(
+        {**brain.model_dump(), "provider": "vertex", "vertex": VERTEX_PROFILE, "usd_limit": 0.1}
+    )
+
+
+def test_vertex_requires_explicit_matching_deployment_approval(monkeypatch):
+    from delivery.adk_models import create_restaurant_model
+
+    monkeypatch.delenv("DELIVERY_ADK_VERTEX_ENABLED", raising=False)
+    with pytest.raises(PermissionError, match="disabled"):
+        create_restaurant_model(vertex_brain())
+    monkeypatch.setenv("DELIVERY_ADK_VERTEX_ENABLED", "1")
+    monkeypatch.setenv(
+        "DELIVERY_ADK_VERTEX_PROFILE",
+        json.dumps(
+            {
+                **VERTEX_PROFILE,
+                "project": "some-other-project",
+            }
+        ),
+    )
+    with pytest.raises(PermissionError, match="differs"):
+        create_restaurant_model(vertex_brain())
+
+
+def test_native_vertex_adapter_is_keyless_profile_bound_and_has_no_retries(monkeypatch):
+    from delivery.adk_models import create_restaurant_model, validate_model
+
+    monkeypatch.setenv("DELIVERY_ADK_VERTEX_ENABLED", "1")
+    monkeypatch.setenv("DELIVERY_ADK_VERTEX_PROFILE", json.dumps(VERTEX_PROFILE))
+    model = create_restaurant_model(vertex_brain())
+    assert model.client_kwargs == {
+        "vertexai": True,
+        "project": "bakiano-test-only",
+        "location": "europe-west1",
+    }
+    assert model.api_version == "v1" and model.client is None
+    assert model.retry_options.attempts == 1
+    validate_model(vertex_brain(), model)
+
+
+@pytest.mark.integration
+def test_vertex_monetary_admission_denies_before_any_provider_dispatch(adk_city):
+    city = adk_city(
+        brain_changes={"provider": "vertex", "vertex": VERTEX_PROFILE, "usd_limit": 0.0001}
+    )
+    agent, event = first_call(city)
+    assert agent.reserve_budget(event)
+    with connect(agent.dsn) as conn:
+        nonce = conn.execute(
+            "SELECT restaurant_turn_begin(%s,%s,%s) d", (event.id, event.token, event.attempts)
+        ).fetchone()["d"]["nonce"]
+    with pytest.raises(psycopg.errors.ProgramLimitExceeded), connect(agent.dsn) as conn:
+        conn.execute(
+            "SELECT restaurant_model_admit(%s,%s,%s,%s,4000,%s)",
+            (event.id, event.token, event.attempts, nonce, "a" * 64),
+        )
+    with connect(city.url) as conn:
+        assert (
+            conn.execute(
+                "SELECT count(*) n FROM restaurant_model_calls WHERE event_id=%s", (event.id,)
+            ).fetchone()["n"]
+            == 0
+        )
+
+
+@pytest.mark.integration
+def test_vertex_price_reservation_is_durable_and_unpriced_bypass_is_denied(adk_city):
+    from decimal import Decimal
+
+    city = adk_city(
+        brain_changes={"provider": "vertex", "vertex": VERTEX_PROFILE, "usd_limit": 0.1}
+    )
+    agent, event = first_call(city)
+    assert agent.reserve_budget(event)
+    with connect(agent.dsn) as conn:
+        nonce = conn.execute(
+            "SELECT restaurant_turn_begin(%s,%s,%s) d", (event.id, event.token, event.attempts)
+        ).fetchone()["d"]["nonce"]
+        conn.execute(
+            "SELECT restaurant_model_admit(%s,%s,%s,%s,4000,%s)",
+            (event.id, event.token, event.attempts, nonce, "a" * 64),
+        )
+    with pytest.raises(psycopg.errors.InsufficientPrivilege), connect(agent.dsn) as conn:
+        conn.execute(
+            "SELECT restaurant_model_admit_unpriced(%s,%s,%s,%s,1,%s)",
+            (event.id, event.token, event.attempts, nonce, "a" * 64),
+        )
+    with connect(city.url) as conn:
+        receipt = conn.execute(
+            "SELECT * FROM restaurant_model_calls WHERE event_id=%s", (event.id,)
+        ).fetchone()
+        assert receipt["provider"] == "vertex" and receipt["reserved_usd"] == Decimal("0.005024")

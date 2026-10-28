@@ -1,7 +1,7 @@
 """Google ADK reasoning over scoped tools; model I/O never holds a SQL connection.
 
-This release admits only the explicit offline model double. The same factory accepts
-a BaseLlm in tests; no credential discovery or paid model fallback is implemented.
+Offline is the default. Vertex requires an explicit approved deployment profile
+and durable monetary admission; there is no automatic provider fallback.
 """
 
 import asyncio
@@ -171,17 +171,19 @@ class RestaurantTurn:
             raise PermissionError("Model receipt has no admitted dispatch")
         self.fault("after_adk_model")
         usage = llm_response.usage_metadata
-        receipt = {"known": usage is not None}
+        receipt: dict[str, Any] = {
+            "known": usage is not None,
+            "model_version": llm_response.model_version,
+        }
         if usage is not None:
             receipt.update(usage.model_dump(mode="json", exclude_none=True))
         self.sql("restaurant_model_complete", self.pending_step, Jsonb(receipt))
         self.pending_step = None
 
     def build(self, model: BaseLlm) -> LlmAgent:
-        from delivery.adk_offline import OfflineRestaurantModel
+        from delivery.adk_models import validate_model
 
-        if not isinstance(model, OfflineRestaurantModel):
-            raise PermissionError("Only approved offline model adapters are admitted")
+        validate_model(self.brain, model)
         registry: dict[str, Callable[..., Any]] = {
             "restaurant.order": self.read_order,
             "restaurant.pantry": self.read_pantry,
@@ -289,7 +291,7 @@ def ensure_restaurant_result(
         raise RuntimeError("RestaurantTurnUnavailable")
     if not receipt["dispatch"]:
         return False
-    from delivery.adk_offline import OfflineRestaurantModel
+    from delivery.adk_models import create_restaurant_model
 
     turn = RestaurantTurn(agent, event, receipt["nonce"], fault)
     turn.fault("after_adk_begin")
@@ -297,7 +299,7 @@ def ensure_restaurant_result(
 
         async def run() -> RestaurantPlan:
             return await asyncio.wait_for(
-                turn.run(model or OfflineRestaurantModel()), turn.brain.timeout_seconds
+                turn.run(model or create_restaurant_model(turn.brain)), turn.brain.timeout_seconds
             )
 
         plan = asyncio.run(run())

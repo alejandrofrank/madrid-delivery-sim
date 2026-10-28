@@ -31,6 +31,8 @@ services:
     ports: ["127.0.0.1:${APP_PORT:-8010}:8000"]
     environment:
       LLM_PROVIDER: disabled
+      DELIVERY_ADK_VERTEX_ENABLED: ${DELIVERY_ADK_VERTEX_ENABLED:-0}
+      DELIVERY_ADK_VERTEX_PROFILE: ${DELIVERY_ADK_VERTEX_PROFILE:-}
       DATABASE_URL: postgresql://delivery:delivery_local_only@postgres:5432/delivery
       TEST_DATABASE_URL: postgresql://delivery:delivery_local_only@postgres:5432/delivery_test
       REDIS_URL: redis://redis:6379/0
