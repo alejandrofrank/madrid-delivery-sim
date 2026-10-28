@@ -1,0 +1,165 @@
+{
+  "verified_at": "2026-10-28T19:47:44.699396+00:00",
+  "mode": "local-only",
+  "source_fingerprint": "c5f6609162bd618b69846be6406001fa664c52788b0b87306fc5d16d8df5cb8c",
+  "source_changed_during_checks": false,
+  "ui_commit": "629b01b",
+  "test_receipt_id": "6f8384f4-bddf-444d-a06c-85b85f202920",
+  "tests": {
+    "total": 442,
+    "passed": 442,
+    "failed": 0,
+    "skipped": 0
+  },
+  "ruff": "passed",
+  "mypy": {
+    "status": "passed",
+    "source_modules": 42
+  },
+  "host_javascript_syntax": "passed",
+  "python_image_javascript_check": "unavailable: Node is not installed; host syntax and browser checks passed",
+  "role_scenarios": {
+    "passed": 12,
+    "total": 12,
+    "criteria_passed": 49,
+    "criteria_total": 49,
+    "seed": 731,
+    "repetitions": 2,
+    "business_outcomes_match": true,
+    "outcome_hash": "82fe99a3708041e8644823753112c5cbacada05eeb1a6d315c6aa909a4d5423f"
+  },
+  "offline_judge_baseline": {
+    "passed": 6,
+    "total": 6,
+    "model_calls": 0,
+    "hard_policy_violations": 0
+  },
+  "health_freshness": {
+    "test_run": "current",
+    "static_checks": "current",
+    "scenarios": "current",
+    "judge": "current"
+  },
+  "workspaces": [
+    "restaurants",
+    "delivery",
+    "inventory",
+    "health",
+    "architecture",
+    "madrid-baseline"
+  ],
+  "shared_contract": {
+    "navigation": "web/workspace.js",
+    "tokens_and_controls": "web/workspace.css",
+    "cache_versions": "Content digests for HTML CSS/JS references and rendered SVGs; documentation JSON uses no-store",
+    "existing_element_ids_and_form_fields": "preserved across all six pages",
+    "missing_assets_or_stale_versions": 0,
+    "core_text_color_contrast_on_white": {
+      "ink": 17.59,
+      "secondary": 7.38,
+      "accent": 5.28,
+      "positive": 7.08,
+      "negative": 7.18,
+      "warning": 6.16
+    }
+  },
+  "browser": {
+    "desktop_widths": [
+      1280,
+      1916
+    ],
+    "mobile_width": 375,
+    "all_six_pages_shared_navigation": "passed",
+    "active_page_indication": "passed",
+    "mobile_menu_and_escape": "passed",
+    "navigation_pinned_while_scrolling": "passed",
+    "page_horizontal_overflow": false,
+    "populated_order_history": {
+      "orders": 2,
+      "expanded_order_messages": 24,
+      "recorded_memory_changes": 10,
+      "names_and_timestamps": "passed"
+    },
+    "delivery_fleet_tab_and_courier_memory_inspector": "passed",
+    "health_role_filters": {
+      "role": "courier",
+      "cases_shown": 3,
+      "total_cases": 3,
+      "failed": 0
+    },
+    "chapter_search_and_source_inspection": "passed",
+    "diagrams_loaded": 8,
+    "diagram_expand_zoom_fit": "passed",
+    "svg_content_versions": "passed",
+    "console_errors": 0,
+    "viewport_override_reset": true,
+    "previews": [
+      "artifacts/unified-restaurants-ui.png",
+      "artifacts/precision-fleet-diagram.png",
+      "artifacts/unified-mobile-menu.png",
+      "artifacts/unified-health-ui.png"
+    ],
+    "test_catalogue_filter": {
+      "query": "inference",
+      "cases_shown": 27,
+      "total_cases": 442
+    }
+  },
+  "diagrams": {
+    "tool": "D2 0.9.0",
+    "layered_layout": "ELK",
+    "count": 8,
+    "offline_hash_reference_and_native_label_checks": "passed",
+    "byte_identical_regeneration": "passed",
+    "bridge_label_clearance_pixels": [
+      43,
+      56
+    ],
+    "native_layered_edge_width_pixels": 1,
+    "sequence_lifelines": "D2 dashed defaults",
+    "widths_and_heights": {
+      "system-boundary": [
+        1298.0,
+        730.0
+      ],
+      "meal-handoffs": [
+        1159.0,
+        1688.0
+      ],
+      "agent-transaction": [
+        809.0,
+        1211.0
+      ],
+      "restaurant-supply": [
+        1042.0,
+        1131.0
+      ],
+      "delivery-queue": [
+        1114.0,
+        1099.0
+      ],
+      "gcp-components": [
+        1250.0,
+        730.0
+      ],
+      "durable-inference": [
+        1251.0,
+        902.0
+      ],
+      "fleet-recovery": [
+        1374.0,
+        629.0
+      ]
+    }
+  },
+  "paid_model_calls": 0,
+  "cloud_resources_created": 0,
+  "limits": [
+    "Responsive and keyboard checks are targeted browser checks, not a full assistive-technology certification",
+    "Core palette contrast checks do not claim a complete contrast audit of every map feature",
+    "Long message sequences deliberately scroll at readable size; Fit can reduce label size",
+    "Historical operator views were read without running new simulations or changing the saved blueprint",
+    "Local role scenarios verify deterministic policies, not live model quality",
+    "Local verification receipts are not signed attestations"
+  ]
+}

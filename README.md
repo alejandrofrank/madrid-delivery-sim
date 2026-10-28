@@ -31,6 +31,9 @@ The newer [durable inference verification record](docs/evidence/durable-inferenc
 retains 442 passing tests, physical worker crash recovery, repeatable scenarios
 and the seven tool-generated diagrams. Read the
 [request/result protocol](docs/DURABLE-INFERENCE.md) for retry and isolation guarantees.
+The latest [shared UI verification record](docs/evidence/shared-ui-local.json)
+records the six workspace layouts, eight diagrams, desktop/mobile checks and
+current 442-test regression evidence.
 
 | Read in order | What it explains |
 | --- | --- |

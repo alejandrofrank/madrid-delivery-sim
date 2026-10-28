@@ -12,6 +12,12 @@ the fleet chapter. Browser checks cover all six pages at desktop and 375px,
 mobile menu/Escape, pinned navigation, populated chat/memory, courier inspection,
 health filters, chapter search/source and all eight expanded diagrams. See
 docs/DESIGN-SYSTEM.md for the researched guidance and maintenance contract.
+Verified 442 tests, Ruff, mypy over 42 modules, host JavaScript syntax, native SVG
+and asset-version checks. Twelve role scenarios/49 criteria passed twice with
+matching outcomes; all six offline judge cases passed. Tests, checks, scenarios
+and judge evidence match the running source. No paid calls or GCP deployments.
+The Python-only image still records Node syntax as unavailable; host syntax and
+browser verification passed. See docs/evidence/shared-ui-local.json.
 
 2026-10-28: Closed the first enterprise inference gap for the optional recovery
 judge. Immutable requests, single dispatch admission, saved results and fenced
