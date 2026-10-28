@@ -1,5 +1,19 @@
 # Status
 
+2026-10-28: Added twelve reproducible local role scenarios with 49 declared criteria
+for inventory, restaurant, dispatcher and courier agents. Real scoped queue workers
+exercise last-unit scarcity, delayed supply/process crash, sourcing/consent,
+concurrent dispatch, congestion, dropout custody and physical arrival. Health shows
+role scores, failed-case filters, expected/actual criteria and event/repeat evidence.
+Scores are recomputed from a versioned manifest; omissions, drift and failures across
+repeats stay visible. Two seed-731 runs matched at 12/12 cases and 49/49 criteria,
+with zero paid calls. Verified 392 tests (39 new evaluator checks), Ruff, mypy over
+40 modules, host JavaScript syntax and browser inspection/refresh/filtering. Fixture
+runs and short-lived roles were removed; app/Postgres/Redis remained running during
+checks. Failed supply bootstrap now removes its committed base city. This is a
+rules regression baseline; live-model and held-out comparisons remain unmeasured.
+See docs/AGENT-EVALS.md and docs/evidence/agent-scenarios-local.json.
+
 2026-10-28: Added the local /health dashboard, following Scrapmarket's category
 and run-history pattern. Browse individual parameter cases across ten categories,
 inspect six capability regression groups and six offline judge cases, and probe

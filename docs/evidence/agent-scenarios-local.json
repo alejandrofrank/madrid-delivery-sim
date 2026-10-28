@@ -1,0 +1,115 @@
+{
+  "version": "agent-scenarios-v1",
+  "seed": 731,
+  "score": 100.0,
+  "counts": {
+    "total": 12,
+    "passed": 12,
+    "failed": 0,
+    "not_measured": 0
+  },
+  "checks_passed": 49,
+  "checks_total": 49,
+  "reproduction": {
+    "repetitions": 2,
+    "hashes": [
+      "82fe99a3708041e8644823753112c5cbacada05eeb1a6d315c6aa909a4d5423f",
+      "82fe99a3708041e8644823753112c5cbacada05eeb1a6d315c6aa909a4d5423f"
+    ],
+    "matched": true,
+    "outcomes_matched": true,
+    "inputs_matched": true
+  },
+  "source_fingerprint": "c6d2c9246225dfbf47f0a27305648c7bf8fe15c763533bad5d5227e1a191fef8",
+  "fixture_hash": "fb09506c4148ef7c6d5c46d92282accae11b31a07fcd4b08ac0b97ce5cb3f905",
+  "outcome_hash": "82fe99a3708041e8644823753112c5cbacada05eeb1a6d315c6aa909a4d5423f",
+  "configurations": {
+    "assignment-race": "9be8e7da60b2b9f063df23f6f5908b424805aaba84d7fd90ddcdb4ab9e5d6af4",
+    "courier-authority": "9be8e7da60b2b9f063df23f6f5908b424805aaba84d7fd90ddcdb4ab9e5d6af4",
+    "fleet": "9be8e7da60b2b9f063df23f6f5908b424805aaba84d7fd90ddcdb4ab9e5d6af4",
+    "inventory-crash": "38335151b12214c6d4cada259ce664ea65edb8a4c0a06e90184de16cb6dd405b",
+    "market-forward": "63c9c33e21410a4342ad3d5b188564a37885fa1e03b43a5602b9dcadab9fd879",
+    "pantry": "6ef8a641bf10d4d73875c396ba32da26da07459b7d0e539dbb3695704fe5ddba",
+    "substitution-approved": "e5490ad1127c5709942d40d63007053b6df1e0a654f897c99df34b299ccb675b",
+    "substitution-declined": "83c2be6df5071ed5d257c61416bba9385f52368dbc64d3e4e3a3333a5f5c8ebc"
+  },
+  "tests": {
+    "total": 392,
+    "passed": 392,
+    "failed": 0,
+    "skipped": 0,
+    "xfailed": 0,
+    "xpassed": 0,
+    "not_run": 0
+  },
+  "checks": [
+    {
+      "id": "pytest",
+      "label": "Full test suite",
+      "status": "passed",
+      "duration_seconds": 250.690612,
+      "exit_code": 0
+    },
+    {
+      "id": "ruff",
+      "label": "Ruff",
+      "status": "passed",
+      "duration_seconds": 0.153688,
+      "exit_code": 0
+    },
+    {
+      "id": "mypy",
+      "label": "Mypy",
+      "status": "passed",
+      "duration_seconds": 14.582019,
+      "exit_code": 0
+    },
+    {
+      "id": "agent-scenarios",
+      "label": "Local role scenarios \u00b7 two reproducibility runs",
+      "status": "passed",
+      "duration_seconds": 91.549101,
+      "exit_code": 0
+    },
+    {
+      "id": "javascript",
+      "label": "JavaScript syntax",
+      "status": "unavailable",
+      "duration_seconds": 0.0,
+      "exit_code": null
+    },
+    {
+      "id": "evals",
+      "label": "Offline recovery baseline",
+      "status": "passed",
+      "duration_seconds": 0.483232,
+      "exit_code": 0
+    }
+  ],
+  "verified_at": "2026-10-28T15:05:17.264772+00:00",
+  "mode": "local-deterministic",
+  "command": "make eval-agents; make health",
+  "browser": {
+    "role_cards": 4,
+    "role_and_failure_filters": true,
+    "criteria_and_event_repetitions": true,
+    "expansion_survives_refresh": true,
+    "missing_and_running_evidence_unmeasured": true,
+    "console_errors": 0,
+    "horizontal_page_overflow": false
+  },
+  "runtime": {
+    "dedicated_database": "delivery_test",
+    "temporary_runs_and_agent_identities_cleaned": true,
+    "app_postgres_redis_unchanged_during_checks": true,
+    "model_provider": "disabled",
+    "search_provider": "local",
+    "paid_provider_calls": 0
+  },
+  "limits": [
+    "Fixed development scenarios with rules-based agents; not a held-out model benchmark.",
+    "No live provider latency, production load, architecture superiority or semantic-memory comparison measured.",
+    "Python checker has no Node; host JavaScript syntax and browser verification passed.",
+    "Local receipts are not signed attestations against a hostile host operator."
+  ]
+}

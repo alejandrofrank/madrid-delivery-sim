@@ -28,6 +28,10 @@ baseline, and check local services, queues and budgets. From Bash, run `make hea
 after starting the stack to refresh the evidence. Partial, skipped, missing and
 outdated results stay visible. See [health evidence and limits](docs/HEALTH.md).
 
+`make eval-agents` runs twelve local inventory, restaurant, dispatcher and courier
+scenarios twice. The Agent evals view shows role scores, failed cases, expected/actual
+criteria and source events. No model is called. See [scenario contracts and repeatability](docs/AGENT-EVALS.md).
+
 ### M2 inventory slice
 
 The fictional-city inventory lab is at **http://localhost:8010/lab** after starting

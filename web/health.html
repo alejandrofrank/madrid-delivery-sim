@@ -123,12 +123,58 @@
         aria-labelledby="evals-tab"
         hidden
       >
+        <section
+          class="panel scenario-panel"
+          aria-labelledby="scenario-heading"
+        >
+          <div class="section-heading">
+            <div>
+              <h2 id="scenario-heading">Role scenario evaluations</h2>
+              <p>
+                Reproducible inventory, restaurant, dispatcher and courier
+                scenarios run the local role handlers against fixed fixtures.
+                Inspect each criterion and the events behind its result.
+              </p>
+            </div>
+            <button id="copy-scenario-command">Copy make eval-agents</button>
+          </div>
+          <div id="scenario-provenance" class="scenario-provenance"></div>
+          <div id="scenario-roles" class="scenario-grid"></div>
+          <div class="scenario-filters">
+            <label
+              >Role<select id="scenario-role-filter">
+                <option value="all">All roles</option>
+                <option value="inventory">Inventory</option>
+                <option value="restaurant">Restaurant</option>
+                <option value="dispatcher">Dispatcher</option>
+                <option value="courier">Courier</option>
+              </select></label
+            >
+            <label
+              >Result<select id="scenario-status-filter">
+                <option value="all">All cases</option>
+                <option value="failed">Failed cases</option>
+              </select></label
+            >
+          </div>
+          <p id="scenario-count" class="subtle" role="status"></p>
+          <div id="scenario-cases"></div>
+          <p id="scenario-note" class="scenario-note"></p>
+          <p class="scenario-note">
+            Local deterministic rules, with no model calls or external services.
+            These scores measure fixture criteria, not LLM quality. Each case
+            passes only when every criterion passes. Unmeasured criteria count
+            as zero once any criterion is measured; an entirely unmeasured score
+            stays unmeasured.
+          </p>
+        </section>
         <div class="section-heading">
           <div>
             <h2>Agent capability regressions</h2>
             <p>
               Selected behavioral checks from the suite. Categories overlap;
-              these counts are not independent quality scores.
+              these counts are not independent quality scores or the role
+              scenarios above.
             </p>
           </div>
           <span class="tag">Local / rules / mocked providers</span>
@@ -140,7 +186,8 @@
               <h2>Recovery judge · rules baseline</h2>
               <p>
                 Fixed cases validate the evaluation harness against its rules
-                oracle. No model is called.
+                oracle, separate from role behavior scenarios. No model is
+                called.
               </p>
             </div>
             <span id="judge-status"></span>
@@ -232,8 +279,8 @@
         <span id="footer-state"
           >Local evidence · no checks run from this page</span
         ><span
-          >Run <code>make health</code> to refresh tests, code checks and the
-          offline judge baseline.</span
+          >Run <code>make health</code> to refresh tests, code checks, role
+          scenarios and the offline judge baseline.</span
         >
       </footer>
     </main>

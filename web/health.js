@@ -5,6 +5,7 @@ let evidence,
   selectedCategory = "all",
   selectedCapability = null;
 let selectedRun = new URLSearchParams(location.search).get("test_run");
+const expandedScenarios = new Set();
 const names = {
   passed: "Passed",
   failed: "Failed",
@@ -88,6 +89,11 @@ async function copy(text) {
   }
 }
 $("copy-command").addEventListener("click", () => copy("make health"));
+$("copy-scenario-command").addEventListener("click", () =>
+  copy("make eval-agents"),
+);
+for (const id of ["scenario-role-filter", "scenario-status-filter"])
+  $(id).addEventListener("change", renderScenarios);
 function metric(label, value, note, state) {
   const node = el("article", undefined, "metric");
   node.append(el("span", label), el("strong", value, state), el("p", note));
@@ -175,19 +181,18 @@ function renderSummary() {
         : "not_measured",
     ),
   );
-  const judge = evidence.judge;
+  const scenarios = evidence.scenarios;
   metrics.append(
     metric(
-      "Offline judge cases",
-      judge.available
-        ? `${judge.counts.passed} / ${judge.counts.total}`
-        : "Not run",
-      "Rules oracle · no model quality score",
-      judge.available
-        ? effectiveStatus(
-            judge.counts.passed === judge.counts.total ? "passed" : "failed",
-            judge.freshness,
-          )
+      "Role scenario cases",
+      scenarios?.available
+        ? `${scenarios.counts.passed} / ${scenarios.counts.total}`
+        : "Not measured",
+      scenarios?.available
+        ? `${scenarios.counts.failed} failed · ${scenarios.counts.not_measured} unmeasured${scenarios.freshness !== "current" ? " · historical" : ""}`
+        : "Run make eval-agents · local deterministic rules",
+      scenarios?.available
+        ? effectiveStatus(scenarios.status, scenarios.freshness)
         : "not_measured",
     ),
   );
@@ -370,7 +375,234 @@ for (const id of ["search", "status-filter", "kind-filter"])
   $(id).addEventListener(id === "search" ? "input" : "change", () =>
     renderTests(),
   );
+function scenarioScore(score, historical) {
+  if (score === null || score === undefined) return "Not measured";
+  return `${Number(score.toFixed(1))}%${historical ? " · historical" : ""}`;
+}
+function criterionValue(value) {
+  return value === null || value === undefined ? "Not measured" : String(value);
+}
+function renderScenarios() {
+  const report = evidence.scenarios,
+    provenance = $("scenario-provenance"),
+    roles = $("scenario-roles"),
+    cases = $("scenario-cases");
+  for (const detail of cases.querySelectorAll("details[data-scenario-id]")) {
+    if (detail.open) expandedScenarios.add(detail.dataset.scenarioId);
+    else expandedScenarios.delete(detail.dataset.scenarioId);
+  }
+  provenance.replaceChildren();
+  roles.replaceChildren();
+  cases.replaceChildren();
+  $("scenario-note").textContent = report?.note || "";
+  if (!report) {
+    provenance.append(badge("not_measured"));
+    cases.append(
+      el("p", "No role scenario receipt. Run make eval-agents.", "empty"),
+    );
+    $("scenario-count").textContent = "Role scenarios have not been measured.";
+    return;
+  }
+  const historical = report.available && report.freshness !== "current",
+    state = report.available
+      ? effectiveStatus(report.status, report.freshness)
+      : "not_measured";
+  provenance.append(
+    badge(state),
+    el("strong", scenarioScore(report.score, historical)),
+    el(
+      "span",
+      report.available ? when(report.created_at) : "No local scenario receipt",
+    ),
+  );
+  if (report.available) {
+    provenance.append(
+      el("span", `${report.version} · seed ${report.seed} · ${report.mode}`),
+    );
+    if (report.reproduction) {
+      const repeat = report.reproduction;
+      const comparison = badge(
+        effectiveStatus(
+          repeat.repetitions > 1
+            ? repeat.matched
+              ? "passed"
+              : "failed"
+            : "not_measured",
+          report.freshness,
+        ),
+        repeat.repetitions > 1
+          ? `${repeat.repetitions} runs ${repeat.matched ? "matched" : "differ"}`
+          : "1 run recorded · repeat not measured",
+      );
+      if (repeat.hashes?.length) comparison.title = repeat.hashes.join(" · ");
+      provenance.append(comparison);
+    }
+    for (const [label, value] of [
+      ["Source", report.source_fingerprint],
+      ["Fixtures", report.fixture_hash],
+      ["Outcomes", report.outcome_hash],
+    ]) {
+      const fingerprint = el(
+        "span",
+        `${label} ${value?.slice(0, 12) || "not recorded"}`,
+        "scenario-fingerprint",
+      );
+      if (value) fingerprint.title = value;
+      provenance.append(fingerprint);
+    }
+    if (historical)
+      provenance.append(
+        el(
+          "p",
+          `Historical scores: ${names[report.freshness] || "source cannot be verified"}. Run make eval-agents for current evidence.`,
+          "scenario-history",
+        ),
+      );
+  }
+  for (const role of report.roles || []) {
+    const card = el("article", undefined, "scenario-role"),
+      head = el("div", undefined, "capability-head"),
+      status = report.available
+        ? effectiveStatus(role.status, report.freshness)
+        : "not_measured";
+    head.append(el("h3", role.name), badge(status));
+    card.append(
+      head,
+      el("strong", scenarioScore(role.score, historical), status),
+      el(
+        "p",
+        `${role.counts.passed} / ${role.counts.total} cases passed · ${role.counts.failed} failed · ${role.counts.not_measured} unmeasured`,
+      ),
+      el(
+        "p",
+        `${role.checks_passed} / ${role.checks_total} criteria passed`,
+        "subtle",
+      ),
+    );
+    const inspect = el("button", "Inspect cases");
+    inspect.addEventListener("click", () => {
+      $("scenario-role-filter").value = role.id;
+      $("scenario-status-filter").value = "all";
+      renderScenarios();
+    });
+    card.append(inspect);
+    roles.append(card);
+  }
+  const roleFilter = $("scenario-role-filter").value,
+    statusFilter = $("scenario-status-filter").value,
+    allCases = report.cases || [],
+    matchingRole = allCases.filter(
+      (item) => roleFilter === "all" || item.role === roleFilter,
+    ),
+    visible = matchingRole.filter(
+      (item) => statusFilter === "all" || item.status === statusFilter,
+    ),
+    failed = matchingRole.filter((item) => item.status === "failed").length;
+  $("scenario-count").textContent =
+    `Showing ${visible.length} of ${matchingRole.length} cases · ${failed} failed${historical ? " in this historical receipt" : ""}. Open a case to inspect expected and actual criteria.`;
+  if (!visible.length) {
+    cases.append(
+      el(
+        "p",
+        statusFilter === "failed"
+          ? matchingRole.some((item) => item.status === "not_measured")
+            ? "No failed cases recorded. Unmeasured cases have no passing result; select All cases to inspect them."
+            : "No failed cases in this receipt. Select All cases to inspect the passing evidence."
+          : "No scenario cases recorded. Run make eval-agents.",
+        "empty",
+      ),
+    );
+  }
+  for (const item of visible) {
+    const detail = el("details", undefined, "scenario-case"),
+      summary = el("summary"),
+      heading = el("div", undefined, "scenario-case-heading"),
+      status = report.available
+        ? effectiveStatus(item.status, report.freshness)
+        : "not_measured";
+    detail.dataset.scenarioId = item.id;
+    detail.open = expandedScenarios.has(item.id);
+    detail.addEventListener("toggle", () => {
+      if (!detail.isConnected) return;
+      if (detail.open) expandedScenarios.add(item.id);
+      else expandedScenarios.delete(item.id);
+    });
+    heading.append(
+      el("strong", item.name),
+      el("small", `${item.role} · ${item.id}`),
+    );
+    summary.append(
+      badge(
+        status,
+        historical
+          ? `${names[item.status] || item.status} · historical`
+          : undefined,
+      ),
+      heading,
+      el("span", scenarioScore(item.score, historical), "scenario-case-score"),
+    );
+    const body = el("div", undefined, "scenario-case-body");
+    body.append(
+      el("p", item.description),
+      el(
+        "p",
+        "Criteria retain failed or missing observations across all repeats. Each criterion and source event identifies its repetition.",
+        "subtle",
+      ),
+      el(
+        "p",
+        item.error ? `Error code: ${item.error}` : "Error code: none recorded",
+        item.error ? "failed" : "subtle",
+      ),
+      table(
+        ["Criterion", "Expected", "Actual", "Repeat", "Result"],
+        (item.checks || []).map((check) => [
+          check.label,
+          criterionValue(check.expected),
+          criterionValue(check.actual),
+          check.repetition ?? "—",
+          badge(
+            report.available
+              ? effectiveStatus(check.status, report.freshness)
+              : "not_measured",
+            historical
+              ? `${names[check.status] || check.status} · historical`
+              : undefined,
+          ),
+        ]),
+      ),
+      el("h3", "Source evidence"),
+    );
+    if (item.evidence?.length) {
+      body.append(
+        table(
+          [
+            "Repeat",
+            "Event",
+            "Topic",
+            "Trace",
+            "State",
+            "Attempts",
+            "Simulation time",
+          ],
+          item.evidence.map((event) => [
+            event.repetition ?? 1,
+            event.sequence,
+            event.topic,
+            event.trace,
+            event.state,
+            event.attempts,
+            event.sim_time,
+          ]),
+        ),
+      );
+    } else body.append(el("p", "No source events recorded.", "subtle"));
+    detail.append(summary, body);
+    cases.append(detail);
+  }
+}
 function renderEvals() {
+  renderScenarios();
   const root = $("capabilities");
   root.replaceChildren();
   for (const cap of evidence.capabilities) {
@@ -668,6 +900,7 @@ async function loadEvidence() {
       if (evidence.test_run) evidence.test_run.freshness = "unavailable";
       evidence.static_checks.freshness = "unavailable";
       evidence.judge.freshness = "unavailable";
+      if (evidence.scenarios) evidence.scenarios.freshness = "unavailable";
       renderSummary();
       renderEvals();
       renderChecks();

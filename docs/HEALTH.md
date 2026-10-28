@@ -14,8 +14,9 @@ make health
 ```
 
 This builds a disposable checker container, runs the full pytest suite against
-`delivery_test`, runs Ruff and mypy, and evaluates the fixed recovery-judge rules
-baseline. It does not restart the running app or its database/Redis dependencies.
+`delivery_test`, runs Ruff and mypy, evaluates twelve role scenarios twice, and
+evaluates the fixed recovery-judge rules baseline. It does not restart the running
+app or its database/Redis dependencies.
 The checker forces `LLM_PROVIDER=disabled`; its evaluation command never accepts a
 cloud endpoint. It requires a configured `delivery_test` URL and also binds the
 subprocesses' default database to that test database. A nonzero test/check result
@@ -44,7 +45,12 @@ health` in a Bash environment that needs the Windows executable.
   result and integration filters. Expand a file, then a check for its description,
   source line, original case ID, duration and failing phase. Descriptions come from
   test docstrings or names; they are not generated assertions about test coverage.
-- **Agent evals:** selected regressions for queue resilience, coordination,
+- **Role scenarios:** inventory, restaurant, dispatcher and courier scorecards,
+  failed-case/role filters, expandable expected/actual criteria, repetition numbers
+  and bounded source event trails. `make eval-agents` runs only these scenarios.
+  All 49 declared criteria are scored; a correct business refusal can be a pass.
+  See [scenario contracts, scoring and reproducibility](AGENT-EVALS.md).
+- **Capability regressions:** selected regressions for queue resilience, coordination,
   memory isolation, budget admission, disrupted-city scenarios and replay. Each
   card links to its cases and states its limits. These groups overlap and must
   not be added into a second test total.
@@ -89,6 +95,11 @@ Use descriptive explicit IDs for parametrized inputs rather than embedding long
 payloads or credentials in case names. These files are local development receipts,
 not signed attestations or a sandbox against a hostile host operator.
 
+Role receipts additionally retain typed criterion observations and fixture-only
+event metadata. Two repeated runs retain all observations: failures and omissions
+cannot be erased by a later pass. The reader recomputes scores from the versioned
+manifest. Source, input-configuration and business-outcome hashes make drift visible.
+
 The read-only `/api/health/evidence` and `/api/health/runtime` endpoints are for the
 trusted local operator. They use the same local-host gate as supply endpoints.
 They do not grant an agent any new tool or memory access.
@@ -107,6 +118,15 @@ with versioned fixtures, actual results, source/model versions, budget accountin
 and explicit measurement scope rather than reusing the regression pass rate.
 
 ## Verification
+
+Current role-evaluation verification (2026-10-28): 392 tests passed, Ruff and mypy
+(40 source modules) passed, and the two-run seed-731 role battery matched at 12/12
+cases and 49/49 criteria. All four roles scored 100% on these fixed criteria.
+Browser checks covered unmeasured/running receipts, role and failed-case filters,
+criterion/event repetition provenance and expanded details surviving refresh.
+No console errors or horizontal page overflow; app/Postgres/Redis stayed running.
+See [role evaluation receipt](evidence/agent-scenarios-local.json). The earlier
+353-test dashboard baseline below is retained as historical evidence.
 
 Verified locally on 2026-10-28: 353 tests passed, including 46 reporting/health
 checks. Ruff and mypy (38 source modules) passed. The dashboard indexed 36 test

@@ -2,6 +2,15 @@
 
 Updated 2026-10-28. Implemented slices are identified below; remaining milestones are planned.
 
+Role scenario evaluation slice: make eval-agents now runs a versioned local
+seed-731 battery twice: twelve scenarios, 49 criteria across inventory, restaurant,
+dispatcher and courier agents. The health dashboard shows scores, failed cases,
+expected/actual values and event evidence by repetition. Real workers retain role
+isolation and queued communication; regression checks include process crashes and
+assignment contention. Two local runs matched at 12/12 cases, with zero paid calls.
+This advances M7 development evidence; held-out model, topology and memory
+comparisons remain planned. See [scenario contracts and limits](docs/AGENT-EVALS.md).
+
 Local health slice: `/health` now exposes the categorized test catalogue, source
 and run history, six capability regression groups, the offline recovery baseline,
 service probes and per-run queue/budget diagnostics. `make health` records actual
