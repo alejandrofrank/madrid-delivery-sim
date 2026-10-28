@@ -1,0 +1,258 @@
+{
+  "verified_at": "2026-10-28T23:54:08.313601+00:00",
+  "scope": "Local Google ADK runtime, role isolation, durable budgets and queue-only effects",
+  "adk_version": "2.13.0",
+  "source_fingerprint": "a352a61cc0f9892c61f3cb0599abaec1fb94a7de36ae54f383d861b319cc251e",
+  "test_receipt": "df9d3b0e-e57b-4dbd-acdb-b7a4cd0390d2",
+  "test_counts": {
+    "passed": 465
+  },
+  "adk_cases": [
+    {
+      "id": "tests/test_adk_restaurant.py::test_templates_are_editable_but_cannot_grant_authority",
+      "status": "passed"
+    },
+    {
+      "id": "tests/test_adk_restaurant.py::test_paid_model_adapter_is_rejected_before_execution",
+      "status": "passed"
+    },
+    {
+      "id": "tests/test_adk_restaurant.py::test_intake_saves_and_applies_a_scoped_plan",
+      "status": "passed"
+    },
+    {
+      "id": "tests/test_adk_restaurant.py::test_both_souls_use_real_adk_and_queue_delivery[speed-market-a]",
+      "status": "passed"
+    },
+    {
+      "id": "tests/test_adk_restaurant.py::test_both_souls_use_real_adk_and_queue_delivery[cost-market-b]",
+      "status": "passed"
+    },
+    {
+      "id": "tests/test_adk_restaurant.py::test_adk_identity_has_no_legacy_broad_tools_or_raw_tables",
+      "status": "passed"
+    },
+    {
+      "id": "tests/test_adk_restaurant.py::test_budget_exhaustion_never_changes_stock_or_publishes_supply[brain_changes0-16]",
+      "status": "passed"
+    },
+    {
+      "id": "tests/test_adk_restaurant.py::test_budget_exhaustion_never_changes_stock_or_publishes_supply[brain_changes1-16]",
+      "status": "passed"
+    },
+    {
+      "id": "tests/test_adk_restaurant.py::test_budget_exhaustion_never_changes_stock_or_publishes_supply[brain_changes2-1]",
+      "status": "passed"
+    },
+    {
+      "id": "tests/test_adk_restaurant.py::test_saved_plan_survives_crash_and_is_applied_without_more_model_calls",
+      "status": "passed"
+    },
+    {
+      "id": "tests/test_adk_restaurant.py::test_interrupted_turn_fails_closed_without_redispatch",
+      "status": "passed"
+    },
+    {
+      "id": "tests/test_adk_restaurant.py::test_changed_stock_invalidates_saved_plan",
+      "status": "passed"
+    },
+    {
+      "id": "tests/test_adk_restaurant.py::test_other_roles_and_runs_cannot_open_a_restaurant_turn",
+      "status": "passed"
+    },
+    {
+      "id": "tests/test_adk_restaurant.py::test_unknown_supplier_is_rejected_before_any_business_effect",
+      "status": "passed"
+    },
+    {
+      "id": "tests/test_adk_restaurant.py::test_effective_prompt_reaches_adk_without_history_from_other_orders[speed]",
+      "status": "passed"
+    },
+    {
+      "id": "tests/test_adk_restaurant.py::test_effective_prompt_reaches_adk_without_history_from_other_orders[cost]",
+      "status": "passed"
+    },
+    {
+      "id": "tests/test_adk_restaurant.py::test_model_io_has_no_open_agent_database_connection",
+      "status": "passed"
+    },
+    {
+      "id": "tests/test_adk_restaurant.py::test_real_process_death_reuses_saved_adk_plan",
+      "status": "passed"
+    },
+    {
+      "id": "tests/test_adk_restaurant.py::test_vertex_requires_explicit_matching_deployment_approval",
+      "status": "passed"
+    },
+    {
+      "id": "tests/test_adk_restaurant.py::test_native_vertex_adapter_is_keyless_profile_bound_and_has_no_retries",
+      "status": "passed"
+    },
+    {
+      "id": "tests/test_adk_restaurant.py::test_vertex_monetary_admission_denies_before_any_provider_dispatch",
+      "status": "passed"
+    },
+    {
+      "id": "tests/test_adk_restaurant.py::test_vertex_price_reservation_is_durable_and_unpriced_bypass_is_denied",
+      "status": "passed"
+    },
+    {
+      "id": "tests/test_adk_restaurant.py::test_forged_event_body_does_not_reach_the_model_or_change_the_order",
+      "status": "passed"
+    }
+  ],
+  "static_checks": [
+    {
+      "id": "pytest",
+      "label": "Full test suite",
+      "status": "passed",
+      "duration_seconds": 316.564804,
+      "exit_code": 0
+    },
+    {
+      "id": "ruff",
+      "label": "Ruff",
+      "status": "passed",
+      "duration_seconds": 0.100371,
+      "exit_code": 0
+    },
+    {
+      "id": "mypy",
+      "label": "Mypy",
+      "status": "passed",
+      "duration_seconds": 16.527029,
+      "exit_code": 0
+    },
+    {
+      "id": "agent-scenarios",
+      "label": "Local role scenarios \u00b7 two reproducibility runs",
+      "status": "passed",
+      "duration_seconds": 82.144926,
+      "exit_code": 0
+    },
+    {
+      "id": "javascript",
+      "label": "JavaScript syntax",
+      "status": "unavailable",
+      "duration_seconds": 0.0,
+      "exit_code": null
+    },
+    {
+      "id": "evals",
+      "label": "Offline recovery baseline",
+      "status": "passed",
+      "duration_seconds": 0.38955,
+      "exit_code": 0
+    }
+  ],
+  "host_javascript_syntax": "passed",
+  "source_catalogue": {
+    "chapters": 20,
+    "sources": 67,
+    "links": "passed"
+  },
+  "profiles": [
+    {
+      "profile": "speed",
+      "run": "5e8bf371-24e7-4e42-aadc-e0a5f843ff9e",
+      "url": "http://localhost:8010/restaurant-lab?run=5e8bf371-24e7-4e42-aadc-e0a5f843ff9e",
+      "supplier": "market-a",
+      "metrics": {
+        "adk_offline_calls": 24,
+        "adk_vertex_dispatches": 0,
+        "adk_reserved_usd": 0.0,
+        "adk_reserved_tokens": 185663,
+        "adk_paid_calls": 0,
+        "scheduled_calls": 1,
+        "events": 24,
+        "dead_letters": 0,
+        "retries": 0,
+        "delivered": 1,
+        "unfinished_orders": 0,
+        "open_delivery_jobs": 0,
+        "late_physical_deliveries": 0,
+        "model_calls": 0,
+        "model_provider": "disabled",
+        "search_reserved_calls": 0,
+        "search_reserved_input_tokens": 0,
+        "search_unknown_usage_calls": 0,
+        "search_actual_input_tokens": null,
+        "search_actual_output_tokens": null,
+        "decision_mode": "mixed_rules_adk",
+        "transport": "durable_queue",
+        "call_mode": "simulated_transcript",
+        "communication_latency_seconds": 5
+      },
+      "invariants": {
+        "stock_nonnegative": true,
+        "stock_conserved": true,
+        "canonical_units": true
+      },
+      "replay_matches": true
+    },
+    {
+      "profile": "cost",
+      "run": "b61dbb56-d90a-42e6-9c28-ac63938f6789",
+      "url": "http://localhost:8010/restaurant-lab?run=b61dbb56-d90a-42e6-9c28-ac63938f6789",
+      "supplier": "market-b",
+      "metrics": {
+        "adk_offline_calls": 24,
+        "adk_vertex_dispatches": 0,
+        "adk_reserved_usd": 0.0,
+        "adk_reserved_tokens": 186095,
+        "adk_paid_calls": 0,
+        "scheduled_calls": 1,
+        "events": 24,
+        "dead_letters": 0,
+        "retries": 0,
+        "delivered": 1,
+        "unfinished_orders": 0,
+        "open_delivery_jobs": 0,
+        "late_physical_deliveries": 0,
+        "model_calls": 0,
+        "model_provider": "disabled",
+        "search_reserved_calls": 0,
+        "search_reserved_input_tokens": 0,
+        "search_unknown_usage_calls": 0,
+        "search_actual_input_tokens": null,
+        "search_actual_output_tokens": null,
+        "decision_mode": "mixed_rules_adk",
+        "transport": "durable_queue",
+        "call_mode": "simulated_transcript",
+        "communication_latency_seconds": 5
+      },
+      "invariants": {
+        "stock_nonnegative": true,
+        "stock_conserved": true,
+        "canonical_units": true
+      },
+      "replay_matches": true
+    }
+  ],
+  "paid_model_calls": 0,
+  "gcp_resources_created": 0,
+  "browser": {
+    "widths": [
+      375,
+      1280
+    ],
+    "page_overflow": false,
+    "console_errors": 0,
+    "prompt_and_soul_editing": "passed",
+    "profile_loading": "passed",
+    "frozen_engine_and_budget_inspection": "passed",
+    "health_adk_category": "23/23",
+    "documentation_and_source_viewer": "passed",
+    "screenshots": [
+      "artifacts/adk-restaurant-inspection.png",
+      "artifacts/adk-health-catalogue.png"
+    ]
+  },
+  "limits": [
+    "SOUL behavior was exercised with a scripted offline model double, not a generative quality benchmark.",
+    "The native keyless Vertex adapter and monetary admission were tested without provider invocation.",
+    "Vertex stays disabled by default; live IAM/model/region/billing verification remains separate.",
+    "The Python-only health image reports JavaScript syntax unavailable; host syntax and browser checks passed.",
+    "Monetary admission uses configured approved rates, not a billing-account spending cap."
+  ]
+}

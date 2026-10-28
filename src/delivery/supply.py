@@ -425,6 +425,16 @@ def supply_snapshot(run: str, url: str | None = None) -> dict[str, Any]:
                     "display_name": settings_data.get("display_name", binding["agent_id"]),
                     "definition": definition,
                     "definition_hash": binding["definition_hash"],
+                    "adk_budget": conn.execute(
+                        "SELECT count(*) calls_reserved,"
+                        "coalesce(sum(m.reserved_tokens),0) tokens_reserved,"
+                        "coalesce(sum(m.reserved_usd),0) usd_reserved "
+                        "FROM restaurant_model_calls m JOIN restaurant_turns t USING(event_id) "
+                        "WHERE t.run_id=%s AND t.store=%s",
+                        (run, binding["store"]),
+                    ).fetchone()
+                    if definition.get("policy") == "adk"
+                    else None,
                     "budget": conn.execute(
                         "SELECT * FROM agent_budgets WHERE run_id=%s AND store=%s",
                         (run, binding["store"]),
@@ -524,7 +534,9 @@ def supply_snapshot(run: str, url: str | None = None) -> dict[str, Any]:
             "search_unknown_usage_calls": search_usage["unknown"],
             "search_actual_input_tokens": search_usage["input_tokens"],
             "search_actual_output_tokens": search_usage["output_tokens"],
-            "decision_mode": "local_rules",
+            "decision_mode": "mixed_rules_adk"
+            if adk_usage["calls"] or adk_usage["vertex_calls"]
+            else "local_rules",
             "transport": "durable_queue",
             "call_mode": "simulated_transcript",
             "communication_latency_seconds": session["config"]["communication_latency_seconds"],

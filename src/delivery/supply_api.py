@@ -32,6 +32,23 @@ router = APIRouter()
 _LEASES: dict[tuple[str, str, int], Event] = CHANNEL_LEASES
 
 
+@router.get("/api/supply/agent-templates")
+def agent_templates() -> dict[str, Any]:
+    """Trusted operator catalogue; no credentials, model calls or executable paths."""
+    from delivery.adk_contracts import restaurant_template
+
+    brain, speed = restaurant_template("speed")
+    _, cost = restaurant_template("cost")
+    return {
+        "restaurant-v1": {
+            "brain": brain.model_dump(mode="json"),
+            "souls": {"speed": speed, "cost": cost},
+            "provider": "offline scripted model",
+            "paid_calls": False,
+        }
+    }
+
+
 class StartSupply(BaseModel):
     model_config = ConfigDict(extra="forbid")
     revision: str = Field(min_length=64, max_length=64)

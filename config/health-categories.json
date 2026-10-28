@@ -2,6 +2,12 @@
   "schema_version": 1,
   "categories": [
     {
+      "id": "adk",
+      "name": "ADK restaurant agents",
+      "description": "Google ADK tool loop, SOUL fixtures, scoped capabilities, budgets and crash recovery; zero paid calls",
+      "files": ["tests/test_adk_restaurant.py"]
+    },
+    {
       "id": "agents",
       "name": "Agent identity & safety",
       "description": "Roles, frozen permissions, environment isolation and unsafe instructions",

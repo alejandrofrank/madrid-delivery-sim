@@ -14,6 +14,12 @@ const budgetLabels = {
   memory_bytes: ['Memory bytes', 1, 65536],
 };
 let blueprint = null;
+let agentTemplates = {};
+const adkBudgetLabels = {
+  model_calls_per_event: ['Model calls / event', 1, 8],
+  model_calls_per_run: ['Model calls / restaurant / run', 1, 100],
+  reserved_tokens_per_run: ['Reserved tokens / restaurant / run', 1, 1048576],
+};
 let draft = null;
 let snapshot = null;
 let selectedId = null;
@@ -145,6 +151,10 @@ function captureEditor(report = true) {
       const agent = agentDefinition();
       agent.display_name = $('agent-name').value.trim();
       agent.soul = $('agent-soul').value;
+      if (agent.brain) {
+        agent.brain.instructions = $('agent-prompt').value;
+        for (const key of Object.keys(adkBudgetLabels)) agent.brain[key] = Number($(`adk-budget-${key}`).value);
+      }
       agent.latency_seconds = Number($('agent-latency').value);
       for (const key of Object.keys(budgetLabels)) agent.limits[key] = Number($(`budget-${key}`).value);
     }
@@ -200,6 +210,23 @@ function renderAgentEditor() {
   $('agent-name').value = agent.display_name || '';
   $('agent-soul').value = agent.soul || '';
   $('agent-latency').value = agent.latency_seconds ?? 0;
+  $('agent-engine').value = agent.brain?.provider === 'vertex' ? 'vertex' : agent.brain ? 'adk' : 'rules';
+  $('agent-engine').disabled = disabled || entity.kind !== 'restaurant';
+  $('adk-editor').hidden = !agent.brain;
+  $('agent-prompt').value = agent.brain?.instructions || '';
+  $('agent-prompt').disabled = disabled || !agent.brain;
+  $('agent-prompt').required = !disabled && !!agent.brain;
+  $('adk-provider-note').textContent = agent.brain?.provider === 'vertex'
+    ? 'Vertex requires the matching approved deployment profile, explicit deployment opt-in and a positive monetary allowance. Live calls can cost money.'
+    : 'Google ADK runs a scripted offline model fixture. This tests wiring and safety; it does not evaluate LLM understanding. No paid calls.';
+  $('load-adk-profile').disabled = disabled;
+  $('adk-profile').disabled = disabled;
+  $('adk-budget-fields').replaceChildren();
+  if (agent.brain) for (const [key, [label, min, max]] of Object.entries(adkBudgetLabels)) {
+    const field = element('label', label), input = element('input');
+    Object.assign(input, {id: `adk-budget-${key}`, type: 'number', min: String(min), max: String(max), required: true, value: agent.brain[key], disabled});
+    field.append(input); $('adk-budget-fields').append(field);
+  }
   for (const id of ['agent-name', 'agent-soul', 'agent-latency']) $(id).disabled = disabled;
   $('budget-fields').replaceChildren();
   for (const [key, [label, min, max]] of Object.entries(budgetLabels)) {
@@ -214,12 +241,16 @@ function renderAgentEditor() {
   $('agent-json').setAttribute('aria-label', disabled ? 'Inherited agent definition, read only. Choose override or shared template to edit.' : 'Editable agent definition JSON');
 }
 
-function renderEditor() {
-  const entity = currentEntity();
-  if (!entity) return;
+function renderEntityHeading(entity) {
   $('inspector-title').textContent = entity.name;
   $('entity-context').textContent = `${entity.id} · node ${entity.node} · grid ${entity.node % 32}, ${Math.floor(entity.node / 32)}`;
   $('entity-kind').textContent = roles[entity.kind] || entity.kind;
+}
+
+function renderEditor() {
+  const entity = currentEntity();
+  if (!entity) return;
+  renderEntityHeading(entity);
   $('entity-name').value = entity.name;
   $('entity-node').value = entity.node;
   $('entity-opening').value = hourWindow(entity.opening_hours);
@@ -366,6 +397,8 @@ function renderMetrics() {
         : `${provider} · ${reserved} reserved; actual usage unknown`;
     } else usageCaption = '0 reserved · local city policies';
   } else if (snapshot && usage.model_calls === null) usageCaption = `${provider} · actual usage unknown`;
+  if (usage.adk_offline_calls) usageCaption += ` · ${usage.adk_offline_calls} offline ADK calls, €0`;
+  if (usage.adk_vertex_dispatches) usageCaption += ` · ${usage.adk_vertex_dispatches} Vertex dispatches; $${Number(usage.adk_reserved_usd || 0).toFixed(4)} reserved`;
   const active = orders.filter(order => !['delivered', 'failed', 'rejected', 'cancelled'].includes(order.status));
   const delivered = orders.filter(order => order.status === 'delivered');
   const failed = orders.filter(order => ['failed', 'rejected', 'cancelled'].includes(order.status));
@@ -598,12 +631,20 @@ function renderInspection() {
   const agent = agentForEntity();
   const detail = inspectionAgentId === agent?.agent_id ? inspection : null;
   const identity = detail?.agent || agent || {};
+  const definition = identity.definition || identity;
+  if ($('inspection-tab').getAttribute('aria-selected') === 'true') renderEntityHeading(entity);
   const agentSection = element('section', null, 'inspector-section');
   agentSection.append(element('h3', 'Agent identity'), statList([
     ['Display name', identity.display_name || identity.definition?.display_name || entity.definition?.agent?.display_name || '—'],
     ['Role', identity.role || entity.kind],
+    ['Engine', definition.policy === 'adk' ? `Google ADK · ${definition.brain?.provider || 'offline'}` : 'Local rules'],
     ['Agent ID', identity.agent_id || 'Not provisioned'],
     ['Latency', `${identity.latency_seconds ?? identity.definition?.latency_seconds ?? entity.definition?.agent?.latency_seconds ?? snapshot.config?.agents?.[entity.kind]?.latency_seconds ?? '—'} seconds`],
+  ]));
+  if (definition.policy === 'adk' && agent?.adk_budget) agentSection.append(statList([
+    ['ADK model calls', `${agent.adk_budget.calls_reserved} / ${definition.brain.model_calls_per_run}`],
+    ['ADK tokens reserved', `${agent.adk_budget.tokens_reserved} / ${definition.brain.reserved_tokens_per_run}`],
+    ['ADK money reserved', `$${Number(agent.adk_budget.usd_reserved).toFixed(4)} / $${Number(definition.brain.usd_limit).toFixed(2)}`],
   ]));
   const ownStock = (snapshot.stock || []).filter(row => row.owner === entity.id || row.owner === agent?.agent_id);
   const stockSection = element('section', null, 'inspector-section');
@@ -1014,6 +1055,8 @@ function activateTab(tab, row) {
     item.tabIndex = selected ? 0 : -1;
     $(item.getAttribute('aria-controls')).hidden = !selected;
   }
+  if (tab.id === 'inspection-tab') renderInspection();
+  if (tab.id === 'definition-tab' && currentEntity()) renderEntityHeading(currentEntity());
 }
 
 for (const row of document.querySelectorAll('[role=tablist]')) {
@@ -1043,6 +1086,24 @@ $('agent-scope').addEventListener('change', () => {
   renderAgentEditor();
   $('entity-json').value = pretty(entity);
 });
+$('agent-engine').addEventListener('change', () => {
+  const next = $('agent-engine').value;
+  if (!captureEditor()) return;
+  const agent = agentDefinition();
+  if (next === 'adk') {
+    agent.brain = clone(agentTemplates['restaurant-v1'].brain);
+    agent.limits.tool_calls_per_event = 16;
+  } else agent.brain = null;
+  markDirty(); renderAgentEditor();
+});
+$('load-adk-profile').addEventListener('click', () => {
+  if (!captureEditor()) return;
+  const agent = agentDefinition(), template = agentTemplates['restaurant-v1'];
+  agent.soul = template.souls[$('adk-profile').value];
+  agent.brain.instructions = template.brain.instructions;
+  agent.display_name = $('adk-profile').value === 'cost' ? 'Mateo' : 'Elena';
+  markDirty(); renderAgentEditor();
+});
 for (const id of ['entity-json', 'agent-json']) $(id).addEventListener('input', () => { jsonDirty = true; editorDirty = false; markDirty(); });
 document.querySelector('.advanced').addEventListener('toggle', event => { if (event.target.open && editorDirty && !jsonDirty) captureEditor(); });
 $('apply-json').addEventListener('click', () => applyAdvanced());
@@ -1071,7 +1132,7 @@ window.addEventListener('beforeunload', event => { if (draftDirty) { event.preve
   renderMetrics(); renderEvidence();
   requestAnimationFrame(animate);
   try {
-    blueprint = await api('/api/supply/blueprint');
+    [blueprint, agentTemplates] = await Promise.all([api('/api/supply/blueprint'), api('/api/supply/agent-templates')]);
     draft = clone(blueprint.config);
     selectedId = draft.entities.find(entity => entity.kind === 'restaurant')?.id || draft.entities[0]?.id;
     agentEditScope = currentEntity()?.agent ? 'entity' : 'inherit';

@@ -21,7 +21,11 @@ down:
 	$(DOCKER) compose down
 
 # Read-only dashboard at /health; checks use delivery_test and zero model calls.
-.PHONY: health eval-agents
+.PHONY: health eval-agents test-adk demo-adk
+demo-adk:
+	$(DOCKER) compose run --rm --no-deps --build app python scripts/demo_adk_restaurants.py
+test-adk:
+	$(DOCKER) compose run --rm --no-deps --build app pytest -q tests/test_adk_restaurant.py -p delivery.health_report --health-report=artifacts/health/adk
 health:
 	$(DOCKER) compose run --rm --no-deps --build -e DELIVERY_SOURCE_REVISION=$$(git rev-parse HEAD) app python scripts/health_check.py
 eval-agents:

@@ -1,8 +1,11 @@
 # Agent memory: implementation and next steps
 
-Reviewed 2026-10-28. This is a custom Python/Postgres runtime. It does **not** run
-Google ADK, LangGraph, OpenAI Agents SDK or a managed Memory Bank. The references
-below guide the design; we have not benchmarked this project as state of the art.
+The durable memory boundary is implemented in Python/Postgres. The optional
+[restaurant ADK adapter](ADK-RESTAURANT.md) uses this typed recall through a scoped
+function tool; its ADK session is fresh per event and contains no other order's
+conversation. Its current model is an offline fixture. We do not run LangGraph,
+OpenAI Agents SDK or a managed Memory Bank. The references below guide the design;
+we have not benchmarked this project as state of the art.
 The default city remains local, with model providers disabled.
 
 ## What exists today

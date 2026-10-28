@@ -28,7 +28,7 @@ def test_reference_loads_without_database_or_provider_access(monkeypatch):
     assert response.status_code == 200
     body = response.json()
     ids = [page["id"] for page in body["pages"]]
-    assert len(ids) == len(set(ids)) == 19
+    assert len(ids) == len(set(ids)) == 20
     assert {"overview", "decisions", "capabilities", "enterprise-gcp", "memory"} <= set(ids)
     assert all(page["body"].startswith("# ") for page in body["pages"])
     assert "source_fingerprint" not in body  # Reference review is not a live health receipt.

@@ -8,7 +8,7 @@
     <link rel="stylesheet" href="/static/supply.css?v=26eb31fcc8c1" />
     <link rel="stylesheet" href="/static/workspace.css?v=6c6854d75885" />
     <script defer src="/static/workspace.js?v=887294277a47"></script>
-    <script defer src="/static/supply.js?v=b8820e2cf5ee"></script>
+    <script defer src="/static/supply.js?v=1909b49d5589"></script>
   </head>
   <body data-page="restaurants">
     <div id="workspace-shell">
@@ -29,7 +29,7 @@
           <h1>Restaurant operations</h1>
           <p>Household calls, kitchen stock and supermarket supply.</p>
         </div>
-        <span class="page-context">32 × 32 city · local rules</span>
+        <span class="page-context">32 × 32 city · local execution</span>
       </div>
       <section class="toolbar" aria-label="Simulation controls">
         <button id="start-run" class="primary" disabled>
@@ -145,8 +145,8 @@
         </form>
         <p class="settings-note">
           Edits form the next blueprint. Each run keeps its starting
-          definitions, stock, memory, and event history. All phone conversations
-          are simulated by local rules.
+          definitions, stock, memory, and event history. Calls travel through
+          local queues. Restaurants can use rules or the offline ADK tool loop.
         </p>
       </details>
       <section
@@ -306,7 +306,43 @@
                   required
               /></label>
               <label
-                >Soul / operating instructions<textarea
+                >Decision engine<select id="agent-engine">
+                  <option value="rules">Local rules</option>
+                  <option value="adk">
+                    Google ADK · offline model fixture
+                  </option>
+                  <option value="vertex" disabled>
+                    Google ADK · Vertex configured in advanced JSON
+                  </option>
+                </select></label
+              >
+              <div id="adk-editor" hidden>
+                <label
+                  >Restaurant profile<select id="adk-profile">
+                    <option value="speed">Elena · shortest lead time</option>
+                    <option value="cost">Mateo · lowest procurement fee</option>
+                  </select></label
+                >
+                <button id="load-adk-profile" type="button">
+                  Load profile prompts
+                </button>
+                <label
+                  >Role prompt<textarea
+                    id="agent-prompt"
+                    rows="6"
+                    maxlength="8192"
+                  ></textarea>
+                </label>
+                <div id="adk-budget-fields" class="budget-grid"></div>
+                <p id="adk-provider-note" class="scope-note">
+                  Google's real ADK Runner executes scoped tool calls. The
+                  offline model is a scripted test fixture; it demonstrates
+                  wiring and safety, and does not evaluate an LLM's
+                  understanding. No paid provider is enabled.
+                </p>
+              </div>
+              <label
+                >SOUL / decision preferences<textarea
                   id="agent-soul"
                   rows="4"
                   maxlength="8192"
@@ -324,8 +360,10 @@
               /></label>
               <div id="budget-fields" class="budget-grid"></div>
               <p class="scope-note">
-                The soul describes behavior. Server-owned tools and authority
-                remain fixed. Each entity receives its own memory and budget.
+                ADK receives the role prompt and SOUL as instructions. Rules
+                workers retain fixed policies. Permissions, stock, consent and
+                budgets are enforced independently. Each entity has its own
+                memory and budget.
               </p>
             </form>
             <details class="advanced">

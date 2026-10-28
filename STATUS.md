@@ -1,5 +1,24 @@
 # Status
 
+2026-10-29: Added Google ADK 2.13.0 restaurant agents with reusable templates,
+editable role prompts/SOUL, granular scoped functions and staged decisions. A
+separate restricted SQL executor denies legacy broad tools and raw stock/history
+access. Model calls and tool receipts persist outside effects transactions;
+saved plans survive worker death, while uncertain turns and stale observations
+fail closed. Two offline profiles selected different suppliers and each delivered
+one meal through 24 events and 24 scripted ADK calls, with zero retries, dead
+letters or paid calls, conserved stock and matching replay. Added a keyless native
+Vertex adapter behind a matching approved deployment profile, explicit opt-in and
+durable monetary admission; it remains disabled and was not invoked against GCP.
+The UI edits prompts, shows ADK identity/reservations, and lists 23 ADK checks in
+Health. Verified 465 tests, Ruff, mypy over 46 modules, host JavaScript syntax,
+20 documentation chapters/67 linked sources, desktop/375px browser behavior,
+12 role scenarios/49 criteria twice with matching outcomes and six offline judge
+cases. The Python-only health image still records Node syntax as unavailable;
+host syntax passed. No GCP resources were created. See docs/ADK-RESTAURANT.md and
+docs/evidence/adk-restaurants-local.json. `make test-adk` runs the isolated checks;
+`make demo-adk` retains a small local comparison without changing the blueprint.
+
 2026-10-28: Replaced unbounded Madrid map gestures with an explicit Overview /
 Explore interaction. Overview preserves normal page scrolling and marker clicks;
 Explore enables bounded pan/zoom and Escape exits without resetting the view.

@@ -20,7 +20,9 @@ authenticated scopes, typed selective recall, budgets and local scenario evals.
 The optional cloud component is an IAM-authenticated **Cloud Run recovery judge
 calling a Google publisher model through Vertex REST**. It can veto a locally
 computed candidate; it cannot invent a route, change stock or execute a delivery.
-Google ADK, Agent Runtime, managed Memory Bank and Agent Gateway are not deployed.
+The [restaurant adapter](ADK-RESTAURANT.md) now runs Google ADK locally with granular
+tools and an explicitly offline model double. Managed Agent Runtime, Memory Bank
+and Agent Gateway are not deployed; restaurant Gemini calls are not enabled.
 
 Google's current product documentation uses **Gemini Enterprise Agent Platform**
 and **Agent Runtime**; older Agent Engine/Vertex AI names and API resource names
@@ -53,7 +55,7 @@ consumer or a bounded task, with external state and restart-safe ownership.
 [Cloud Run agent resource choices](https://docs.cloud.google.com/run/docs/ai-agents),
 [billing behavior](https://docs.cloud.google.com/run/docs/configuring/billing-settings).
 
-For an ADK implementation, pin a tested framework/SDK version and dependencies.
+The local restaurant implementation pins ADK 2.13.0 and compatible SDK dependencies.
 Keep our role definition, authenticated tool boundary and queue protocol as the
 business contract; ADK becomes the reasoning adapter. Do not replace those
 contracts with a prompt or a framework's implicit shared state. Google's

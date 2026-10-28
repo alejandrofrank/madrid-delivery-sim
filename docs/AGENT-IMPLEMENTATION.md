@@ -8,14 +8,18 @@ illustrative ADK design. Start with this document, then read the
 ## The agent object
 
 An agent is a frozen `LocalAgent` containing an authenticated `AgentScope`, a
-validated `RoleSpec`, its scoped database connection and, for an explicitly enabled
+validated `RoleSpec`, its scoped database identity and, for an explicitly enabled
 GCP judge, a gateway origin. Its public work loop is `claim()` → `process(event)`.
 The shared class is in [agent_runtime.py](../src/delivery/agent_runtime.py).
 `create_inventory_agent` is an alias of `create_agent`, not a separate framework.
 
-Most agents use fixed Python decision policies. Inventory arithmetic, sourcing,
-consent, route selection and custody are enforced by domain code and SQL. Only
-the optional recovery judge calls a Google model. The city is a realistic test
+Most agents use fixed Python decision policies. Restaurants can instead select
+the [Google ADK adapter](ADK-RESTAURANT.md), with editable prompts/SOUL and granular
+tools. Its current model is a scripted offline fixture; Gemini is not enabled.
+Inventory arithmetic, sourcing,
+consent, route selection and custody are enforced by domain code and SQL. The
+recovery judge is the previously live-verified Google model path; restaurants now
+also have a disabled-by-default, budgeted native Vertex adapter. The city is a realistic test
 environment for those boundaries; running a city is not itself an LLM workload.
 
 | Building block | Actual implementation | What it guarantees |
@@ -69,9 +73,12 @@ has a separate fixed `systemInstruction` and `PROMPT_VERSION` in
 proof of the exact model prompt. Cloud experiments must retain the gateway prompt
 version/image digest as well as the local role definition hash.
 
-A future ADK adapter would deliberately assemble trusted role instructions,
-scoped observations, recall and approved tool wrappers. That adapter is not
-implemented. Adding one must preserve these independent authorization checks.
+The restaurant ADK adapter assembles platform instructions, the frozen role prompt
+and SOUL, then supplies scoped tools and current-order recall. Its two offline
+profiles demonstrate that instructions reach the actual ADK function-calling loop.
+The scripted model implements those fixture strategies; this is not evidence of
+generative-model quality. Permissions and budgets remain enforced independently.
+Other roles and the cloud judge keep the behavior described above.
 
 ## Roles, namespaces and tools
 
@@ -89,6 +96,11 @@ prefixed exactly as their runtime registry names indicate.
 | Household | Entity ID | `supply.read/command` | `household.order` |
 | Restaurant | Entity ID | `supply.read/command` | `restaurant.order` |
 | Market | Entity ID | `supply.read/command` | `market.request` |
+
+That table describes the default deterministic supply workers. An ADK restaurant
+uses `restaurant.*` capabilities listed in the [ADK chapter](ADK-RESTAURANT.md)
+and a separate restricted PostgreSQL group. It cannot call `supply.command` or
+read the legacy broad supply context. Its typed memory contract remains unchanged.
 
 Workflow roles use `queue.publish` within their topic/recipient policy. Supply
 commands produce a fixed SQL outbox; the agent cannot choose arbitrary recipients.

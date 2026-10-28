@@ -40,6 +40,7 @@ current 442-test regression evidence.
 | [Agent implementation](docs/AGENT-IMPLEMENTATION.md) | Exact factory, editable definitions/SOUL, role tools, authenticated scopes, event transactions, memory and budgets |
 | [GCP components](docs/GCP-COMPONENTS.md) | Every Terraform resource, authentication/model request path, service sizing and retained-vs-billable lifecycle |
 | [Enterprise architecture](docs/ENTERPRISE-GCP.md) | Current Google guidance, ADK/runtime choices, security/governance, durable execution, cost, eval/release gates and prioritized gaps |
+| [ADK restaurant](docs/ADK-RESTAURANT.md) | Reusable prompts/SOUL, scoped granular tools and reproducible offline Google ADK verification |
 | [Operations and live evidence](docs/GCP-AI.md) | Start/status/stop and dated verification, with no claim that a past receipt is current cloud status |
 
 The guides distinguish implemented behavior from proposed enterprise work. They
