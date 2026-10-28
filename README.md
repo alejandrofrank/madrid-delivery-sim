@@ -23,6 +23,10 @@ work without external services. The existing `/docs` remains the API reference.
 See [maintaining the documentation website](docs/DOCUMENTATION-SITE.md).
 The [local website verification record](docs/evidence/documentation-local.json)
 retains the 409-test source fingerprint, scenario results and browser checks.
+The newer [durable inference verification record](docs/evidence/durable-inference-local.json)
+retains 442 passing tests, physical worker crash recovery, repeatable scenarios
+and the seven tool-generated diagrams. Read the
+[request/result protocol](docs/DURABLE-INFERENCE.md) for retry and isolation guarantees.
 
 | Read in order | What it explains |
 | --- | --- |

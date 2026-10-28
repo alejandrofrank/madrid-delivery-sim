@@ -1,0 +1,71 @@
+{
+  "verified_at": "2026-10-28T19:03:08.187357+00:00",
+  "mode": "local-only-fake-provider",
+  "source_fingerprint": "a0132bb482433754ceb9c4e3d803387a16ea87ca593b9eef7b8d01b772ae6535",
+  "source_changed_during_checks": false,
+  "verified_code_commits": ["8099ae9", "fcab855"],
+  "test_receipt_id": "79c9d17a-2d99-43e0-88e7-2465ed5d7509",
+  "tests": {"total": 442, "passed": 442, "failed": 0, "skipped": 0},
+  "inference_test_cases": {"runtime": 9, "durable_protocol": 6, "crash_recovery": 21},
+  "physical_process_death": {
+    "mechanism": "Worker subprocess exits with os._exit(73); replacement reclaims the persisted event",
+    "checkpoints": [
+      "after_prepare", "after_dispatch", "before_invoke", "after_response",
+      "before_result_save", "after_result_save", "before_apply",
+      "after_apply_before_ack", "after_apply"
+    ],
+    "provider_io_checks": [
+      "No connections remain for the scoped worker login",
+      "Another connection can acquire the run advisory lock",
+      "Another connection can lock the source event row"
+    ],
+    "recovery_checks": [
+      "Prepared requests can dispatch once after reclaim",
+      "Saved results are reused without another provider call or reservation",
+      "Unknown dispatch outcomes are denied without resend",
+      "Effects, memory, outgoing events, applied receipt and ACK commit atomically",
+      "Completed work cannot be claimed again",
+      "Concurrent owners and late old-owner saves cannot duplicate dispatch or overwrite a terminal result",
+      "Changed simulated time or typed recall rejects prepared inputs before dispatch admission",
+      "Stale saved approvals cannot override fresh business facts",
+      "Legacy model-call records retain their charge and are not resent",
+      "Malformed result fields, stale leases, raw table access and cross-role access are denied"
+    ]
+  },
+  "ruff": "passed",
+  "mypy": {"status": "passed", "source_modules": 42},
+  "host_javascript_syntax": "passed",
+  "python_image_javascript_check": "unavailable: Node is not installed; host syntax and browser checks passed",
+  "role_scenarios": {
+    "passed": 12, "total": 12, "criteria_passed": 49, "criteria_total": 49,
+    "seed": 731, "repetitions": 2, "business_outcomes_match": true,
+    "outcome_hash": "82fe99a3708041e8644823753112c5cbacada05eeb1a6d315c6aa909a4d5423f"
+  },
+  "offline_judge_baseline": {"passed": 6, "total": 6, "model_calls": 0, "hard_policy_violations": 0},
+  "health_freshness": {"tests": "current", "static_checks": "current", "scenarios": "current", "judge": "current"},
+  "documentation": {
+    "chapters": 19, "catalogued_source_files": 57, "documentation_tests": 18,
+    "local_links": "resolved", "vendor_hashes": "passed",
+    "diagrams": 7, "generator": "D2 0.9.0", "layered_layout": "ELK 0.12.0",
+    "native_svg_labels": true, "offline_source_and_asset_hashes": "passed",
+    "byte_identical_regeneration": "passed"
+  },
+  "browser": {
+    "all_seven_diagrams_loaded": true, "diagram_render_failures": 0,
+    "expansion_zoom_and_fit": "passed", "d2_source_disclosure": "passed",
+    "local_chapter_search": "passed", "chapter_navigation": "passed",
+    "horizontal_overflow": false, "console_errors": 0,
+    "ui_preview": "artifacts/architecture-ui.png",
+    "diagram_preview": "artifacts/durable-inference-diagram.png"
+  },
+  "cloud_resources_created": 0,
+  "paid_model_calls": 0,
+  "limits": [
+    "Unknown external outcomes trade availability for no automatic resend; provider execution or billing is not exactly-once",
+    "Model admission is a per-run call/token allowance, not a project-wide currency cap",
+    "Crash recovery expires the persisted lease in the test controller instead of waiting thirty wall-clock seconds",
+    "The worker recovery path is verified; an automatic supervisor for abrupt controller death remains future work",
+    "A fake provider tests the protocol, not live model quality or GCP integration",
+    "Desktop browser behavior was checked; local receipts are not signed attestations"
+  ]
+}

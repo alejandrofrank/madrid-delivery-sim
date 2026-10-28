@@ -1,5 +1,27 @@
 # Status
 
+2026-10-28: Closed the first enterprise inference gap for the optional recovery
+judge. Immutable requests, single dispatch admission, saved results and fenced
+application now surround provider I/O with short committed phases; the network
+call holds no worker SQL connection. Saved results survive reclaim without another
+call or budget reservation. Unknown dispatches fail closed without automatic
+resend; fresh facts, typed memory and execution gates still control application.
+Twenty-one crash/recovery integration cases include real process termination at
+nine boundaries, competing workers, late saves, stale inputs, legacy calls,
+malformed receipts and cross-role denial. Verified 442 tests, Ruff, mypy over
+42 modules, twelve role scenarios/49 criteria twice with matching outcomes and
+six offline judge cases. All evidence is current for the tested source fingerprint.
+No paid calls or GCP resources were used. The Python-only image reports Node
+syntax as unavailable; host syntax and browser checks passed.
+
+The architecture UI now uses a compact, restrained reference layout and seven
+D2/ELK-generated diagrams with native SVG labels, routed connectors, source
+inspection, expansion and zoom. Nineteen chapters include the durable inference
+protocol and its availability/spend trade-off. All seven diagrams loaded in the
+browser without render failures, console errors or horizontal page overflow.
+Pinned diagram sources and offline asset verification are committed. See
+docs/DURABLE-INFERENCE.md and docs/evidence/durable-inference-local.json.
+
 2026-10-28: Added the local architecture website at `/architecture`, following
 Scrapmarket's topic-oriented engineering reference. Eighteen searchable chapters,
 an interactive component inspector, six rendered diagrams, eight decision records,

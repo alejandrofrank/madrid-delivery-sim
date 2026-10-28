@@ -9,6 +9,8 @@ effects, memory, outbox and ACK together. Saved results survive worker death wit
 another call or budget charge. Uncertain dispatches fail closed without automatic
 resend. Local verification includes physical process termination, concurrent owners,
 stale results, role isolation and legacy receipts, using a fake provider only.
+The full 442-test suite passed, with twelve role scenarios/49 criteria repeated
+twice with matching outcomes and six offline judge cases; no paid calls were made.
 See [request protocol and recovery policy](docs/DURABLE-INFERENCE.md).
 
 Architecture website slice: `/architecture` provides nineteen numbered chapters,
