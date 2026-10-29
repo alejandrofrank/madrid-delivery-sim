@@ -6,7 +6,7 @@ p {margin:6px 0;color:var(--ui-muted);} .note {font-size:12px;max-width:1000px;m
 table {border-collapse:collapse;width:100%;white-space:nowrap;font-size:13px;}
 th,td {padding:12px;text-align:left;border-bottom:1px solid var(--ui-line);}
 th {font-size:12px;letter-spacing:.04em;text-transform:uppercase;color:var(--ui-muted);font-weight:normal;}
-.profile {margin:20px 0 32px;} .profile-#main > header {display:flex;justify-content:space-between;gap:16px;align-items:center;margin-bottom:12px;}
+.profile {margin:20px 0 32px;} .profile-header {display:flex;justify-content:space-between;gap:16px;align-items:center;margin-bottom:12px;}
 .turn {border:1px solid var(--ui-line);background:var(--ui-surface);margin:8px 0;}
 summary {padding:12px;cursor:pointer;} .turn-body {padding:0 16px 16px;border-top:1px solid var(--ui-line);}
 .pill {display:inline-block;border:1px solid var(--ui-line);padding:2px 6px;font:11px var(--ui-mono);margin-right:8px;}
@@ -17,7 +17,7 @@ pre {white-space:pre-wrap;overflow-wrap:anywhere;word-break:break-word;margin:8p
 .chat {border-left:1px solid var(--ui-line);padding:6px 12px;margin:8px 0;}
 .chat-label {font-size:12px;color:var(--ui-muted);} .memory {border:1px solid var(--ui-line);padding:10px;margin:6px 0;}
 #route-evidence {border-bottom:1px solid var(--ui-line);padding-bottom:24px;margin-bottom:24px;}
-#route-evidence > .profile-#main > header {margin-bottom:8px;} #route-state {font-size:12px;}
+#route-evidence > .profile-header {margin-bottom:8px;} #route-state {font-size:12px;}
 .cell-note {display:block;margin-top:4px;color:var(--ui-muted);font-size:12px;}
 .routing-arms td {vertical-align:top;} .routing-arms th:first-child {min-width:170px;}
 .route-profile {margin:18px 0;} .route-profile h3 {margin:0;}
@@ -34,3 +34,31 @@ pre {white-space:pre-wrap;overflow-wrap:anywhere;word-break:break-word;margin:8p
 .route-turn > summary {font-size:12px;line-height:1.7;overflow-wrap:anywhere;}
 .route-turn .table-wrap {margin:10px 0;} .paired-differences {margin:12px 0 20px;}
 @media(max-width:700px) {main{padding:16px;}#main > header,.profile-header{align-items:flex-start;flex-direction:column;}.tool{grid-template-columns:1fr;gap:2px;}}
+
+.profile-header {display:flex;justify-content:space-between;gap:16px;align-items:center}
+.live-trace {border:1px solid var(--ui-line);background:var(--ui-surface);padding:20px;margin:24px 0}
+.trace-filter {display:flex;align-items:center;gap:8px;color:var(--ui-muted);font-size:12px}
+.trace-summary {display:flex;flex-wrap:wrap;gap:16px;border-bottom:1px solid var(--ui-line);padding:0 0 16px;color:var(--ui-muted);font:12px var(--ui-mono)}
+.trace-summary:empty {display:none}
+.timeline {list-style:none;margin:0;padding:0}
+.timeline-step {position:relative;border-bottom:1px solid var(--ui-line);padding:20px 0 20px 44px;margin:0}
+.timeline-step:last-child {border-bottom:0}
+.step-heading {display:flex;align-items:baseline;gap:12px}
+.step-heading h3 {margin:0;font-size:15px;font-weight:600;overflow-wrap:anywhere}
+.step-number {position:absolute;left:0;top:20px;color:var(--ui-accent);font:12px/24px var(--ui-mono)}
+.step-kind {color:var(--ui-muted);font-size:12px;min-width:55px}
+.step-meta {display:flex;flex-wrap:wrap;gap:16px;font:12px var(--ui-mono);color:var(--ui-muted);margin:10px 0}
+.step-summary {color:var(--ui-ink);max-width:75ch;line-height:1.6}
+.timeline-step>details>summary {padding:12px 0 0;color:var(--ui-accent);font-size:12px}
+.trace-empty {padding:40px 16px;text-align:center}
+.trace-empty h3 {font-size:17px;margin:0 0 8px}
+.trace-empty p {max-width:60ch;margin:0 auto}
+.trace-empty nav {display:flex;flex-wrap:wrap;justify-content:center;gap:16px;margin-top:20px}
+.trace-empty a {display:inline-flex;align-items:center;min-height:36px}
+.retained-evidence {border-top:1px solid var(--ui-line);padding-top:8px}
+.retained-evidence>summary {font-size:15px;padding:16px 0}
+.retained-evidence .memory,.retained-evidence .agent-building-blocks,.retained-evidence .route-receipts {border-width:0 0 1px;background:transparent}
+.call.timeline-step {padding-left:0}
+.call h4 {font:13px var(--ui-mono);line-height:1.7;margin:0}
+[hidden] {display:none!important}
+@media(max-width:600px){.live-trace{padding:16px}.profile-header{align-items:flex-start;flex-direction:column}.timeline-step{padding-left:32px}.step-heading{flex-wrap:wrap;gap:4px 12px}.step-heading h3{width:100%}.step-meta{gap:8px;font-size:12px}}

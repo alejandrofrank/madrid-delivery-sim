@@ -7,7 +7,7 @@ const option = (name, fallback) => args.includes(name) ? args[args.indexOf(name)
 const base = option('--url', 'http://127.0.0.1:8021').replace(/\/$/, '');
 const phase = option('--phase', 'after');
 if (args.includes('--help')) {
-  console.log('Usage: node scripts/screenshot_ui.ts [--url URL] [--phase NAME] [--out PATH] [--only flow,supply,lab,health,agent-traces,documentation,madrid] [--width N --height N] [--runs JSON_FILE] [--check]');
+  console.log('Usage: node scripts/screenshot_ui.ts [--url URL] [--phase NAME] [--out PATH] [--only flow,supply,lab,health,agent-traces,documentation,madrid] [--width N --height N] [--runs JSON_FILE] [--trace-source delivery --trace-agent AGENT_ID] [--check]');
   process.exit(0);
 }
 if (!/^[a-z0-9-]+$/.test(phase)) throw Error('Use a simple phase name, such as before or after.');
@@ -54,6 +54,10 @@ let browser;
     await page.setViewportSize({width:sizes[0][1], height:sizes[0][2]});
     const target = new URL(base + route);
     if (runs[name]) target.searchParams.set('run', runs[name]);
+    if (name === 'agent-traces' && option('--trace-agent','')) {
+      target.searchParams.set('source',option('--trace-source','delivery'));
+      target.searchParams.set('agent',option('--trace-agent',''));
+    }
     const response = await page.goto(target.href, {waitUntil:'domcontentloaded'});
     await page.waitForSelector(ready, {state:'attached', timeout:30000});
     await page.evaluate(() => document.fonts.ready);

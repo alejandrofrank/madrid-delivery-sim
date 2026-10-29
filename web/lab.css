@@ -328,3 +328,8 @@ footer {
     scroll-behavior: auto !important;
   }
 }
+
+.inventory-empty {padding:40px 24px;margin:16px 0;border:1px dashed var(--ui-strong-line);color:var(--muted);text-align:center}
+.inventory-empty:not([hidden]) + #city {display:none}
+#city {background:var(--bg)}
+[hidden] {display:none!important}

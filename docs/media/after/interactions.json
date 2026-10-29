@@ -1,0 +1,29 @@
+{
+  "results": [
+    {
+      "name": "Delivery roster filters, map selection and trace navigation",
+      "passed": true
+    },
+    {
+      "name": "Restaurant selection, filters, trace and separate definitions",
+      "passed": true
+    },
+    {
+      "name": "Inventory checkpoint selection and store inspection",
+      "passed": true
+    },
+    {
+      "name": "Architecture flow, component links and reduced motion",
+      "passed": true
+    },
+    {
+      "name": "Madrid roster, selection and map after switching views",
+      "passed": true
+    },
+    {
+      "name": "All pages fit narrow screens and expose current navigation",
+      "passed": true
+    }
+  ],
+  "errors": []
+}
