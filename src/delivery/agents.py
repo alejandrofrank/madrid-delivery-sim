@@ -8,9 +8,15 @@ from psycopg.types.json import Jsonb
 from delivery.customer_service import Advice, refund_policy
 from delivery.db import Connection
 from delivery.dispatch_optimizer import Candidate, optimize_dispatch
-from delivery.dispatch_policy import assignment_score, fair_ranks, load_policy, operating_cost
+from delivery.dispatch_policy import (
+    assignment_score,
+    fair_ranks,
+    load_policy,
+    operating_cost,
+    prioritize_deadlines,
+)
 from delivery.queue import Event, publish
-from delivery.world import ENERGY_PER_KM, World, position, route_progress, trace
+from delivery.world import ENERGY_PER_KM, World, depart_at, position, route_progress, trace
 
 
 class Dispatcher:
@@ -77,7 +83,14 @@ class Dispatcher:
                     selected.append(chosen)
                     used.add(chosen.courier_id)
         else:
-            selected = list(optimize_dispatch(candidates))
+            selected = list(
+                optimize_dispatch(
+                    prioritize_deadlines(
+                        candidates,
+                        [o["id"] for o in pending],
+                    )
+                )
+            )
         orders_by_id = {o["id"]: o for o in pending}
         couriers_by_id = {c["id"]: c for c in couriers}
         for chosen in selected:
@@ -111,7 +124,7 @@ class Dispatcher:
                 producer="dispatcher",
                 topic="courier.assigned",
                 payload={"order_id": order["id"], "courier_id": courier["id"]},
-                key=f"assignment:{order['id']}",
+                key=f"assignment:{order['id']}:{order['version'] + 1}",
                 trace_id=order["id"],
                 parent_id=event.id,
                 due_sim=sim,
@@ -126,7 +139,7 @@ class Dispatcher:
                 {
                     "rule": policy.strategy,
                     "objective": (
-                        "max served; min generalized seconds; longest idle/fewer jobs"
+                        "max served; earliest deadlines; min cost; longest idle/fewer jobs"
                         if policy.strategy == "min_cost"
                         else "earliest completion, then courier ID"
                     ),
@@ -176,17 +189,8 @@ class Courier:
             ).fetchone()
             if not row:
                 return
-            route = row["reposition_route"]
-            delay = max(0, row["sim_time"] - route["start_at"])
-            for field in (
-                "start_at",
-                "pickup_arrival_at",
-                "pickup_at",
-                "delivery_arrival_at",
-                "end_at",
-            ):
-                route[field] += delay
-            route["points"] = [[x, y, t + delay] for x, y, t in route["points"]]
+            delay = max(0, row["sim_time"] - row["reposition_route"]["start_at"])
+            route = depart_at(row["reposition_route"], row["sim_time"])
             if route["end_at"] + 600 > min(row["duration"], row["shift_end"]):
                 conn.execute(
                     "UPDATE couriers SET status='idle',reposition_route=NULL "
@@ -231,18 +235,68 @@ class Courier:
                 event=event.id,
             )
             return
+        order = conn.execute(
+            """SELECT o.*,r.sim_time,r.duration,c.shift_end FROM orders o
+               JOIN runs r ON r.id=o.run_id
+               JOIN couriers c ON c.run_id=o.run_id AND c.id=o.courier
+               WHERE o.run_id=%s AND o.id=%s AND o.courier=%s AND o.status='assigned'
+               AND c.status='reserved' FOR UPDATE OF o,c""",
+            (event.run_id, event.payload["order_id"], courier),
+        ).fetchone()
+        if not order:
+            return
+        route = depart_at(order["route"], order["sim_time"], order["ready_sim"])
+        if route["end_at"] > min(order["duration"], order["shift_end"]):
+            conn.execute(
+                "UPDATE orders SET status='pending',courier=NULL,assigned_sim=NULL,route=NULL,"
+                "route_m=0,cost_eur=0,version=version+1 WHERE run_id=%s AND id=%s",
+                (event.run_id, order["id"]),
+            )
+            conn.execute(
+                "UPDATE couriers SET status='idle' WHERE run_id=%s AND id=%s",
+                (event.run_id, courier),
+            )
+            publish(
+                conn,
+                run_id=event.run_id,
+                producer="courier",
+                topic="courier.available",
+                payload={"courier_id": courier, "order_id": order["id"]},
+                key=f"assignment-cancelled:{event.id}",
+                trace_id=event.trace_id,
+                parent_id=event.id,
+                due_sim=order["sim_time"],
+            )
+            trace(
+                conn,
+                str(event.run_id),
+                order["sim_time"],
+                "courier",
+                "assignment_cancelled",
+                {"reason": "delayed handoff exceeds shift/run horizon", "distance_m": 0},
+                order["id"],
+                courier,
+                event.id,
+            )
+            return
         conn.execute(
-            "UPDATE couriers SET status='to_pickup' WHERE run_id=%s AND id=%s "
-            "AND status='reserved'",
+            "UPDATE orders SET route=%s WHERE run_id=%s AND id=%s",
+            (Jsonb(route), event.run_id, order["id"]),
+        )
+        conn.execute(
+            "UPDATE couriers SET status='to_pickup' WHERE run_id=%s AND id=%s",
             (event.run_id, courier),
         )
         trace(
             conn,
             str(event.run_id),
-            event.due_sim,
+            order["sim_time"],
             "courier",
             "accepted_route",
-            {"rule": "follow approved road route; wait for preparation before pickup"},
+            {
+                "rule": "follow approved road route; depart after acceptance; wait for preparation",
+                "departure_sim": route.get("start_at", route["points"][0][2]),
+            },
             event.payload["order_id"],
             courier,
             event.id,
@@ -293,7 +347,7 @@ class Courier:
             route = order["route"]
             assignment = conn.execute(
                 "SELECT id FROM events WHERE run_id=%s AND topic='courier.assigned' "
-                "AND trace_id=%s",
+                "AND trace_id=%s ORDER BY id DESC LIMIT 1",
                 (run, order["id"]),
             ).fetchone()
             parent_id = assignment["id"] if assignment else None

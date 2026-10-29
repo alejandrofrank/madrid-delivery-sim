@@ -150,7 +150,7 @@ function renderMetrics() {
   $("empty-distance").textContent = measured(m.empty_km, " km");
   $("reposition-distance").textContent = measured(m.reposition_km, " km");
   const policy = state.dispatch_policy || run.dispatch_policy;
-  const strategy = policy?.strategy === "min_cost" ? "Lowest estimated cost"
+  const strategy = policy?.strategy === "min_cost" ? "Deadline + cost"
     : policy?.strategy === "legacy" || !policy ? "Earliest completion (legacy)" : human(policy.strategy);
   const reposition = policy?.reposition === "demand_aware" ? "Move toward demand" : "Stay at drop-off";
   $("dispatch-policy-summary").textContent = `Run policy: ${strategy} · ${reposition}`;

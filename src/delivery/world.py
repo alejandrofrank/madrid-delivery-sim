@@ -215,6 +215,31 @@ def route_progress(route: dict[str, Any], sim: float) -> tuple[float, float]:
     return empty + loaded, empty
 
 
+def depart_at(route: dict[str, Any], sim: int, ready: int | None = None) -> dict[str, Any]:
+    """Rebase an approved, not-yet-started route to its actual queue acceptance."""
+    start = route.get("start_at", route["points"][0][2])
+    delay = max(0, sim - start)
+    shifted = dict(route)
+    if ready is None or "pickup_arrival_at" not in route:
+        pickup_shift = delay
+    else:
+        pickup_shift = max(route["pickup_arrival_at"] + delay, ready) + 60 - route["pickup_at"]
+    for field in ("start_at", "pickup_arrival_at"):
+        if field in shifted:
+            shifted[field] += delay
+    for field in ("pickup_at", "delivery_arrival_at", "end_at"):
+        if field in shifted:
+            shifted[field] += pickup_shift
+    if ready is not None and "pickup_arrival_at" in shifted:
+        shifted["pickup_wait_seconds"] = max(0, ready - shifted["pickup_arrival_at"])
+        shifted["end_at"] = math.ceil(shifted["delivery_arrival_at"] + 45)
+    boundary = route.get("pickup_arrival_at", float("inf"))
+    shifted["points"] = [
+        [x, y, t + (delay if t <= boundary else pickup_shift)] for x, y, t in route["points"]
+    ]
+    return shifted
+
+
 def seed_locations(conn: Connection, world: World) -> None:
     """Static shared city, idempotent; no fabricated shops or graph fallback."""
     stores = json.loads((DATA / "stores.json").read_text(encoding="utf-8"))

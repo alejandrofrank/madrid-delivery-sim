@@ -474,3 +474,154 @@ def test_baseline_uses_synthetic_costs_and_fixed_mode_speeds_without_traffic() -
     assert score["vehicle_cost_seconds"] == pytest.approx(
         operating_cost(route["distance_m"], "bike") * 3600 / 12
     )
+
+
+@pytest.mark.integration
+def test_overdue_order_keeps_service_priority_when_fresh_demand_is_cheaper(
+    db_url: str, run_id: UUID, world: World, places: dict[str, Any]
+) -> None:
+    sim = 1000
+    pickup, destination = places["store"]["node"], places["customer"]["node"]
+    with connect(db_url) as conn:
+        other_store = conn.execute(
+            "SELECT * FROM locations WHERE kind='store' AND node<>%s ORDER BY id LIMIT 1",
+            (pickup,),
+        ).fetchone()
+        assert other_store
+        configure(conn, run_id, sim=sim)
+        add_courier(conn, run_id, world, places, "only-courier", pickup)
+        add_order(conn, run_id, places, "overdue", 0, 0)
+        conn.execute(
+            "UPDATE orders SET store=%s,due_sim=500 WHERE run_id=%s AND id='overdue'",
+            (other_store["id"], run_id),
+        )
+        add_order(conn, run_id, places, "fresh", sim, sim)
+    overdue_route = world.route(pickup, other_store["node"], destination, "bike", sim, 0)
+    fresh_route = world.route(pickup, pickup, destination, "bike", sim, sim)
+    overdue_score = assignment_score(overdue_route, "bike", sim, 500, DispatchPolicy())
+    fresh_score = assignment_score(fresh_route, "bike", sim, sim + 7200, DispatchPolicy())
+    assert overdue_route["pickup_distance_m"] > fresh_route["pickup_distance_m"]
+    assert overdue_score["total"] > fresh_score["total"] + 5000
+
+    assert assign(db_url, run_id, world, "overdue", sim)["courier"] == "only-courier"
+    with connect(db_url) as conn:
+        fresh = conn.execute(
+            "SELECT status,courier FROM orders WHERE run_id=%s AND id='fresh'", (run_id,)
+        ).fetchone()
+    assert fresh == {"status": "pending", "courier": None}
+
+
+@pytest.mark.integration
+def test_delayed_assignment_departs_after_ack_and_recomputes_preparation_wait(
+    db_url: str, run_id: UUID, world: World, places: dict[str, Any]
+) -> None:
+    start, pickup, destination = (
+        places["hub"]["node"],
+        places["store"]["node"],
+        places["customer"]["node"],
+    )
+    ready = math.ceil(world.path(start, pickup)[1] / SPEED_MPS["bike"]) + 300
+    with connect(db_url) as conn:
+        configure(conn, run_id)
+        add_courier(conn, run_id, world, places, "bike-1", start)
+        add_order(conn, run_id, places, "delayed-delivery", 0, ready)
+    original = assign(db_url, run_id, world, "delayed-delivery")
+    assert original["route"]["pickup_wait_seconds"] > 0
+    acknowledged = ready + 120
+    advance(db_url, run_id, acknowledged)
+    reserved = courier_state(db_url, run_id, "bike-1")
+    assert reserved["status"] == "reserved" and reserved["node"] == start
+    assert reserved["distance_m"] == reserved["empty_distance_m"] == 0
+    assert reserved["energy"] == 100 and reserved["operating_cost_eur"] == 0
+    assert [reserved["lon"], reserved["lat"]] == pytest.approx(world.coord(start))
+
+    accept(db_url, run_id, acknowledged)
+    with connect(db_url) as conn:
+        order = conn.execute(
+            "SELECT route FROM orders WHERE run_id=%s AND id='delayed-delivery'", (run_id,)
+        ).fetchone()
+    assert order
+    route = order["route"]
+    expected = world.route(start, pickup, destination, "bike", acknowledged, ready)
+    assert route["start_at"] == acknowledged
+    assert route["pickup_wait_seconds"] == 0
+    for field in ("pickup_arrival_at", "pickup_at", "delivery_arrival_at", "end_at"):
+        assert route[field] == pytest.approx(expected[field])
+    advance(db_url, run_id, acknowledged)
+    assert courier_state(db_url, run_id, "bike-1")["distance_m"] == 0
+    partial = acknowledged + math.floor(route["pickup_travel_seconds"] / 2)
+    advance(db_url, run_id, partial)
+    moved = courier_state(db_url, run_id, "bike-1")
+    assert moved["distance_m"] == pytest.approx((partial - acknowledged) * SPEED_MPS["bike"])
+    assert moved["empty_distance_m"] == pytest.approx(moved["distance_m"])
+    assert moved["completed_jobs"] == 0
+
+
+@pytest.mark.integration
+def test_infeasible_delayed_assignment_cancels_and_can_reassign_with_new_queue_event(
+    db_url: str, run_id: UUID, world: World, places: dict[str, Any]
+) -> None:
+    pickup, destination = places["store"]["node"], places["customer"]["node"]
+    planned = world.route(pickup, pickup, destination, "bike", 0, 0)
+    with connect(db_url) as conn:
+        configure(conn, run_id)
+        add_courier(conn, run_id, world, places, "bike-first", pickup)
+        add_courier(conn, run_id, world, places, "bike-backup", pickup)
+        conn.execute(
+            "UPDATE couriers SET shift_end=%s WHERE run_id=%s AND id='bike-first'",
+            (planned["end_at"] + 10, run_id),
+        )
+        conn.execute(
+            "UPDATE couriers SET status='offline' WHERE run_id=%s AND id='bike-backup'", (run_id,)
+        )
+        add_order(conn, run_id, places, "reassignable", 0, 0)
+    assert assign(db_url, run_id, world, "reassignable")["courier"] == "bike-first"
+    acknowledged = 30
+    advance(db_url, run_id, acknowledged)
+    accept(db_url, run_id, acknowledged)
+    with connect(db_url) as conn:
+        cancelled = conn.execute(
+            "SELECT status,courier,assigned_sim,route,route_m,cost_eur FROM orders "
+            "WHERE run_id=%s AND id='reassignable'",
+            (run_id,),
+        ).fetchone()
+        conn.execute(
+            "UPDATE couriers SET status='idle' WHERE run_id=%s AND id='bike-backup'", (run_id,)
+        )
+    assert cancelled == {
+        "status": "pending",
+        "courier": None,
+        "assigned_sim": None,
+        "route": None,
+        "route_m": 0,
+        "cost_eur": 0,
+    }
+    first = courier_state(db_url, run_id, "bike-first")
+    assert first["node"] == pickup and first["energy"] == 100
+    assert first["distance_m"] == first["empty_distance_m"] == first["operating_cost_eur"] == 0
+    assert first["completed_jobs"] == 0
+
+    queue = Queue(db_url)
+    retry = queue.claim("dispatcher", run_id, acknowledged, accepted_topics=("courier.available",))
+    assert retry and queue.process(retry, Dispatcher(world).handle)
+    with connect(db_url) as conn:
+        reassigned = conn.execute(
+            "SELECT courier,status,route FROM orders WHERE run_id=%s AND id='reassignable'",
+            (run_id,),
+        ).fetchone()
+        events = conn.execute(
+            "SELECT dedupe_key,payload FROM events WHERE run_id=%s "
+            "AND topic='courier.assigned' ORDER BY id",
+            (run_id,),
+        ).fetchall()
+    assert reassigned and reassigned["status"] == "assigned"
+    assert reassigned["courier"] == "bike-backup"
+    assert len(events) == len({event["dedupe_key"] for event in events}) == 2
+    assert [event["payload"]["courier_id"] for event in events] == ["bike-first", "bike-backup"]
+    accept(db_url, run_id, acknowledged)
+    advance(db_url, run_id, reassigned["route"]["end_at"])
+    backup = courier_state(db_url, run_id, "bike-backup")
+    first = courier_state(db_url, run_id, "bike-first")
+    assert backup["completed_jobs"] == 1
+    assert first["completed_jobs"] == first["distance_m"] == first["operating_cost_eur"] == 0
+    assert first["energy"] == 100

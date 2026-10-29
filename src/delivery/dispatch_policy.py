@@ -5,6 +5,7 @@ from typing import Any, Literal
 
 from pydantic import BaseModel, ConfigDict, Field
 
+from delivery.dispatch_optimizer import Candidate
 from delivery.world import COST_PER_KM
 
 
@@ -65,3 +66,28 @@ def fair_ranks(couriers: list[dict[str, Any]], salt: str) -> dict[str, int]:
         ),
     )
     return {c["id"]: rank for rank, c in enumerate(ordered)}
+
+
+def prioritize_deadlines(candidates: list[Candidate], order_ids: list[str]) -> list[Candidate]:
+    """After maximum cardinality, serve earliest deadlines before comparing cost.
+
+    Charging lateness only to selected jobs would make an already-late job ever
+    more expensive and starve it. Binary ranks encode lexicographic service
+    priority for the bounded batch. A unit dominates all possible economic costs;
+    within the same served order set the economic objective is unchanged.
+    """
+    if not candidates:
+        return []
+    ranks = {order: i for i, order in enumerate(order_ids)}
+    count = len(ranks)
+    cardinality = min(count, len({c.courier_id for c in candidates}))
+    scale = cardinality * max(c.cost for c in candidates) + 1
+    return [
+        Candidate(
+            c.order_id,
+            c.courier_id,
+            c.cost + ((1 << count) - (1 << (count - ranks[c.order_id] - 1))) * scale,
+            c.tie_break_rank,
+        )
+        for c in candidates
+    ]
