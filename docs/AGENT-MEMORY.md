@@ -3,7 +3,8 @@
 The durable memory boundary is implemented in Python/Postgres. The optional
 [restaurant ADK adapter](ADK-RESTAURANT.md) uses this typed recall through a scoped
 function tool; its ADK session is fresh per event and contains no other order's
-conversation. Its current model is an offline fixture. We do not run LangGraph,
+conversation. Its default model is an offline fixture; explicit paid experiments
+use native Gemini on Vertex and optional Jev routing. We do not run LangGraph,
 OpenAI Agents SDK or a managed Memory Bank. The references below guide the design;
 we have not benchmarked this project as state of the art.
 The default city remains local, with model providers disabled.
@@ -74,7 +75,56 @@ force a client to combine separate SQL statements into one transaction. The host
 operator API and fixed Python code remain trusted; agents have no arbitrary SQL,
 network or code tool. This is not an OS sandbox for hostile code.
 
-## Local verification
+## Selectable per-agent memory
+
+Each shared role template or individual entity can select a memory profile in
+`/restaurant-lab`. Entity overrides are frozen at run creation. Leaving the profile
+unset preserves legacy recall. A profile changes the context an agent receives,
+with these bounded choices:
+
+| Mode | Context returned to an ADK restaurant or Jev router | Useful when |
+| --- | --- | --- |
+| `none` | No prior facts | The current event and authoritative tools are sufficient |
+| `text` | Concise factual lines with source, version and expiry references | A few observations fit naturally in a short prompt |
+| `json` | Compact structured facts with a scope envelope and provenance | A small machine-readable record is sufficient |
+| `typed` | Canonical typed fact envelopes | Decisions need explicit revisions, relationships and expiry |
+
+All modes keep canonical typed writes and revision history for audit. `none`
+disables recall, not evidence retention. Text and JSON are projections of scoped
+facts, not an unrestricted scratchpad or a second source of truth. The model
+cannot pick a foreign namespace, write arbitrary JSON, fetch the whole chat or
+turn a memory statement into inventory authority. No vector database, embeddings,
+LLM summarizer or managed Memory Bank is provisioned by selecting a mode.
+
+Profiles cap the number of facts (1–8), complete UTF-8 representation bytes
+(256–8,192), and maximum fact lifetime (60–86,400 simulated seconds). Defaults are
+eight facts, 8 KiB and one hour. SQL applies role/order/request/attempt scope,
+expiry and the lower profile bounds before Python formats the result. Whole facts
+are omitted when they cannot fit; values and source references are never truncated
+or summarized. The lifetime setting caps a writer's requested TTL and cannot
+extend an existing shorter retention policy. Canonical facts remain available to
+the trusted stale-result fence even if the model sees a text or JSON projection.
+
+SQL wrappers retain the original public function identities and call private typed
+implementations. Agent identities cannot execute those private helpers to bypass
+the selected profile. Validation covers Python definitions and frozen database
+bindings. Historical agents without a profile keep their previous behavior.
+
+Sources: [memory profile and projections](../src/delivery/memory_profiles.py),
+[database profile enforcement](../sql/migrations/024_agent_memory_modes.sql),
+[profile and isolation checks](../tests/test_memory_profiles.py).
+
+## Current profile verification
+
+Verified 2026-10-29: 38 memory-profile checks passed, including all four views,
+mixed-scope rejection, byte/fact bounds, TTL clamping, retained history, legacy
+definition compatibility, frozen binding validation and denial of private SQL
+helpers. The full local suite passed 553 tests, with Ruff, mypy over 49 modules,
+host JavaScript syntax, twelve repeated role scenarios and six offline judge
+cases. No paid calls are used by that suite. The separate live routing comparison
+used typed recall in every arm; it does not compare memory-mode decision quality.
+
+## Historical local verification
 
 Verified 2026-10-28 (Europe/Madrid): the complete suite passed **307 tests**.
 Ruff, JavaScript syntax and mypy over 36 source files passed. Tests use real

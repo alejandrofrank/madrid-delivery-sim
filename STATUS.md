@@ -1,5 +1,39 @@
 # Status
 
+2026-10-29 (Jev routing and memory profiles): Added a durable Jev-first decision
+adapter for ADK restaurants. Editable prompts/SOUL drive action and supplier
+choices; confidence/margin, tool authority, stock, consent, queue effects and
+independent Jev/Vertex budgets remain enforced. Routine arrival/cooking events
+use no model. Shared role templates and individual entities can select none,
+text, compact JSON or typed recall, with fact/byte/TTL caps and unchanged scoped
+canonical audit history. The local editor and AI evidence page expose the frozen
+settings, model prompts, tools, memory, routes, probabilities, usage and latency.
+
+The six-arm real-provider comparison delivered four orders and failed its release
+gate. Speed matched outcomes with 23 versus seven Gemini calls, 0.011208962 versus
+0.002920592 USD known usage, and 37.634 versus 11.845 seconds wall time. Cost mode
+rejected an invented finish tool; reasoning mode rejected a 574-character summary
+against the 500-character contract. Neither applied its staged sourcing effects.
+Their savings are withheld. Jev explicitly requested Gemini for reasoning; all
+three live judgments escalated at the conservative threshold, so direct Jev
+execution remains local-fixture evidence only. A reviewed one-time continuation
+ran only the untouched plans and preserved prior failures, configurations, source
+header and cumulative accounting. No failed model request was repeated.
+
+Known provider usage totaled 0.045150294 USD; conservatively accounted reservations
+were 0.460544866 USD, below the 0.60 USD ceiling. Invoice reconciliation is pending.
+Billing is parked with the project and 15 free foundation resources retained;
+normal local UI has no Jev key, ADC mount or paid Vertex opt-in. See
+`docs/evidence/jev-routing-comparison.json` and `docs/ADK-RESTAURANT.md` for failed
+cases and the limits of this development comparison.
+
+Verified 553 local tests, Ruff, mypy over 49 modules, host JavaScript syntax,
+documentation/source links, twelve role scenarios repeated with matching outcomes
+and six offline judge cases. The Python-only health container records Node as
+unavailable; host syntax checks passed separately. Browser inspection covered
+memory/routing controls, retained comparisons, failed-case disclosures and a page
+with no horizontal overflow or console errors. The repository remains private.
+
 2026-10-29 (live ADK follow-up): Tested both editable restaurant SOULs with real
 Gemini 3.5 Flash-Lite on Vertex and Jev 1.14.0 ingredient relevance. Each profile
 delivered one synthetic pizza through 24 queue events with 25 Gemini calls,

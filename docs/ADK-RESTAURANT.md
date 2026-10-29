@@ -179,7 +179,7 @@ Cloud Run or managed-runtime hosting must be Terraform-owned before deployment;
 ADK names or sessions do not create IAM identities. No new GCP resource is required
 or provisioned by the offline checks.
 
-## Real Vertex and Jev comparison
+## Historical Vertex and Jev comparison
 
 The native restaurant worker stays local and impersonates a dedicated, keyless
 `restaurant-adk` service account in the isolated simulation project. Terraform
@@ -242,9 +242,9 @@ probe received HTTP 403 / PERMISSION_DENIED for `resourcemanager.projects.get`.
 
 These two synthetic orders prove integration and the intended SOUL distinction;
 they are not a general model-quality benchmark or proof of cost/latency savings
-from a Jev cascade. Both agents still invoke Gemini on routine arrival and cooking
-events. Routing those bounded, high-confidence cases through rules or Jev before
-escalating ambiguity to Gemini is a separate optimization that needs an A/B eval.
+from a Jev cascade. That baseline invokes Gemini on routine arrival and cooking
+events. The Jev-first implementation below compares that baseline with selective
+escalation on the same scenarios.
 One recovered receipt has no whole-run wall time; per-call latency and token
 metadata were durably retained and remain available.
 
@@ -269,6 +269,131 @@ could fail stale-state validation after a different query plan. Canonical orderi
 fixes that comparison while preserving version/quantity checks. A regression test
 rewrites physical stock rows without changing their business values; existing
 stale-stock tests continue to reject actual changes.
+
+## Jev-first decisions and bounded model selection
+
+Set `brain.routing.strategy` to `jev_first` in an ADK restaurant definition. The
+operator editor exposes the routing strategy, confidence and margin; advanced JSON
+also controls the pinned Jev model, router instructions, calls, tokens and money.
+Leaving routing unset preserves the existing ADK model tool loop. These settings
+are frozen with the agent at run creation; editing a template cannot change a live run.
+
+The execution path is:
+
+1. Physical ingredient-arrival and cooking events follow their single validated
+   protocol action without a model. This does not choose suppliers or substitutions.
+2. For an order, approval or shortage judgment, the worker retrieves only this
+   restaurant's current recipe, required pantry rows, public supplier quotes and
+   selected current-order memory. Household identity, raw call transcript, other
+   orders and supermarket stock are omitted from Jev's request.
+3. One Jev request evaluates three independent typed choices against those facts,
+   the editable role prompt and SOUL: direct versus Gemini, permitted action, and
+   quoted supplier versus abstention. It cannot invent tool names, models or URLs.
+4. Direct action requires confidence at least **0.85**, top-to-second probability
+   margin at least **0.20** on every relevant question, valid response shape and
+   locally supported evidence. Stock sufficiency, replacement consent and tool
+   authority remain mandatory. These thresholds are configurable starting values,
+   not a calibrated guarantee of correctness on this domain.
+5. Jev's request for reasoning, low certainty, unsupported action or an invalid/
+   missing provider response permits the separately budgeted Gemini tool loop.
+   An exhausted router budget or missing deployment permission fails closed.
+6. Both paths stage the same typed plan through the same granular tools. SQL
+   validates and commits effects, memory, outbox and ACK atomically. Jev never
+   contacts a supermarket directly or changes stock.
+
+The approved executor registry currently contains **no further model** and the
+frozen Gemini Vertex profile. Jev chooses whether that model is needed; it does
+not gain permission to choose a more expensive model, provider, region or identity.
+Adding another approved tier requires a reviewed adapter, deployment allowlist,
+tariff and eval cases. This keeps model selection editable within an explicit
+security and cost boundary.
+
+Before dispatch, Postgres stores the Jev request and reserves input bytes plus
+2,048 tokens at the pinned input tariff. A single durable router receipt is allowed
+per event. The result, probabilities, confidence, margin, executor, reason, known
+usage and latency are saved before downstream Gemini admission or effects. Network
+calls run outside transactions. Unknown usage keeps the full reservation. No
+provider retry or automatic resumption repeats a pending request after a crash.
+The ordinary saved-plan recovery path remains available after a complete result.
+
+This is currently a **restaurant** decision adapter. Other roles share selectable
+memory and enforcement but retain their existing deterministic or judge policy;
+they are not silently converted to autonomous Jev agents.
+
+Run the bounded matched comparison explicitly:
+
+```bash
+make gcp-vertex-start
+make demo-adk-routing
+make gcp-stop
+make gcp-status
+```
+
+It executes one order each for speed, cost and an explicitly requested fast-versus-
+cheap explanation, in baseline and cascade mode: six runs. Each pair uses the same
+SOUL, city seed, demand and typed memory. Baseline retains the prior initial Jev
+mozzarella relevance search; cascade uses Jev for decisions and optional relevance
+search only after Gemini escalation. This compares the two complete configurations,
+not an isolated causal effect of one provider. The combined admission allowance is
+$0.54 Vertex plus less than $0.01 Jev, within $0.60. The permanent experiment marker
+prevents repeat spending, even if its UI receipt is lost. The normal UI has no keys,
+ADC mount or paid deployment gate.
+
+[AI evidence](/agent-traces) exposes each arm's outcomes, provider counts, costs,
+wall time and routing decisions. A cost saving is reported only for a pair with
+matched supplier choice, delivery, queue, replay, stock and complete known usage.
+Provider medians have different call mixes; baseline legacy Jev search latency is
+an aggregate operation and is excluded from provider p50. One order per arm is a
+smoke comparison, not a statistically established quality or speed improvement.
+
+### Live routing result: 2026-10-29
+
+The complete six-arm comparison **failed its outcome gate**, with four meals
+delivered. The failure remains visible in `/agent-traces`; this is not a release
+approval for making the cascade the default.
+
+| SOUL | Baseline Gemini calls / cost / wall time | Jev-first Gemini calls / cost / wall time | Outcome |
+| --- | --- | --- | --- |
+| Speed | 23 / 0.011208962 USD / 37.634 s | 7 / 0.002920592 USD / 11.845 s | Both delivered; same supplier, conserved stock and matching replay |
+| Cost | 25 / 0.012906462 USD / 32.460 s | 6 / 0.002402218 USD / 10.369 s | Cascade rejected an invented `finish_finish_decision` tool; no applied sourcing effects |
+| Explain trade-off | 23 / 0.012891262 USD / 31.913 s | 6 / 0.002820798 USD / 12.448 s | Jev explicitly chose Gemini; its 574-character finish summary exceeded the 500-character contract |
+
+Costs include actual reported Vertex and Jev usage at the frozen tariffs. The
+failed runs' lower costs do not support a savings claim. Only the speed pair
+matched outcomes: its observed cost fell by 73.9% and wall time by 68.5%. These
+changes combine five no-model protocol events, Jev routing and less relevance
+searching; they cannot be attributed to Jev alone.
+
+All three live judgments escalated: speed confidence was 0.68, cost 0.56, and
+reasoning 0.84 with an explicit Gemini choice. The 0.85 direct-action threshold
+was not lowered after observing results. Direct Jev actions were verified with
+injected responses locally, **not established by these live trials**. Jev router
+latency was 208, 162 and 157 ms respectively. The provider-mix median in the
+operator table includes downstream Gemini calls and is a different measurement.
+
+After the cost failure, the original attempt stopped. A reviewed, one-time
+continuation dispatched only the two untouched reasoning plans, under the same
+six original configurations and cumulative ceilings. It did not retry a failed
+event, replace a run, reset a budget or overwrite earlier evidence. Hashes of the
+four preserved arms were checked before and after continuation. The second failure
+stopped that continuation; all six planned arms had then been attempted.
+
+Total known usage was **0.045150294 USD**, with **0.460544866 USD** conservatively
+accounted using reservations for admitted work, below the 0.60 USD ceiling. No
+usage was unknown. Invoice reconciliation remains pending. The retained summary
+is `docs/evidence/jev-routing-comparison.json`; full local model/tool receipts
+remain in `artifacts/adk-route-comparison.json`.
+
+The next quality gate is stronger model-visible tool constraints and bounded
+handling of malformed proposals, followed by a new, explicitly budgeted evaluation.
+Scope, consent, stock validation and summary limits must remain enforced. The
+existing failed examples must remain in the evaluation set; repeatedly rerunning
+until a green sample appears would conceal the failure rate.
+
+Sources: [Jev decision adapter](../src/delivery/jev_routing.py),
+[router admission and result schema](../sql/migrations/022_jev_decision_routing.sql),
+[local failure/isolation checks](../tests/test_jev_routing.py),
+[matched comparison runner](../scripts/compare_agent_routing.py).
 
 Official deployment references: [Gemini model lifecycle](https://docs.cloud.google.com/gemini-enterprise-agent-platform/models/model-versions),
 [3.5 Flash-Lite capabilities](https://docs.cloud.google.com/gemini-enterprise-agent-platform/models/gemini/3-5-flash-lite),

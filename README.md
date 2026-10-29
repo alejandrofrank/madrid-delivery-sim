@@ -40,7 +40,7 @@ current 442-test regression evidence.
 | [Agent implementation](docs/AGENT-IMPLEMENTATION.md) | Exact factory, editable definitions/SOUL, role tools, authenticated scopes, event transactions, memory and budgets |
 | [GCP components](docs/GCP-COMPONENTS.md) | Every Terraform resource, authentication/model request path, service sizing and retained-vs-billable lifecycle |
 | [Enterprise architecture](docs/ENTERPRISE-GCP.md) | Current Google guidance, ADK/runtime choices, security/governance, durable execution, cost, eval/release gates and prioritized gaps |
-| [ADK restaurant](docs/ADK-RESTAURANT.md) | Reusable prompts/SOUL, scoped granular tools and reproducible offline Google ADK verification |
+| [ADK restaurant](docs/ADK-RESTAURANT.md) | Editable prompts/SOUL, Jev-first routing, scoped tools, capped Vertex comparisons and reproducible offline verification |
 | [Operations and live evidence](docs/GCP-AI.md) | Start/status/stop and dated verification, with no claim that a past receipt is current cloud status |
 
 The guides distinguish implemented behavior from proposed enterprise work. They
@@ -115,7 +115,12 @@ household meal calls, seven restaurants, nearby ingredient markets, reservations
 substitution consent, cooking and courier handoff. Edit entity/agent definitions
 on the map; inspect private memory and replay recorded business facts. It runs
 locally with zero provider calls by default. Optional scoped Jev relevance search
-has separate opt-in and budgets. See [contracts and limitations](docs/RESTAURANT-SUPPLY.md).
+has separate opt-in and budgets. ADK restaurants also support Jev-first decisions
+with selective Gemini escalation, and each agent can select no recall, short text,
+compact JSON or typed memory. [AI evidence](http://localhost:8010/agent-traces)
+retains comparisons without starting new calls. See [agent construction and
+routing](docs/ADK-RESTAURANT.md), [memory profiles](docs/AGENT-MEMORY.md), and
+[supply contracts](docs/RESTAURANT-SUPPLY.md).
 
 The fixed fleet recovery regression remains available from the CLI:
 

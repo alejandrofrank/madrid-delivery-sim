@@ -1,6 +1,22 @@
 # Roadmap: Bakiano delivery operations lab
 
-Updated 2026-10-28. Implemented slices are identified below; remaining milestones are planned.
+Updated 2026-10-29. Implemented slices are identified below; remaining milestones are planned.
+
+Jev-first restaurant slice: a frozen routing policy now chooses a bounded direct
+decision or the approved Gemini executor from scoped facts, the role prompt and
+SOUL. Routine physical protocol events use no model. Durable request/result
+receipts, confidence/margin gates, independent monetary admission and crash fencing
+surround the provider calls. A matched six-run speed/cost/reasoning comparison
+records outcomes and usage under a shared $0.60 ceiling. This is development smoke
+evidence; held-out calibration, other-role adapters and additional model tiers remain
+planned. See [routing protocol and comparison](docs/ADK-RESTAURANT.md).
+
+Selectable memory slice: role templates and entity overrides can recall no prior
+facts, short text, compact JSON or canonical typed facts, with bounded fact count,
+bytes and TTL. All modes retain source events, revisions and audit history and
+enforce the same current-order/request/attempt scope. These are recall projections;
+semantic search and unrestricted model-written memories remain planned. See
+[memory profiles and isolation](docs/AGENT-MEMORY.md).
 
 Shared UI slice: restaurants, delivery, inventory, health, architecture and the
 Madrid baseline now use one local workspace shell, visual tokens and control
@@ -71,7 +87,8 @@ restaurant and market agents, ingredient reservation/forwarding, explicit househ
 substitution consent, cooking and last-mile delivery. Entity and agent definitions
 are editable and frozen per run. Scoped local ingredient search and an opt-in Jev
 relevance adapter use separate durable admission accounting. Model calls are not
-part of ordinary city execution; live Jev verification remains pending. See
+part of ordinary city execution; explicit native Vertex and Jev trials are recorded
+in the [ADK guide](docs/ADK-RESTAURANT.md). See
 [restaurant supply contracts and verification](docs/RESTAURANT-SUPPLY.md).
 
 Local interaction update: map-first city controls now configure store opening stock,
