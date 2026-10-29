@@ -1,0 +1,40 @@
+COMP-DIFF [Rebuilt live operations] overall 65% (drift) structure 66% color 83% detail 60% bands 44%
+PALETTE comp #091919(71%) #182535(22%) #2c4049(4%) #8e9eb2(1%) #566676(1%)
+PALETTE build #0b1c1d(94%) #2e4658(4%) #192644(1%) #436a81(0%) #153a73(0%)
+REGION navigation         drift         59%  structure  86%  color  91%  detail  27%
+REGION page-title         drift         54%  structure  41%  color  69%  detail  54%
+REGION session-label      drift         58%  structure  68%  color  83%  detail  17%
+REGION start-controls     contradicted  40%  structure  43%  color  40%  detail  30%
+REGION orders-kpi         drift         55%  structure  72%  color  87%  detail  31%
+REGION ontime-kpi         drift         62%  structure  73%  color  88%  detail  20%
+REGION cost-kpi           drift         62%  structure  68%  color  87%  detail  22%
+REGION latency-kpi        drift         56%  structure  75%  color  87%  detail  33%
+REGION agent-controls     missing       66%  structure  86%  color  78%  detail   0%  +invented detail
+REGION agent-columns      missing       73%  structure  91%  color  93%  detail   0%  +invented detail
+REGION agent-row-1        contradicted  47%  structure  68%  color  35%  detail  19%
+REGION agent-row-2        drift         70%  structure  81%  color  88%  detail  11%  +invented detail
+REGION agent-row-3        drift         69%  structure  82%  color  86%  detail  12%
+REGION agent-row-4        contradicted  42%  structure  65%  color  26%  detail  16%  +invented detail
+REGION agent-row-5        drift         69%  structure  78%  color  85%  detail  21%
+REGION agent-row-6        drift         71%  structure  81%  color  87%  detail  23%  +invented detail
+REGION map                drift         56%  structure  60%  color  72%  detail  68%
+REGION map-controls       drift         50%  structure  62%  color  53%  detail  17%
+REGION map-legend         contradicted  51%  structure  52%  color  41%  detail  32%
+REGION map-selected       contradicted  33%  structure  27%  color  46%  detail  25%
+REGION evidence           drift         63%  structure  87%  color  88%  detail  20%
+REGION order-controls     drift         77%  structure  92%  color  84%  detail  32%
+REGION order-columns      drift         68%  structure  86%  color  89%  detail  19%
+REGION order-row-1        drift         66%  structure  75%  color  78%  detail  25%
+REGION order-row-2        drift         72%  structure  77%  color  79%  detail  46%
+REGION order-row-3        drift         69%  structure  76%  color  78%  detail  38%
+REGION order-row-4        drift         69%  structure  77%  color  79%  detail  35%
+REGION order-row-5        drift         69%  structure  79%  color  82%  detail  22%
+REGION order-row-6        drift         67%  structure  74%  color  87%  detail  19%
+REGION titlebar           drift         68%  structure  84%  color  87%  detail  45%
+REGION agent-table        drift         62%  structure  46%  color  87%  detail  47%
+REGION orders-table       drift         64%  structure  73%  color  88%  detail  42%
+FILES side-by-side /mnt/c/Users/aleja/Documents/mds-ui/docs/media/correction/comparison/side-by-side.png
+FILES heatmap /mnt/c/Users/aleja/Documents/mds-ui/docs/media/correction/comparison/heatmap.png
+FILES regions 32 under /mnt/c/Users/aleja/Documents/mds-ui/docs/media/correction/comparison/regions
+WORST map-selected (contradicted, 33%); start-controls (contradicted, 40%); agent-row-4 (contradicted, 42%)
+OPEN the side-by-side and the worst region pairs before deciding anything; the numbers rank, the crops decide.

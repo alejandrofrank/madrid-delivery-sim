@@ -1,0 +1,85 @@
+{
+  "base": "http://127.0.0.1:8021",
+  "phase": "correction",
+  "capturedAt": "2026-10-29T17:55:12.140Z",
+  "results": [
+    {
+      "page": "health",
+      "route": "/health",
+      "run": null,
+      "size": "desktop",
+      "status": 200,
+      "horizontalOverflow": false,
+      "width": 1440,
+      "title": "Health & evaluations · Bakiano",
+      "heading": "Health & evaluations",
+      "unlabeledControls": [],
+      "errors": []
+    },
+    {
+      "page": "health",
+      "route": "/health",
+      "run": null,
+      "size": "laptop",
+      "status": 200,
+      "horizontalOverflow": false,
+      "width": 1280,
+      "title": "Health & evaluations · Bakiano",
+      "heading": "Health & evaluations",
+      "unlabeledControls": [],
+      "errors": []
+    },
+    {
+      "page": "health",
+      "route": "/health",
+      "run": null,
+      "size": "mobile",
+      "status": 200,
+      "horizontalOverflow": false,
+      "width": 390,
+      "title": "Health & evaluations · Bakiano",
+      "heading": "Health & evaluations",
+      "unlabeledControls": [],
+      "errors": []
+    },
+    {
+      "page": "agent-traces",
+      "route": "/agent-traces",
+      "run": "6ab8067d-69ca-4c7d-88b7-98c455ffe60c",
+      "size": "desktop",
+      "status": 200,
+      "horizontalOverflow": false,
+      "width": 1440,
+      "title": "Agent evidence · Bakiano",
+      "heading": "Agent traces",
+      "unlabeledControls": [],
+      "errors": []
+    },
+    {
+      "page": "agent-traces",
+      "route": "/agent-traces",
+      "run": "6ab8067d-69ca-4c7d-88b7-98c455ffe60c",
+      "size": "laptop",
+      "status": 200,
+      "horizontalOverflow": false,
+      "width": 1280,
+      "title": "Agent evidence · Bakiano",
+      "heading": "Agent traces",
+      "unlabeledControls": [],
+      "errors": []
+    },
+    {
+      "page": "agent-traces",
+      "route": "/agent-traces",
+      "run": "6ab8067d-69ca-4c7d-88b7-98c455ffe60c",
+      "size": "mobile",
+      "status": 200,
+      "horizontalOverflow": false,
+      "width": 390,
+      "title": "Agent evidence · Bakiano",
+      "heading": "Agent traces",
+      "unlabeledControls": [],
+      "errors": []
+    }
+  ]
+}

@@ -1,15 +1,19 @@
 <!doctype html>
 <html lang="en">
   <head>
+    <link rel="stylesheet" href="/static/tokens.css?v=657eeda273de">
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
     <title>Bakiano · Delivery operations</title>
     <link rel="icon" href="data:," />
-    <link rel="stylesheet" href="/static/flow.css?v=c06260975d8c" />
-    <link rel="stylesheet" href="/static/workspace.css?v=6c6854d75885" />
-    <script defer src="/static/workspace.js?v=887294277a47"></script>
-    <script defer src="/static/flow.js?v=13dd184b6fc6"></script>
-  </head>
+    <link rel="stylesheet" href="/static/flow.css?v=8212f56c1123" />
+    <link rel="stylesheet" href="/static/workspace.css?v=ae6b1f54d770" />
+    <script defer src="/static/workspace.js?v=4163be67ea66"></script>
+    
+  <link rel="stylesheet" href="/static/agents.css?v=641951871aa8">
+<script defer src="/static/console.js?v=6976b690ad39"></script>
+<script defer src="/static/flow.js?v=9c638d278ae6"></script>
+</head>
   <body data-page="delivery">
     <div id="workspace-shell">
       <noscript
@@ -64,9 +68,9 @@
         >
           Stores
         </button>
-      </nav>
+      <button id="flow-simulation-toggle" aria-pressed="false">Simulation</button></nav>
       <div
-        class="delivery-toolbar"
+        class="delivery-toolbar" hidden
         role="region"
         aria-label="Simulation controls"
       >
@@ -97,7 +101,7 @@
         aria-label="Operations summary"
       ></section>
       <p id="error" role="alert" hidden></p>
-      <main id="main" tabindex="-1">
+      <main id="main" tabindex="-1"><section id="live-agents" class="live-agents" aria-label="Live delivery agents"></section>
         <div class="map-column">
           <div class="map-heading">
             <div><strong>Dispatch map</strong></div>
@@ -106,8 +110,8 @@
           <section class="map-shell" aria-label="City map">
             <svg
               id="city"
-              role="img"
-              aria-label="Interactive delivery city map"
+              role="group"
+              aria-label="Interactive delivery city map. Arrow keys move between markers; Enter selects."
             ></svg>
             <div class="entity-tools">
               <label
@@ -145,22 +149,9 @@
               Choose a shop to adjust its stock, demand and team.
             </div>
           </section>
-          <section class="operations-board" aria-label="Operations board">
-            <div class="board-heading">
-              <div><h2 id="board-title">Order book</h2></div>
-              <label
-                >Show
-                <select id="board-filter">
-                  <option value="all">All orders</option>
-                  <option value="active">In progress</option>
-                  <option value="attention">Needs attention</option>
-                </select></label
-              >
-            </div>
-            <div id="board-content"></div>
-          </section>
+          
         </div>
-        <aside id="context" aria-label="Selected city context">
+        <aside hidden id="context" aria-label="Selected city context">
           <div class="panel-head">
             <h2 id="context-title">Operations watch</h2>
             <button id="close-panel" aria-label="Close selection">×</button>
@@ -262,9 +253,22 @@
             <button id="back-store">← Back to shop</button>
             <div id="driver-live"></div>
             <p id="agent-note">Memory is scoped to this agent.</p>
-            <div id="agent-content"></div>
+            <a id="agent-trace-link" class="agent-trace-link" href="/agent-traces">Open full trace</a><details class="agent-drilldown"><summary>Agent memory and configuration</summary><div id="agent-content"></div></details>
           </section>
-        </aside>
+        </aside><section class="operations-board" aria-label="Operations board">
+            <div class="board-heading">
+              <div><h2 id="board-title">Order book</h2></div>
+              <label
+                >Show
+                <select id="board-filter">
+                  <option value="all">All orders</option>
+                  <option value="active">In progress</option>
+                  <option value="attention">Needs attention</option>
+                </select></label
+              >
+            </div>
+            <div id="board-content"></div>
+          </section>
       </main>
       <details id="evidence">
         <summary>Run evidence <span id="outcomes"></span></summary>

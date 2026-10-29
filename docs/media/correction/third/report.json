@@ -1,0 +1,20 @@
+{
+  "base": "http://127.0.0.1:8021",
+  "phase": "after",
+  "capturedAt": "2026-10-29T17:41:38.870Z",
+  "results": [
+    {
+      "page": "madrid",
+      "route": "/",
+      "run": null,
+      "size": "custom",
+      "status": 200,
+      "horizontalOverflow": false,
+      "width": 1536,
+      "title": "Madrid operations · Bakiano",
+      "heading": "Madrid operations",
+      "unlabeledControls": [],
+      "errors": []
+    }
+  ]
+}

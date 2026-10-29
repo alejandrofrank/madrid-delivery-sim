@@ -251,6 +251,10 @@ def main() -> None:
                     "--elk-edgeNodeBetweenLayers=24",
                     "--elk-padding=[top=36,left=28,bottom=28,right=28]",
                     "--theme=0",
+                    *[f"--font-{style}={SOURCES / 'fonts' / filename}" for style, filename in (
+                        ("regular", "IBMPlexSans-Regular.ttf"), ("italic", "IBMPlexSans-Italic.ttf"),
+                        ("bold", "IBMPlexSans-Bold.ttf"), ("semibold", "IBMPlexSans-SemiBold.ttf"),
+                    )],
                     "--pad=24",
                     "--omit-version",
                     "--salt",

@@ -2,10 +2,15 @@
 
 Queue-driven delivery agents on Madrid streets, with Google ADK, real A2A endpoints, distributed traces, and auditable BigQuery run evidence.
 
-![Demo capture placeholder](docs/media/demo.gif)
+![Live agent operations](docs/media/ui-demo.gif)
 
-*GIF placeholder: replace with a capture of dispatch → agent trace → outcome.
-The working demo runs locally with `make setup`.*
+The redesigned console spans seven workspaces. Run `make setup` and open
+**[localhost:8010](http://localhost:8010/)**. For an isolated second instance, use
+`docker compose -p mds-ui -f compose.yaml -f compose.ui.yaml up -d --build` on
+port 8021. [Before/after, verification and limits](docs/UI-REDESIGN.md).
+
+The GIF records actual local simulation activity. All default runs are free of
+cloud and model charges.
 
 ```mermaid
 flowchart LR
@@ -41,7 +46,7 @@ CI check runs without paid model calls. [Public-readiness review](docs/PUBLIC-RE
 
 ## Agent architecture and GCP client documentation
 
-All six local workspaces share navigation, visual tokens, controls and mobile
+All seven local workspaces share navigation, visual tokens, controls and mobile
 behaviour. The [shared design contract](docs/DESIGN-SYSTEM.md) records the design
 sources, diagram conventions and content-versioning workflow for future changes.
 
@@ -59,7 +64,8 @@ and the seven tool-generated diagrams. Read the
 [request/result protocol](docs/DURABLE-INFERENCE.md) for retry and isolation guarantees.
 The earlier [shared UI verification record](docs/evidence/shared-ui-local.json)
 records the six workspace layouts, eight diagrams, desktop/mobile checks and
-442-test regression evidence from that revision.
+its 442-test regression evidence. The current redesign evidence and seven-page
+comparison are in the [UI redesign record](docs/UI-REDESIGN.md).
 
 | Read in order | What it explains |
 | --- | --- |
@@ -76,7 +82,7 @@ reading them requires no cloud deployment or paid inference.
 
 Milestone 1 includes 18 bike, moto, and van couriers across Chamberí, Retiro, and Puente de Vallecas; 24 real OSM pickup locations; 180 synthetic customers; and a seeded 10:00 to 22:00 service day. The map renders cached street geometry with no tile API key or external map requests.
 
-![Local operations interface](docs/demo.png)
+
 
 ## Run locally
 

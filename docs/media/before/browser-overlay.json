@@ -1,0 +1,1592 @@
+{
+  "headless": true,
+  "notes": "Overlay script injected into fresh Playwright pages; no source tag added. Screenshots retained; no claim of a user-presented tab.",
+  "reports": [
+    {
+      "page": "flow",
+      "preflight": true,
+      "injection": "loaded",
+      "console": [
+        {
+          "type": "startGroup",
+          "text": "%c[impeccable] 2 anti-patterns found color: oklch(84% 0.19 80.46); font-weight: bold"
+        },
+        {
+          "type": "log",
+          "text": "%cundersized-ui-text%c 10px functional text \"Operations lab\" (below 11px floor) color: oklch(84% 0.19 80.46); font-weight: bold color: inherit JSHandle@node"
+        },
+        {
+          "type": "log",
+          "text": "%coverused-font%c Primary font: arial (87% of text) color: oklch(84% 0.19 80.46); font-weight: bold color: inherit JSHandle@node"
+        },
+        {
+          "type": "endGroup",
+          "text": "console.groupEnd"
+        }
+      ],
+      "errors": [],
+      "findings": [
+        {
+          "selector": "span.workspace-wordmark > small",
+          "tagName": "small",
+          "rect": {
+            "x": 64.875,
+            "y": 33.296875,
+            "width": 73.421875,
+            "height": 13,
+            "top": 33.296875,
+            "right": 138.296875,
+            "bottom": 46.296875,
+            "left": 64.875
+          },
+          "isPageLevel": false,
+          "isHidden": false,
+          "findings": [
+            {
+              "type": "undersized-ui-text",
+              "category": "quality",
+              "severity": "warning",
+              "advisory": false,
+              "detail": "10px functional text \"Operations lab\" (below 11px floor)",
+              "ignoreValue": "",
+              "name": "Undersized functional text",
+              "description": "Interactive and content-bearing UI text (links, buttons, nav items, labels, table cells, meta rows, timecodes) below 11px is a legibility failure, not a style choice. WCAG sets no absolute pixel floor, but functional text under 11px is a defensible quality bar: it fails on high-DPI and small viewports and it degrades tap and read targets. The 11px floor holds even inside a footer; only non-interactive legal smallprint gets the softer 10px floor. Being ON the DESIGN.md size ramp does not exempt a value here: adding 8px to the ramp launders the token but not the legibility problem, and that is exactly the escape hatch this rule closes. Exempts sup/sub, visually-hidden (sr-only) text, and code/terminal contexts. Decorative letterspaced micro-labels are still functional and stay in scope."
+            }
+          ]
+        },
+        {
+          "selector": "body",
+          "tagName": "body",
+          "rect": null,
+          "isPageLevel": true,
+          "isHidden": false,
+          "findings": [
+            {
+              "type": "overused-font",
+              "category": "slop",
+              "severity": "warning",
+              "advisory": false,
+              "detail": "Primary font: arial (87% of text)",
+              "ignoreValue": "",
+              "name": "Overused font",
+              "description": "Inter, Roboto, Fraunces, Geist, Plus Jakarta Sans, and Space Grotesk are used on so many sites they no longer feel distinctive. Each new wave of AI-generated UIs converges on the same handful of faces. Choose a face that gives your interface personality."
+            }
+          ]
+        }
+      ],
+      "detectorNodes": []
+    },
+    {
+      "page": "supply",
+      "preflight": true,
+      "injection": "loaded",
+      "console": [
+        {
+          "type": "startGroup",
+          "text": "%c[impeccable] 4 anti-patterns found color: oklch(84% 0.19 80.46); font-weight: bold"
+        },
+        {
+          "type": "log",
+          "text": "%cundersized-ui-text%c 10px functional text \"Operations lab\" (below 11px floor) color: oklch(84% 0.19 80.46); font-weight: bold color: inherit JSHandle@node"
+        },
+        {
+          "type": "log",
+          "text": "%cstraggler%c \"changes.\" alone on the last of 2 lines (17% of the measure) color: oklch(84% 0.19 80.46); font-weight: bold color: inherit JSHandle@node"
+        },
+        {
+          "type": "log",
+          "text": "%cstraggler%c \"selection.\" alone on the last of 3 lines (17% of the measure) color: oklch(84% 0.19 80.46); font-weight: bold color: inherit JSHandle@node"
+        },
+        {
+          "type": "log",
+          "text": "%coverused-font%c Primary font: arial (95% of text) color: oklch(84% 0.19 80.46); font-weight: bold color: inherit JSHandle@node"
+        },
+        {
+          "type": "endGroup",
+          "text": "console.groupEnd"
+        }
+      ],
+      "errors": [],
+      "findings": [
+        {
+          "selector": "span.workspace-wordmark > small",
+          "tagName": "small",
+          "rect": {
+            "x": 64.875,
+            "y": 33.296875,
+            "width": 73.421875,
+            "height": 13,
+            "top": 33.296875,
+            "right": 138.296875,
+            "bottom": 46.296875,
+            "left": 64.875
+          },
+          "isPageLevel": false,
+          "isHidden": false,
+          "findings": [
+            {
+              "type": "undersized-ui-text",
+              "category": "quality",
+              "severity": "warning",
+              "advisory": false,
+              "detail": "10px functional text \"Operations lab\" (below 11px floor)",
+              "ignoreValue": "",
+              "name": "Undersized functional text",
+              "description": "Interactive and content-bearing UI text (links, buttons, nav items, labels, table cells, meta rows, timecodes) below 11px is a legibility failure, not a style choice. WCAG sets no absolute pixel floor, but functional text under 11px is a defensible quality bar: it fails on high-DPI and small viewports and it degrades tap and read targets. The 11px floor holds even inside a footer; only non-interactive legal smallprint gets the softer 10px floor. Being ON the DESIGN.md size ramp does not exempt a value here: adding 8px to the ramp launders the token but not the legibility problem, and that is exactly the escape hatch this rule closes. Exempts sup/sub, visually-hidden (sr-only) text, and code/terminal contexts. Decorative letterspaced micro-labels are still functional and stay in scope."
+            }
+          ]
+        },
+        {
+          "selector": "#definition-panel > p.scope-note",
+          "tagName": "p",
+          "rect": {
+            "x": 1027,
+            "y": 568.828125,
+            "width": 388,
+            "height": 61.1875,
+            "top": 568.828125,
+            "right": 1415,
+            "bottom": 630.015625,
+            "left": 1027
+          },
+          "isPageLevel": false,
+          "isHidden": false,
+          "findings": [
+            {
+              "type": "straggler",
+              "category": "quality",
+              "severity": "advisory",
+              "advisory": true,
+              "detail": "\"changes.\" alone on the last of 2 lines (17% of the measure)",
+              "ignoreValue": "",
+              "name": "Straggler",
+              "description": "The last line of this paragraph holds one word, which leaves a hole under the block. Set text-wrap: pretty on body copy (Chrome, Safari) to pull a word down beside it. Where a browser ignores it, edit the last sentence or bind the last two words with a no-break space. Keep it if the break is intended."
+            }
+          ]
+        },
+        {
+          "selector": "#entity-form > p.scope-note:nth-of-type(2)",
+          "tagName": "p",
+          "rect": {
+            "x": 1043,
+            "y": 1908.984375,
+            "width": 356,
+            "height": 55.78125,
+            "top": 1908.984375,
+            "right": 1399,
+            "bottom": 1964.765625,
+            "left": 1043
+          },
+          "isPageLevel": false,
+          "isHidden": false,
+          "findings": [
+            {
+              "type": "straggler",
+              "category": "quality",
+              "severity": "advisory",
+              "advisory": true,
+              "detail": "\"selection.\" alone on the last of 3 lines (17% of the measure)",
+              "ignoreValue": "",
+              "name": "Straggler",
+              "description": "The last line of this paragraph holds one word, which leaves a hole under the block. Set text-wrap: pretty on body copy (Chrome, Safari) to pull a word down beside it. Where a browser ignores it, edit the last sentence or bind the last two words with a no-break space. Keep it if the break is intended."
+            }
+          ]
+        },
+        {
+          "selector": "body",
+          "tagName": "body",
+          "rect": null,
+          "isPageLevel": true,
+          "isHidden": false,
+          "findings": [
+            {
+              "type": "overused-font",
+              "category": "slop",
+              "severity": "warning",
+              "advisory": false,
+              "detail": "Primary font: arial (95% of text)",
+              "ignoreValue": "",
+              "name": "Overused font",
+              "description": "Inter, Roboto, Fraunces, Geist, Plus Jakarta Sans, and Space Grotesk are used on so many sites they no longer feel distinctive. Each new wave of AI-generated UIs converges on the same handful of faces. Choose a face that gives your interface personality."
+            }
+          ]
+        },
+        {
+          "selector": "div:nth-of-type(3) > div > span",
+          "tagName": "span",
+          "rect": {
+            "x": 1023,
+            "y": 546.828125,
+            "width": 75.59375,
+            "height": 20,
+            "top": 546.828125,
+            "right": 1098.59375,
+            "bottom": 566.828125,
+            "left": 1023
+          },
+          "isPageLevel": false,
+          "isHidden": false,
+          "findings": [
+            {
+              "type": "text-occlusion",
+              "category": "quality",
+              "severity": "warning",
+              "advisory": false,
+              "detail": "span \"straggler\" is 100% covered by overlapping text (button)",
+              "ignoreValue": "",
+              "name": "Text occluded by an overlapping element",
+              "description": "Text is painted under an opaque element or a second text run, so part of it cannot be read. A decorative box, a stacked layer, or an inline element with leaked padding lands on the words instead of beside them. Give overlapping layers room, or move the text out from under the layer above it."
+            }
+          ]
+        }
+      ],
+      "detectorNodes": []
+    },
+    {
+      "page": "documentation",
+      "preflight": true,
+      "injection": "loaded",
+      "console": [
+        {
+          "type": "startGroup",
+          "text": "%c[impeccable] 29 anti-patterns found color: oklch(84% 0.19 80.46); font-weight: bold"
+        },
+        {
+          "type": "log",
+          "text": "%cundersized-ui-text%c 10px functional text \"Operations lab\" (below 11px floor) color: oklch(84% 0.19 80.46); font-weight: bold color: inherit JSHandle@node"
+        },
+        {
+          "type": "log",
+          "text": "%ctiny-text%c 11px body text color: oklch(84% 0.19 80.46); font-weight: bold color: inherit JSHandle@node"
+        },
+        {
+          "type": "log",
+          "text": "%ctiny-text%c 10px body text color: oklch(84% 0.19 80.46); font-weight: bold color: inherit JSHandle@node"
+        },
+        {
+          "type": "log",
+          "text": "%cundersized-ui-text%c 10px functional text \"Copy link\" (below 11px floor) color: oklch(84% 0.19 80.46); font-weight: bold color: inherit JSHandle@node"
+        },
+        {
+          "type": "log",
+          "text": "%cundersized-ui-text%c 10px functional text \"Print\" (below 11px floor) color: oklch(84% 0.19 80.46); font-weight: bold color: inherit JSHandle@node"
+        },
+        {
+          "type": "log",
+          "text": "%ctiny-text%c 11px body text color: oklch(84% 0.19 80.46); font-weight: bold color: inherit JSHandle@node"
+        },
+        {
+          "type": "log",
+          "text": "%ctiny-text%c 11px body text color: oklch(84% 0.19 80.46); font-weight: bold color: inherit JSHandle@node"
+        },
+        {
+          "type": "log",
+          "text": "%ctiny-text%c 10px body text color: oklch(84% 0.19 80.46); font-weight: bold color: inherit JSHandle@node"
+        },
+        {
+          "type": "log",
+          "text": "%cundersized-ui-text%c 10px functional text \"Local Optional GCP\" (below 11px floor) color: oklch(84% 0.19 80.46); font-weight: bold color: inherit JSHandle@node"
+        },
+        {
+          "type": "log",
+          "text": "%cundersized-ui-text%c 10px functional text \"Demand, streets, incidents\" (below 11px floor) color: oklch(84% 0.19 80.46); font-weight: bold color: inherit JSHandle@node"
+        },
+        {
+          "type": "log",
+          "text": "%cundersized-ui-text%c 10px functional text \"Policy, tools, budgets\" (below 11px floor) color: oklch(84% 0.19 80.46); font-weight: bold color: inherit JSHandle@node"
+        },
+        {
+          "type": "log",
+          "text": "%cundersized-ui-text%c 10px functional text \"Facts, queue, memory, audit\" (below 11px floor) color: oklch(84% 0.19 80.46); font-weight: bold color: inherit JSHandle@node"
+        },
+        {
+          "type": "log",
+          "text": "%cundersized-ui-text%c 10px functional text \"Authenticated, bounded verdict\" (below 11px floor) color: oklch(84% 0.19 80.46); font-weight: bold color: inherit JSHandle@node"
+        },
+        {
+          "type": "log",
+          "text": "%cundersized-ui-text%c 10px functional text \"Decision only, no city tools\" (below 11px floor) color: oklch(84% 0.19 80.46); font-weight: bold color: inherit JSHandle@node"
+        },
+        {
+          "type": "log",
+          "text": "%cline-length%c ~99 chars on 2 of 2 rendered lines (aim for <80) color: oklch(84% 0.19 80.46); font-weight: bold color: inherit JSHandle@node"
+        },
+        {
+          "type": "log",
+          "text": "%cstraggler%c \"scope.\" alone on the last of 2 lines (7% of the measure) color: oklch(84% 0.19 80.46); font-weight: bold color: inherit JSHandle@node"
+        },
+        {
+          "type": "log",
+          "text": "%cline-length%c ~130 chars on 3 of 4 rendered lines (aim for <80) color: oklch(84% 0.19 80.46); font-weight: bold color: inherit JSHandle@node"
+        },
+        {
+          "type": "log",
+          "text": "%cline-length%c ~127 chars on 2 of 2 rendered lines (aim for <80) color: oklch(84% 0.19 80.46); font-weight: bold color: inherit JSHandle@node"
+        },
+        {
+          "type": "log",
+          "text": "%cline-length%c ~131 chars on 3 of 4 rendered lines (aim for <80) color: oklch(84% 0.19 80.46); font-weight: bold color: inherit JSHandle@node"
+        },
+        {
+          "type": "log",
+          "text": "%cline-length%c ~128 chars on 4 of 4 rendered lines (aim for <80) color: oklch(84% 0.19 80.46); font-weight: bold color: inherit JSHandle@node"
+        },
+        {
+          "type": "log",
+          "text": "%cline-length%c ~130 chars on 4 of 5 rendered lines (aim for <80) color: oklch(84% 0.19 80.46); font-weight: bold color: inherit JSHandle@node"
+        },
+        {
+          "type": "log",
+          "text": "%cline-length%c ~135 chars on 3 of 7 rendered lines (aim for <80) color: oklch(84% 0.19 80.46); font-weight: bold color: inherit JSHandle@node"
+        },
+        {
+          "type": "log",
+          "text": "%cline-length%c ~130 chars on 3 of 3 rendered lines (aim for <80) color: oklch(84% 0.19 80.46); font-weight: bold color: inherit JSHandle@node"
+        },
+        {
+          "type": "log",
+          "text": "%cline-length%c ~134 chars on 2 of 4 rendered lines (aim for <80) color: oklch(84% 0.19 80.46); font-weight: bold color: inherit JSHandle@node"
+        },
+        {
+          "type": "log",
+          "text": "%cline-length%c ~135 chars on 2 of 5 rendered lines (aim for <80) color: oklch(84% 0.19 80.46); font-weight: bold color: inherit JSHandle@node"
+        },
+        {
+          "type": "log",
+          "text": "%cline-length%c ~130 chars on 2 of 3 rendered lines (aim for <80) color: oklch(84% 0.19 80.46); font-weight: bold color: inherit JSHandle@node"
+        },
+        {
+          "type": "log",
+          "text": "%cline-length%c ~129 chars on 3 of 4 rendered lines (aim for <80) color: oklch(84% 0.19 80.46); font-weight: bold color: inherit JSHandle@node"
+        },
+        {
+          "type": "log",
+          "text": "%cstraggler%c \"work.\" alone on the last of 4 lines (4% of the measure) color: oklch(84% 0.19 80.46); font-weight: bold color: inherit JSHandle@node"
+        },
+        {
+          "type": "log",
+          "text": "%cundersized-ui-text%c 10px functional text \"Verify the implementation ↗\" (below 11px floor) color: oklch(84% 0.19 80.46); font-weight: bold color: inherit JSHandle@node"
+        },
+        {
+          "type": "log",
+          "text": "%ctiny-text%c 11px body text color: oklch(84% 0.19 80.46); font-weight: bold color: inherit JSHandle@node"
+        },
+        {
+          "type": "log",
+          "text": "%coverused-font%c Primary font: arial (72% of text) color: oklch(84% 0.19 80.46); font-weight: bold color: inherit JSHandle@node"
+        },
+        {
+          "type": "log",
+          "text": "%cflat-type-hierarchy%c Role sizes: body 14px, h3 16px, h2 19px, h1 20px (largest adjacent step 1.19:1; target 1.25:1; weight separates headings from body text) color: oklch(84% 0.19 80.46); font-weight: bold color: inherit JSHandle@node"
+        },
+        {
+          "type": "endGroup",
+          "text": "console.groupEnd"
+        }
+      ],
+      "errors": [],
+      "findings": [
+        {
+          "selector": "span.workspace-wordmark > small",
+          "tagName": "small",
+          "rect": {
+            "x": 64.875,
+            "y": 33.296875,
+            "width": 73.421875,
+            "height": 13,
+            "top": 33.296875,
+            "right": 138.296875,
+            "bottom": 46.296875,
+            "left": 64.875
+          },
+          "isPageLevel": false,
+          "isHidden": false,
+          "findings": [
+            {
+              "type": "undersized-ui-text",
+              "category": "quality",
+              "severity": "warning",
+              "advisory": false,
+              "detail": "10px functional text \"Operations lab\" (below 11px floor)",
+              "ignoreValue": "",
+              "name": "Undersized functional text",
+              "description": "Interactive and content-bearing UI text (links, buttons, nav items, labels, table cells, meta rows, timecodes) below 11px is a legibility failure, not a style choice. WCAG sets no absolute pixel floor, but functional text under 11px is a defensible quality bar: it fails on high-DPI and small viewports and it degrades tap and read targets. The 11px floor holds even inside a footer; only non-interactive legal smallprint gets the softer 10px floor. Being ON the DESIGN.md size ramp does not exempt a value here: adding 8px to the ramp launders the token but not the legibility problem, and that is exactly the escape hatch this rule closes. Exempts sup/sub, visually-hidden (sr-only) text, and code/terminal contexts. Decorative letterspaced micro-labels are still functional and stay in scope."
+            }
+          ]
+        },
+        {
+          "selector": "div.sidebar-footer",
+          "tagName": "div",
+          "rect": {
+            "x": 27,
+            "y": 1123.59375,
+            "width": 191,
+            "height": 85.390625,
+            "top": 1123.59375,
+            "right": 218,
+            "bottom": 1208.984375,
+            "left": 27
+          },
+          "isPageLevel": false,
+          "isHidden": false,
+          "findings": [
+            {
+              "type": "tiny-text",
+              "category": "quality",
+              "severity": "warning",
+              "advisory": false,
+              "detail": "11px body text",
+              "ignoreValue": "",
+              "name": "Tiny body text",
+              "description": "Body text below 12px is hard to read, especially on high-DPI screens. Use at least 14px for body content, 16px is ideal."
+            }
+          ]
+        },
+        {
+          "selector": "div.sidebar-footer > small",
+          "tagName": "small",
+          "rect": {
+            "x": 27,
+            "y": 1163.390625,
+            "width": 164.0625,
+            "height": 11,
+            "top": 1163.390625,
+            "right": 191.0625,
+            "bottom": 1174.390625,
+            "left": 27
+          },
+          "isPageLevel": false,
+          "isHidden": false,
+          "findings": [
+            {
+              "type": "tiny-text",
+              "category": "quality",
+              "severity": "advisory",
+              "advisory": true,
+              "detail": "10px body text",
+              "ignoreValue": "",
+              "name": "Tiny body text",
+              "description": "Body text below 12px is hard to read, especially on high-DPI screens. Use at least 14px for body content, 16px is ideal."
+            }
+          ]
+        },
+        {
+          "selector": "#copy-link",
+          "tagName": "button",
+          "rect": {
+            "x": 1110.75,
+            "y": 153.5,
+            "width": 64.234375,
+            "height": 36,
+            "top": 153.5,
+            "right": 1174.984375,
+            "bottom": 189.5,
+            "left": 1110.75
+          },
+          "isPageLevel": false,
+          "isHidden": false,
+          "findings": [
+            {
+              "type": "undersized-ui-text",
+              "category": "quality",
+              "severity": "warning",
+              "advisory": false,
+              "detail": "10px functional text \"Copy link\" (below 11px floor)",
+              "ignoreValue": "",
+              "name": "Undersized functional text",
+              "description": "Interactive and content-bearing UI text (links, buttons, nav items, labels, table cells, meta rows, timecodes) below 11px is a legibility failure, not a style choice. WCAG sets no absolute pixel floor, but functional text under 11px is a defensible quality bar: it fails on high-DPI and small viewports and it degrades tap and read targets. The 11px floor holds even inside a footer; only non-interactive legal smallprint gets the softer 10px floor. Being ON the DESIGN.md size ramp does not exempt a value here: adding 8px to the ramp launders the token but not the legibility problem, and that is exactly the escape hatch this rule closes. Exempts sup/sub, visually-hidden (sr-only) text, and code/terminal contexts. Decorative letterspaced micro-labels are still functional and stay in scope."
+            }
+          ]
+        },
+        {
+          "selector": "#print-page",
+          "tagName": "button",
+          "rect": {
+            "x": 1180.984375,
+            "y": 153.5,
+            "width": 41.015625,
+            "height": 36,
+            "top": 153.5,
+            "right": 1222,
+            "bottom": 189.5,
+            "left": 1180.984375
+          },
+          "isPageLevel": false,
+          "isHidden": false,
+          "findings": [
+            {
+              "type": "undersized-ui-text",
+              "category": "quality",
+              "severity": "warning",
+              "advisory": false,
+              "detail": "10px functional text \"Print\" (below 11px floor)",
+              "ignoreValue": "",
+              "name": "Undersized functional text",
+              "description": "Interactive and content-bearing UI text (links, buttons, nav items, labels, table cells, meta rows, timecodes) below 11px is a legibility failure, not a style choice. WCAG sets no absolute pixel floor, but functional text under 11px is a defensible quality bar: it fails on high-DPI and small viewports and it degrades tap and read targets. The 11px floor holds even inside a footer; only non-interactive legal smallprint gets the softer 10px floor. Being ON the DESIGN.md size ramp does not exempt a value here: adding 8px to the ramp launders the token but not the legibility problem, and that is exactly the escape hatch this rule closes. Exempts sup/sub, visually-hidden (sr-only) text, and code/terminal contexts. Decorative letterspaced micro-labels are still functional and stay in scope."
+            }
+          ]
+        },
+        {
+          "selector": "#review-date",
+          "tagName": "span",
+          "rect": {
+            "x": 453.078125,
+            "y": 236.09375,
+            "width": 192.0625,
+            "height": 18.6875,
+            "top": 236.09375,
+            "right": 645.140625,
+            "bottom": 254.78125,
+            "left": 453.078125
+          },
+          "isPageLevel": false,
+          "isHidden": false,
+          "findings": [
+            {
+              "type": "tiny-text",
+              "category": "quality",
+              "severity": "warning",
+              "advisory": false,
+              "detail": "11px body text",
+              "ignoreValue": "",
+              "name": "Tiny body text",
+              "description": "Body text below 12px is hard to read, especially on high-DPI screens. Use at least 14px for body content, 16px is ideal."
+            }
+          ]
+        },
+        {
+          "selector": "div.reference-note",
+          "tagName": "div",
+          "rect": {
+            "x": 284,
+            "y": 293.78125,
+            "width": 938,
+            "height": 18.6875,
+            "top": 293.78125,
+            "right": 1222,
+            "bottom": 312.46875,
+            "left": 284
+          },
+          "isPageLevel": false,
+          "isHidden": false,
+          "findings": [
+            {
+              "type": "tiny-text",
+              "category": "quality",
+              "severity": "warning",
+              "advisory": false,
+              "detail": "11px body text",
+              "ignoreValue": "",
+              "name": "Tiny body text",
+              "description": "Body text below 12px is hard to read, especially on high-DPI screens. Use at least 14px for body content, 16px is ideal."
+            }
+          ]
+        },
+        {
+          "selector": "span.legend",
+          "tagName": "span",
+          "rect": {
+            "x": 1069.3125,
+            "y": 367.96875,
+            "width": 133.6875,
+            "height": 15,
+            "top": 367.96875,
+            "right": 1203,
+            "bottom": 382.96875,
+            "left": 1069.3125
+          },
+          "isPageLevel": false,
+          "isHidden": false,
+          "findings": [
+            {
+              "type": "tiny-text",
+              "category": "quality",
+              "severity": "warning",
+              "advisory": false,
+              "detail": "10px body text",
+              "ignoreValue": "",
+              "name": "Tiny body text",
+              "description": "Body text below 12px is hard to read, especially on high-DPI screens. Use at least 14px for body content, 16px is ideal."
+            },
+            {
+              "type": "undersized-ui-text",
+              "category": "quality",
+              "severity": "warning",
+              "advisory": false,
+              "detail": "10px functional text \"Local Optional GCP\" (below 11px floor)",
+              "ignoreValue": "",
+              "name": "Undersized functional text",
+              "description": "Interactive and content-bearing UI text (links, buttons, nav items, labels, table cells, meta rows, timecodes) below 11px is a legibility failure, not a style choice. WCAG sets no absolute pixel floor, but functional text under 11px is a defensible quality bar: it fails on high-DPI and small viewports and it degrades tap and read targets. The 11px floor holds even inside a footer; only non-interactive legal smallprint gets the softer 10px floor. Being ON the DESIGN.md size ramp does not exempt a value here: adding 8px to the ramp launders the token but not the legibility problem, and that is exactly the escape hatch this rule closes. Exempts sup/sub, visually-hidden (sr-only) text, and code/terminal contexts. Decorative letterspaced micro-labels are still functional and stay in scope."
+            }
+          ]
+        },
+        {
+          "selector": "button:nth-of-type(1) > small",
+          "tagName": "small",
+          "rect": {
+            "x": 312,
+            "y": 490.46875,
+            "width": 245.515625,
+            "height": 15,
+            "top": 490.46875,
+            "right": 557.515625,
+            "bottom": 505.46875,
+            "left": 312
+          },
+          "isPageLevel": false,
+          "isHidden": false,
+          "findings": [
+            {
+              "type": "undersized-ui-text",
+              "category": "quality",
+              "severity": "warning",
+              "advisory": false,
+              "detail": "10px functional text \"Demand, streets, incidents\" (below 11px floor)",
+              "ignoreValue": "",
+              "name": "Undersized functional text",
+              "description": "Interactive and content-bearing UI text (links, buttons, nav items, labels, table cells, meta rows, timecodes) below 11px is a legibility failure, not a style choice. WCAG sets no absolute pixel floor, but functional text under 11px is a defensible quality bar: it fails on high-DPI and small viewports and it degrades tap and read targets. The 11px floor holds even inside a footer; only non-interactive legal smallprint gets the softer 10px floor. Being ON the DESIGN.md size ramp does not exempt a value here: adding 8px to the ramp launders the token but not the legibility problem, and that is exactly the escape hatch this rule closes. Exempts sup/sub, visually-hidden (sr-only) text, and code/terminal contexts. Decorative letterspaced micro-labels are still functional and stay in scope."
+            }
+          ]
+        },
+        {
+          "selector": "button:nth-of-type(2) > small",
+          "tagName": "small",
+          "rect": {
+            "x": 312,
+            "y": 547.46875,
+            "width": 245.515625,
+            "height": 15,
+            "top": 547.46875,
+            "right": 557.515625,
+            "bottom": 562.46875,
+            "left": 312
+          },
+          "isPageLevel": false,
+          "isHidden": false,
+          "findings": [
+            {
+              "type": "undersized-ui-text",
+              "category": "quality",
+              "severity": "warning",
+              "advisory": false,
+              "detail": "10px functional text \"Policy, tools, budgets\" (below 11px floor)",
+              "ignoreValue": "",
+              "name": "Undersized functional text",
+              "description": "Interactive and content-bearing UI text (links, buttons, nav items, labels, table cells, meta rows, timecodes) below 11px is a legibility failure, not a style choice. WCAG sets no absolute pixel floor, but functional text under 11px is a defensible quality bar: it fails on high-DPI and small viewports and it degrades tap and read targets. The 11px floor holds even inside a footer; only non-interactive legal smallprint gets the softer 10px floor. Being ON the DESIGN.md size ramp does not exempt a value here: adding 8px to the ramp launders the token but not the legibility problem, and that is exactly the escape hatch this rule closes. Exempts sup/sub, visually-hidden (sr-only) text, and code/terminal contexts. Decorative letterspaced micro-labels are still functional and stay in scope."
+            }
+          ]
+        },
+        {
+          "selector": "button:nth-of-type(3) > small",
+          "tagName": "small",
+          "rect": {
+            "x": 312,
+            "y": 604.46875,
+            "width": 245.515625,
+            "height": 15,
+            "top": 604.46875,
+            "right": 557.515625,
+            "bottom": 619.46875,
+            "left": 312
+          },
+          "isPageLevel": false,
+          "isHidden": false,
+          "findings": [
+            {
+              "type": "undersized-ui-text",
+              "category": "quality",
+              "severity": "warning",
+              "advisory": false,
+              "detail": "10px functional text \"Facts, queue, memory, audit\" (below 11px floor)",
+              "ignoreValue": "",
+              "name": "Undersized functional text",
+              "description": "Interactive and content-bearing UI text (links, buttons, nav items, labels, table cells, meta rows, timecodes) below 11px is a legibility failure, not a style choice. WCAG sets no absolute pixel floor, but functional text under 11px is a defensible quality bar: it fails on high-DPI and small viewports and it degrades tap and read targets. The 11px floor holds even inside a footer; only non-interactive legal smallprint gets the softer 10px floor. Being ON the DESIGN.md size ramp does not exempt a value here: adding 8px to the ramp launders the token but not the legibility problem, and that is exactly the escape hatch this rule closes. Exempts sup/sub, visually-hidden (sr-only) text, and code/terminal contexts. Decorative letterspaced micro-labels are still functional and stay in scope."
+            }
+          ]
+        },
+        {
+          "selector": "button.cloud-node:nth-of-type(4) > small",
+          "tagName": "small",
+          "rect": {
+            "x": 312,
+            "y": 707.46875,
+            "width": 245.515625,
+            "height": 15,
+            "top": 707.46875,
+            "right": 557.515625,
+            "bottom": 722.46875,
+            "left": 312
+          },
+          "isPageLevel": false,
+          "isHidden": false,
+          "findings": [
+            {
+              "type": "undersized-ui-text",
+              "category": "quality",
+              "severity": "warning",
+              "advisory": false,
+              "detail": "10px functional text \"Authenticated, bounded verdict\" (below 11px floor)",
+              "ignoreValue": "",
+              "name": "Undersized functional text",
+              "description": "Interactive and content-bearing UI text (links, buttons, nav items, labels, table cells, meta rows, timecodes) below 11px is a legibility failure, not a style choice. WCAG sets no absolute pixel floor, but functional text under 11px is a defensible quality bar: it fails on high-DPI and small viewports and it degrades tap and read targets. The 11px floor holds even inside a footer; only non-interactive legal smallprint gets the softer 10px floor. Being ON the DESIGN.md size ramp does not exempt a value here: adding 8px to the ramp launders the token but not the legibility problem, and that is exactly the escape hatch this rule closes. Exempts sup/sub, visually-hidden (sr-only) text, and code/terminal contexts. Decorative letterspaced micro-labels are still functional and stay in scope."
+            }
+          ]
+        },
+        {
+          "selector": "button.cloud-node:nth-of-type(5) > small",
+          "tagName": "small",
+          "rect": {
+            "x": 312,
+            "y": 764.46875,
+            "width": 245.515625,
+            "height": 15,
+            "top": 764.46875,
+            "right": 557.515625,
+            "bottom": 779.46875,
+            "left": 312
+          },
+          "isPageLevel": false,
+          "isHidden": false,
+          "findings": [
+            {
+              "type": "undersized-ui-text",
+              "category": "quality",
+              "severity": "warning",
+              "advisory": false,
+              "detail": "10px functional text \"Decision only, no city tools\" (below 11px floor)",
+              "ignoreValue": "",
+              "name": "Undersized functional text",
+              "description": "Interactive and content-bearing UI text (links, buttons, nav items, labels, table cells, meta rows, timecodes) below 11px is a legibility failure, not a style choice. WCAG sets no absolute pixel floor, but functional text under 11px is a defensible quality bar: it fails on high-DPI and small viewports and it degrades tap and read targets. The 11px floor holds even inside a footer; only non-interactive legal smallprint gets the softer 10px floor. Being ON the DESIGN.md size ramp does not exempt a value here: adding 8px to the ramp launders the token but not the legibility problem, and that is exactly the escape hatch this rule closes. Exempts sup/sub, visually-hidden (sr-only) text, and code/terminal contexts. Decorative letterspaced micro-labels are still functional and stay in scope."
+            }
+          ]
+        },
+        {
+          "selector": "#component-inspector > p",
+          "tagName": "p",
+          "rect": {
+            "x": 607.515625,
+            "y": 490.96875,
+            "width": 591.484375,
+            "height": 40.78125,
+            "top": 490.96875,
+            "right": 1199,
+            "bottom": 531.75,
+            "left": 607.515625
+          },
+          "isPageLevel": false,
+          "isHidden": false,
+          "findings": [
+            {
+              "type": "line-length",
+              "category": "quality",
+              "severity": "warning",
+              "advisory": false,
+              "detail": "~99 chars on 2 of 2 rendered lines (aim for <80)",
+              "ignoreValue": "",
+              "name": "Line length too long",
+              "description": "Text lines wider than ~80 characters are hard to read. The eye loses its place tracking back to the start of the next line, so it is measured on the lines that rendered and charged when more than one of them runs long. Add a max-width (65ch to 75ch) to text containers."
+            }
+          ]
+        },
+        {
+          "selector": "dd:nth-of-type(3)",
+          "tagName": "dd",
+          "rect": {
+            "x": 607.515625,
+            "y": 671.03125,
+            "width": 591.484375,
+            "height": 40.78125,
+            "top": 671.03125,
+            "right": 1199,
+            "bottom": 711.8125,
+            "left": 607.515625
+          },
+          "isPageLevel": false,
+          "isHidden": false,
+          "findings": [
+            {
+              "type": "straggler",
+              "category": "quality",
+              "severity": "advisory",
+              "advisory": true,
+              "detail": "\"scope.\" alone on the last of 2 lines (7% of the measure)",
+              "ignoreValue": "",
+              "name": "Straggler",
+              "description": "The last line of this paragraph holds one word, which leaves a hole under the block. Set text-wrap: pretty on body copy (Chrome, Safari) to pull a word down beside it. Where a browser ignores it, edit the last sentence or bind the last two words with a no-break space. Keep it if the break is intended."
+            }
+          ]
+        },
+        {
+          "selector": "#chapter-body > p:nth-of-type(1)",
+          "tagName": "p",
+          "rect": {
+            "x": 284,
+            "y": 900.40625,
+            "width": 938,
+            "height": 100.75,
+            "top": 900.40625,
+            "right": 1222,
+            "bottom": 1001.15625,
+            "left": 284
+          },
+          "isPageLevel": false,
+          "isHidden": false,
+          "findings": [
+            {
+              "type": "line-length",
+              "category": "quality",
+              "severity": "warning",
+              "advisory": false,
+              "detail": "~130 chars on 3 of 4 rendered lines (aim for <80)",
+              "ignoreValue": "",
+              "name": "Line length too long",
+              "description": "Text lines wider than ~80 characters are hard to read. The eye loses its place tracking back to the start of the next line, so it is measured on the lines that rendered and charged when more than one of them runs long. Add a max-width (65ch to 75ch) to text containers."
+            }
+          ]
+        },
+        {
+          "selector": "#chapter-body > p:nth-of-type(2)",
+          "tagName": "p",
+          "rect": {
+            "x": 284,
+            "y": 1016.15625,
+            "width": 938,
+            "height": 50.375,
+            "top": 1016.15625,
+            "right": 1222,
+            "bottom": 1066.53125,
+            "left": 284
+          },
+          "isPageLevel": false,
+          "isHidden": false,
+          "findings": [
+            {
+              "type": "line-length",
+              "category": "quality",
+              "severity": "warning",
+              "advisory": false,
+              "detail": "~127 chars on 2 of 2 rendered lines (aim for <80)",
+              "ignoreValue": "",
+              "name": "Line length too long",
+              "description": "Text lines wider than ~80 characters are hard to read. The eye loses its place tracking back to the start of the next line, so it is measured on the lines that rendered and charged when more than one of them runs long. Add a max-width (65ch to 75ch) to text containers."
+            }
+          ]
+        },
+        {
+          "selector": "#chapter-body > p:nth-of-type(3)",
+          "tagName": "p",
+          "rect": {
+            "x": 284,
+            "y": 1917.921875,
+            "width": 938,
+            "height": 100.75,
+            "top": 1917.921875,
+            "right": 1222,
+            "bottom": 2018.671875,
+            "left": 284
+          },
+          "isPageLevel": false,
+          "isHidden": false,
+          "findings": [
+            {
+              "type": "line-length",
+              "category": "quality",
+              "severity": "warning",
+              "advisory": false,
+              "detail": "~131 chars on 3 of 4 rendered lines (aim for <80)",
+              "ignoreValue": "",
+              "name": "Line length too long",
+              "description": "Text lines wider than ~80 characters are hard to read. The eye loses its place tracking back to the start of the next line, so it is measured on the lines that rendered and charged when more than one of them runs long. Add a max-width (65ch to 75ch) to text containers."
+            }
+          ]
+        },
+        {
+          "selector": "#chapter-body > p:nth-of-type(4)",
+          "tagName": "p",
+          "rect": {
+            "x": 284,
+            "y": 2033.671875,
+            "width": 938,
+            "height": 100.75,
+            "top": 2033.671875,
+            "right": 1222,
+            "bottom": 2134.421875,
+            "left": 284
+          },
+          "isPageLevel": false,
+          "isHidden": false,
+          "findings": [
+            {
+              "type": "line-length",
+              "category": "quality",
+              "severity": "warning",
+              "advisory": false,
+              "detail": "~128 chars on 4 of 4 rendered lines (aim for <80)",
+              "ignoreValue": "",
+              "name": "Line length too long",
+              "description": "Text lines wider than ~80 characters are hard to read. The eye loses its place tracking back to the start of the next line, so it is measured on the lines that rendered and charged when more than one of them runs long. Add a max-width (65ch to 75ch) to text containers."
+            }
+          ]
+        },
+        {
+          "selector": "p:nth-of-type(6)",
+          "tagName": "p",
+          "rect": {
+            "x": 284,
+            "y": 2356.765625,
+            "width": 938,
+            "height": 125.9375,
+            "top": 2356.765625,
+            "right": 1222,
+            "bottom": 2482.703125,
+            "left": 284
+          },
+          "isPageLevel": false,
+          "isHidden": false,
+          "findings": [
+            {
+              "type": "line-length",
+              "category": "quality",
+              "severity": "warning",
+              "advisory": false,
+              "detail": "~130 chars on 4 of 5 rendered lines (aim for <80)",
+              "ignoreValue": "",
+              "name": "Line length too long",
+              "description": "Text lines wider than ~80 characters are hard to read. The eye loses its place tracking back to the start of the next line, so it is measured on the lines that rendered and charged when more than one of them runs long. Add a max-width (65ch to 75ch) to text containers."
+            }
+          ]
+        },
+        {
+          "selector": "p:nth-of-type(7)",
+          "tagName": "p",
+          "rect": {
+            "x": 284,
+            "y": 2497.703125,
+            "width": 938,
+            "height": 100.75,
+            "top": 2497.703125,
+            "right": 1222,
+            "bottom": 2598.453125,
+            "left": 284
+          },
+          "isPageLevel": false,
+          "isHidden": false,
+          "findings": [
+            {
+              "type": "line-length",
+              "category": "quality",
+              "severity": "warning",
+              "advisory": false,
+              "detail": "~135 chars on 3 of 7 rendered lines (aim for <80)",
+              "ignoreValue": "",
+              "name": "Line length too long",
+              "description": "Text lines wider than ~80 characters are hard to read. The eye loses its place tracking back to the start of the next line, so it is measured on the lines that rendered and charged when more than one of them runs long. Add a max-width (65ch to 75ch) to text containers."
+            }
+          ]
+        },
+        {
+          "selector": "p:nth-of-type(9)",
+          "tagName": "p",
+          "rect": {
+            "x": 284,
+            "y": 3517.21875,
+            "width": 938,
+            "height": 75.5625,
+            "top": 3517.21875,
+            "right": 1222,
+            "bottom": 3592.78125,
+            "left": 284
+          },
+          "isPageLevel": false,
+          "isHidden": false,
+          "findings": [
+            {
+              "type": "line-length",
+              "category": "quality",
+              "severity": "warning",
+              "advisory": false,
+              "detail": "~130 chars on 3 of 3 rendered lines (aim for <80)",
+              "ignoreValue": "",
+              "name": "Line length too long",
+              "description": "Text lines wider than ~80 characters are hard to read. The eye loses its place tracking back to the start of the next line, so it is measured on the lines that rendered and charged when more than one of them runs long. Add a max-width (65ch to 75ch) to text containers."
+            }
+          ]
+        },
+        {
+          "selector": "p:nth-of-type(10)",
+          "tagName": "p",
+          "rect": {
+            "x": 284,
+            "y": 3607.78125,
+            "width": 938,
+            "height": 75.5625,
+            "top": 3607.78125,
+            "right": 1222,
+            "bottom": 3683.34375,
+            "left": 284
+          },
+          "isPageLevel": false,
+          "isHidden": false,
+          "findings": [
+            {
+              "type": "line-length",
+              "category": "quality",
+              "severity": "warning",
+              "advisory": false,
+              "detail": "~134 chars on 2 of 4 rendered lines (aim for <80)",
+              "ignoreValue": "",
+              "name": "Line length too long",
+              "description": "Text lines wider than ~80 characters are hard to read. The eye loses its place tracking back to the start of the next line, so it is measured on the lines that rendered and charged when more than one of them runs long. Add a max-width (65ch to 75ch) to text containers."
+            }
+          ]
+        },
+        {
+          "selector": "p:nth-of-type(11)",
+          "tagName": "p",
+          "rect": {
+            "x": 284,
+            "y": 3789.9375,
+            "width": 938,
+            "height": 100.75,
+            "top": 3789.9375,
+            "right": 1222,
+            "bottom": 3890.6875,
+            "left": 284
+          },
+          "isPageLevel": false,
+          "isHidden": false,
+          "findings": [
+            {
+              "type": "line-length",
+              "category": "quality",
+              "severity": "warning",
+              "advisory": false,
+              "detail": "~135 chars on 2 of 5 rendered lines (aim for <80)",
+              "ignoreValue": "",
+              "name": "Line length too long",
+              "description": "Text lines wider than ~80 characters are hard to read. The eye loses its place tracking back to the start of the next line, so it is measured on the lines that rendered and charged when more than one of them runs long. Add a max-width (65ch to 75ch) to text containers."
+            }
+          ]
+        },
+        {
+          "selector": "p:nth-of-type(12)",
+          "tagName": "p",
+          "rect": {
+            "x": 284,
+            "y": 3905.6875,
+            "width": 938,
+            "height": 75.5625,
+            "top": 3905.6875,
+            "right": 1222,
+            "bottom": 3981.25,
+            "left": 284
+          },
+          "isPageLevel": false,
+          "isHidden": false,
+          "findings": [
+            {
+              "type": "line-length",
+              "category": "quality",
+              "severity": "warning",
+              "advisory": false,
+              "detail": "~130 chars on 2 of 3 rendered lines (aim for <80)",
+              "ignoreValue": "",
+              "name": "Line length too long",
+              "description": "Text lines wider than ~80 characters are hard to read. The eye loses its place tracking back to the start of the next line, so it is measured on the lines that rendered and charged when more than one of them runs long. Add a max-width (65ch to 75ch) to text containers."
+            }
+          ]
+        },
+        {
+          "selector": "p:nth-of-type(13)",
+          "tagName": "p",
+          "rect": {
+            "x": 284,
+            "y": 3996.25,
+            "width": 938,
+            "height": 100.75,
+            "top": 3996.25,
+            "right": 1222,
+            "bottom": 4097,
+            "left": 284
+          },
+          "isPageLevel": false,
+          "isHidden": false,
+          "findings": [
+            {
+              "type": "line-length",
+              "category": "quality",
+              "severity": "warning",
+              "advisory": false,
+              "detail": "~129 chars on 3 of 4 rendered lines (aim for <80)",
+              "ignoreValue": "",
+              "name": "Line length too long",
+              "description": "Text lines wider than ~80 characters are hard to read. The eye loses its place tracking back to the start of the next line, so it is measured on the lines that rendered and charged when more than one of them runs long. Add a max-width (65ch to 75ch) to text containers."
+            },
+            {
+              "type": "straggler",
+              "category": "quality",
+              "severity": "advisory",
+              "advisory": true,
+              "detail": "\"work.\" alone on the last of 4 lines (4% of the measure)",
+              "ignoreValue": "",
+              "name": "Straggler",
+              "description": "The last line of this paragraph holds one word, which leaves a hole under the block. Set text-wrap: pretty on body copy (Chrome, Safari) to pull a word down beside it. Where a browser ignores it, edit the last sentence or bind the last two words with a no-break space. Keep it if the break is intended."
+            }
+          ]
+        },
+        {
+          "selector": "footer.reader-footer > a",
+          "tagName": "a",
+          "rect": {
+            "x": 1080.0625,
+            "y": 4274.5,
+            "width": 141.9375,
+            "height": 15,
+            "top": 4274.5,
+            "right": 1222,
+            "bottom": 4289.5,
+            "left": 1080.0625
+          },
+          "isPageLevel": false,
+          "isHidden": false,
+          "findings": [
+            {
+              "type": "undersized-ui-text",
+              "category": "quality",
+              "severity": "warning",
+              "advisory": false,
+              "detail": "10px functional text \"Verify the implementation ↗\" (below 11px floor)",
+              "ignoreValue": "",
+              "name": "Undersized functional text",
+              "description": "Interactive and content-bearing UI text (links, buttons, nav items, labels, table cells, meta rows, timecodes) below 11px is a legibility failure, not a style choice. WCAG sets no absolute pixel floor, but functional text under 11px is a defensible quality bar: it fails on high-DPI and small viewports and it degrades tap and read targets. The 11px floor holds even inside a footer; only non-interactive legal smallprint gets the softer 10px floor. Being ON the DESIGN.md size ramp does not exempt a value here: adding 8px to the ramp launders the token but not the legibility problem, and that is exactly the escape hatch this rule closes. Exempts sup/sub, visually-hidden (sr-only) text, and code/terminal contexts. Decorative letterspaced micro-labels are still functional and stay in scope."
+            }
+          ]
+        },
+        {
+          "selector": "div.evidence-link > p",
+          "tagName": "p",
+          "rect": {
+            "x": 1260,
+            "y": 374,
+            "width": 162,
+            "height": 49.5,
+            "top": 374,
+            "right": 1422,
+            "bottom": 423.5,
+            "left": 1260
+          },
+          "isPageLevel": false,
+          "isHidden": false,
+          "findings": [
+            {
+              "type": "tiny-text",
+              "category": "quality",
+              "severity": "warning",
+              "advisory": false,
+              "detail": "11px body text",
+              "ignoreValue": "",
+              "name": "Tiny body text",
+              "description": "Body text below 12px is hard to read, especially on high-DPI screens. Use at least 14px for body content, 16px is ideal."
+            }
+          ]
+        },
+        {
+          "selector": "body",
+          "tagName": "body",
+          "rect": null,
+          "isPageLevel": true,
+          "isHidden": false,
+          "findings": [
+            {
+              "type": "overused-font",
+              "category": "slop",
+              "severity": "warning",
+              "advisory": false,
+              "detail": "Primary font: arial (72% of text)",
+              "ignoreValue": "",
+              "name": "Overused font",
+              "description": "Inter, Roboto, Fraunces, Geist, Plus Jakarta Sans, and Space Grotesk are used on so many sites they no longer feel distinctive. Each new wave of AI-generated UIs converges on the same handful of faces. Choose a face that gives your interface personality."
+            },
+            {
+              "type": "flat-type-hierarchy",
+              "category": "slop",
+              "severity": "advisory",
+              "advisory": true,
+              "detail": "Role sizes: body 14px, h3 16px, h2 19px, h1 20px (largest adjacent step 1.19:1; target 1.25:1; weight separates headings from body text)",
+              "ignoreValue": "",
+              "name": "Flat type hierarchy",
+              "description": "Dominant heading and body roles are separated by less than 1.25× at every step, leaving the size hierarchy flat. Add at least one stronger size step."
+            }
+          ]
+        },
+        {
+          "selector": "div:nth-of-type(12) > div > span",
+          "tagName": "span",
+          "rect": {
+            "x": 308,
+            "y": 468.46875,
+            "width": 188.140625,
+            "height": 20,
+            "top": 468.46875,
+            "right": 496.140625,
+            "bottom": 488.46875,
+            "left": 308
+          },
+          "isPageLevel": false,
+          "isHidden": false,
+          "findings": [
+            {
+              "type": "text-occlusion",
+              "category": "quality",
+              "severity": "warning",
+              "advisory": false,
+              "detail": "span \"undersized functional te\" is 100% covered by overlapping text (strong) on an opaque layer (div.component-map.component-index)",
+              "ignoreValue": "",
+              "name": "Text occluded by an overlapping element",
+              "description": "Text is painted under an opaque element or a second text run, so part of it cannot be read. A decorative box, a stacked layer, or an inline element with leaked padding lands on the words instead of beside them. Give overlapping layers room, or move the text out from under the layer above it."
+            }
+          ]
+        },
+        {
+          "selector": "div:nth-of-type(13) > div > span",
+          "tagName": "span",
+          "rect": {
+            "x": 308,
+            "y": 525.46875,
+            "width": 188.140625,
+            "height": 20,
+            "top": 525.46875,
+            "right": 496.140625,
+            "bottom": 545.46875,
+            "left": 308
+          },
+          "isPageLevel": false,
+          "isHidden": false,
+          "findings": [
+            {
+              "type": "text-occlusion",
+              "category": "quality",
+              "severity": "warning",
+              "advisory": false,
+              "detail": "span \"undersized functional te\" is 100% covered by overlapping text (strong) on an opaque layer (button)",
+              "ignoreValue": "",
+              "name": "Text occluded by an overlapping element",
+              "description": "Text is painted under an opaque element or a second text run, so part of it cannot be read. A decorative box, a stacked layer, or an inline element with leaked padding lands on the words instead of beside them. Give overlapping layers room, or move the text out from under the layer above it."
+            }
+          ]
+        },
+        {
+          "selector": "div:nth-of-type(14) > div > span",
+          "tagName": "span",
+          "rect": {
+            "x": 308,
+            "y": 582.46875,
+            "width": 188.140625,
+            "height": 20,
+            "top": 582.46875,
+            "right": 496.140625,
+            "bottom": 602.46875,
+            "left": 308
+          },
+          "isPageLevel": false,
+          "isHidden": false,
+          "findings": [
+            {
+              "type": "text-occlusion",
+              "category": "quality",
+              "severity": "warning",
+              "advisory": false,
+              "detail": "span \"undersized functional te\" is 100% covered by overlapping text (strong) on an opaque layer (div.component-map.component-index)",
+              "ignoreValue": "",
+              "name": "Text occluded by an overlapping element",
+              "description": "Text is painted under an opaque element or a second text run, so part of it cannot be read. A decorative box, a stacked layer, or an inline element with leaked padding lands on the words instead of beside them. Give overlapping layers room, or move the text out from under the layer above it."
+            }
+          ]
+        },
+        {
+          "selector": "div:nth-of-type(15) > div > span",
+          "tagName": "span",
+          "rect": {
+            "x": 308,
+            "y": 685.46875,
+            "width": 188.140625,
+            "height": 20,
+            "top": 685.46875,
+            "right": 496.140625,
+            "bottom": 705.46875,
+            "left": 308
+          },
+          "isPageLevel": false,
+          "isHidden": false,
+          "findings": [
+            {
+              "type": "text-occlusion",
+              "category": "quality",
+              "severity": "warning",
+              "advisory": false,
+              "detail": "span \"undersized functional te\" is 100% covered by overlapping text (strong) on an opaque layer (div.component-map.component-index)",
+              "ignoreValue": "",
+              "name": "Text occluded by an overlapping element",
+              "description": "Text is painted under an opaque element or a second text run, so part of it cannot be read. A decorative box, a stacked layer, or an inline element with leaked padding lands on the words instead of beside them. Give overlapping layers room, or move the text out from under the layer above it."
+            }
+          ]
+        },
+        {
+          "selector": "div:nth-of-type(16) > div > span",
+          "tagName": "span",
+          "rect": {
+            "x": 308,
+            "y": 742.46875,
+            "width": 188.140625,
+            "height": 20,
+            "top": 742.46875,
+            "right": 496.140625,
+            "bottom": 762.46875,
+            "left": 308
+          },
+          "isPageLevel": false,
+          "isHidden": false,
+          "findings": [
+            {
+              "type": "text-occlusion",
+              "category": "quality",
+              "severity": "warning",
+              "advisory": false,
+              "detail": "span \"undersized functional te\" is 100% covered by overlapping text (strong) on an opaque layer (div.component-map.component-index)",
+              "ignoreValue": "",
+              "name": "Text occluded by an overlapping element",
+              "description": "Text is painted under an opaque element or a second text run, so part of it cannot be read. A decorative box, a stacked layer, or an inline element with leaked padding lands on the words instead of beside them. Give overlapping layers room, or move the text out from under the layer above it."
+            }
+          ]
+        },
+        {
+          "selector": "div:nth-of-type(17) > div > span",
+          "tagName": "span",
+          "rect": {
+            "x": 603.515625,
+            "y": 468.96875,
+            "width": 148.421875,
+            "height": 20,
+            "top": 468.96875,
+            "right": 751.9375,
+            "bottom": 488.96875,
+            "left": 603.515625
+          },
+          "isPageLevel": false,
+          "isHidden": false,
+          "findings": [
+            {
+              "type": "text-occlusion",
+              "category": "quality",
+              "severity": "warning",
+              "advisory": false,
+              "detail": "span \"line length too long\" is 100% covered by overlapping text (h3) on an opaque layer (section.explorer)",
+              "ignoreValue": "",
+              "name": "Text occluded by an overlapping element",
+              "description": "Text is painted under an opaque element or a second text run, so part of it cannot be read. A decorative box, a stacked layer, or an inline element with leaked padding lands on the words instead of beside them. Give overlapping layers room, or move the text out from under the layer above it."
+            }
+          ]
+        },
+        {
+          "selector": "div:nth-of-type(18) > div > span",
+          "tagName": "span",
+          "rect": {
+            "x": 603.515625,
+            "y": 649.03125,
+            "width": 75.59375,
+            "height": 20,
+            "top": 649.03125,
+            "right": 679.109375,
+            "bottom": 669.03125,
+            "left": 603.515625
+          },
+          "isPageLevel": false,
+          "isHidden": false,
+          "findings": [
+            {
+              "type": "text-occlusion",
+              "category": "quality",
+              "severity": "warning",
+              "advisory": false,
+              "detail": "span \"straggler\" is 100% covered by overlapping text (dt) on an opaque layer (section.explorer)",
+              "ignoreValue": "",
+              "name": "Text occluded by an overlapping element",
+              "description": "Text is painted under an opaque element or a second text run, so part of it cannot be read. A decorative box, a stacked layer, or an inline element with leaked padding lands on the words instead of beside them. Give overlapping layers room, or move the text out from under the layer above it."
+            }
+          ]
+        }
+      ],
+      "detectorNodes": []
+    },
+    {
+      "page": "madrid",
+      "preflight": true,
+      "injection": "loaded",
+      "console": [
+        {
+          "type": "startGroup",
+          "text": "%c[impeccable] 5 anti-patterns found color: oklch(84% 0.19 80.46); font-weight: bold"
+        },
+        {
+          "type": "log",
+          "text": "%cundersized-ui-text%c 10px functional text \"Operations lab\" (below 11px floor) color: oklch(84% 0.19 80.46); font-weight: bold color: inherit JSHandle@node"
+        },
+        {
+          "type": "log",
+          "text": "%ccramped-padding%c <div> \"leaflet-control-attribution\": children flush against bg on top (no inset) color: oklch(84% 0.19 80.46); font-weight: bold color: inherit JSHandle@node"
+        },
+        {
+          "type": "log",
+          "text": "%cundersized-ui-text%c 10px functional text \"Leaflet\" (below 11px floor) color: oklch(84% 0.19 80.46); font-weight: bold color: inherit JSHandle@node"
+        },
+        {
+          "type": "log",
+          "text": "%cundersized-ui-text%c 10px functional text \"© OpenStreetMap contributors\" (below 11px floor) color: oklch(84% 0.19 80.46); font-weight: bold color: inherit JSHandle@node"
+        },
+        {
+          "type": "log",
+          "text": "%coverused-font%c Primary font: arial (76% of text) color: oklch(84% 0.19 80.46); font-weight: bold color: inherit JSHandle@node"
+        },
+        {
+          "type": "endGroup",
+          "text": "console.groupEnd"
+        }
+      ],
+      "errors": [],
+      "findings": [
+        {
+          "selector": "span.workspace-wordmark > small",
+          "tagName": "small",
+          "rect": {
+            "x": 64.875,
+            "y": 33.296875,
+            "width": 73.421875,
+            "height": 13,
+            "top": 33.296875,
+            "right": 138.296875,
+            "bottom": 46.296875,
+            "left": 64.875
+          },
+          "isPageLevel": false,
+          "isHidden": false,
+          "findings": [
+            {
+              "type": "undersized-ui-text",
+              "category": "quality",
+              "severity": "warning",
+              "advisory": false,
+              "detail": "10px functional text \"Operations lab\" (below 11px floor)",
+              "ignoreValue": "",
+              "name": "Undersized functional text",
+              "description": "Interactive and content-bearing UI text (links, buttons, nav items, labels, table cells, meta rows, timecodes) below 11px is a legibility failure, not a style choice. WCAG sets no absolute pixel floor, but functional text under 11px is a defensible quality bar: it fails on high-DPI and small viewports and it degrades tap and read targets. The 11px floor holds even inside a footer; only non-interactive legal smallprint gets the softer 10px floor. Being ON the DESIGN.md size ramp does not exempt a value here: adding 8px to the ramp launders the token but not the legibility problem, and that is exactly the escape hatch this rule closes. Exempts sup/sub, visually-hidden (sr-only) text, and code/terminal contexts. Decorative letterspaced micro-labels are still functional and stay in scope."
+            }
+          ]
+        },
+        {
+          "selector": "div.leaflet-control-attribution.leaflet-control",
+          "tagName": "div",
+          "rect": {
+            "x": 824.640625,
+            "y": 988.296875,
+            "width": 222.359375,
+            "height": 14,
+            "top": 988.296875,
+            "right": 1047,
+            "bottom": 1002.296875,
+            "left": 824.640625
+          },
+          "isPageLevel": false,
+          "isHidden": false,
+          "findings": [
+            {
+              "type": "cramped-padding",
+              "category": "quality",
+              "severity": "warning",
+              "advisory": false,
+              "detail": "<div> \"leaflet-control-attribution\": children flush against bg on top (no inset)",
+              "ignoreValue": "",
+              "name": "Cramped padding",
+              "description": "Text is too close to the edge of its container. Two shapes: (1) an element with its own text where the space between the rendered text and the border box is too small for the font size, and (2) a wrapper whose children's text lands flush against a visible boundary (border, outline, or non-transparent background) with nothing to inset it. Add at least 8px (ideally 12–16px) of space inside bordered, outlined, or colored containers."
+            }
+          ]
+        },
+        {
+          "selector": "div.leaflet-control-attribution.leaflet-control > a:nth-of-type(1)",
+          "tagName": "a",
+          "rect": {
+            "x": 829.640625,
+            "y": 989.296875,
+            "width": 47.234375,
+            "height": 11,
+            "top": 989.296875,
+            "right": 876.875,
+            "bottom": 1000.296875,
+            "left": 829.640625
+          },
+          "isPageLevel": false,
+          "isHidden": false,
+          "findings": [
+            {
+              "type": "undersized-ui-text",
+              "category": "quality",
+              "severity": "warning",
+              "advisory": false,
+              "detail": "10px functional text \"Leaflet\" (below 11px floor)",
+              "ignoreValue": "",
+              "name": "Undersized functional text",
+              "description": "Interactive and content-bearing UI text (links, buttons, nav items, labels, table cells, meta rows, timecodes) below 11px is a legibility failure, not a style choice. WCAG sets no absolute pixel floor, but functional text under 11px is a defensible quality bar: it fails on high-DPI and small viewports and it degrades tap and read targets. The 11px floor holds even inside a footer; only non-interactive legal smallprint gets the softer 10px floor. Being ON the DESIGN.md size ramp does not exempt a value here: adding 8px to the ramp launders the token but not the legibility problem, and that is exactly the escape hatch this rule closes. Exempts sup/sub, visually-hidden (sr-only) text, and code/terminal contexts. Decorative letterspaced micro-labels are still functional and stay in scope."
+            }
+          ]
+        },
+        {
+          "selector": "div.leaflet-control-attribution.leaflet-control > a:nth-of-type(2)",
+          "tagName": "a",
+          "rect": {
+            "x": 886.625,
+            "y": 989.296875,
+            "width": 155.375,
+            "height": 11,
+            "top": 989.296875,
+            "right": 1042,
+            "bottom": 1000.296875,
+            "left": 886.625
+          },
+          "isPageLevel": false,
+          "isHidden": false,
+          "findings": [
+            {
+              "type": "undersized-ui-text",
+              "category": "quality",
+              "severity": "warning",
+              "advisory": false,
+              "detail": "10px functional text \"© OpenStreetMap contributors\" (below 11px floor)",
+              "ignoreValue": "",
+              "name": "Undersized functional text",
+              "description": "Interactive and content-bearing UI text (links, buttons, nav items, labels, table cells, meta rows, timecodes) below 11px is a legibility failure, not a style choice. WCAG sets no absolute pixel floor, but functional text under 11px is a defensible quality bar: it fails on high-DPI and small viewports and it degrades tap and read targets. The 11px floor holds even inside a footer; only non-interactive legal smallprint gets the softer 10px floor. Being ON the DESIGN.md size ramp does not exempt a value here: adding 8px to the ramp launders the token but not the legibility problem, and that is exactly the escape hatch this rule closes. Exempts sup/sub, visually-hidden (sr-only) text, and code/terminal contexts. Decorative letterspaced micro-labels are still functional and stay in scope."
+            }
+          ]
+        },
+        {
+          "selector": "body",
+          "tagName": "body",
+          "rect": null,
+          "isPageLevel": true,
+          "isHidden": false,
+          "findings": [
+            {
+              "type": "overused-font",
+              "category": "slop",
+              "severity": "warning",
+              "advisory": false,
+              "detail": "Primary font: arial (76% of text)",
+              "ignoreValue": "",
+              "name": "Overused font",
+              "description": "Inter, Roboto, Fraunces, Geist, Plus Jakarta Sans, and Space Grotesk are used on so many sites they no longer feel distinctive. Each new wave of AI-generated UIs converges on the same handful of faces. Choose a face that gives your interface personality."
+            }
+          ]
+        }
+      ],
+      "detectorNodes": []
+    }
+  ]
+}

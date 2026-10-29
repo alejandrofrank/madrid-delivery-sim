@@ -1,0 +1,456 @@
+{
+  "schemaVersion": 3,
+  "stage": "components",
+  "id": "components",
+  "title": "Plan and asset review",
+  "comp": {
+    "path": ".impeccable/mocks/comp-agents-map.png",
+    "width": 1536,
+    "height": 1024
+  },
+  "specSha256": "305bdc2e18e23bded0cfc7a3a992b19054eab26d5635448dafdf985bb0741c12",
+  "components": [
+    {
+      "id": "map",
+      "name": "Map",
+      "kind": "chrome",
+      "role": "plan",
+      "box": {
+        "x": 0.4609,
+        "y": 0.1924,
+        "w": 0.5313,
+        "h": 0.4482
+      },
+      "note": "Interactive geographic data surface. Runtime street geometry, routes, agent positions, labels and controls; all driven by current simulator data.",
+      "medium": "code",
+      "preview": {
+        "kind": "comp-crop"
+      },
+      "codeDrawn": true,
+      "dependencies": []
+    },
+    {
+      "id": "navigation",
+      "name": "Navigation",
+      "kind": "chrome",
+      "role": "plan",
+      "box": {
+        "x": 0,
+        "y": 0,
+        "w": 1,
+        "h": 0.0439
+      },
+      "note": "Top shared navigation with brand, route links and runtime status.",
+      "medium": "code",
+      "preview": {
+        "kind": "comp-crop"
+      },
+      "codeDrawn": false,
+      "dependencies": []
+    },
+    {
+      "id": "orders-kpi",
+      "name": "Orders kpi",
+      "kind": "chrome",
+      "role": "plan",
+      "box": {
+        "x": 0.0078,
+        "y": 0.1055,
+        "w": 0.2539,
+        "h": 0.0781
+      },
+      "note": "Runtime metric and its history chart. Unavailable observations show No run yet.",
+      "medium": "code",
+      "preview": {
+        "kind": "comp-crop"
+      },
+      "codeDrawn": false,
+      "dependencies": []
+    },
+    {
+      "id": "ontime-kpi",
+      "name": "Ontime kpi",
+      "kind": "chrome",
+      "role": "plan",
+      "box": {
+        "x": 0.2624,
+        "y": 0.1055,
+        "w": 0.2363,
+        "h": 0.0781
+      },
+      "note": "Runtime metric and its history chart. Unavailable observations show No run yet.",
+      "medium": "code",
+      "preview": {
+        "kind": "comp-crop"
+      },
+      "codeDrawn": false,
+      "dependencies": []
+    },
+    {
+      "id": "cost-kpi",
+      "name": "Cost kpi",
+      "kind": "chrome",
+      "role": "plan",
+      "box": {
+        "x": 0.4993,
+        "y": 0.1055,
+        "w": 0.2376,
+        "h": 0.0781
+      },
+      "note": "Runtime metric and its history chart. Unavailable observations show No run yet.",
+      "medium": "code",
+      "preview": {
+        "kind": "comp-crop"
+      },
+      "codeDrawn": false,
+      "dependencies": []
+    },
+    {
+      "id": "latency-kpi",
+      "name": "Latency kpi",
+      "kind": "chrome",
+      "role": "plan",
+      "box": {
+        "x": 0.7376,
+        "y": 0.1055,
+        "w": 0.2546,
+        "h": 0.0781
+      },
+      "note": "Runtime metric and its history chart. Unavailable observations show No run yet.",
+      "medium": "code",
+      "preview": {
+        "kind": "comp-crop"
+      },
+      "codeDrawn": false,
+      "dependencies": []
+    },
+    {
+      "id": "map-legend",
+      "name": "Map legend",
+      "kind": "chrome",
+      "role": "plan",
+      "box": {
+        "x": 0.8802,
+        "y": 0.4912,
+        "w": 0.1048,
+        "h": 0.1357
+      },
+      "note": "Legend explains type symbols and observed versus planned routes.",
+      "medium": "code",
+      "preview": {
+        "kind": "comp-crop"
+      },
+      "codeDrawn": false,
+      "dependencies": []
+    },
+    {
+      "id": "evidence",
+      "name": "Evidence",
+      "kind": "chrome",
+      "role": "plan",
+      "box": {
+        "x": 0.0078,
+        "y": 0.6494,
+        "w": 0.9844,
+        "h": 0.0986
+      },
+      "note": "Selected agent evidence strip with identity, state, task, last decision and trace link.",
+      "medium": "code",
+      "preview": {
+        "kind": "comp-crop"
+      },
+      "codeDrawn": false,
+      "dependencies": []
+    }
+  ],
+  "codeRegions": [
+    {
+      "id": "page-title",
+      "name": "Page title",
+      "kind": "text",
+      "box": {
+        "x": 0.0189,
+        "y": 0.0605,
+        "w": 0.181,
+        "h": 0.0332
+      },
+      "note": "Delivery operations page title."
+    },
+    {
+      "id": "session-label",
+      "name": "Session label",
+      "kind": "text",
+      "box": {
+        "x": 0.2083,
+        "y": 0.0645,
+        "w": 0.1634,
+        "h": 0.0244
+      },
+      "note": "Illustrative synthetic session, a compact runtime status label."
+    },
+    {
+      "id": "start-controls",
+      "name": "Start controls",
+      "kind": "control",
+      "box": {
+        "x": 0.7799,
+        "y": 0.0596,
+        "w": 0.2116,
+        "h": 0.0342
+      },
+      "note": "Start simulation and Configure buttons."
+    },
+    {
+      "id": "agent-controls",
+      "name": "Agent controls",
+      "kind": "control",
+      "box": {
+        "x": 0.0078,
+        "y": 0.1924,
+        "w": 0.4466,
+        "h": 0.0479
+      },
+      "note": "Agents heading with role, status and search filters."
+    },
+    {
+      "id": "agent-columns",
+      "name": "Agent columns",
+      "kind": "text",
+      "box": {
+        "x": 0.0182,
+        "y": 0.2432,
+        "w": 0.4258,
+        "h": 0.0332
+      },
+      "note": "Agent, Role, Status, Current task, Throughput and History column labels."
+    },
+    {
+      "id": "agent-row-1",
+      "name": "Agent row 1",
+      "kind": "control",
+      "box": {
+        "x": 0.0085,
+        "y": 0.2793,
+        "w": 0.4453,
+        "h": 0.0508
+      },
+      "note": "Selectable runtime agent row: identity, role, state, task and observed throughput history."
+    },
+    {
+      "id": "agent-row-2",
+      "name": "Agent row 2",
+      "kind": "control",
+      "box": {
+        "x": 0.0085,
+        "y": 0.3301,
+        "w": 0.4453,
+        "h": 0.0508
+      },
+      "note": "Selectable runtime agent row: identity, role, state, task and observed throughput history."
+    },
+    {
+      "id": "agent-row-3",
+      "name": "Agent row 3",
+      "kind": "control",
+      "box": {
+        "x": 0.0085,
+        "y": 0.3809,
+        "w": 0.4453,
+        "h": 0.0508
+      },
+      "note": "Selectable runtime agent row: identity, role, state, task and observed throughput history."
+    },
+    {
+      "id": "agent-row-4",
+      "name": "Agent row 4",
+      "kind": "control",
+      "box": {
+        "x": 0.0085,
+        "y": 0.4316,
+        "w": 0.4453,
+        "h": 0.0508
+      },
+      "note": "Selectable runtime agent row: identity, role, state, task and observed throughput history."
+    },
+    {
+      "id": "agent-row-5",
+      "name": "Agent row 5",
+      "kind": "control",
+      "box": {
+        "x": 0.0085,
+        "y": 0.4824,
+        "w": 0.4453,
+        "h": 0.0508
+      },
+      "note": "Selectable runtime agent row: identity, role, state, task and observed throughput history."
+    },
+    {
+      "id": "agent-row-6",
+      "name": "Agent row 6",
+      "kind": "control",
+      "box": {
+        "x": 0.0085,
+        "y": 0.5332,
+        "w": 0.4453,
+        "h": 0.0508
+      },
+      "note": "Selectable runtime agent row: identity, role, state, task and observed throughput history."
+    },
+    {
+      "id": "map-controls",
+      "name": "Map controls",
+      "kind": "control",
+      "box": {
+        "x": 0.9609,
+        "y": 0.2002,
+        "w": 0.0273,
+        "h": 0.1035
+      },
+      "note": "Zoom and fit controls."
+    },
+    {
+      "id": "map-selected",
+      "name": "Map selected",
+      "kind": "control",
+      "box": {
+        "x": 0.7051,
+        "y": 0.3623,
+        "w": 0.0794,
+        "h": 0.042
+      },
+      "note": "Selected agent marker and name. Runtime position is selectable."
+    },
+    {
+      "id": "order-controls",
+      "name": "Order controls",
+      "kind": "control",
+      "box": {
+        "x": 0.0078,
+        "y": 0.7568,
+        "w": 0.9844,
+        "h": 0.0449
+      },
+      "note": "Orders heading with state and restaurant filters, search and sorting."
+    },
+    {
+      "id": "order-columns",
+      "name": "Order columns",
+      "kind": "text",
+      "box": {
+        "x": 0.0182,
+        "y": 0.8066,
+        "w": 0.9499,
+        "h": 0.0225
+      },
+      "note": "Order book column headings."
+    },
+    {
+      "id": "order-row-1",
+      "name": "Order row 1",
+      "kind": "control",
+      "box": {
+        "x": 0.0182,
+        "y": 0.8311,
+        "w": 0.9609,
+        "h": 0.0234
+      },
+      "note": "Inspectable runtime order row with its status, agent and latest decision."
+    },
+    {
+      "id": "order-row-2",
+      "name": "Order row 2",
+      "kind": "control",
+      "box": {
+        "x": 0.0182,
+        "y": 0.8545,
+        "w": 0.9609,
+        "h": 0.0234
+      },
+      "note": "Inspectable runtime order row with its status, agent and latest decision."
+    },
+    {
+      "id": "order-row-3",
+      "name": "Order row 3",
+      "kind": "control",
+      "box": {
+        "x": 0.0182,
+        "y": 0.8779,
+        "w": 0.9609,
+        "h": 0.0234
+      },
+      "note": "Inspectable runtime order row with its status, agent and latest decision."
+    },
+    {
+      "id": "order-row-4",
+      "name": "Order row 4",
+      "kind": "control",
+      "box": {
+        "x": 0.0182,
+        "y": 0.9014,
+        "w": 0.9609,
+        "h": 0.0234
+      },
+      "note": "Inspectable runtime order row with its status, agent and latest decision."
+    },
+    {
+      "id": "order-row-5",
+      "name": "Order row 5",
+      "kind": "control",
+      "box": {
+        "x": 0.0182,
+        "y": 0.9248,
+        "w": 0.9609,
+        "h": 0.0234
+      },
+      "note": "Inspectable runtime order row with its status, agent and latest decision."
+    },
+    {
+      "id": "order-row-6",
+      "name": "Order row 6",
+      "kind": "control",
+      "box": {
+        "x": 0.0182,
+        "y": 0.9482,
+        "w": 0.9609,
+        "h": 0.0234
+      },
+      "note": "Inspectable runtime order row with its status, agent and latest decision."
+    },
+    {
+      "id": "titlebar",
+      "name": "Titlebar",
+      "kind": "chrome",
+      "box": {
+        "x": 0.0078,
+        "y": 0.0439,
+        "w": 0.9844,
+        "h": 0.0557
+      },
+      "note": "Page heading and simulation control layout."
+    },
+    {
+      "id": "agent-table",
+      "name": "Agent table",
+      "kind": "chrome",
+      "box": {
+        "x": 0.0078,
+        "y": 0.1924,
+        "w": 0.4466,
+        "h": 0.4482
+      },
+      "note": "Live agent table including column headings, selectable agent rows and blank unused rows."
+    },
+    {
+      "id": "orders-table",
+      "name": "Orders table",
+      "kind": "chrome",
+      "box": {
+        "x": 0.0078,
+        "y": 0.7568,
+        "w": 0.9844,
+        "h": 0.2314
+      },
+      "note": "Live order table and filtering controls."
+    }
+  ]
+}

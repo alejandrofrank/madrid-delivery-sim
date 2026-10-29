@@ -1,0 +1,1829 @@
+{
+  "tool": "comp-spec",
+  "version": 1,
+  "createdAt": "2026-10-29T14:10:47.996Z",
+  "comp": ".impeccable/mocks/comp-agents-map.png",
+  "warnings": [
+    "region map: \"codeDrawn\": true set in the regions file (the painted-material refusal is overridden: code draws this region)",
+    "region map: \"container\": true set in the regions file (the region-size refusal is overridden: one undivided element)",
+    "region titlebar: \"container\": true set in the regions file (the region-size refusal is overridden: one undivided element)",
+    "region agent-table: \"container\": true set in the regions file (the region-size refusal is overridden: one undivided element)",
+    "region orders-table: \"container\": true set in the regions file (the region-size refusal is overridden: one undivided element)"
+  ],
+  "uncoveredInkCells": [
+    "A7"
+  ],
+  "compSize": {
+    "width": 1536,
+    "height": 1024
+  },
+  "aspect": 1.5,
+  "orientation": "landscape",
+  "palette": [
+    {
+      "hex": "#091919",
+      "coverage": 0.7185
+    },
+    {
+      "hex": "#182535",
+      "coverage": 0.2244
+    },
+    {
+      "hex": "#2c4049",
+      "coverage": 0.0436
+    },
+    {
+      "hex": "#8e9eb2",
+      "coverage": 0.0068
+    },
+    {
+      "hex": "#566676",
+      "coverage": 0.0067
+    }
+  ],
+  "bands": [
+    {
+      "y": 0.0353,
+      "strength": 0.2212
+    },
+    {
+      "y": 0.0706,
+      "strength": 0.3406
+    },
+    {
+      "y": 0.0941,
+      "strength": 0.3323
+    },
+    {
+      "y": 0.6941,
+      "strength": 0.3193
+    },
+    {
+      "y": 0.8353,
+      "strength": 0.2173
+    },
+    {
+      "y": 0.8824,
+      "strength": 0.2247
+    },
+    {
+      "y": 0.9176,
+      "strength": 0.2146
+    }
+  ],
+  "regions": [
+    {
+      "id": "navigation",
+      "kind": "chrome",
+      "note": "Top shared navigation with brand, route links and runtime status.",
+      "grid": null,
+      "box": {
+        "x": 0,
+        "y": 0,
+        "w": 1,
+        "h": 0.0439
+      },
+      "px": {
+        "x": 0,
+        "y": 0,
+        "w": 1536,
+        "h": 45
+      },
+      "aspect": 34.1333,
+      "palette": [
+        {
+          "hex": "#081718",
+          "coverage": 0.9711
+        },
+        {
+          "hex": "#a1b5c8",
+          "coverage": 0.0107
+        },
+        {
+          "hex": "#4c5a6b",
+          "coverage": 0.0096
+        },
+        {
+          "hex": "#2d3040",
+          "coverage": 0.0054
+        },
+        {
+          "hex": "#f3f3f3",
+          "coverage": 0.0032
+        }
+      ],
+      "detail": {
+        "energy": 20.5936
+      },
+      "medium": "semantic",
+      "plate": null,
+      "text": null,
+      "surface": {
+        "flat": false,
+        "rules": false
+      }
+    },
+    {
+      "id": "page-title",
+      "kind": "text",
+      "note": "Delivery operations page title.",
+      "grid": null,
+      "box": {
+        "x": 0.0189,
+        "y": 0.0605,
+        "w": 0.181,
+        "h": 0.0332
+      },
+      "px": {
+        "x": 29,
+        "y": 62,
+        "w": 278,
+        "h": 34
+      },
+      "aspect": 8.1765,
+      "palette": [
+        {
+          "hex": "#091518",
+          "coverage": 0.7275
+        },
+        {
+          "hex": "#f5f5f6",
+          "coverage": 0.2089
+        },
+        {
+          "hex": "#777d82",
+          "coverage": 0.0254
+        },
+        {
+          "hex": "#3d4949",
+          "coverage": 0.02
+        },
+        {
+          "hex": "#bec2c6",
+          "coverage": 0.0182
+        }
+      ],
+      "detail": {
+        "energy": 84.9377
+      },
+      "medium": "semantic",
+      "plate": null,
+      "text": null,
+      "surface": {
+        "flat": false,
+        "rules": false
+      },
+      "type": {
+        "comp": {
+          "lines": 1,
+          "glyphs": 18,
+          "capHeightPx": 23.2,
+          "inkIsDark": false,
+          "allCaps": false,
+          "advance": 0.6136,
+          "advTall": 0.3014,
+          "advX": 0.6244,
+          "gap": 0.1077,
+          "xRatio": 0.6954,
+          "stemW": 0.193,
+          "contrast": 1.1902,
+          "serif": 0.9517,
+          "densTall": 0.6427,
+          "densX": 0.6182,
+          "weight": 0.6427
+        },
+        "widthClass": "normal",
+        "weightClass": "bold",
+        "chosen": {
+          "family": "Alegreya Sans",
+          "weight": 700,
+          "fontSizePx": 33,
+          "source": "catalog",
+          "estimatedSize": true,
+          "stamp": "879d898c2722"
+        }
+      }
+    },
+    {
+      "id": "session-label",
+      "kind": "text",
+      "note": "Illustrative synthetic session, a compact runtime status label.",
+      "grid": null,
+      "box": {
+        "x": 0.2083,
+        "y": 0.0645,
+        "w": 0.1634,
+        "h": 0.0244
+      },
+      "px": {
+        "x": 320,
+        "y": 66,
+        "w": 251,
+        "h": 25
+      },
+      "aspect": 10.04,
+      "palette": [
+        {
+          "hex": "#081718",
+          "coverage": 0.9044
+        },
+        {
+          "hex": "#97aac1",
+          "coverage": 0.035
+        },
+        {
+          "hex": "#5f7089",
+          "coverage": 0.031
+        },
+        {
+          "hex": "#1f454a",
+          "coverage": 0.0188
+        },
+        {
+          "hex": "#28eee8",
+          "coverage": 0.0108
+        }
+      ],
+      "detail": {
+        "energy": 34.3953
+      },
+      "medium": "semantic",
+      "plate": null,
+      "text": null,
+      "surface": {
+        "flat": false,
+        "rules": false
+      },
+      "type": {
+        "comp": {
+          "lines": 1,
+          "glyphs": 27,
+          "capHeightPx": 10.1,
+          "inkIsDark": false,
+          "allCaps": false,
+          "advance": 0.5283,
+          "advTall": 0.3632,
+          "advX": 0.5778,
+          "gap": 0.066,
+          "xRatio": 0.7157,
+          "stemW": 0.1703,
+          "contrast": 1.2013,
+          "serif": 0.5954,
+          "densTall": 0.6061,
+          "densX": 0.5865,
+          "weight": 0.6061
+        },
+        "widthClass": "condensed",
+        "weightClass": "bold"
+      }
+    },
+    {
+      "id": "start-controls",
+      "kind": "control",
+      "note": "Start simulation and Configure buttons.",
+      "grid": null,
+      "box": {
+        "x": 0.7799,
+        "y": 0.0596,
+        "w": 0.2116,
+        "h": 0.0342
+      },
+      "px": {
+        "x": 1198,
+        "y": 61,
+        "w": 325,
+        "h": 35
+      },
+      "aspect": 9.2857,
+      "palette": [
+        {
+          "hex": "#0a171d",
+          "coverage": 0.4862
+        },
+        {
+          "hex": "#26e8d9",
+          "coverage": 0.3661
+        },
+        {
+          "hex": "#273643",
+          "coverage": 0.0804
+        },
+        {
+          "hex": "#158678",
+          "coverage": 0.0552
+        },
+        {
+          "hex": "#9aacbc",
+          "coverage": 0.0122
+        }
+      ],
+      "detail": {
+        "energy": 32.2252
+      },
+      "medium": "semantic",
+      "plate": null,
+      "text": null,
+      "surface": {
+        "flat": false,
+        "rules": false
+      }
+    },
+    {
+      "id": "orders-kpi",
+      "kind": "chrome",
+      "note": "Runtime metric and its history chart. Unavailable observations show No run yet.",
+      "grid": null,
+      "box": {
+        "x": 0.0078,
+        "y": 0.1055,
+        "w": 0.2539,
+        "h": 0.0781
+      },
+      "px": {
+        "x": 12,
+        "y": 108,
+        "w": 390,
+        "h": 80
+      },
+      "aspect": 4.875,
+      "palette": [
+        {
+          "hex": "#09181b",
+          "coverage": 0.9699
+        },
+        {
+          "hex": "#1f364b",
+          "coverage": 0.01
+        },
+        {
+          "hex": "#93a7c0",
+          "coverage": 0.01
+        },
+        {
+          "hex": "#bcd6ea",
+          "coverage": 0.0057
+        },
+        {
+          "hex": "#55657a",
+          "coverage": 0.0043
+        }
+      ],
+      "detail": {
+        "energy": 10.0037
+      },
+      "medium": "semantic",
+      "plate": null,
+      "text": null,
+      "surface": {
+        "flat": false,
+        "rules": false
+      }
+    },
+    {
+      "id": "ontime-kpi",
+      "kind": "chrome",
+      "note": "Runtime metric and its history chart. Unavailable observations show No run yet.",
+      "grid": null,
+      "box": {
+        "x": 0.2624,
+        "y": 0.1055,
+        "w": 0.2363,
+        "h": 0.0781
+      },
+      "px": {
+        "x": 403,
+        "y": 108,
+        "w": 363,
+        "h": 80
+      },
+      "aspect": 4.5375,
+      "palette": [
+        {
+          "hex": "#09181b",
+          "coverage": 0.9808
+        },
+        {
+          "hex": "#1d3545",
+          "coverage": 0.0059
+        },
+        {
+          "hex": "#565e71",
+          "coverage": 0.0047
+        },
+        {
+          "hex": "#9db3d3",
+          "coverage": 0.0043
+        },
+        {
+          "hex": "#98a8b2",
+          "coverage": 0.0043
+        }
+      ],
+      "detail": {
+        "energy": 10.9319
+      },
+      "medium": "semantic",
+      "plate": null,
+      "text": null,
+      "surface": {
+        "flat": false,
+        "rules": false
+      }
+    },
+    {
+      "id": "cost-kpi",
+      "kind": "chrome",
+      "note": "Runtime metric and its history chart. Unavailable observations show No run yet.",
+      "grid": null,
+      "box": {
+        "x": 0.4993,
+        "y": 0.1055,
+        "w": 0.2376,
+        "h": 0.0781
+      },
+      "px": {
+        "x": 767,
+        "y": 108,
+        "w": 365,
+        "h": 80
+      },
+      "aspect": 4.5625,
+      "palette": [
+        {
+          "hex": "#09181b",
+          "coverage": 0.9724
+        },
+        {
+          "hex": "#93a3b6",
+          "coverage": 0.0113
+        },
+        {
+          "hex": "#304457",
+          "coverage": 0.0083
+        },
+        {
+          "hex": "#5f768c",
+          "coverage": 0.004
+        },
+        {
+          "hex": "#1c2c48",
+          "coverage": 0.004
+        }
+      ],
+      "detail": {
+        "energy": 11.8153
+      },
+      "medium": "semantic",
+      "plate": null,
+      "text": null,
+      "surface": {
+        "flat": false,
+        "rules": false
+      }
+    },
+    {
+      "id": "latency-kpi",
+      "kind": "chrome",
+      "note": "Runtime metric and its history chart. Unavailable observations show No run yet.",
+      "grid": null,
+      "box": {
+        "x": 0.7376,
+        "y": 0.1055,
+        "w": 0.2546,
+        "h": 0.0781
+      },
+      "px": {
+        "x": 1133,
+        "y": 108,
+        "w": 391,
+        "h": 80
+      },
+      "aspect": 4.8875,
+      "palette": [
+        {
+          "hex": "#09181b",
+          "coverage": 0.9788
+        },
+        {
+          "hex": "#22374f",
+          "coverage": 0.008
+        },
+        {
+          "hex": "#8b9cb1",
+          "coverage": 0.0063
+        },
+        {
+          "hex": "#3d5367",
+          "coverage": 0.0046
+        },
+        {
+          "hex": "#bed8ee",
+          "coverage": 0.0023
+        }
+      ],
+      "detail": {
+        "energy": 10.8282
+      },
+      "medium": "semantic",
+      "plate": null,
+      "text": null,
+      "surface": {
+        "flat": false,
+        "rules": false
+      }
+    },
+    {
+      "id": "agent-controls",
+      "kind": "control",
+      "note": "Agents heading with role, status and search filters.",
+      "grid": null,
+      "box": {
+        "x": 0.0078,
+        "y": 0.1924,
+        "w": 0.4466,
+        "h": 0.0479
+      },
+      "px": {
+        "x": 12,
+        "y": 197,
+        "w": 686,
+        "h": 49
+      },
+      "aspect": 14,
+      "palette": [
+        {
+          "hex": "#081818",
+          "coverage": 0.8182
+        },
+        {
+          "hex": "#101626",
+          "coverage": 0.146
+        },
+        {
+          "hex": "#26313e",
+          "coverage": 0.0212
+        },
+        {
+          "hex": "#54616f",
+          "coverage": 0.0084
+        },
+        {
+          "hex": "#f2f2f3",
+          "coverage": 0.0063
+        }
+      ],
+      "detail": {
+        "energy": 14.1407
+      },
+      "medium": "semantic",
+      "plate": null,
+      "text": null,
+      "surface": {
+        "flat": false,
+        "rules": false
+      }
+    },
+    {
+      "id": "agent-columns",
+      "kind": "text",
+      "note": "Agent, Role, Status, Current task, Throughput and History column labels.",
+      "grid": null,
+      "box": {
+        "x": 0.0182,
+        "y": 0.2432,
+        "w": 0.4258,
+        "h": 0.0332
+      },
+      "px": {
+        "x": 28,
+        "y": 249,
+        "w": 654,
+        "h": 34
+      },
+      "aspect": 19.2353,
+      "palette": [
+        {
+          "hex": "#081719",
+          "coverage": 0.943
+        },
+        {
+          "hex": "#a1afbe",
+          "coverage": 0.0216
+        },
+        {
+          "hex": "#545e6f",
+          "coverage": 0.0158
+        },
+        {
+          "hex": "#29323f",
+          "coverage": 0.0154
+        },
+        {
+          "hex": "#75828f",
+          "coverage": 0.0042
+        }
+      ],
+      "detail": {
+        "energy": 19.1102
+      },
+      "medium": "semantic",
+      "plate": null,
+      "text": null,
+      "surface": {
+        "flat": false,
+        "rules": false
+      },
+      "type": {
+        "comp": {
+          "lines": 1,
+          "glyphs": 39,
+          "capHeightPx": 13.4,
+          "inkIsDark": false,
+          "allCaps": false,
+          "advance": 0.3724,
+          "advTall": null,
+          "advX": 0.3724,
+          "gap": 0.0745,
+          "xRatio": 0.4063,
+          "stemW": 0.1471,
+          "contrast": 1.1039,
+          "serif": 0.9976,
+          "densTall": null,
+          "densX": 0.728,
+          "weight": 0.728
+        },
+        "widthClass": "compressed",
+        "weightClass": "black"
+      }
+    },
+    {
+      "id": "agent-row-1",
+      "kind": "control",
+      "note": "Selectable runtime agent row: identity, role, state, task and observed throughput history.",
+      "grid": null,
+      "reviewGroup": "agent-rows",
+      "box": {
+        "x": 0.0085,
+        "y": 0.2793,
+        "w": 0.4453,
+        "h": 0.0508
+      },
+      "px": {
+        "x": 13,
+        "y": 286,
+        "w": 684,
+        "h": 52
+      },
+      "aspect": 13.1538,
+      "palette": [
+        {
+          "hex": "#082931",
+          "coverage": 0.8232
+        },
+        {
+          "hex": "#105e5c",
+          "coverage": 0.128
+        },
+        {
+          "hex": "#5d8a9c",
+          "coverage": 0.0314
+        },
+        {
+          "hex": "#3a5767",
+          "coverage": 0.011
+        },
+        {
+          "hex": "#e1eaee",
+          "coverage": 0.0064
+        }
+      ],
+      "detail": {
+        "energy": 23.9053
+      },
+      "medium": "semantic",
+      "plate": null,
+      "text": null,
+      "surface": {
+        "flat": false,
+        "rules": false
+      }
+    },
+    {
+      "id": "agent-row-2",
+      "kind": "control",
+      "note": "Selectable runtime agent row: identity, role, state, task and observed throughput history.",
+      "grid": null,
+      "reviewGroup": "agent-rows",
+      "box": {
+        "x": 0.0085,
+        "y": 0.3301,
+        "w": 0.4453,
+        "h": 0.0508
+      },
+      "px": {
+        "x": 13,
+        "y": 338,
+        "w": 684,
+        "h": 52
+      },
+      "aspect": 13.1538,
+      "palette": [
+        {
+          "hex": "#081818",
+          "coverage": 0.8877
+        },
+        {
+          "hex": "#142131",
+          "coverage": 0.0644
+        },
+        {
+          "hex": "#526171",
+          "coverage": 0.0317
+        },
+        {
+          "hex": "#b0c0d0",
+          "coverage": 0.0097
+        },
+        {
+          "hex": "#7a8a9c",
+          "coverage": 0.0065
+        }
+      ],
+      "detail": {
+        "energy": 17.8723
+      },
+      "medium": "semantic",
+      "plate": null,
+      "text": null,
+      "surface": {
+        "flat": false,
+        "rules": false
+      }
+    },
+    {
+      "id": "agent-row-3",
+      "kind": "control",
+      "note": "Selectable runtime agent row: identity, role, state, task and observed throughput history.",
+      "grid": null,
+      "reviewGroup": "agent-rows",
+      "box": {
+        "x": 0.0085,
+        "y": 0.3809,
+        "w": 0.4453,
+        "h": 0.0508
+      },
+      "px": {
+        "x": 13,
+        "y": 390,
+        "w": 684,
+        "h": 52
+      },
+      "aspect": 13.1538,
+      "palette": [
+        {
+          "hex": "#09191a",
+          "coverage": 0.8927
+        },
+        {
+          "hex": "#122b46",
+          "coverage": 0.0576
+        },
+        {
+          "hex": "#546375",
+          "coverage": 0.0317
+        },
+        {
+          "hex": "#e4e6ec",
+          "coverage": 0.0091
+        },
+        {
+          "hex": "#19558d",
+          "coverage": 0.0089
+        }
+      ],
+      "detail": {
+        "energy": 20.0331
+      },
+      "medium": "semantic",
+      "plate": null,
+      "text": null,
+      "surface": {
+        "flat": false,
+        "rules": false
+      }
+    },
+    {
+      "id": "agent-row-4",
+      "kind": "control",
+      "note": "Selectable runtime agent row: identity, role, state, task and observed throughput history.",
+      "grid": null,
+      "reviewGroup": "agent-rows",
+      "box": {
+        "x": 0.0085,
+        "y": 0.4316,
+        "w": 0.4453,
+        "h": 0.0508
+      },
+      "px": {
+        "x": 13,
+        "y": 442,
+        "w": 684,
+        "h": 52
+      },
+      "aspect": 13.1538,
+      "palette": [
+        {
+          "hex": "#09191a",
+          "coverage": 0.8948
+        },
+        {
+          "hex": "#0d2945",
+          "coverage": 0.0629
+        },
+        {
+          "hex": "#566578",
+          "coverage": 0.0304
+        },
+        {
+          "hex": "#143666",
+          "coverage": 0.007
+        },
+        {
+          "hex": "#9ba8c0",
+          "coverage": 0.0048
+        }
+      ],
+      "detail": {
+        "energy": 16.4522
+      },
+      "medium": "semantic",
+      "plate": null,
+      "text": null,
+      "surface": {
+        "flat": false,
+        "rules": false
+      }
+    },
+    {
+      "id": "agent-row-5",
+      "kind": "control",
+      "note": "Selectable runtime agent row: identity, role, state, task and observed throughput history.",
+      "grid": null,
+      "reviewGroup": "agent-rows",
+      "box": {
+        "x": 0.0085,
+        "y": 0.4824,
+        "w": 0.4453,
+        "h": 0.0508
+      },
+      "px": {
+        "x": 13,
+        "y": 494,
+        "w": 684,
+        "h": 52
+      },
+      "aspect": 13.1538,
+      "palette": [
+        {
+          "hex": "#091a1a",
+          "coverage": 0.9254
+        },
+        {
+          "hex": "#596879",
+          "coverage": 0.0304
+        },
+        {
+          "hex": "#083a31",
+          "coverage": 0.0264
+        },
+        {
+          "hex": "#a2b0c1",
+          "coverage": 0.0093
+        },
+        {
+          "hex": "#333a49",
+          "coverage": 0.0085
+        }
+      ],
+      "detail": {
+        "energy": 18.9468
+      },
+      "medium": "semantic",
+      "plate": null,
+      "text": null,
+      "surface": {
+        "flat": false,
+        "rules": false
+      }
+    },
+    {
+      "id": "agent-row-6",
+      "kind": "control",
+      "note": "Selectable runtime agent row: identity, role, state, task and observed throughput history.",
+      "grid": null,
+      "reviewGroup": "agent-rows",
+      "box": {
+        "x": 0.0085,
+        "y": 0.5332,
+        "w": 0.4453,
+        "h": 0.0508
+      },
+      "px": {
+        "x": 13,
+        "y": 546,
+        "w": 684,
+        "h": 52
+      },
+      "aspect": 13.1538,
+      "palette": [
+        {
+          "hex": "#09191a",
+          "coverage": 0.9169
+        },
+        {
+          "hex": "#566577",
+          "coverage": 0.0351
+        },
+        {
+          "hex": "#083831",
+          "coverage": 0.031
+        },
+        {
+          "hex": "#095444",
+          "coverage": 0.0092
+        },
+        {
+          "hex": "#8d9db2",
+          "coverage": 0.0079
+        }
+      ],
+      "detail": {
+        "energy": 19.5373
+      },
+      "medium": "semantic",
+      "plate": null,
+      "text": null,
+      "surface": {
+        "flat": false,
+        "rules": false
+      }
+    },
+    {
+      "id": "map",
+      "kind": "chrome",
+      "note": "Interactive geographic data surface. Runtime street geometry, routes, agent positions, labels and controls; all driven by current simulator data.",
+      "grid": null,
+      "codeDrawn": true,
+      "container": true,
+      "box": {
+        "x": 0.4609,
+        "y": 0.1924,
+        "w": 0.5313,
+        "h": 0.4482
+      },
+      "px": {
+        "x": 708,
+        "y": 197,
+        "w": 816,
+        "h": 459
+      },
+      "aspect": 1.7778,
+      "palette": [
+        {
+          "hex": "#1c2b36",
+          "coverage": 0.9376
+        },
+        {
+          "hex": "#273454",
+          "coverage": 0.0261
+        },
+        {
+          "hex": "#314c53",
+          "coverage": 0.0153
+        },
+        {
+          "hex": "#094173",
+          "coverage": 0.0142
+        },
+        {
+          "hex": "#0b0b14",
+          "coverage": 0.0068
+        }
+      ],
+      "detail": {
+        "energy": 22.6021
+      },
+      "medium": "semantic",
+      "plate": null,
+      "text": null,
+      "surface": {
+        "flat": false,
+        "rules": false
+      }
+    },
+    {
+      "id": "map-controls",
+      "kind": "control",
+      "note": "Zoom and fit controls.",
+      "grid": null,
+      "parentId": "map",
+      "box": {
+        "x": 0.9609,
+        "y": 0.2002,
+        "w": 0.0273,
+        "h": 0.1035
+      },
+      "px": {
+        "x": 1476,
+        "y": 205,
+        "w": 42,
+        "h": 106
+      },
+      "aspect": 0.3962,
+      "palette": [
+        {
+          "hex": "#091818",
+          "coverage": 0.5686
+        },
+        {
+          "hex": "#192636",
+          "coverage": 0.3002
+        },
+        {
+          "hex": "#364550",
+          "coverage": 0.0934
+        },
+        {
+          "hex": "#eef4f7",
+          "coverage": 0.0298
+        },
+        {
+          "hex": "#9094a0",
+          "coverage": 0.008
+        }
+      ],
+      "detail": {
+        "energy": 5.8088
+      },
+      "medium": "semantic",
+      "plate": null,
+      "text": null,
+      "surface": {
+        "flat": false,
+        "rules": false
+      }
+    },
+    {
+      "id": "map-legend",
+      "kind": "chrome",
+      "note": "Legend explains type symbols and observed versus planned routes.",
+      "grid": null,
+      "parentId": "map",
+      "box": {
+        "x": 0.8802,
+        "y": 0.4912,
+        "w": 0.1048,
+        "h": 0.1357
+      },
+      "px": {
+        "x": 1352,
+        "y": 503,
+        "w": 161,
+        "h": 139
+      },
+      "aspect": 1.1583,
+      "palette": [
+        {
+          "hex": "#091719",
+          "coverage": 0.9037
+        },
+        {
+          "hex": "#2a3647",
+          "coverage": 0.0465
+        },
+        {
+          "hex": "#9dacc0",
+          "coverage": 0.0253
+        },
+        {
+          "hex": "#636f82",
+          "coverage": 0.0187
+        },
+        {
+          "hex": "#3b9bf8",
+          "coverage": 0.0058
+        }
+      ],
+      "detail": {
+        "energy": 21.8606
+      },
+      "medium": "semantic",
+      "plate": null,
+      "text": null,
+      "surface": {
+        "flat": false,
+        "rules": false
+      }
+    },
+    {
+      "id": "map-selected",
+      "kind": "control",
+      "note": "Selected agent marker and name. Runtime position is selectable.",
+      "grid": null,
+      "parentId": "map",
+      "box": {
+        "x": 0.7051,
+        "y": 0.3623,
+        "w": 0.0794,
+        "h": 0.042
+      },
+      "px": {
+        "x": 1083,
+        "y": 371,
+        "w": 122,
+        "h": 43
+      },
+      "aspect": 2.8372,
+      "palette": [
+        {
+          "hex": "#132424",
+          "coverage": 0.4133
+        },
+        {
+          "hex": "#121c2c",
+          "coverage": 0.3676
+        },
+        {
+          "hex": "#1d7a77",
+          "coverage": 0.1105
+        },
+        {
+          "hex": "#43ece9",
+          "coverage": 0.0571
+        },
+        {
+          "hex": "#274757",
+          "coverage": 0.0514
+        }
+      ],
+      "detail": {
+        "energy": 34.4796
+      },
+      "medium": "semantic",
+      "plate": null,
+      "text": null,
+      "surface": {
+        "flat": false,
+        "rules": false
+      }
+    },
+    {
+      "id": "evidence",
+      "kind": "chrome",
+      "note": "Selected agent evidence strip with identity, state, task, last decision and trace link.",
+      "grid": null,
+      "box": {
+        "x": 0.0078,
+        "y": 0.6494,
+        "w": 0.9844,
+        "h": 0.0986
+      },
+      "px": {
+        "x": 12,
+        "y": 665,
+        "w": 1512,
+        "h": 101
+      },
+      "aspect": 14.9703,
+      "palette": [
+        {
+          "hex": "#081818",
+          "coverage": 0.866
+        },
+        {
+          "hex": "#121b2b",
+          "coverage": 0.0996
+        },
+        {
+          "hex": "#3a4555",
+          "coverage": 0.0117
+        },
+        {
+          "hex": "#b1c9e3",
+          "coverage": 0.0114
+        },
+        {
+          "hex": "#707f92",
+          "coverage": 0.0112
+        }
+      ],
+      "detail": {
+        "energy": 21.7109
+      },
+      "medium": "semantic",
+      "plate": null,
+      "text": null,
+      "surface": {
+        "flat": false,
+        "rules": false
+      }
+    },
+    {
+      "id": "order-controls",
+      "kind": "control",
+      "note": "Orders heading with state and restaurant filters, search and sorting.",
+      "grid": null,
+      "box": {
+        "x": 0.0078,
+        "y": 0.7568,
+        "w": 0.9844,
+        "h": 0.0449
+      },
+      "px": {
+        "x": 12,
+        "y": 775,
+        "w": 1512,
+        "h": 46
+      },
+      "aspect": 32.8696,
+      "palette": [
+        {
+          "hex": "#081818",
+          "coverage": 0.8087
+        },
+        {
+          "hex": "#151e2e",
+          "coverage": 0.171
+        },
+        {
+          "hex": "#28383e",
+          "coverage": 0.0112
+        },
+        {
+          "hex": "#7e90a0",
+          "coverage": 0.0059
+        },
+        {
+          "hex": "#475767",
+          "coverage": 0.0032
+        }
+      ],
+      "detail": {
+        "energy": 11.9671
+      },
+      "medium": "semantic",
+      "plate": null,
+      "text": null,
+      "surface": {
+        "flat": false,
+        "rules": false
+      }
+    },
+    {
+      "id": "order-columns",
+      "kind": "text",
+      "note": "Order book column headings.",
+      "grid": null,
+      "box": {
+        "x": 0.0182,
+        "y": 0.8066,
+        "w": 0.9499,
+        "h": 0.0225
+      },
+      "px": {
+        "x": 28,
+        "y": 826,
+        "w": 1459,
+        "h": 23
+      },
+      "aspect": 63.4348,
+      "palette": [
+        {
+          "hex": "#081719",
+          "coverage": 0.9583
+        },
+        {
+          "hex": "#abb8cb",
+          "coverage": 0.0155
+        },
+        {
+          "hex": "#353d4e",
+          "coverage": 0.0132
+        },
+        {
+          "hex": "#778498",
+          "coverage": 0.0109
+        },
+        {
+          "hex": "#202040",
+          "coverage": 0.0021
+        }
+      ],
+      "detail": {
+        "energy": 9.3982
+      },
+      "medium": "semantic",
+      "plate": null,
+      "text": null,
+      "surface": {
+        "flat": false,
+        "rules": false
+      },
+      "type": {
+        "comp": {
+          "lines": 1,
+          "glyphs": 52,
+          "capHeightPx": 8.4,
+          "inkIsDark": false,
+          "allCaps": false,
+          "advance": 0.6352,
+          "advTall": 0.6749,
+          "advX": 0.6352,
+          "gap": 0.0397,
+          "xRatio": 0.7382,
+          "stemW": 0.2154,
+          "contrast": 1.165,
+          "serif": 1.0716,
+          "densTall": 0.6205,
+          "densX": 0.641,
+          "weight": 0.6205
+        },
+        "widthClass": "normal",
+        "weightClass": "bold"
+      }
+    },
+    {
+      "id": "order-row-1",
+      "kind": "control",
+      "note": "Inspectable runtime order row with its status, agent and latest decision.",
+      "grid": null,
+      "reviewGroup": "order-rows",
+      "box": {
+        "x": 0.0182,
+        "y": 0.8311,
+        "w": 0.9609,
+        "h": 0.0234
+      },
+      "px": {
+        "x": 28,
+        "y": 851,
+        "w": 1476,
+        "h": 24
+      },
+      "aspect": 61.5,
+      "palette": [
+        {
+          "hex": "#081818",
+          "coverage": 0.731
+        },
+        {
+          "hex": "#121626",
+          "coverage": 0.1969
+        },
+        {
+          "hex": "#0b3b34",
+          "coverage": 0.033
+        },
+        {
+          "hex": "#3b4957",
+          "coverage": 0.0201
+        },
+        {
+          "hex": "#768093",
+          "coverage": 0.019
+        }
+      ],
+      "detail": {
+        "energy": 14.2421
+      },
+      "medium": "semantic",
+      "plate": null,
+      "text": null,
+      "surface": {
+        "flat": false,
+        "rules": false
+      }
+    },
+    {
+      "id": "order-row-2",
+      "kind": "control",
+      "note": "Inspectable runtime order row with its status, agent and latest decision.",
+      "grid": null,
+      "reviewGroup": "order-rows",
+      "box": {
+        "x": 0.0182,
+        "y": 0.8545,
+        "w": 0.9609,
+        "h": 0.0234
+      },
+      "px": {
+        "x": 28,
+        "y": 875,
+        "w": 1476,
+        "h": 24
+      },
+      "aspect": 61.5,
+      "palette": [
+        {
+          "hex": "#081818",
+          "coverage": 0.6821
+        },
+        {
+          "hex": "#121828",
+          "coverage": 0.2347
+        },
+        {
+          "hex": "#162c48",
+          "coverage": 0.0421
+        },
+        {
+          "hex": "#8391a5",
+          "coverage": 0.0261
+        },
+        {
+          "hex": "#52596c",
+          "coverage": 0.015
+        }
+      ],
+      "detail": {
+        "energy": 14.0769
+      },
+      "medium": "semantic",
+      "plate": null,
+      "text": null,
+      "surface": {
+        "flat": false,
+        "rules": false
+      }
+    },
+    {
+      "id": "order-row-3",
+      "kind": "control",
+      "note": "Inspectable runtime order row with its status, agent and latest decision.",
+      "grid": null,
+      "reviewGroup": "order-rows",
+      "box": {
+        "x": 0.0182,
+        "y": 0.8779,
+        "w": 0.9609,
+        "h": 0.0234
+      },
+      "px": {
+        "x": 28,
+        "y": 899,
+        "w": 1476,
+        "h": 24
+      },
+      "aspect": 61.5,
+      "palette": [
+        {
+          "hex": "#081818",
+          "coverage": 0.6977
+        },
+        {
+          "hex": "#121828",
+          "coverage": 0.2323
+        },
+        {
+          "hex": "#0e2849",
+          "coverage": 0.0293
+        },
+        {
+          "hex": "#9aa6b6",
+          "coverage": 0.0279
+        },
+        {
+          "hex": "#5e697a",
+          "coverage": 0.0128
+        }
+      ],
+      "detail": {
+        "energy": 14.0167
+      },
+      "medium": "semantic",
+      "plate": null,
+      "text": null,
+      "surface": {
+        "flat": false,
+        "rules": false
+      }
+    },
+    {
+      "id": "order-row-4",
+      "kind": "control",
+      "note": "Inspectable runtime order row with its status, agent and latest decision.",
+      "grid": null,
+      "reviewGroup": "order-rows",
+      "box": {
+        "x": 0.0182,
+        "y": 0.9014,
+        "w": 0.9609,
+        "h": 0.0234
+      },
+      "px": {
+        "x": 28,
+        "y": 923,
+        "w": 1476,
+        "h": 24
+      },
+      "aspect": 61.5,
+      "palette": [
+        {
+          "hex": "#09171a",
+          "coverage": 0.9026
+        },
+        {
+          "hex": "#372b19",
+          "coverage": 0.0429
+        },
+        {
+          "hex": "#9ca9b9",
+          "coverage": 0.0262
+        },
+        {
+          "hex": "#3d4b57",
+          "coverage": 0.0151
+        },
+        {
+          "hex": "#6c7889",
+          "coverage": 0.0132
+        }
+      ],
+      "detail": {
+        "energy": 14.0389
+      },
+      "medium": "semantic",
+      "plate": null,
+      "text": null,
+      "surface": {
+        "flat": false,
+        "rules": false
+      }
+    },
+    {
+      "id": "order-row-5",
+      "kind": "control",
+      "note": "Inspectable runtime order row with its status, agent and latest decision.",
+      "grid": null,
+      "reviewGroup": "order-rows",
+      "box": {
+        "x": 0.0182,
+        "y": 0.9248,
+        "w": 0.9609,
+        "h": 0.0234
+      },
+      "px": {
+        "x": 28,
+        "y": 947,
+        "w": 1476,
+        "h": 24
+      },
+      "aspect": 61.5,
+      "palette": [
+        {
+          "hex": "#09181b",
+          "coverage": 0.9281
+        },
+        {
+          "hex": "#0d3c37",
+          "coverage": 0.0254
+        },
+        {
+          "hex": "#4a5463",
+          "coverage": 0.0194
+        },
+        {
+          "hex": "#b0bbcb",
+          "coverage": 0.0165
+        },
+        {
+          "hex": "#252f41",
+          "coverage": 0.0105
+        }
+      ],
+      "detail": {
+        "energy": 13.2492
+      },
+      "medium": "semantic",
+      "plate": null,
+      "text": null,
+      "surface": {
+        "flat": false,
+        "rules": false
+      }
+    },
+    {
+      "id": "order-row-6",
+      "kind": "control",
+      "note": "Inspectable runtime order row with its status, agent and latest decision.",
+      "grid": null,
+      "reviewGroup": "order-rows",
+      "box": {
+        "x": 0.0182,
+        "y": 0.9482,
+        "w": 0.9609,
+        "h": 0.0234
+      },
+      "px": {
+        "x": 28,
+        "y": 971,
+        "w": 1476,
+        "h": 24
+      },
+      "aspect": 61.5,
+      "palette": [
+        {
+          "hex": "#081819",
+          "coverage": 0.9265
+        },
+        {
+          "hex": "#093e35",
+          "coverage": 0.0254
+        },
+        {
+          "hex": "#8995aa",
+          "coverage": 0.016
+        },
+        {
+          "hex": "#3b4355",
+          "coverage": 0.016
+        },
+        {
+          "hex": "#bec7d6",
+          "coverage": 0.016
+        }
+      ],
+      "detail": {
+        "energy": 13.5218
+      },
+      "medium": "semantic",
+      "plate": null,
+      "text": null,
+      "surface": {
+        "flat": false,
+        "rules": false
+      }
+    },
+    {
+      "id": "titlebar",
+      "kind": "chrome",
+      "note": "Page heading and simulation control layout.",
+      "grid": null,
+      "container": true,
+      "box": {
+        "x": 0.0078,
+        "y": 0.0439,
+        "w": 0.9844,
+        "h": 0.0557
+      },
+      "px": {
+        "x": 12,
+        "y": 45,
+        "w": 1512,
+        "h": 57
+      },
+      "aspect": 26.5263,
+      "palette": [
+        {
+          "hex": "#091818",
+          "coverage": 0.8557
+        },
+        {
+          "hex": "#0f1424",
+          "coverage": 0.0672
+        },
+        {
+          "hex": "#23e8d9",
+          "coverage": 0.0497
+        },
+        {
+          "hex": "#f7f7f7",
+          "coverage": 0.0223
+        },
+        {
+          "hex": "#707681",
+          "coverage": 0.0051
+        }
+      ],
+      "detail": {
+        "energy": 33.4946
+      },
+      "medium": "semantic",
+      "plate": null,
+      "text": null,
+      "surface": {
+        "flat": true,
+        "rules": true
+      }
+    },
+    {
+      "id": "agent-table",
+      "kind": "chrome",
+      "note": "Live agent table including column headings, selectable agent rows and blank unused rows.",
+      "grid": null,
+      "container": true,
+      "box": {
+        "x": 0.0078,
+        "y": 0.1924,
+        "w": 0.4466,
+        "h": 0.4482
+      },
+      "px": {
+        "x": 12,
+        "y": 197,
+        "w": 686,
+        "h": 459
+      },
+      "aspect": 1.4946,
+      "palette": [
+        {
+          "hex": "#091a1b",
+          "coverage": 0.9372
+        },
+        {
+          "hex": "#566576",
+          "coverage": 0.0209
+        },
+        {
+          "hex": "#0b3734",
+          "coverage": 0.0183
+        },
+        {
+          "hex": "#172d46",
+          "coverage": 0.0172
+        },
+        {
+          "hex": "#7590a2",
+          "coverage": 0.0064
+        }
+      ],
+      "detail": {
+        "energy": 17.2385
+      },
+      "medium": "semantic",
+      "plate": null,
+      "text": null,
+      "surface": {
+        "flat": false,
+        "rules": true
+      }
+    },
+    {
+      "id": "orders-table",
+      "kind": "chrome",
+      "note": "Live order table and filtering controls.",
+      "grid": null,
+      "container": true,
+      "box": {
+        "x": 0.0078,
+        "y": 0.7568,
+        "w": 0.9844,
+        "h": 0.2314
+      },
+      "px": {
+        "x": 12,
+        "y": 775,
+        "w": 1512,
+        "h": 237
+      },
+      "aspect": 6.3797,
+      "palette": [
+        {
+          "hex": "#09181a",
+          "coverage": 0.9537
+        },
+        {
+          "hex": "#1f3146",
+          "coverage": 0.0169
+        },
+        {
+          "hex": "#a2afc0",
+          "coverage": 0.0147
+        },
+        {
+          "hex": "#113834",
+          "coverage": 0.0079
+        },
+        {
+          "hex": "#535c6a",
+          "coverage": 0.0068
+        }
+      ],
+      "detail": {
+        "energy": 18.0472
+      },
+      "medium": "semantic",
+      "plate": null,
+      "text": null,
+      "surface": {
+        "flat": true,
+        "rules": true
+      }
+    }
+  ],
+  "compSha256": "79cae25a5b44e40aa5f1122aafe242879a2783791fed81e5435b170834d92e48",
+  "regionsSource": {
+    "path": ".impeccable/build/regions.json",
+    "sha256": "abb91886f4f63f9758367d01b113ff8f948563c3ddf569555e450538f9bdc17b"
+  }
+}

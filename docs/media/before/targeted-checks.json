@@ -1,0 +1,86 @@
+{
+  "sourceLinks": [
+    {
+      "viewport": 1440,
+      "links": [
+        {
+          "text": "src/delivery/agent_runtime.py",
+          "x": 607.515625,
+          "y": 726.8125,
+          "width": 591.484375,
+          "height": 19.796875,
+          "bottom": 746.609375,
+          "display": "block",
+          "lineHeight": "19.8px",
+          "font": "11px"
+        },
+        {
+          "text": "src/delivery/agent_specs.py",
+          "x": 607.515625,
+          "y": 746.609375,
+          "width": 591.484375,
+          "height": 19.796875,
+          "bottom": 766.40625,
+          "display": "block",
+          "lineHeight": "19.8px",
+          "font": "11px"
+        }
+      ]
+    },
+    {
+      "viewport": 390,
+      "links": [
+        {
+          "text": "src/delivery/agent_runtime.py",
+          "x": 43,
+          "y": 1398.9375,
+          "width": 304,
+          "height": 19.796875,
+          "bottom": 1418.734375,
+          "display": "block",
+          "lineHeight": "19.8px",
+          "font": "11px"
+        },
+        {
+          "text": "src/delivery/agent_specs.py",
+          "x": 43,
+          "y": 1418.734375,
+          "width": 304,
+          "height": 19.796875,
+          "bottom": 1438.53125,
+          "display": "block",
+          "lineHeight": "19.8px",
+          "font": "11px"
+        }
+      ]
+    }
+  ],
+  "touch": {
+    "engine": "Chromium CDP synthesized touch, no physical device",
+    "before": {
+      "viewBox": "-1007.5 -1007.5 17515 17515",
+      "dragging": false,
+      "scrollY": 447
+    },
+    "start": {
+      "viewBox": "-1007.5 -1007.5 17515 17515",
+      "dragging": false,
+      "scrollY": 447
+    },
+    "move": {
+      "viewBox": "-1007.5 -1007.5 17515 17515",
+      "dragging": false,
+      "scrollY": 447
+    },
+    "cancel": {
+      "viewBox": "-1007.5 -1007.5 17515 17515",
+      "dragging": false,
+      "scrollY": 426
+    },
+    "mouseAfterCancel": {
+      "viewBox": "-1007.5 -1007.5 17515 17515",
+      "dragging": false,
+      "scrollY": 426
+    }
+  }
+}
