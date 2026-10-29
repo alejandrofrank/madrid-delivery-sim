@@ -31,7 +31,7 @@ label{display:flex;flex-direction:column;gap:6px;font-size:12px;color:var(--ui-m
 .agent-column-labels{font-size:11px;color:var(--ui-muted);min-height:36px;border-bottom:1px solid var(--ui-line)}
 .agent-column-labels span:nth-last-child(-n+2){text-align:right}.agent-list{min-height:0;flex:1;overflow:auto;overscroll-behavior:contain}
 .fleet-row{width:100%;min-height:51px;border:0;border-bottom:1px solid var(--ui-line);border-radius:0;text-align:left;background:transparent;font-weight:400}
-.fleet-row>.status-pill{justify-self:start}.fleet-row.active{background:var(--ui-accent-soft);box-shadow:inset 1px 0 var(--ui-accent)}
+.fleet-row>.status-pill{justify-self:stretch;justify-content:center}.fleet-row.active{background:var(--ui-accent-soft);box-shadow:inset 1px 0 var(--ui-accent)}
 .fleet-person{display:flex;align-items:center;gap:8px;min-width:0}.fleet-person>span{min-width:0}
 .fleet-row strong{display:block;font-size:12px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .fleet-row small{display:block;color:var(--ui-muted);font-size:10px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -42,7 +42,7 @@ label{display:flex;flex-direction:column;gap:6px;font-size:12px;color:var(--ui-m
 .fleet-total{text-align:right;font:11px var(--ui-mono)}.fleet-throughput{text-align:right;font:10px var(--ui-mono);color:var(--ui-muted)}
 .fleet-throughput svg{display:block;width:72px;height:24px;margin-left:auto}.history-missing{display:block;text-align:right;color:var(--ui-faint)}
 .status-pill,.badge{display:inline-flex;align-items:center;gap:5px;max-width:100%;border:1px solid #3b5361;border-radius:12px;padding:2px 7px;color:var(--ui-muted);font-size:10px;white-space:nowrap;line-height:1.35}
-.status-pill::before{content:"";width:5px;height:5px;border-radius:50%;background:currentColor;flex-shrink:0}.badge{border-radius:4px;padding:3px 7px}
+.ledger .status-pill{inline-size:104px;justify-content:center}.badge{border-radius:4px;padding:3px 7px}
 .status-pill.working,.status-pill.delivered,.badge.running{background:#0b3537;color:#54e3d7;border-color:#15766f}
 .status-pill.late,.status-pill.unserved{background:#38232c;color:var(--ui-negative);border-color:#71444c}
 .status-pill.to_pickup,.status-pill.returning,.status-pill.assigned{color:#8dccff;background:#102d43;border-color:#2e658f}

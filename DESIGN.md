@@ -252,7 +252,7 @@ Ordinary panels and list rows are flat. Fine boundaries and restrained tonal cha
 
 ## Shapes
 
-Controls and operational panels use restrained corners from the control radius. Shared small state chips use the chip radius. Madrid uses rounded 12px status pills with a state dot, while session badges retain the smaller corner radius. Roster rows, tabs, reading frames and table geometry stay square where the implementation defines them that way. Use one-pixel rules for working boundaries. Circles belong to roster role symbols, map markers, clusters and numbered lifecycle steps; they are functional symbols rather than a decorative motif.
+Controls and operational panels use restrained corners from the control radius. Shared small state chips use the chip radius. Madrid uses rounded 12px status pills without redundant state dots. Ledger pills are 104px wide with centered labels; roster pills stretch to the status column width. Session badges retain the smaller corner radius. Roster rows, tabs, reading frames and table geometry stay square where the implementation defines them that way. Use one-pixel rules for working boundaries. Circles belong to roster role symbols, map markers, clusters and numbered lifecycle steps; they are functional symbols rather than a decorative motif.
 
 The unused larger-radius declaration in the CSS token file is not promoted into this documented component vocabulary. No future surface should inherit a radius merely because a dormant variable exists.
 
@@ -268,7 +268,7 @@ Plain outlined fields retain accessible labels. Shared forms use visible labels;
 
 ### Chips
 
-Small labels expose actual state. Neutral chips have a fine outline and muted text. Shared active chips use the soft accent surface with accent text; Madrid's active status pills use the dedicated working-state tokens, a small dot and rounded ends. Outcome colors are paired with readable status words. These chips are status indicators, not implied buttons.
+Small labels expose actual state. Neutral chips have a fine outline and muted text. Shared active chips use the soft accent surface with accent text; Madrid's active status pills use the dedicated working-state tokens, centered labels and rounded ends. Outcome colors are paired with readable status words. These chips are status indicators, not implied buttons.
 
 ### Cards / Containers
 
