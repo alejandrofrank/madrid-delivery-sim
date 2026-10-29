@@ -18,7 +18,7 @@
   brand.className = "workspace-brand";
   brand.setAttribute("aria-label", "Bakiano operations home");
   brand.innerHTML =
-    '<span class="workspace-mark" aria-hidden="true">b.</span><span class="workspace-wordmark">BAKIANO<small>Operations</small></span>';
+    '<span class="workspace-wordmark">Bakiano<small>Operations</small></span><span class="workspace-project">Madrid Delivery Sim</span>';
   brand.querySelector("small").textContent = pages.find(([path]) => path === location.pathname)?.[1] || "Operations";
   const nav = document.createElement("nav");
   nav.id = "workspace-navigation";
@@ -35,7 +35,7 @@
   actions.className = "workspace-actions";
   const local = document.createElement("span");
   local.className = "workspace-local";
-  local.textContent = "Workspace";
+  local.textContent = "Local · synthetic";
   actions.append(local);
   const search = document.getElementById("open-search");
   if (search) actions.append(search);

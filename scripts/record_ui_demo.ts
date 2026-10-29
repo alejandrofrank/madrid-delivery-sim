@@ -8,6 +8,7 @@ const args=process.argv.slice(2),arg=(key,fallback)=>args.includes(key)?args[arg
  const page=await browser.newPage({viewport:{width:1440,height:960},reducedMotion:'no-preference'});
  await page.goto(arg('--url','http://127.0.0.1:8021')+'/');
  await page.waitForSelector('.fleet-row');
+ await page.waitForFunction(()=>document.getElementById('map').dataset.basemap==='ready');
  await page.locator('#view-simulation').click();
  await page.locator('#duration').selectOption('60');
  if(await page.locator('#start').isEnabled()) await page.locator('#start').click();

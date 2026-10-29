@@ -397,3 +397,8 @@ button,input,select,textarea{transition:background-color var(--ui-motion) var(--
 button{font-weight:500}summary{min-height:32px;align-content:center}
 pre{background:var(--ui-bg);color:var(--ui-muted);border-radius:var(--ui-radius)}
 @media(min-width:1081px){.workspace-header{padding:0 24px}.workspace-navigation{gap:18px}.workspace-wordmark small{display:none}}
+
+.workspace-header{gap:24px;padding:0 20px}.workspace-wordmark{font-size:17px;font-weight:600;letter-spacing:0}.workspace-project{font-size:12px;color:var(--ui-muted);font-weight:400;border-left:1px solid var(--ui-line);padding-left:14px}.workspace-brand{gap:14px}
+.workspace-navigation{margin-left:auto}.workspace-navigation a{font-size:12px}.workspace-actions{margin-left:0}.workspace-local{font-size:11px}
+@media(max-width:1200px){.workspace-project{display:none}}
+@media(max-width:1080px){.workspace-header{padding:8px 16px}.workspace-actions{margin-left:auto}.workspace-navigation{margin-left:0}}

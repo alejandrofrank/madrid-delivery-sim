@@ -61,6 +61,9 @@ let browser;
     const response = await page.goto(target.href, {waitUntil:'domcontentloaded'});
     await page.waitForSelector(ready, {state:'attached', timeout:30000});
     await page.evaluate(() => document.fonts.ready);
+    if(name==="health")await page.waitForFunction(()=>!document.getElementById("provenance").textContent.includes("Loading local"),null,{timeout:60000});
+    if(name==="agent-traces" && option("--trace-agent",""))await page.waitForSelector("#live-timeline .timeline-step",{timeout:30000});
+    if (name === "madrid") await page.waitForFunction(()=>document.getElementById("map").dataset.basemap==="ready",{},{timeout:30000});
     await page.waitForTimeout(1500);
     for (const [size, width, height] of sizes) {
       await page.setViewportSize({width,height});

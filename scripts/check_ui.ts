@@ -94,6 +94,13 @@ const base=arg('--url','http://127.0.0.1:8021'),runFile=arg('--runs','artifacts/
  await check('Madrid roster, selection and map after switching views',async()=>{
   await page.goto(base+'/?run='+runs.madrid);
   await page.waitForSelector('.fleet-row');
+  await page.waitForFunction(()=>document.getElementById('map').dataset.basemap==='ready');
+  assert(await page.evaluate(()=>window.madridBasemap.queryRenderedFeatures().length>100),'Real cartographic features are rendered');
+  assert.equal(await page.locator('#order-filter').inputValue(),'all','Completed sessions show recorded orders');
+  assert(await page.locator('#orders tr').count()>0);
+  await page.locator('#order-search').fill('no-such-order');
+  assert(await page.locator('#orders-empty').isVisible());
+  await page.locator('#order-search').fill('');
   await page.locator('#agent-role').selectOption('bike');
   await page.locator('.fleet-row').first().click();
   assert(await page.locator('.fleet-row[aria-pressed=true]').count()===1);
