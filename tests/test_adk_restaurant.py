@@ -129,6 +129,38 @@ def test_search_grant_does_not_enable_undeclared_capability(adk_city):
         )
 
 
+@pytest.mark.integration
+def test_physical_stock_reordering_does_not_invalidate_equal_business_facts(adk_city):
+    from delivery.adk_restaurant import ensure_restaurant_result
+
+    city = adk_city()
+    agent, event = first_call(city)
+    assert agent.reserve_budget(event)
+    assert ensure_restaurant_result(agent, event)
+    with connect(city.url) as conn:
+        ingredients = conn.execute(
+            "SELECT ingredient FROM supply_stock WHERE run_id=%s AND owner='restaurant-pizza' "
+            "ORDER BY ingredient DESC",
+            (city.run,),
+        ).fetchall()
+        for row in ingredients:
+            conn.execute(
+                "UPDATE supply_stock SET on_hand=on_hand WHERE run_id=%s "
+                "AND owner='restaurant-pizza' AND ingredient=%s",
+                (city.run, row["ingredient"]),
+            )
+    with connect(agent.dsn) as conn:
+        agent.handle(conn, event)
+    with connect(city.url) as conn:
+        assert (
+            conn.execute(
+                "SELECT state FROM restaurant_turns WHERE event_id=%s",
+                (event.id,),
+            ).fetchone()["state"]
+            == "applied"
+        )
+
+
 def test_paid_model_adapter_is_rejected_before_execution() -> None:
     from types import SimpleNamespace
 
