@@ -1,0 +1,13 @@
+{
+  "reviewed_at": "2026-10-29",
+  "source_revision": "22d3fefa322ca419afde8fa903462066040bb6d5",
+  "scanner": "gitleaks 8.30.1",
+  "image_digest": "sha256:c00b6bd0aeb3071cbcb79009cb16a60dd9e0a7c60e2be9ab65d25e6bc8abbb7f",
+  "scope": "git history, all local refs",
+  "commits_scanned": 95,
+  "findings": 0,
+  "sensitive_paths_tracked_after_cleanup": [],
+  "history_rewritten": false,
+  "repository_visibility_changed": false,
+  "limits": "Pattern-based scan; no claim that all possible secrets are detectable. Ignored local files were not published or copied into evidence."
+}

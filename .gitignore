@@ -1,6 +1,4 @@
-﻿.env
-.env.*
-!.env.example
+.env*
 *.log
 .venv/
 __pycache__/
@@ -24,3 +22,11 @@ infra/gcp-ai/*.tfplan
 # Local lifecycle command scratch files (no credentials or plans in Git)
 infra/gcp-ai/.demo-command.lock
 infra/gcp-ai/zz-demo.auto.tfvars.tmp
+
+# Sensitive local output is excluded at every depth.
+codex_run.log
+*.tfplan
+*.tfstate*
+*.tfvars
+*.tfvars.json
+.terraform/
