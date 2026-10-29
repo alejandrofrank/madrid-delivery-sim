@@ -11,6 +11,14 @@
       "status": "Implemented + roadmap"
     },
     {
+      "id": "google-stack",
+      "title": "Google stack demonstration",
+      "group": "Start here",
+      "file": "docs/GOOGLE-STACK.md",
+      "summary": "Trace a business decision through ADK, A2A, telemetry and analytics.",
+      "status": "Implemented locally / cloud opt-in"
+    },
+    {
       "id": "decisions",
       "title": "Why this architecture",
       "group": "Start here",
@@ -65,6 +73,14 @@
       "file": "docs/DURABLE-INFERENCE.md",
       "summary": "Committed requests, network calls outside SQL, saved results and safe crash recovery.",
       "status": "Local crash verified / fake provider"
+    },
+    {
+      "id": "a2a",
+      "title": "A2A agent interoperability",
+      "group": "Agent engineering",
+      "file": "docs/A2A.md",
+      "summary": "Real SDK agent discovery and JSON-RPC over the durable queue.",
+      "status": "Local / no paid calls"
     },
     {
       "id": "restaurant-supply",
@@ -131,6 +147,22 @@
       "status": "Historical evidence"
     },
     {
+      "id": "observability",
+      "title": "OpenTelemetry and Cloud Trace",
+      "group": "Google Cloud",
+      "file": "docs/OBSERVABILITY.md",
+      "summary": "Propagate trace context through agents and queue retries; inspect in Jaeger or Cloud Trace.",
+      "status": "Local verified / cloud opt-in"
+    },
+    {
+      "id": "analytics",
+      "title": "Run evidence in BigQuery",
+      "group": "Google Cloud",
+      "file": "docs/GOOGLE-ANALYTICS.md",
+      "summary": "Allowlisted receipts, bounded uploads, scoped IAM and a Looker Studio view.",
+      "status": "Offline verified / cloud opt-in"
+    },
+    {
       "id": "evals",
       "title": "Role scenario evaluations",
       "group": "Verification & operations",
@@ -161,38 +193,6 @@
       "file": "docs/M2-VALIDATION.md",
       "summary": "Last-unit contention, delayed replenishment and real worker crash recovery.",
       "status": "Seeded slice"
-    },
-    {
-      "id": "google-stack",
-      "title": "Google stack demonstration",
-      "group": "Start here",
-      "file": "docs/GOOGLE-STACK.md",
-      "summary": "Trace a business decision through ADK, A2A, telemetry and analytics.",
-      "status": "Implemented locally / cloud opt-in"
-    },
-    {
-      "id": "a2a",
-      "title": "A2A agent interoperability",
-      "group": "Agent engineering",
-      "file": "docs/A2A.md",
-      "summary": "Real SDK agent discovery and JSON-RPC over the durable queue.",
-      "status": "Local / no paid calls"
-    },
-    {
-      "id": "observability",
-      "title": "OpenTelemetry and Cloud Trace",
-      "group": "Google Cloud",
-      "file": "docs/OBSERVABILITY.md",
-      "summary": "Propagate trace context through agents and queue retries; inspect in Jaeger or Cloud Trace.",
-      "status": "Local verified / cloud opt-in"
-    },
-    {
-      "id": "analytics",
-      "title": "Run evidence in BigQuery",
-      "group": "Google Cloud",
-      "file": "docs/GOOGLE-ANALYTICS.md",
-      "summary": "Allowlisted receipts, bounded uploads, scoped IAM and a Looker Studio view.",
-      "status": "Offline verified / cloud opt-in"
     }
   ],
   "supplementary": [
@@ -222,6 +222,7 @@
     "docs/evidence/gcp-switch-verification.json",
     "docs/evidence/gcp-teardown-plan.json",
     "docs/evidence/gcp-teardown-result.json",
+    "docs/evidence/google-stack-local.json",
     "docs/evidence/local-health.json",
     "docs/evidence/restaurant-supply-local.json",
     "docs/evidence/typed-memory-local.json",

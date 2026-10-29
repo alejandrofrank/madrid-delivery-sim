@@ -67,6 +67,12 @@ README is explicitly a placeholder, not claimed footage.
 
 ## Reproduce the checks
 
+The [local verification receipt](evidence/google-stack-local.json) records 628
+passing tests, Ruff, mypy over 54 modules, twelve scenarios repeated twice with
+49/49 criteria passing, mocked Terraform checks, and the Jaeger/export smoke test.
+It identifies the exact regression revision and distinguishes local evidence
+from untested live cloud integration.
+
 ```bash
 make setup
 make check

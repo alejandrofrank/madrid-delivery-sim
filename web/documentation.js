@@ -31,7 +31,7 @@ const components = {
     name: "Scoped role workers",
     state: "IMPLEMENTED · LOCAL",
     purpose:
-      "One reusable LocalAgent object binds a frozen role definition to an authenticated database scope. Most policies are deterministic Python. The optional judge is the only Google model caller.",
+      "One reusable LocalAgent object binds a frozen role definition to an authenticated database scope. Deterministic policies work alongside Google ADK restaurant and customer-service adapters, with scripted offline models and separately enabled paid inference.",
     inputs:
       "An addressed event, fenced lease, approved tools and relevant recall.",
     outputs:

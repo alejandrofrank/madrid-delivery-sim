@@ -1,5 +1,34 @@
 # Status
 
+2026-10-29 (Google stack portfolio branch): Migrated customer advice to the real
+Google ADK Runner with a scripted offline model, bounded schema/request, durable
+budget admission and the existing rules/refund fallback. Added dispatcher and
+customer-service A2A 1.0 servers, discoverable cards and official-SDK integration
+tests. OpenTelemetry propagates through the durable queue and agents; local
+Jaeger links appear on `/agent-traces`. Cloud Trace uses an explicitly enabled
+collector and a trace-only identity. BigQuery exports bounded, allowlisted run
+receipts/KPIs, with opt-in Terraform tables, scoped writer IAM and a Looker Studio
+view. Both native baseline and ADK comparison receipts are supported. Shutdown
+now detects retained analytics/tracing resources before changing cloud state.
+
+Verified a clean committed snapshot with 628 passing tests, Ruff, mypy over 54
+modules, and twelve deterministic scenarios repeated twice with 49/49 criteria
+passing and matching outcomes. Twelve mocked Terraform runs passed. A free local
+demo delivered seven orders on time, resolved a recorded Jaeger trace, and
+prepared one BigQuery receipt plus 15 KPI rows. No paid calls or cloud deployments
+were made for this branch; inference caps in `cloud_ai.py` are unchanged. Live
+Cloud Trace/BigQuery integration remains unmeasured. Maps ETA and Agent Engine
+deployment remain optional future work.
+
+The README now leads with a pitch, labelled GIF placeholder, architecture and
+measured results. The 24-chapter documentation site includes the demonstration,
+A2A, tracing and analytics runbooks. Gitleaks scanned 114 commits with zero
+findings; sensitive logs, environment files, Terraform plans/state and private
+variables are ignored and untracked. No history rewrite or visibility change.
+See [the demonstration guide](docs/GOOGLE-STACK.md),
+[verification receipt](docs/evidence/google-stack-local.json), and
+[public-readiness review](docs/PUBLIC-READINESS.md).
+
 2026-10-29 (Jev routing and memory profiles): Added a durable Jev-first decision
 adapter for ADK restaurants. Editable prompts/SOUL drive action and supplier
 choices; confidence/margin, tool authority, stock, consent, queue effects and

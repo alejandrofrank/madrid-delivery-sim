@@ -28,10 +28,10 @@ flowchart LR
 
 | Headline result | Evidence and scope |
 | --- | --- |
-| Tests | Full regression receipt linked below; pytest, Ruff and mypy are required gates. |
+| Tests | **628 passed**; Ruff and mypy (54 modules) passed. [Verification receipt](docs/evidence/google-stack-local.json). |
 | Scenarios | 12 deterministic role scenarios, run twice with matching outcomes. |
 | Cost per local run | **$0 in cloud/model charges**; local compute excluded. |
-| Evaluation pass rate | **12/12 scenarios; 49/49 assertions (100%)** in the [retained scenario receipt](docs/evidence/agent-scenarios-local.json). This measures contracts, not LLM quality. |
+| Evaluation pass rate | **12/12 scenarios; 49/49 assertions (100%)**, repeated with matching outcomes in the [Google stack receipt](docs/evidence/google-stack-local.json). This measures contracts, not LLM quality. |
 | Interoperability | Two A2A 1.0 servers called through the official SDK; replay reuses durable work. |
 
 Start at the [Google stack demonstration guide](docs/GOOGLE-STACK.md), inspect
@@ -57,9 +57,9 @@ The newer [durable inference verification record](docs/evidence/durable-inferenc
 retains 442 passing tests, physical worker crash recovery, repeatable scenarios
 and the seven tool-generated diagrams. Read the
 [request/result protocol](docs/DURABLE-INFERENCE.md) for retry and isolation guarantees.
-The latest [shared UI verification record](docs/evidence/shared-ui-local.json)
+The earlier [shared UI verification record](docs/evidence/shared-ui-local.json)
 records the six workspace layouts, eight diagrams, desktop/mobile checks and
-current 442-test regression evidence.
+442-test regression evidence from that revision.
 
 | Read in order | What it explains |
 | --- | --- |

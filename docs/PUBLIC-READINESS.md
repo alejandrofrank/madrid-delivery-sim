@@ -1,8 +1,8 @@
 # Public-readiness review
 
-On October 29, 2026, Gitleaks 8.30.1 scanned all local Git refs (95 commits,
-6.59 MB of historical changes): **zero secret findings**. The redacted local
-report is in ignored `artifacts/google-stack-secrets.json`; the shareable
+On October 29, 2026, Gitleaks 8.30.1 scanned all local Git refs (114 commits,
+7.50 MB of historical changes): **zero secret findings**. The redacted local
+report is in ignored `artifacts/google-stack-secrets-final.json`; the shareable
 [counts-only receipt](evidence/public-readiness.json) records the source revision
 and scanner digest. Pattern scans cannot prove the absence of every secret.
 No history was rewritten and the GitHub repository remains private.
