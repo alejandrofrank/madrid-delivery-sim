@@ -131,16 +131,23 @@ def traced_event(
         @wraps(function)
         def wrapped(*args: P.args, **kwargs: P.kwargs) -> R:
             event: Any = args[1] if len(args) > 1 else kwargs["event"]
+            # Inference replay can operate on a minimal event reference; optional
+            # observability must not require fields the underlying call never reads.
+            attributes: dict[str, Any] = {}
+            for attribute, field in (
+                ("delivery.run_id", "run_id"),
+                ("messaging.message.id", "id"),
+                ("messaging.destination.name", "topic"),
+                ("delivery.attempt", "attempts"),
+            ):
+                value = getattr(event, field, None)
+                if value is not None:
+                    attributes[attribute] = value if field == "attempts" else str(value)
             with trace_span(
                 name,
-                parent=event.otel_traceparent,
+                parent=getattr(event, "otel_traceparent", None),
                 kind=kind,
-                attributes={
-                    "delivery.run_id": str(event.run_id),
-                    "messaging.message.id": str(event.id),
-                    "messaging.destination.name": event.topic,
-                    "delivery.attempt": event.attempts,
-                },
+                attributes=attributes,
             ) as span:
                 result = function(*args, **kwargs)
                 if result is False:
