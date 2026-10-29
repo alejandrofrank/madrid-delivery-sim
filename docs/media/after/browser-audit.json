@@ -1,0 +1,3246 @@
+{
+  "phase": "after",
+  "engine": "Chromium via Playwright 1.64.1",
+  "conditions": "Local page defaults; free seeded Madrid/inventory runs may be present, no paid model calls. DOM contrast calculation against composited solid ancestor backgrounds only.",
+  "pages": [
+    {
+      "page": "flow",
+      "route": "/delivery-lab",
+      "title": "Bakiano · Delivery operations",
+      "headingSizes": [
+        {
+          "role": "H1",
+          "font": "24px",
+          "text": "Delivery operations"
+        },
+        {
+          "role": "H2",
+          "font": "15px",
+          "text": "Agents 26"
+        },
+        {
+          "role": "H2",
+          "font": "15px",
+          "text": "Order book"
+        },
+        {
+          "role": "H3",
+          "font": "14px",
+          "text": "Simulation timeline"
+        }
+      ],
+      "bodySize": "14px",
+      "contrastCandidates": [],
+      "under24Controls": [
+        {
+          "selector": "g",
+          "text": "Aster Household 001 · customer-001",
+          "width": 13.5,
+          "height": 13.5
+        },
+        {
+          "selector": "g",
+          "text": "Aster Household 002 · customer-002",
+          "width": 13.5,
+          "height": 13.5
+        },
+        {
+          "selector": "g",
+          "text": "Aster Household 003 · customer-003",
+          "width": 13.5,
+          "height": 13.5
+        },
+        {
+          "selector": "g",
+          "text": "Aster Household 004 · customer-004",
+          "width": 13.5,
+          "height": 13.5
+        },
+        {
+          "selector": "g",
+          "text": "Aster Household 005 · customer-005",
+          "width": 13.5,
+          "height": 13.5
+        },
+        {
+          "selector": "g",
+          "text": "Aster Household 006 · customer-006",
+          "width": 13.5,
+          "height": 13.5
+        },
+        {
+          "selector": "g",
+          "text": "Aster Household 007 · customer-007",
+          "width": 13.5,
+          "height": 13.5
+        },
+        {
+          "selector": "g",
+          "text": "Aster Household 008 · customer-008",
+          "width": 13.5,
+          "height": 13.5
+        },
+        {
+          "selector": "g",
+          "text": "Aster Household 009 · customer-009",
+          "width": 13.5,
+          "height": 13.5
+        },
+        {
+          "selector": "g",
+          "text": "Aster Household 010 · customer-010",
+          "width": 13.5,
+          "height": 13.5
+        },
+        {
+          "selector": "g",
+          "text": "Aster Household 011 · customer-011",
+          "width": 13.5,
+          "height": 13.5
+        },
+        {
+          "selector": "g",
+          "text": "Aster Household 012 · customer-012",
+          "width": 13.5,
+          "height": 13.5
+        },
+        {
+          "selector": "g",
+          "text": "Aster Household 013 · customer-013",
+          "width": 13.5,
+          "height": 13.5
+        },
+        {
+          "selector": "g",
+          "text": "Aster Household 014 · customer-014",
+          "width": 13.5,
+          "height": 13.5
+        },
+        {
+          "selector": "g",
+          "text": "Aster Household 015 · customer-015",
+          "width": 13.5,
+          "height": 13.5
+        },
+        {
+          "selector": "g",
+          "text": "Aster Household 016 · customer-016",
+          "width": 13.5,
+          "height": 13.5
+        },
+        {
+          "selector": "g",
+          "text": "Aster Household 017 · customer-017",
+          "width": 13.5,
+          "height": 13.5
+        },
+        {
+          "selector": "g",
+          "text": "Aster Household 018 · customer-018",
+          "width": 13.5,
+          "height": 13.5
+        },
+        {
+          "selector": "g",
+          "text": "Aster Household 019 · customer-019",
+          "width": 13.5,
+          "height": 13.5
+        },
+        {
+          "selector": "g",
+          "text": "Aster Household 020 · customer-020",
+          "width": 13.5,
+          "height": 13.5
+        },
+        {
+          "selector": "g",
+          "text": "Aster Household 021 · customer-021",
+          "width": 13.5,
+          "height": 13.5
+        },
+        {
+          "selector": "g",
+          "text": "Aster Household 022 · customer-022",
+          "width": 13.5,
+          "height": 13.5
+        },
+        {
+          "selector": "g",
+          "text": "Aster Household 023 · customer-023",
+          "width": 13.5,
+          "height": 13.5
+        },
+        {
+          "selector": "g",
+          "text": "Aster Household 024 · customer-024",
+          "width": 13.5,
+          "height": 13.5
+        },
+        {
+          "selector": "g",
+          "text": "Aster Household 025 · customer-025",
+          "width": 13.5,
+          "height": 13.5
+        },
+        {
+          "selector": "g",
+          "text": "Aster Household 026 · customer-026",
+          "width": 13.5,
+          "height": 13.5
+        },
+        {
+          "selector": "g",
+          "text": "Aster Household 027 · customer-027",
+          "width": 13.5,
+          "height": 13.5
+        },
+        {
+          "selector": "g",
+          "text": "Aster Household 028 · customer-028",
+          "width": 13.5,
+          "height": 13.5
+        },
+        {
+          "selector": "g",
+          "text": "Aster Household 029 · customer-029",
+          "width": 13.5,
+          "height": 13.5
+        },
+        {
+          "selector": "g",
+          "text": "Aster Household 030 · customer-030",
+          "width": 13.5,
+          "height": 13.5
+        },
+        {
+          "selector": "g",
+          "text": "Aster Household 031 · customer-031",
+          "width": 13.5,
+          "height": 13.5
+        },
+        {
+          "selector": "g",
+          "text": "Aster Household 032 · customer-032",
+          "width": 13.5,
+          "height": 13.5
+        },
+        {
+          "selector": "g",
+          "text": "Aster Household 033 · customer-033",
+          "width": 13.5,
+          "height": 13.5
+        },
+        {
+          "selector": "g",
+          "text": "Aster Household 034 · customer-034",
+          "width": 13.5,
+          "height": 13.5
+        },
+        {
+          "selector": "g",
+          "text": "Aster Household 035 · customer-035",
+          "width": 13.5,
+          "height": 13.5
+        },
+        {
+          "selector": "g",
+          "text": "Aster Household 036 · customer-036",
+          "width": 13.5,
+          "height": 13.5
+        },
+        {
+          "selector": "g",
+          "text": "Aster Household 037 · customer-037",
+          "width": 13.5,
+          "height": 13.5
+        },
+        {
+          "selector": "g",
+          "text": "Aster Household 038 · customer-038",
+          "width": 13.5,
+          "height": 13.5
+        },
+        {
+          "selector": "g",
+          "text": "Aster Household 039 · customer-039",
+          "width": 13.5,
+          "height": 13.5
+        },
+        {
+          "selector": "g",
+          "text": "Aster Household 040 · customer-040",
+          "width": 13.5,
+          "height": 13.5
+        },
+        {
+          "selector": "g",
+          "text": "Aster Household 041 · customer-041",
+          "width": 13.5,
+          "height": 13.5
+        },
+        {
+          "selector": "g",
+          "text": "Aster Household 042 · customer-042",
+          "width": 13.5,
+          "height": 13.5
+        },
+        {
+          "selector": "g",
+          "text": "Aster Household 043 · customer-043",
+          "width": 13.5,
+          "height": 13.5
+        },
+        {
+          "selector": "g",
+          "text": "Aster Household 044 · customer-044",
+          "width": 13.5,
+          "height": 13.5
+        },
+        {
+          "selector": "g",
+          "text": "Aster Household 045 · customer-045",
+          "width": 13.5,
+          "height": 13.5
+        },
+        {
+          "selector": "g",
+          "text": "Aster Household 046 · customer-046",
+          "width": 13.5,
+          "height": 13.5
+        },
+        {
+          "selector": "g",
+          "text": "Aster Household 047 · customer-047",
+          "width": 13.5,
+          "height": 13.5
+        },
+        {
+          "selector": "g",
+          "text": "Aster Household 048 · customer-048",
+          "width": 13.5,
+          "height": 13.5
+        },
+        {
+          "selector": "g",
+          "text": "Aster Household 049 · customer-049",
+          "width": 13.5,
+          "height": 13.5
+        },
+        {
+          "selector": "g",
+          "text": "Aster Household 050 · customer-050",
+          "width": 13.5,
+          "height": 13.5
+        },
+        {
+          "selector": "g",
+          "text": "Aster Household 051 · customer-051",
+          "width": 13.5,
+          "height": 13.5
+        },
+        {
+          "selector": "g",
+          "text": "Aster Household 052 · customer-052",
+          "width": 13.5,
+          "height": 13.5
+        },
+        {
+          "selector": "g",
+          "text": "Aster Household 053 · customer-053",
+          "width": 13.5,
+          "height": 13.5
+        },
+        {
+          "selector": "g",
+          "text": "Aster Household 054 · customer-054",
+          "width": 13.5,
+          "height": 13.5
+        },
+        {
+          "selector": "g",
+          "text": "Aster Household 055 · customer-055",
+          "width": 13.5,
+          "height": 13.5
+        },
+        {
+          "selector": "g",
+          "text": "Aster Household 056 · customer-056",
+          "width": 13.5,
+          "height": 13.5
+        },
+        {
+          "selector": "g",
+          "text": "Aster Household 057 · customer-057",
+          "width": 13.5,
+          "height": 13.5
+        },
+        {
+          "selector": "g",
+          "text": "Aster Household 058 · customer-058",
+          "width": 13.5,
+          "height": 13.5
+        },
+        {
+          "selector": "g",
+          "text": "Aster Household 059 · customer-059",
+          "width": 13.5,
+          "height": 13.5
+        },
+        {
+          "selector": "g",
+          "text": "Aster Household 060 · customer-060",
+          "width": 13.5,
+          "height": 13.5
+        },
+        {
+          "selector": "g",
+          "text": "Aster Household 061 · customer-061",
+          "width": 13.5,
+          "height": 13.5
+        },
+        {
+          "selector": "g",
+          "text": "Aster Household 062 · customer-062",
+          "width": 13.5,
+          "height": 13.5
+        },
+        {
+          "selector": "g",
+          "text": "Aster Household 063 · customer-063",
+          "width": 13.5,
+          "height": 13.5
+        },
+        {
+          "selector": "g",
+          "text": "Aster Household 064 · customer-064",
+          "width": 13.5,
+          "height": 13.5
+        },
+        {
+          "selector": "g",
+          "text": "Aster Household 065 · customer-065",
+          "width": 13.5,
+          "height": 13.5
+        },
+        {
+          "selector": "g",
+          "text": "Aster Household 066 · customer-066",
+          "width": 13.5,
+          "height": 13.5
+        },
+        {
+          "selector": "g",
+          "text": "Aster Household 067 · customer-067",
+          "width": 13.5,
+          "height": 13.5
+        },
+        {
+          "selector": "g",
+          "text": "Aster Household 068 · customer-068",
+          "width": 13.5,
+          "height": 13.5
+        },
+        {
+          "selector": "g",
+          "text": "Aster Household 069 · customer-069",
+          "width": 13.5,
+          "height": 13.5
+        },
+        {
+          "selector": "g",
+          "text": "Aster Household 070 · customer-070",
+          "width": 13.5,
+          "height": 13.5
+        },
+        {
+          "selector": "g",
+          "text": "Aster Household 071 · customer-071",
+          "width": 13.5,
+          "height": 13.5
+        },
+        {
+          "selector": "g",
+          "text": "Aster Household 072 · customer-072",
+          "width": 13.5,
+          "height": 13.5
+        },
+        {
+          "selector": "g",
+          "text": "Aster Household 073 · customer-073",
+          "width": 13.5,
+          "height": 13.5
+        },
+        {
+          "selector": "g",
+          "text": "Aster Household 074 · customer-074",
+          "width": 13.5,
+          "height": 13.5
+        },
+        {
+          "selector": "g",
+          "text": "Aster Household 075 · customer-075",
+          "width": 13.5,
+          "height": 13.5
+        },
+        {
+          "selector": "g",
+          "text": "Aster Household 076 · customer-076",
+          "width": 13.5,
+          "height": 13.5
+        },
+        {
+          "selector": "g",
+          "text": "Aster Household 077 · customer-077",
+          "width": 13.5,
+          "height": 13.5
+        },
+        {
+          "selector": "g",
+          "text": "Aster Household 078 · customer-078",
+          "width": 13.5,
+          "height": 13.5
+        },
+        {
+          "selector": "g",
+          "text": "Aster Household 079 · customer-079",
+          "width": 13.5,
+          "height": 13.5
+        },
+        {
+          "selector": "g",
+          "text": "Aster Household 080 · customer-080",
+          "width": 13.5,
+          "height": 13.5
+        },
+        {
+          "selector": "g",
+          "text": "Aster Household 081 · customer-081",
+          "width": 13.5,
+          "height": 13.5
+        },
+        {
+          "selector": "g",
+          "text": "Aster Household 082 · customer-082",
+          "width": 13.5,
+          "height": 13.5
+        },
+        {
+          "selector": "g",
+          "text": "Aster Household 083 · customer-083",
+          "width": 13.5,
+          "height": 13.5
+        },
+        {
+          "selector": "g",
+          "text": "Aster Household 084 · customer-084",
+          "width": 13.5,
+          "height": 13.5
+        },
+        {
+          "selector": "g",
+          "text": "Aster Household 085 · customer-085",
+          "width": 13.5,
+          "height": 13.5
+        },
+        {
+          "selector": "g",
+          "text": "Aster Household 086 · customer-086",
+          "width": 13.5,
+          "height": 13.5
+        },
+        {
+          "selector": "g",
+          "text": "Aster Household 087 · customer-087",
+          "width": 13.5,
+          "height": 13.5
+        },
+        {
+          "selector": "g",
+          "text": "Aster Household 088 · customer-088",
+          "width": 13.5,
+          "height": 13.5
+        },
+        {
+          "selector": "g",
+          "text": "Aster Household 089 · customer-089",
+          "width": 13.5,
+          "height": 13.5
+        },
+        {
+          "selector": "g",
+          "text": "Aster Household 090 · customer-090",
+          "width": 13.5,
+          "height": 13.5
+        },
+        {
+          "selector": "g",
+          "text": "Aster Household 091 · customer-091",
+          "width": 13.5,
+          "height": 13.5
+        },
+        {
+          "selector": "g",
+          "text": "Aster Household 092 · customer-092",
+          "width": 13.5,
+          "height": 13.5
+        },
+        {
+          "selector": "g",
+          "text": "Aster Household 093 · customer-093",
+          "width": 13.5,
+          "height": 13.5
+        },
+        {
+          "selector": "g",
+          "text": "Aster Household 094 · customer-094",
+          "width": 13.5,
+          "height": 13.5
+        },
+        {
+          "selector": "g",
+          "text": "Aster Household 095 · customer-095",
+          "width": 13.5,
+          "height": 13.5
+        },
+        {
+          "selector": "g",
+          "text": "Aster Household 096 · customer-096",
+          "width": 13.5,
+          "height": 13.5
+        },
+        {
+          "selector": "g",
+          "text": "Aster Household 097 · customer-097",
+          "width": 13.5,
+          "height": 13.5
+        },
+        {
+          "selector": "g",
+          "text": "Aster Household 098 · customer-098",
+          "width": 13.5,
+          "height": 13.5
+        },
+        {
+          "selector": "g",
+          "text": "Aster Household 099 · customer-099",
+          "width": 13.5,
+          "height": 13.5
+        },
+        {
+          "selector": "g",
+          "text": "Aster Household 100 · customer-100",
+          "width": 13.5,
+          "height": 13.5
+        },
+        {
+          "selector": "g",
+          "text": "Aster Household 101 · customer-101",
+          "width": 13.5,
+          "height": 13.5
+        },
+        {
+          "selector": "g",
+          "text": "Aster Household 102 · customer-102",
+          "width": 13.5,
+          "height": 13.5
+        },
+        {
+          "selector": "g",
+          "text": "Aster Household 103 · customer-103",
+          "width": 13.5,
+          "height": 13.5
+        },
+        {
+          "selector": "g",
+          "text": "Aster Household 104 · customer-104",
+          "width": 13.5,
+          "height": 13.5
+        },
+        {
+          "selector": "g",
+          "text": "Aster Household 105 · customer-105",
+          "width": 13.5,
+          "height": 13.5
+        },
+        {
+          "selector": "g",
+          "text": "Aster Household 106 · customer-106",
+          "width": 13.5,
+          "height": 13.5
+        },
+        {
+          "selector": "g",
+          "text": "Aster Household 107 · customer-107",
+          "width": 13.5,
+          "height": 13.5
+        },
+        {
+          "selector": "g",
+          "text": "Aster Household 108 · customer-108",
+          "width": 13.5,
+          "height": 13.5
+        },
+        {
+          "selector": "g",
+          "text": "Aster Household 109 · customer-109",
+          "width": 13.5,
+          "height": 13.5
+        },
+        {
+          "selector": "g",
+          "text": "Aster Household 110 · customer-110",
+          "width": 13.5,
+          "height": 13.5
+        },
+        {
+          "selector": "g",
+          "text": "Aster Household 111 · customer-111",
+          "width": 13.5,
+          "height": 13.5
+        },
+        {
+          "selector": "g",
+          "text": "Aster Household 112 · customer-112",
+          "width": 13.5,
+          "height": 13.5
+        },
+        {
+          "selector": "g",
+          "text": "Aster Household 113 · customer-113",
+          "width": 13.5,
+          "height": 13.5
+        },
+        {
+          "selector": "g",
+          "text": "Aster Household 114 · customer-114",
+          "width": 13.5,
+          "height": 13.5
+        },
+        {
+          "selector": "g",
+          "text": "Aster Household 115 · customer-115",
+          "width": 13.5,
+          "height": 13.5
+        },
+        {
+          "selector": "g",
+          "text": "Aster Household 116 · customer-116",
+          "width": 13.5,
+          "height": 13.5
+        },
+        {
+          "selector": "g",
+          "text": "Aster Household 117 · customer-117",
+          "width": 13.5,
+          "height": 13.5
+        },
+        {
+          "selector": "g",
+          "text": "Aster Household 118 · customer-118",
+          "width": 13.5,
+          "height": 13.5
+        },
+        {
+          "selector": "g",
+          "text": "Aster Household 119 · customer-119",
+          "width": 13.5,
+          "height": 13.5
+        },
+        {
+          "selector": "g",
+          "text": "Aster Household 120 · customer-120",
+          "width": 13.5,
+          "height": 13.5
+        },
+        {
+          "selector": "g",
+          "text": "Aster Household 121 · customer-121",
+          "width": 13.5,
+          "height": 13.5
+        },
+        {
+          "selector": "g",
+          "text": "Aster Household 122 · customer-122",
+          "width": 13.5,
+          "height": 13.5
+        },
+        {
+          "selector": "g",
+          "text": "Aster Household 123 · customer-123",
+          "width": 13.5,
+          "height": 13.5
+        },
+        {
+          "selector": "g",
+          "text": "Aster Household 124 · customer-124",
+          "width": 13.5,
+          "height": 13.5
+        },
+        {
+          "selector": "g",
+          "text": "Aster Household 125 · customer-125",
+          "width": 13.5,
+          "height": 13.5
+        },
+        {
+          "selector": "g",
+          "text": "Aster Household 126 · customer-126",
+          "width": 13.5,
+          "height": 13.5
+        },
+        {
+          "selector": "g",
+          "text": "Aster Household 127 · customer-127",
+          "width": 13.5,
+          "height": 13.5
+        },
+        {
+          "selector": "g",
+          "text": "Aster Household 128 · customer-128",
+          "width": 13.5,
+          "height": 13.5
+        }
+      ],
+      "domElements": 3293,
+      "svgButtons": 140,
+      "landmarks": [
+        "#main"
+      ],
+      "navigation": [
+        {
+          "domContentLoadedMs": 80,
+          "loadMs": 179
+        }
+      ],
+      "resources": [
+        {
+          "name": "city-config",
+          "type": "fetch",
+          "bytes": 452429,
+          "duration": 60
+        },
+        {
+          "name": "IBMPlexSans-SemiBold.woff2",
+          "type": "css",
+          "bytes": 67360,
+          "duration": 54
+        },
+        {
+          "name": "IBMPlexSans-Medium.woff2",
+          "type": "css",
+          "bytes": 67040,
+          "duration": 53
+        },
+        {
+          "name": "IBMPlexSans-Regular.woff2",
+          "type": "css",
+          "bytes": 63320,
+          "duration": 56
+        },
+        {
+          "name": "IBMPlexMono-Regular.woff2",
+          "type": "css",
+          "bytes": 49548,
+          "duration": 40
+        },
+        {
+          "name": "flow.js?v=9c638d278ae6",
+          "type": "script",
+          "bytes": 45330,
+          "duration": 22
+        },
+        {
+          "name": "flow.css?v=0f5fa63ae6ad",
+          "type": "link",
+          "bytes": 23294,
+          "duration": 16
+        },
+        {
+          "name": "workspace.css?v=5c17fb1a2e19",
+          "type": "link",
+          "bytes": 9012,
+          "duration": 17
+        }
+      ],
+      "widths": [
+        {
+          "viewport": 1440,
+          "document": 1440,
+          "overflow": false
+        },
+        {
+          "viewport": 1280,
+          "document": 1280,
+          "overflow": false
+        },
+        {
+          "viewport": 390,
+          "document": 390,
+          "overflow": false
+        },
+        {
+          "viewport": 320,
+          "document": 320,
+          "overflow": false
+        }
+      ],
+      "menuOpen": {
+        "expanded": "true",
+        "visibleLinks": 7,
+        "outline": "rgb(99, 213, 197) solid 2px"
+      },
+      "menuClosed": {
+        "expanded": "false",
+        "focus": "workspace-menu"
+      },
+      "keyboard": [
+        {
+          "element": "A",
+          "id": "",
+          "text": "Skip to workspace",
+          "outline": "rgb(231, 237, 240) solid 3px",
+          "focusVisible": true
+        },
+        {
+          "element": "A",
+          "id": "",
+          "text": "Bakiano operations home",
+          "outline": "rgb(231, 237, 240) solid 3px",
+          "focusVisible": true
+        },
+        {
+          "element": "BUTTON",
+          "id": "",
+          "text": "Menu",
+          "outline": "rgb(99, 213, 197) solid 2px",
+          "focusVisible": true
+        },
+        {
+          "element": "BUTTON",
+          "id": "",
+          "text": "Overview",
+          "outline": "rgb(99, 213, 197) solid 2px",
+          "focusVisible": true
+        },
+        {
+          "element": "BUTTON",
+          "id": "",
+          "text": "Orders",
+          "outline": "rgb(99, 213, 197) solid 2px",
+          "focusVisible": true
+        },
+        {
+          "element": "BUTTON",
+          "id": "",
+          "text": "Fleet",
+          "outline": "rgb(99, 213, 197) solid 2px",
+          "focusVisible": true
+        },
+        {
+          "element": "BUTTON",
+          "id": "",
+          "text": "Stores",
+          "outline": "rgb(99, 213, 197) solid 2px",
+          "focusVisible": true
+        },
+        {
+          "element": "BUTTON",
+          "id": "flow-simulation-toggle",
+          "text": "Simulation",
+          "outline": "rgb(99, 213, 197) solid 2px",
+          "focusVisible": true
+        }
+      ],
+      "extra": {
+        "accessibleMapButtons": [
+          {
+            "name": "Lucia Rios North Market ready —",
+            "ignored": false
+          },
+          {
+            "name": "Lucia Luna North Market ready —",
+            "ignored": false
+          },
+          {
+            "name": "Mateo Rios Bridge Market ready —",
+            "ignored": false
+          },
+          {
+            "name": "Mateo Luna Bridge Market ready —",
+            "ignored": false
+          },
+          {
+            "name": "Nora Rios South Market ready —",
+            "ignored": false
+          },
+          {
+            "name": "Nora Luna South Market ready —",
+            "ignored": false
+          },
+          {
+            "name": "Hugo Rios West Market ready —",
+            "ignored": false
+          },
+          {
+            "name": "Hugo Luna West Market ready —",
+            "ignored": false
+          },
+          {
+            "name": "Alba Rios Central Market ready —",
+            "ignored": false
+          },
+          {
+            "name": "Alba Luna Central Market ready —",
+            "ignored": false
+          },
+          {
+            "name": "Leo Rios East Market ready —",
+            "ignored": false
+          },
+          {
+            "name": "Leo Luna East Market ready —",
+            "ignored": false
+          },
+          {
+            "name": "Gael Rios North Hygiene Shop ready —",
+            "ignored": false
+          },
+          {
+            "name": "Gael Luna North Hygiene Shop ready —",
+            "ignored": false
+          },
+          {
+            "name": "Vera Rios Central Hygiene Shop ready —",
+            "ignored": false
+          }
+        ]
+      },
+      "errors": []
+    },
+    {
+      "page": "supply",
+      "route": "/restaurant-lab",
+      "title": "Restaurant supply lab · Bakiano",
+      "headingSizes": [
+        {
+          "role": "H1",
+          "font": "24px",
+          "text": "Restaurant operations"
+        },
+        {
+          "role": "H2",
+          "font": "15px",
+          "text": "Agents 138"
+        },
+        {
+          "role": "H2",
+          "font": "15px",
+          "text": "City network"
+        },
+        {
+          "role": "H2",
+          "font": "15px",
+          "text": "Run evidence"
+        }
+      ],
+      "bodySize": "14px",
+      "contrastCandidates": [],
+      "under24Controls": [
+        {
+          "selector": "g",
+          "text": "Aster Household 001, Household, grid 17, 12",
+          "width": 13.3,
+          "height": 13.3
+        },
+        {
+          "selector": "g",
+          "text": "Aster Household 002, Household, grid 9, 29",
+          "width": 13.3,
+          "height": 13.3
+        },
+        {
+          "selector": "g",
+          "text": "Aster Household 003, Household, grid 1, 13",
+          "width": 13.3,
+          "height": 13.3
+        },
+        {
+          "selector": "g",
+          "text": "Aster Household 004, Household, grid 13, 21",
+          "width": 13.3,
+          "height": 13.3
+        },
+        {
+          "selector": "g",
+          "text": "Aster Household 005, Household, grid 7, 27",
+          "width": 13.3,
+          "height": 13.3
+        },
+        {
+          "selector": "g",
+          "text": "Aster Household 006, Household, grid 22, 30",
+          "width": 13.3,
+          "height": 13.3
+        },
+        {
+          "selector": "g",
+          "text": "Aster Household 007, Household, grid 18, 1",
+          "width": 13.3,
+          "height": 13.3
+        },
+        {
+          "selector": "g",
+          "text": "Aster Household 008, Household, grid 21, 19",
+          "width": 13.3,
+          "height": 13.3
+        },
+        {
+          "selector": "g",
+          "text": "Aster Household 009, Household, grid 24, 21",
+          "width": 13.3,
+          "height": 13.3
+        },
+        {
+          "selector": "g",
+          "text": "Aster Household 010, Household, grid 22, 15",
+          "width": 13.3,
+          "height": 13.3
+        },
+        {
+          "selector": "g",
+          "text": "Aster Household 011, Household, grid 22, 1",
+          "width": 13.3,
+          "height": 13.3
+        },
+        {
+          "selector": "g",
+          "text": "Aster Household 012, Household, grid 30, 23",
+          "width": 13.3,
+          "height": 13.3
+        },
+        {
+          "selector": "g",
+          "text": "Aster Household 013, Household, grid 28, 14",
+          "width": 13.3,
+          "height": 13.3
+        },
+        {
+          "selector": "g",
+          "text": "Aster Household 014, Household, grid 8, 7",
+          "width": 13.3,
+          "height": 13.3
+        },
+        {
+          "selector": "g",
+          "text": "Aster Household 015, Household, grid 4, 13",
+          "width": 13.3,
+          "height": 13.3
+        },
+        {
+          "selector": "g",
+          "text": "Aster Household 016, Household, grid 9, 19",
+          "width": 13.3,
+          "height": 13.3
+        },
+        {
+          "selector": "g",
+          "text": "Aster Household 017, Household, grid 28, 9",
+          "width": 13.3,
+          "height": 13.3
+        },
+        {
+          "selector": "g",
+          "text": "Aster Household 018, Household, grid 5, 24",
+          "width": 13.3,
+          "height": 13.3
+        },
+        {
+          "selector": "g",
+          "text": "Aster Household 019, Household, grid 27, 25",
+          "width": 13.3,
+          "height": 13.3
+        },
+        {
+          "selector": "g",
+          "text": "Aster Household 020, Household, grid 29, 15",
+          "width": 13.3,
+          "height": 13.3
+        },
+        {
+          "selector": "g",
+          "text": "Aster Household 021, Household, grid 19, 9",
+          "width": 13.3,
+          "height": 13.3
+        },
+        {
+          "selector": "g",
+          "text": "Aster Household 022, Household, grid 20, 23",
+          "width": 13.3,
+          "height": 13.3
+        },
+        {
+          "selector": "g",
+          "text": "Aster Household 023, Household, grid 7, 8",
+          "width": 13.3,
+          "height": 13.3
+        },
+        {
+          "selector": "g",
+          "text": "Aster Household 024, Household, grid 27, 20",
+          "width": 13.3,
+          "height": 13.3
+        },
+        {
+          "selector": "g",
+          "text": "Aster Household 025, Household, grid 17, 13",
+          "width": 13.3,
+          "height": 13.3
+        },
+        {
+          "selector": "g",
+          "text": "Aster Household 026, Household, grid 22, 2",
+          "width": 13.3,
+          "height": 13.3
+        },
+        {
+          "selector": "g",
+          "text": "Aster Household 027, Household, grid 12, 8",
+          "width": 13.3,
+          "height": 13.3
+        },
+        {
+          "selector": "g",
+          "text": "Aster Household 028, Household, grid 18, 15",
+          "width": 13.3,
+          "height": 13.3
+        },
+        {
+          "selector": "g",
+          "text": "Aster Household 029, Household, grid 6, 17",
+          "width": 13.3,
+          "height": 13.3
+        },
+        {
+          "selector": "g",
+          "text": "Aster Household 030, Household, grid 21, 24",
+          "width": 13.3,
+          "height": 13.3
+        },
+        {
+          "selector": "g",
+          "text": "Aster Household 031, Household, grid 26, 30",
+          "width": 13.3,
+          "height": 13.3
+        },
+        {
+          "selector": "g",
+          "text": "Aster Household 032, Household, grid 0, 14",
+          "width": 13.3,
+          "height": 13.3
+        },
+        {
+          "selector": "g",
+          "text": "Aster Household 033, Household, grid 20, 21",
+          "width": 13.3,
+          "height": 13.3
+        },
+        {
+          "selector": "g",
+          "text": "Aster Household 034, Household, grid 28, 20",
+          "width": 13.3,
+          "height": 13.3
+        },
+        {
+          "selector": "g",
+          "text": "Aster Household 035, Household, grid 18, 26",
+          "width": 13.3,
+          "height": 13.3
+        },
+        {
+          "selector": "g",
+          "text": "Aster Household 036, Household, grid 14, 22",
+          "width": 13.3,
+          "height": 13.3
+        },
+        {
+          "selector": "g",
+          "text": "Aster Household 037, Household, grid 27, 9",
+          "width": 13.3,
+          "height": 13.3
+        },
+        {
+          "selector": "g",
+          "text": "Aster Household 038, Household, grid 7, 13",
+          "width": 13.3,
+          "height": 13.3
+        },
+        {
+          "selector": "g",
+          "text": "Aster Household 039, Household, grid 1, 6",
+          "width": 13.3,
+          "height": 13.3
+        },
+        {
+          "selector": "g",
+          "text": "Aster Household 040, Household, grid 19, 17",
+          "width": 13.3,
+          "height": 13.3
+        },
+        {
+          "selector": "g",
+          "text": "Aster Household 041, Household, grid 25, 12",
+          "width": 13.3,
+          "height": 13.3
+        },
+        {
+          "selector": "g",
+          "text": "Aster Household 042, Household, grid 9, 17",
+          "width": 13.3,
+          "height": 13.3
+        },
+        {
+          "selector": "g",
+          "text": "Aster Household 043, Household, grid 18, 0",
+          "width": 13.3,
+          "height": 13.3
+        },
+        {
+          "selector": "g",
+          "text": "Aster Household 044, Household, grid 7, 1",
+          "width": 13.3,
+          "height": 13.3
+        },
+        {
+          "selector": "g",
+          "text": "Aster Household 045, Household, grid 30, 29",
+          "width": 13.3,
+          "height": 13.3
+        },
+        {
+          "selector": "g",
+          "text": "Aster Household 046, Household, grid 1, 16",
+          "width": 13.3,
+          "height": 13.3
+        },
+        {
+          "selector": "g",
+          "text": "Aster Household 047, Household, grid 6, 10",
+          "width": 13.3,
+          "height": 13.3
+        },
+        {
+          "selector": "g",
+          "text": "Aster Household 048, Household, grid 13, 23",
+          "width": 13.3,
+          "height": 13.3
+        },
+        {
+          "selector": "g",
+          "text": "Aster Household 049, Household, grid 26, 5",
+          "width": 13.3,
+          "height": 13.3
+        },
+        {
+          "selector": "g",
+          "text": "Aster Household 050, Household, grid 8, 19",
+          "width": 13.3,
+          "height": 13.3
+        },
+        {
+          "selector": "g",
+          "text": "Aster Household 051, Household, grid 17, 27",
+          "width": 13.3,
+          "height": 13.3
+        },
+        {
+          "selector": "g",
+          "text": "Aster Household 052, Household, grid 26, 23",
+          "width": 13.3,
+          "height": 13.3
+        },
+        {
+          "selector": "g",
+          "text": "Aster Household 053, Household, grid 21, 10",
+          "width": 13.3,
+          "height": 13.3
+        },
+        {
+          "selector": "g",
+          "text": "Aster Household 054, Household, grid 18, 6",
+          "width": 13.3,
+          "height": 13.3
+        },
+        {
+          "selector": "g",
+          "text": "Aster Household 055, Household, grid 20, 6",
+          "width": 13.3,
+          "height": 13.3
+        },
+        {
+          "selector": "g",
+          "text": "Aster Household 056, Household, grid 20, 27",
+          "width": 13.3,
+          "height": 13.3
+        },
+        {
+          "selector": "g",
+          "text": "Aster Household 057, Household, grid 11, 22",
+          "width": 13.3,
+          "height": 13.3
+        },
+        {
+          "selector": "g",
+          "text": "Aster Household 058, Household, grid 19, 6",
+          "width": 13.3,
+          "height": 13.3
+        },
+        {
+          "selector": "g",
+          "text": "Aster Household 059, Household, grid 19, 7",
+          "width": 13.3,
+          "height": 13.3
+        },
+        {
+          "selector": "g",
+          "text": "Aster Household 060, Household, grid 10, 23",
+          "width": 13.3,
+          "height": 13.3
+        },
+        {
+          "selector": "g",
+          "text": "Aster Household 061, Household, grid 7, 6",
+          "width": 13.3,
+          "height": 13.3
+        },
+        {
+          "selector": "g",
+          "text": "Aster Household 062, Household, grid 7, 21",
+          "width": 13.3,
+          "height": 13.3
+        },
+        {
+          "selector": "g",
+          "text": "Aster Household 063, Household, grid 16, 0",
+          "width": 13.3,
+          "height": 13.3
+        },
+        {
+          "selector": "g",
+          "text": "Aster Household 064, Household, grid 15, 10",
+          "width": 13.2,
+          "height": 13.3
+        },
+        {
+          "selector": "g",
+          "text": "Aster Household 065, Household, grid 10, 26",
+          "width": 13.3,
+          "height": 13.3
+        },
+        {
+          "selector": "g",
+          "text": "Aster Household 066, Household, grid 22, 19",
+          "width": 13.3,
+          "height": 13.3
+        },
+        {
+          "selector": "g",
+          "text": "Aster Household 067, Household, grid 30, 14",
+          "width": 13.3,
+          "height": 13.3
+        },
+        {
+          "selector": "g",
+          "text": "Aster Household 068, Household, grid 18, 23",
+          "width": 13.3,
+          "height": 13.3
+        },
+        {
+          "selector": "g",
+          "text": "Aster Household 069, Household, grid 17, 23",
+          "width": 13.3,
+          "height": 13.3
+        },
+        {
+          "selector": "g",
+          "text": "Aster Household 070, Household, grid 30, 28",
+          "width": 13.3,
+          "height": 13.3
+        },
+        {
+          "selector": "g",
+          "text": "Aster Household 071, Household, grid 25, 26",
+          "width": 13.3,
+          "height": 13.3
+        },
+        {
+          "selector": "g",
+          "text": "Aster Household 072, Household, grid 21, 23",
+          "width": 13.3,
+          "height": 13.3
+        },
+        {
+          "selector": "g",
+          "text": "Aster Household 073, Household, grid 2, 15",
+          "width": 13.3,
+          "height": 13.3
+        },
+        {
+          "selector": "g",
+          "text": "Aster Household 074, Household, grid 18, 12",
+          "width": 13.3,
+          "height": 13.3
+        },
+        {
+          "selector": "g",
+          "text": "Aster Household 075, Household, grid 25, 18",
+          "width": 13.3,
+          "height": 13.3
+        },
+        {
+          "selector": "g",
+          "text": "Aster Household 076, Household, grid 27, 4",
+          "width": 13.3,
+          "height": 13.3
+        },
+        {
+          "selector": "g",
+          "text": "Aster Household 077, Household, grid 21, 15",
+          "width": 13.3,
+          "height": 13.3
+        },
+        {
+          "selector": "g",
+          "text": "Aster Household 078, Household, grid 8, 23",
+          "width": 13.3,
+          "height": 13.3
+        },
+        {
+          "selector": "g",
+          "text": "Aster Household 079, Household, grid 28, 0",
+          "width": 13.3,
+          "height": 13.3
+        },
+        {
+          "selector": "g",
+          "text": "Aster Household 080, Household, grid 25, 10",
+          "width": 13.3,
+          "height": 13.3
+        },
+        {
+          "selector": "g",
+          "text": "Aster Household 081, Household, grid 15, 9",
+          "width": 13.2,
+          "height": 13.3
+        },
+        {
+          "selector": "g",
+          "text": "Aster Household 082, Household, grid 26, 12",
+          "width": 13.3,
+          "height": 13.3
+        },
+        {
+          "selector": "g",
+          "text": "Aster Household 083, Household, grid 14, 28",
+          "width": 13.3,
+          "height": 13.3
+        },
+        {
+          "selector": "g",
+          "text": "Aster Household 084, Household, grid 28, 4",
+          "width": 13.3,
+          "height": 13.3
+        },
+        {
+          "selector": "g",
+          "text": "Aster Household 085, Household, grid 24, 11",
+          "width": 13.3,
+          "height": 13.3
+        },
+        {
+          "selector": "g",
+          "text": "Aster Household 086, Household, grid 18, 20",
+          "width": 13.3,
+          "height": 13.3
+        },
+        {
+          "selector": "g",
+          "text": "Aster Household 087, Household, grid 3, 30",
+          "width": 13.3,
+          "height": 13.3
+        },
+        {
+          "selector": "g",
+          "text": "Aster Household 088, Household, grid 26, 20",
+          "width": 13.3,
+          "height": 13.3
+        },
+        {
+          "selector": "g",
+          "text": "Aster Household 089, Household, grid 0, 24",
+          "width": 13.3,
+          "height": 13.3
+        },
+        {
+          "selector": "g",
+          "text": "Aster Household 090, Household, grid 19, 16",
+          "width": 13.3,
+          "height": 13.3
+        },
+        {
+          "selector": "g",
+          "text": "Aster Household 091, Household, grid 5, 8",
+          "width": 13.3,
+          "height": 13.3
+        },
+        {
+          "selector": "g",
+          "text": "Aster Household 092, Household, grid 18, 11",
+          "width": 13.3,
+          "height": 13.3
+        },
+        {
+          "selector": "g",
+          "text": "Aster Household 093, Household, grid 24, 0",
+          "width": 13.3,
+          "height": 13.3
+        },
+        {
+          "selector": "g",
+          "text": "Aster Household 094, Household, grid 19, 28",
+          "width": 13.3,
+          "height": 13.3
+        },
+        {
+          "selector": "g",
+          "text": "Aster Household 095, Household, grid 1, 0",
+          "width": 13.3,
+          "height": 13.3
+        },
+        {
+          "selector": "g",
+          "text": "Aster Household 096, Household, grid 7, 23",
+          "width": 13.3,
+          "height": 13.3
+        },
+        {
+          "selector": "g",
+          "text": "Aster Household 097, Household, grid 4, 27",
+          "width": 13.3,
+          "height": 13.3
+        },
+        {
+          "selector": "g",
+          "text": "Aster Household 098, Household, grid 7, 15",
+          "width": 13.3,
+          "height": 13.3
+        },
+        {
+          "selector": "g",
+          "text": "Aster Household 099, Household, grid 14, 2",
+          "width": 13.3,
+          "height": 13.3
+        },
+        {
+          "selector": "g",
+          "text": "Aster Household 100, Household, grid 9, 28",
+          "width": 13.3,
+          "height": 13.3
+        },
+        {
+          "selector": "g",
+          "text": "Aster Household 101, Household, grid 8, 14",
+          "width": 13.3,
+          "height": 13.3
+        },
+        {
+          "selector": "g",
+          "text": "Aster Household 102, Household, grid 2, 1",
+          "width": 13.3,
+          "height": 13.3
+        },
+        {
+          "selector": "g",
+          "text": "Aster Household 103, Household, grid 1, 15",
+          "width": 13.3,
+          "height": 13.3
+        },
+        {
+          "selector": "g",
+          "text": "Aster Household 104, Household, grid 29, 18",
+          "width": 13.3,
+          "height": 13.3
+        },
+        {
+          "selector": "g",
+          "text": "Aster Household 105, Household, grid 26, 17",
+          "width": 13.3,
+          "height": 13.3
+        },
+        {
+          "selector": "g",
+          "text": "Aster Household 106, Household, grid 4, 5",
+          "width": 13.3,
+          "height": 13.3
+        },
+        {
+          "selector": "g",
+          "text": "Aster Household 107, Household, grid 29, 10",
+          "width": 13.3,
+          "height": 13.3
+        },
+        {
+          "selector": "g",
+          "text": "Aster Household 108, Household, grid 5, 23",
+          "width": 13.3,
+          "height": 13.3
+        },
+        {
+          "selector": "g",
+          "text": "Aster Household 109, Household, grid 19, 24",
+          "width": 13.3,
+          "height": 13.3
+        },
+        {
+          "selector": "g",
+          "text": "Aster Household 110, Household, grid 1, 22",
+          "width": 13.3,
+          "height": 13.3
+        },
+        {
+          "selector": "g",
+          "text": "Aster Household 111, Household, grid 8, 21",
+          "width": 13.3,
+          "height": 13.3
+        },
+        {
+          "selector": "g",
+          "text": "Aster Household 112, Household, grid 6, 26",
+          "width": 13.3,
+          "height": 13.3
+        },
+        {
+          "selector": "g",
+          "text": "Aster Household 113, Household, grid 25, 25",
+          "width": 13.3,
+          "height": 13.3
+        },
+        {
+          "selector": "g",
+          "text": "Aster Household 114, Household, grid 23, 2",
+          "width": 13.3,
+          "height": 13.3
+        },
+        {
+          "selector": "g",
+          "text": "Aster Household 115, Household, grid 6, 14",
+          "width": 13.3,
+          "height": 13.3
+        },
+        {
+          "selector": "g",
+          "text": "Aster Household 116, Household, grid 10, 22",
+          "width": 13.3,
+          "height": 13.3
+        },
+        {
+          "selector": "g",
+          "text": "Aster Household 117, Household, grid 23, 15",
+          "width": 13.3,
+          "height": 13.3
+        },
+        {
+          "selector": "g",
+          "text": "Aster Household 118, Household, grid 5, 20",
+          "width": 13.3,
+          "height": 13.3
+        },
+        {
+          "selector": "g",
+          "text": "Aster Household 119, Household, grid 11, 20",
+          "width": 13.3,
+          "height": 13.3
+        },
+        {
+          "selector": "g",
+          "text": "Aster Household 120, Household, grid 4, 28",
+          "width": 13.3,
+          "height": 13.3
+        },
+        {
+          "selector": "g",
+          "text": "Aster Household 121, Household, grid 11, 10",
+          "width": 13.3,
+          "height": 13.3
+        },
+        {
+          "selector": "g",
+          "text": "Aster Household 122, Household, grid 30, 12",
+          "width": 13.3,
+          "height": 13.3
+        },
+        {
+          "selector": "g",
+          "text": "Aster Household 123, Household, grid 9, 25",
+          "width": 13.3,
+          "height": 13.3
+        },
+        {
+          "selector": "g",
+          "text": "Aster Household 124, Household, grid 14, 13",
+          "width": 13.3,
+          "height": 13.3
+        },
+        {
+          "selector": "g",
+          "text": "Aster Household 125, Household, grid 8, 26",
+          "width": 13.3,
+          "height": 13.3
+        },
+        {
+          "selector": "g",
+          "text": "Aster Household 126, Household, grid 1, 26",
+          "width": 13.3,
+          "height": 13.3
+        },
+        {
+          "selector": "g",
+          "text": "Aster Household 127, Household, grid 16, 6",
+          "width": 13.3,
+          "height": 13.3
+        },
+        {
+          "selector": "g",
+          "text": "Aster Household 128, Household, grid 27, 19",
+          "width": 13.3,
+          "height": 13.3
+        },
+        {
+          "selector": "g",
+          "text": "Pizza Kitchen, Restaurant, grid 15, 8",
+          "width": 52.6,
+          "height": 18.3
+        },
+        {
+          "selector": "g",
+          "text": "Kebab Kitchen, Restaurant, grid 28, 28",
+          "width": 54.6,
+          "height": 18.3
+        },
+        {
+          "selector": "g",
+          "text": "Hamburgers Kitchen, Restaurant, grid 3, 19",
+          "width": 69.6,
+          "height": 18.3
+        },
+        {
+          "selector": "g",
+          "text": "Steak frites Kitchen, Restaurant, grid 28, 12",
+          "width": 66.6,
+          "height": 18.3
+        },
+        {
+          "selector": "g",
+          "text": "Sushi Kitchen, Restaurant, grid 8, 5",
+          "width": 51.6,
+          "height": 18.3
+        },
+        {
+          "selector": "g",
+          "text": "Soups Kitchen, Restaurant, grid 24, 23",
+          "width": 53.6,
+          "height": 18.3
+        },
+        {
+          "selector": "g",
+          "text": "Salads Kitchen, Restaurant, grid 9, 27",
+          "width": 55.6,
+          "height": 18.3
+        },
+        {
+          "selector": "g",
+          "text": "North Ingredient Market, Supermarket, grid 3, 3",
+          "width": 77.6,
+          "height": 18.3
+        },
+        {
+          "selector": "g",
+          "text": "Central Ingredient Market, Supermarket, grid 17, 18",
+          "width": 82.6,
+          "height": 18.3
+        },
+        {
+          "selector": "g",
+          "text": "South Ingredient Market, Supermarket, grid 24, 4",
+          "width": 77.6,
+          "height": 18.3
+        }
+      ],
+      "domElements": 2520,
+      "svgButtons": 138,
+      "landmarks": [
+        "#main"
+      ],
+      "navigation": [
+        {
+          "domContentLoadedMs": 54,
+          "loadMs": 113
+        }
+      ],
+      "resources": [
+        {
+          "name": "blueprint",
+          "type": "fetch",
+          "bytes": 477543,
+          "duration": 106
+        },
+        {
+          "name": "supply.js?v=b0be49acdc6e",
+          "type": "script",
+          "bytes": 70404,
+          "duration": 24
+        },
+        {
+          "name": "IBMPlexSans-SemiBold.woff2",
+          "type": "css",
+          "bytes": 67360,
+          "duration": 69
+        },
+        {
+          "name": "IBMPlexSans-Medium.woff2",
+          "type": "css",
+          "bytes": 67040,
+          "duration": 68
+        },
+        {
+          "name": "IBMPlexSans-Regular.woff2",
+          "type": "css",
+          "bytes": 63320,
+          "duration": 64
+        },
+        {
+          "name": "IBMPlexMono-Regular.woff2",
+          "type": "css",
+          "bytes": 49548,
+          "duration": 43
+        },
+        {
+          "name": "supply.css?v=2a81fee96c56",
+          "type": "link",
+          "bytes": 42467,
+          "duration": 16
+        },
+        {
+          "name": "workspace.css?v=5c17fb1a2e19",
+          "type": "link",
+          "bytes": 9012,
+          "duration": 16
+        }
+      ],
+      "widths": [
+        {
+          "viewport": 1440,
+          "document": 1440,
+          "overflow": false
+        },
+        {
+          "viewport": 1280,
+          "document": 1280,
+          "overflow": false
+        },
+        {
+          "viewport": 390,
+          "document": 390,
+          "overflow": false
+        },
+        {
+          "viewport": 320,
+          "document": 320,
+          "overflow": false
+        }
+      ],
+      "menuOpen": {
+        "expanded": "true",
+        "visibleLinks": 7,
+        "outline": "rgb(99, 213, 197) solid 2px"
+      },
+      "menuClosed": {
+        "expanded": "false",
+        "focus": "workspace-menu"
+      },
+      "keyboard": [
+        {
+          "element": "A",
+          "id": "",
+          "text": "Skip to workspace",
+          "outline": "rgb(231, 237, 240) solid 3px",
+          "focusVisible": true
+        },
+        {
+          "element": "A",
+          "id": "",
+          "text": "Bakiano operations home",
+          "outline": "rgb(231, 237, 240) solid 3px",
+          "focusVisible": true
+        },
+        {
+          "element": "BUTTON",
+          "id": "",
+          "text": "Menu",
+          "outline": "rgb(99, 213, 197) solid 2px",
+          "focusVisible": true
+        },
+        {
+          "element": "BUTTON",
+          "id": "supply-operations",
+          "text": "Operations",
+          "outline": "rgb(99, 213, 197) solid 2px",
+          "focusVisible": true
+        },
+        {
+          "element": "BUTTON",
+          "id": "supply-simulation",
+          "text": "Simulation & definitions",
+          "outline": "rgb(99, 213, 197) solid 2px",
+          "focusVisible": true
+        },
+        {
+          "element": "SELECT",
+          "id": "",
+          "text": "All roleshouseholdmarketrestaurant",
+          "outline": "rgb(99, 213, 197) solid 2px",
+          "focusVisible": true
+        },
+        {
+          "element": "SELECT",
+          "id": "",
+          "text": "All statusesready",
+          "outline": "rgb(99, 213, 197) solid 2px",
+          "focusVisible": true
+        },
+        {
+          "element": "INPUT",
+          "id": "",
+          "text": "",
+          "outline": "rgb(99, 213, 197) solid 2px",
+          "focusVisible": true
+        }
+      ],
+      "extra": {
+        "accessibleMapButtons": [
+          {
+            "name": "Pizza Kitchen restaurant-pizza Restaurant · Awaiting a run ready —",
+            "ignored": false
+          },
+          {
+            "name": "Kebab Kitchen restaurant-kebab Restaurant · Awaiting a run ready —",
+            "ignored": false
+          },
+          {
+            "name": "Hamburgers Kitchen restaurant-hamburgers Restaurant · Awaiting a run ready —",
+            "ignored": false
+          },
+          {
+            "name": "Steak frites Kitchen restaurant-steak-frites Restaurant · Awaiting a run ready —",
+            "ignored": false
+          },
+          {
+            "name": "Sushi Kitchen restaurant-sushi Restaurant · Awaiting a run ready —",
+            "ignored": false
+          },
+          {
+            "name": "Soups Kitchen restaurant-soups Restaurant · Awaiting a run ready —",
+            "ignored": false
+          },
+          {
+            "name": "Salads Kitchen restaurant-salads Restaurant · Awaiting a run ready —",
+            "ignored": false
+          },
+          {
+            "name": "North Ingredient Market market-a Supermarket · Awaiting a run ready —",
+            "ignored": false
+          },
+          {
+            "name": "Central Ingredient Market market-b Supermarket · Awaiting a run ready —",
+            "ignored": false
+          },
+          {
+            "name": "South Ingredient Market market-c Supermarket · Awaiting a run ready —",
+            "ignored": false
+          },
+          {
+            "name": "Aster Household 001 customer-001 Household · Awaiting a run ready —",
+            "ignored": false
+          },
+          {
+            "name": "Aster Household 002 customer-002 Household · Awaiting a run ready —",
+            "ignored": false
+          },
+          {
+            "name": "Aster Household 003 customer-003 Household · Awaiting a run ready —",
+            "ignored": false
+          },
+          {
+            "name": "Aster Household 004 customer-004 Household · Awaiting a run ready —",
+            "ignored": false
+          },
+          {
+            "name": "Aster Household 005 customer-005 Household · Awaiting a run ready —",
+            "ignored": false
+          }
+        ]
+      },
+      "errors": []
+    },
+    {
+      "page": "lab",
+      "route": "/lab",
+      "title": "Inventory operations · Bakiano",
+      "headingSizes": [
+        {
+          "role": "H1",
+          "font": "24px",
+          "text": "Inventory operations"
+        },
+        {
+          "role": "H2",
+          "font": "15px",
+          "text": "Fictional service area"
+        },
+        {
+          "role": "H2",
+          "font": "15px",
+          "text": "Availability by product"
+        },
+        {
+          "role": "H2",
+          "font": "15px",
+          "text": "Inventory agent boundary"
+        },
+        {
+          "role": "H2",
+          "font": "15px",
+          "text": "Basket outcomes"
+        },
+        {
+          "role": "H2",
+          "font": "15px",
+          "text": "Decision evidence"
+        },
+        {
+          "role": "H2",
+          "font": "15px",
+          "text": "Queue and crash recovery"
+        }
+      ],
+      "bodySize": "14px",
+      "contrastCandidates": [],
+      "under24Controls": [],
+      "domElements": 5163,
+      "svgButtons": 12,
+      "landmarks": [
+        "#main"
+      ],
+      "navigation": [
+        {
+          "domContentLoadedMs": 24,
+          "loadMs": 84
+        }
+      ],
+      "resources": [
+        {
+          "name": "state",
+          "type": "fetch",
+          "bytes": 783805,
+          "duration": 67
+        },
+        {
+          "name": "state?run=6ab8067d-69ca-4c7d-88b7-98c455ffe60c",
+          "type": "fetch",
+          "bytes": 783805,
+          "duration": 55
+        },
+        {
+          "name": "state?run=6ab8067d-69ca-4c7d-88b7-98c455ffe60c",
+          "type": "fetch",
+          "bytes": 783805,
+          "duration": 56
+        },
+        {
+          "name": "state?run=6ab8067d-69ca-4c7d-88b7-98c455ffe60c",
+          "type": "fetch",
+          "bytes": 783805,
+          "duration": 53
+        },
+        {
+          "name": "IBMPlexSans-SemiBold.woff2",
+          "type": "css",
+          "bytes": 67360,
+          "duration": 50
+        },
+        {
+          "name": "IBMPlexSans-Medium.woff2",
+          "type": "css",
+          "bytes": 67040,
+          "duration": 50
+        },
+        {
+          "name": "IBMPlexSans-Regular.woff2",
+          "type": "css",
+          "bytes": 63320,
+          "duration": 40
+        },
+        {
+          "name": "IBMPlexMono-Regular.woff2",
+          "type": "css",
+          "bytes": 49548,
+          "duration": 49
+        }
+      ],
+      "widths": [
+        {
+          "viewport": 1440,
+          "document": 1440,
+          "overflow": false
+        },
+        {
+          "viewport": 1280,
+          "document": 1280,
+          "overflow": false
+        },
+        {
+          "viewport": 390,
+          "document": 390,
+          "overflow": false
+        },
+        {
+          "viewport": 320,
+          "document": 320,
+          "overflow": false
+        }
+      ],
+      "menuOpen": {
+        "expanded": "true",
+        "visibleLinks": 7,
+        "outline": "rgb(99, 213, 197) solid 2px"
+      },
+      "menuClosed": {
+        "expanded": "false",
+        "focus": "workspace-menu"
+      },
+      "keyboard": [
+        {
+          "element": "A",
+          "id": "",
+          "text": "Skip to workspace",
+          "outline": "rgb(231, 237, 240) solid 3px",
+          "focusVisible": true
+        },
+        {
+          "element": "A",
+          "id": "",
+          "text": "Bakiano operations home",
+          "outline": "rgb(231, 237, 240) solid 3px",
+          "focusVisible": true
+        },
+        {
+          "element": "BUTTON",
+          "id": "",
+          "text": "Menu",
+          "outline": "rgb(99, 213, 197) solid 2px",
+          "focusVisible": true
+        },
+        {
+          "element": "SELECT",
+          "id": "catalogue",
+          "text": "Offline synthetic products",
+          "outline": "rgb(99, 213, 197) solid 2px",
+          "focusVisible": true
+        },
+        {
+          "element": "INPUT",
+          "id": "seed",
+          "text": "",
+          "outline": "rgb(99, 213, 197) solid 2px",
+          "focusVisible": true
+        },
+        {
+          "element": "BUTTON",
+          "id": "start",
+          "text": "Run last-unit scenario",
+          "outline": "rgb(99, 213, 197) solid 2px",
+          "focusVisible": true
+        },
+        {
+          "element": "SELECT",
+          "id": "checkpoint",
+          "text": "Live / final state",
+          "outline": "rgb(99, 213, 197) solid 2px",
+          "focusVisible": true
+        },
+        {
+          "element": "g",
+          "id": "",
+          "text": "Inspect North Market",
+          "outline": "rgb(231, 237, 240) solid 3px",
+          "focusVisible": true
+        }
+      ],
+      "extra": {
+        "accessibleMapButtons": [
+          {
+            "name": "Inspect North Market",
+            "ignored": false
+          },
+          {
+            "name": "Inspect Bridge Market",
+            "ignored": false
+          },
+          {
+            "name": "Inspect South Market",
+            "ignored": false
+          },
+          {
+            "name": "Inspect West Market",
+            "ignored": false
+          },
+          {
+            "name": "Inspect Central Market",
+            "ignored": false
+          },
+          {
+            "name": "Inspect East Market",
+            "ignored": false
+          },
+          {
+            "name": "Inspect Home Goods",
+            "ignored": false
+          },
+          {
+            "name": "Inspect Electronics",
+            "ignored": false
+          },
+          {
+            "name": "Inspect Everyday Supplies",
+            "ignored": false
+          },
+          {
+            "name": "Inspect North Hygiene Shop",
+            "ignored": false
+          },
+          {
+            "name": "Inspect Central Hygiene Shop",
+            "ignored": false
+          },
+          {
+            "name": "Inspect South Hygiene Shop",
+            "ignored": false
+          }
+        ]
+      },
+      "errors": []
+    },
+    {
+      "page": "health",
+      "route": "/health",
+      "title": "Health & evaluations · Bakiano",
+      "headingSizes": [
+        {
+          "role": "H1",
+          "font": "20px",
+          "text": "Health & evaluations"
+        },
+        {
+          "role": "H2",
+          "font": "12px",
+          "text": "Test categories"
+        }
+      ],
+      "bodySize": "14px",
+      "contrastCandidates": [],
+      "under24Controls": [],
+      "domElements": 7361,
+      "svgButtons": 0,
+      "landmarks": [
+        "#main"
+      ],
+      "navigation": [
+        {
+          "domContentLoadedMs": 35,
+          "loadMs": 78
+        }
+      ],
+      "resources": [
+        {
+          "name": "evidence",
+          "type": "fetch",
+          "bytes": 266341,
+          "duration": 435
+        },
+        {
+          "name": "IBMPlexSans-SemiBold.woff2",
+          "type": "css",
+          "bytes": 67360,
+          "duration": 30
+        },
+        {
+          "name": "IBMPlexSans-Medium.woff2",
+          "type": "css",
+          "bytes": 67040,
+          "duration": 31
+        },
+        {
+          "name": "IBMPlexSans-Regular.woff2",
+          "type": "css",
+          "bytes": 63320,
+          "duration": 30
+        },
+        {
+          "name": "IBMPlexMono-Regular.woff2",
+          "type": "css",
+          "bytes": 49548,
+          "duration": 29
+        },
+        {
+          "name": "health.js?v=1a913ecdfe18",
+          "type": "script",
+          "bytes": 30843,
+          "duration": 16
+        },
+        {
+          "name": "health.css?v=d7935c2c1ed9",
+          "type": "link",
+          "bytes": 26960,
+          "duration": 13
+        },
+        {
+          "name": "workspace.css?v=5c17fb1a2e19",
+          "type": "link",
+          "bytes": 9012,
+          "duration": 13
+        }
+      ],
+      "widths": [
+        {
+          "viewport": 1440,
+          "document": 1440,
+          "overflow": false
+        },
+        {
+          "viewport": 1280,
+          "document": 1280,
+          "overflow": false
+        },
+        {
+          "viewport": 390,
+          "document": 390,
+          "overflow": false
+        },
+        {
+          "viewport": 320,
+          "document": 320,
+          "overflow": false
+        }
+      ],
+      "menuOpen": {
+        "expanded": "true",
+        "visibleLinks": 7,
+        "outline": "rgb(99, 213, 197) solid 2px"
+      },
+      "menuClosed": {
+        "expanded": "false",
+        "focus": "workspace-menu"
+      },
+      "keyboard": [
+        {
+          "element": "A",
+          "id": "",
+          "text": "Skip to workspace",
+          "outline": "rgb(231, 237, 240) solid 3px",
+          "focusVisible": true
+        },
+        {
+          "element": "A",
+          "id": "",
+          "text": "Bakiano operations home",
+          "outline": "rgb(231, 237, 240) solid 3px",
+          "focusVisible": true
+        },
+        {
+          "element": "BUTTON",
+          "id": "",
+          "text": "Menu",
+          "outline": "rgb(99, 213, 197) solid 2px",
+          "focusVisible": true
+        },
+        {
+          "element": "BUTTON",
+          "id": "copy-command",
+          "text": "Copy check command",
+          "outline": "rgb(99, 213, 197) solid 2px",
+          "focusVisible": true
+        },
+        {
+          "element": "BUTTON",
+          "id": "refresh",
+          "text": "Refresh results",
+          "outline": "rgb(99, 213, 197) solid 2px",
+          "focusVisible": true
+        },
+        {
+          "element": "BUTTON",
+          "id": "tests-tab",
+          "text": "Test catalogue",
+          "outline": "rgb(99, 213, 197) solid 2px",
+          "focusVisible": true
+        },
+        {
+          "element": "BUTTON",
+          "id": "",
+          "text": "All tests565/56546 files · Every collected case, including parameters",
+          "outline": "rgb(99, 213, 197) solid 2px",
+          "focusVisible": true
+        },
+        {
+          "element": "BUTTON",
+          "id": "",
+          "text": "ADK restaurant agents80/804 files · Google ADK tool loop, SOUL fixture",
+          "outline": "rgb(99, 213, 197) solid 2px",
+          "focusVisible": true
+        }
+      ],
+      "extra": {
+        "tabArrow": {
+          "active": "evals-tab",
+          "selected": "true",
+          "evalsVisible": true
+        }
+      },
+      "errors": []
+    },
+    {
+      "page": "agent-traces",
+      "route": "/agent-traces",
+      "title": "Agent evidence · Bakiano",
+      "headingSizes": [
+        {
+          "role": "H1",
+          "font": "22px",
+          "text": "Agent traces"
+        },
+        {
+          "role": "H2",
+          "font": "17px",
+          "text": "Decision timeline"
+        },
+        {
+          "role": "H3",
+          "font": "17px",
+          "text": "Follow an agent’s decisions"
+        },
+        {
+          "role": "H2",
+          "font": "17px",
+          "text": "Tool contracts and direct Jev"
+        },
+        {
+          "role": "H2",
+          "font": "17px",
+          "text": "Jev-first routing comparison"
+        },
+        {
+          "role": "H2",
+          "font": "17px",
+          "text": "SOUL comparison"
+        }
+      ],
+      "bodySize": "14px",
+      "contrastCandidates": [],
+      "under24Controls": [],
+      "domElements": 81,
+      "svgButtons": 0,
+      "landmarks": [
+        "#main"
+      ],
+      "navigation": [
+        {
+          "domContentLoadedMs": 32,
+          "loadMs": 61
+        }
+      ],
+      "resources": [
+        {
+          "name": "IBMPlexSans-SemiBold.woff2",
+          "type": "css",
+          "bytes": 67360,
+          "duration": 21
+        },
+        {
+          "name": "IBMPlexSans-Medium.woff2",
+          "type": "css",
+          "bytes": 67040,
+          "duration": 20
+        },
+        {
+          "name": "IBMPlexSans-Regular.woff2",
+          "type": "css",
+          "bytes": 63320,
+          "duration": 23
+        },
+        {
+          "name": "agent-traces.js?v=230bbd598b56",
+          "type": "script",
+          "bytes": 30746,
+          "duration": 18
+        },
+        {
+          "name": "workspace.css?v=5c17fb1a2e19",
+          "type": "link",
+          "bytes": 9012,
+          "duration": 17
+        },
+        {
+          "name": "agent-traces.css?v=a28e740a0007",
+          "type": "link",
+          "bytes": 5948,
+          "duration": 17
+        },
+        {
+          "name": "workspace.js?v=41d867270659",
+          "type": "script",
+          "bytes": 3244,
+          "duration": 19
+        },
+        {
+          "name": "tokens.css?v=41baf92f749f",
+          "type": "link",
+          "bytes": 1797,
+          "duration": 15
+        }
+      ],
+      "widths": [
+        {
+          "viewport": 1440,
+          "document": 1440,
+          "overflow": false
+        },
+        {
+          "viewport": 1280,
+          "document": 1280,
+          "overflow": false
+        },
+        {
+          "viewport": 390,
+          "document": 390,
+          "overflow": false
+        },
+        {
+          "viewport": 320,
+          "document": 320,
+          "overflow": false
+        }
+      ],
+      "menuOpen": {
+        "expanded": "true",
+        "visibleLinks": 7,
+        "outline": "rgb(99, 213, 197) solid 2px"
+      },
+      "menuClosed": {
+        "expanded": "false",
+        "focus": "workspace-menu"
+      },
+      "keyboard": [
+        {
+          "element": "A",
+          "id": "",
+          "text": "Skip to workspace",
+          "outline": "rgb(231, 237, 240) solid 3px",
+          "focusVisible": true
+        },
+        {
+          "element": "A",
+          "id": "",
+          "text": "Bakiano operations home",
+          "outline": "rgb(231, 237, 240) solid 3px",
+          "focusVisible": true
+        },
+        {
+          "element": "BUTTON",
+          "id": "",
+          "text": "Menu",
+          "outline": "rgb(99, 213, 197) solid 2px",
+          "focusVisible": true
+        },
+        {
+          "element": "BUTTON",
+          "id": "refresh",
+          "text": "Refresh evidence",
+          "outline": "rgb(99, 213, 197) solid 2px",
+          "focusVisible": true
+        },
+        {
+          "element": "SELECT",
+          "id": "trace-kind",
+          "text": "All stepsDecisionsTool callsModel calls",
+          "outline": "rgb(99, 213, 197) solid 2px",
+          "focusVisible": true
+        },
+        {
+          "element": "A",
+          "id": "",
+          "text": "Madrid operations",
+          "outline": "rgb(231, 237, 240) solid 3px",
+          "focusVisible": true
+        },
+        {
+          "element": "A",
+          "id": "",
+          "text": "Delivery",
+          "outline": "rgb(231, 237, 240) solid 3px",
+          "focusVisible": true
+        },
+        {
+          "element": "A",
+          "id": "",
+          "text": "Restaurants",
+          "outline": "rgb(231, 237, 240) solid 3px",
+          "focusVisible": true
+        }
+      ],
+      "extra": {},
+      "errors": []
+    },
+    {
+      "page": "documentation",
+      "route": "/architecture",
+      "title": "System overview · Bakiano engineering",
+      "headingSizes": [
+        {
+          "role": "H1",
+          "font": "20px",
+          "text": "System overview"
+        },
+        {
+          "role": "H2",
+          "font": "16px",
+          "text": "From demand to a recorded decision"
+        },
+        {
+          "role": "H2",
+          "font": "16px",
+          "text": "Inspect a component"
+        },
+        {
+          "role": "H3",
+          "font": "16px",
+          "text": "Scoped role workers"
+        },
+        {
+          "role": "H2",
+          "font": "19px",
+          "text": "Three boundaries#"
+        },
+        {
+          "role": "H2",
+          "font": "19px",
+          "text": "What an agent actually is#"
+        },
+        {
+          "role": "H2",
+          "font": "19px",
+          "text": "Follow one household pizza request#"
+        },
+        {
+          "role": "H2",
+          "font": "19px",
+          "text": "Distinct workspaces and reading paths#"
+        }
+      ],
+      "bodySize": "14px",
+      "contrastCandidates": [],
+      "under24Controls": [
+        {
+          "selector": "a",
+          "text": "Inspect local health evidence ↗",
+          "width": 157,
+          "height": 14
+        },
+        {
+          "selector": "a",
+          "text": "capability evidence",
+          "width": 122,
+          "height": 18
+        },
+        {
+          "selector": "a",
+          "text": "exact GCP inventory",
+          "width": 126,
+          "height": 18
+        },
+        {
+          "selector": "a",
+          "text": "agent construction walkthrough",
+          "width": 199,
+          "height": 18
+        },
+        {
+          "selector": "a.source-link",
+          "text": "runtime",
+          "width": 42,
+          "height": 15
+        },
+        {
+          "selector": "a.source-link",
+          "text": "queue",
+          "width": 35,
+          "height": 15
+        },
+        {
+          "selector": "a.source-link",
+          "text": "identity provisioning",
+          "width": 110,
+          "height": 15
+        },
+        {
+          "selector": "a.source-link",
+          "text": "delivery-fact regressions",
+          "width": 134,
+          "height": 15
+        },
+        {
+          "selector": "a",
+          "text": "restaurant workflow",
+          "width": 127,
+          "height": 18
+        },
+        {
+          "selector": "a",
+          "text": "delivery lab",
+          "width": 73,
+          "height": 18
+        },
+        {
+          "selector": "a.source-link",
+          "text": "inventory lab",
+          "width": 70,
+          "height": 15
+        },
+        {
+          "selector": "a",
+          "text": "agent internals",
+          "width": 94,
+          "height": 18
+        },
+        {
+          "selector": "a",
+          "text": "memory",
+          "width": 52,
+          "height": 18
+        },
+        {
+          "selector": "a",
+          "text": "GCP components",
+          "width": 109,
+          "height": 18
+        },
+        {
+          "selector": "a",
+          "text": "decision records",
+          "width": 105,
+          "height": 18
+        },
+        {
+          "selector": "a",
+          "text": "enterprise roadmap",
+          "width": 124,
+          "height": 18
+        }
+      ],
+      "domElements": 307,
+      "svgButtons": 0,
+      "landmarks": [
+        "#reader"
+      ],
+      "navigation": [
+        {
+          "domContentLoadedMs": 41,
+          "loadMs": 72
+        }
+      ],
+      "resources": [
+        {
+          "name": "documentation",
+          "type": "fetch",
+          "bytes": 254996,
+          "duration": 114
+        },
+        {
+          "name": "IBMPlexSans-SemiBold.woff2",
+          "type": "css",
+          "bytes": 67360,
+          "duration": 26
+        },
+        {
+          "name": "IBMPlexSans-Medium.woff2",
+          "type": "css",
+          "bytes": 67040,
+          "duration": 26
+        },
+        {
+          "name": "IBMPlexSans-Regular.woff2",
+          "type": "css",
+          "bytes": 63320,
+          "duration": 8
+        },
+        {
+          "name": "IBMPlexMono-Regular.woff2",
+          "type": "css",
+          "bytes": 49548,
+          "duration": 24
+        },
+        {
+          "name": "marked.umd.js?v=9eb730d2362a",
+          "type": "script",
+          "bytes": 49507,
+          "duration": 20
+        },
+        {
+          "name": "manifest.json",
+          "type": "fetch",
+          "bytes": 37824,
+          "duration": 8
+        },
+        {
+          "name": "purify.min.js?v=cd37898f9782",
+          "type": "script",
+          "bytes": 30128,
+          "duration": 19
+        }
+      ],
+      "widths": [
+        {
+          "viewport": 1440,
+          "document": 1440,
+          "overflow": false
+        },
+        {
+          "viewport": 1280,
+          "document": 1280,
+          "overflow": false
+        },
+        {
+          "viewport": 390,
+          "document": 390,
+          "overflow": false
+        },
+        {
+          "viewport": 320,
+          "document": 320,
+          "overflow": false
+        }
+      ],
+      "menuOpen": {
+        "expanded": "true",
+        "visibleLinks": 7,
+        "outline": "rgb(99, 213, 197) solid 2px"
+      },
+      "menuClosed": {
+        "expanded": "false",
+        "focus": "workspace-menu"
+      },
+      "keyboard": [
+        {
+          "element": "A",
+          "id": "",
+          "text": "Skip to workspace",
+          "outline": "rgb(231, 237, 240) solid 3px",
+          "focusVisible": true
+        },
+        {
+          "element": "A",
+          "id": "",
+          "text": "Bakiano operations home",
+          "outline": "rgb(231, 237, 240) solid 3px",
+          "focusVisible": true
+        },
+        {
+          "element": "BUTTON",
+          "id": "open-search",
+          "text": "Search chaptersCtrl K",
+          "outline": "rgb(99, 213, 197) solid 2px",
+          "focusVisible": true
+        },
+        {
+          "element": "BUTTON",
+          "id": "",
+          "text": "Menu",
+          "outline": "rgb(99, 213, 197) solid 2px",
+          "focusVisible": true
+        },
+        {
+          "element": "BUTTON",
+          "id": "toggle-topics",
+          "text": "Topics",
+          "outline": "rgb(99, 213, 197) solid 2px",
+          "focusVisible": true
+        },
+        {
+          "element": "BUTTON",
+          "id": "copy-link",
+          "text": "Copy link",
+          "outline": "rgb(99, 213, 197) solid 2px",
+          "focusVisible": true
+        },
+        {
+          "element": "BUTTON",
+          "id": "print-page",
+          "text": "Print",
+          "outline": "rgb(99, 213, 197) solid 2px",
+          "focusVisible": true
+        },
+        {
+          "element": "A",
+          "id": "markdown-link",
+          "text": "View Markdown",
+          "outline": "rgb(168, 183, 192) solid 3px",
+          "focusVisible": true
+        }
+      ],
+      "extra": {
+        "search": {
+          "dialog": true,
+          "focus": "search-input"
+        },
+        "searchClosed": {
+          "dialog": false,
+          "focus": ""
+        }
+      },
+      "errors": []
+    },
+    {
+      "page": "madrid",
+      "route": "/",
+      "title": "Madrid operations · Bakiano",
+      "headingSizes": [
+        {
+          "role": "H1",
+          "font": "24px",
+          "text": "Madrid operations"
+        },
+        {
+          "role": "H2",
+          "font": "15px",
+          "text": "Agents 18"
+        },
+        {
+          "role": "H2",
+          "font": "15px",
+          "text": "Network map"
+        },
+        {
+          "role": "H2",
+          "font": "15px",
+          "text": "Orders"
+        }
+      ],
+      "bodySize": "14px",
+      "contrastCandidates": [],
+      "under24Controls": [
+        {
+          "selector": "div.leaflet-marker-icon.hub-marker.leaflet-zoom-animated.leaflet-interactive",
+          "text": "Chamberí",
+          "width": 58,
+          "height": 21
+        },
+        {
+          "selector": "div.leaflet-marker-icon.hub-marker.leaflet-zoom-animated.leaflet-interactive",
+          "text": "Retiro",
+          "width": 42,
+          "height": 21
+        },
+        {
+          "selector": "div.leaflet-marker-icon.hub-marker.leaflet-zoom-animated.leaflet-interactive",
+          "text": "Puente de Vallecas",
+          "width": 98,
+          "height": 21
+        },
+        {
+          "selector": "a",
+          "text": "Leaflet",
+          "width": 42,
+          "height": 13
+        },
+        {
+          "selector": "a",
+          "text": "© OpenStreetMap contributors",
+          "width": 142,
+          "height": 13
+        },
+        {
+          "selector": "#show-stores",
+          "text": "",
+          "width": 13,
+          "height": 13
+        },
+        {
+          "selector": "#show-complete",
+          "text": "",
+          "width": 13,
+          "height": 13
+        }
+      ],
+      "domElements": 1087,
+      "svgButtons": 0,
+      "landmarks": [
+        "#main"
+      ],
+      "navigation": [
+        {
+          "domContentLoadedMs": 63,
+          "loadMs": 381
+        }
+      ],
+      "resources": [
+        {
+          "name": "roads",
+          "type": "fetch",
+          "bytes": 2751999,
+          "duration": 316
+        },
+        {
+          "name": "leaflet.js?v=db49d009c841",
+          "type": "script",
+          "bytes": 147852,
+          "duration": 20
+        },
+        {
+          "name": "state",
+          "type": "fetch",
+          "bytes": 68025,
+          "duration": 28
+        },
+        {
+          "name": "state",
+          "type": "fetch",
+          "bytes": 68025,
+          "duration": 32
+        },
+        {
+          "name": "IBMPlexSans-SemiBold.woff2",
+          "type": "css",
+          "bytes": 67360,
+          "duration": 332
+        },
+        {
+          "name": "IBMPlexSans-Medium.woff2",
+          "type": "css",
+          "bytes": 67040,
+          "duration": 329
+        },
+        {
+          "name": "IBMPlexSans-Regular.woff2",
+          "type": "css",
+          "bytes": 63320,
+          "duration": 324
+        },
+        {
+          "name": "IBMPlexMono-Regular.woff2",
+          "type": "css",
+          "bytes": 49548,
+          "duration": 13
+        }
+      ],
+      "widths": [
+        {
+          "viewport": 1440,
+          "document": 1440,
+          "overflow": false
+        },
+        {
+          "viewport": 1280,
+          "document": 1280,
+          "overflow": false
+        },
+        {
+          "viewport": 390,
+          "document": 390,
+          "overflow": false
+        },
+        {
+          "viewport": 320,
+          "document": 320,
+          "overflow": false
+        }
+      ],
+      "menuOpen": {
+        "expanded": "true",
+        "visibleLinks": 7,
+        "outline": "rgb(99, 213, 197) solid 2px"
+      },
+      "menuClosed": {
+        "expanded": "false",
+        "focus": "workspace-menu"
+      },
+      "keyboard": [
+        {
+          "element": "A",
+          "id": "",
+          "text": "Skip to workspace",
+          "outline": "rgb(231, 237, 240) solid 3px",
+          "focusVisible": true
+        },
+        {
+          "element": "A",
+          "id": "",
+          "text": "Bakiano operations home",
+          "outline": "rgb(231, 237, 240) solid 3px",
+          "focusVisible": true
+        },
+        {
+          "element": "BUTTON",
+          "id": "",
+          "text": "Menu",
+          "outline": "rgb(99, 213, 197) solid 2px",
+          "focusVisible": true
+        },
+        {
+          "element": "BUTTON",
+          "id": "view-operations",
+          "text": "Operations",
+          "outline": "rgb(99, 213, 197) solid 2px",
+          "focusVisible": true
+        },
+        {
+          "element": "BUTTON",
+          "id": "view-simulation",
+          "text": "Simulation & diagnostics",
+          "outline": "rgb(99, 213, 197) solid 2px",
+          "focusVisible": true
+        },
+        {
+          "element": "SELECT",
+          "id": "agent-role",
+          "text": "All couriersBikeMotoVan",
+          "outline": "rgb(99, 213, 197) solid 2px",
+          "focusVisible": true
+        },
+        {
+          "element": "SELECT",
+          "id": "agent-status",
+          "text": "All statusesWorkingAvailableOff shift",
+          "outline": "rgb(99, 213, 197) solid 2px",
+          "focusVisible": true
+        },
+        {
+          "element": "INPUT",
+          "id": "agent-search",
+          "text": "",
+          "outline": "rgb(99, 213, 197) solid 2px",
+          "focusVisible": true
+        }
+      ],
+      "extra": {},
+      "errors": []
+    }
+  ]
+}

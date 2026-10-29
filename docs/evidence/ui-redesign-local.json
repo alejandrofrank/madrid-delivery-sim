@@ -1,0 +1,76 @@
+{
+  "recorded_at": "2026-10-29T17:07:20.947526+00:00",
+  "preview": "http://localhost:8021/",
+  "branch": "feat/ui-redesign",
+  "backend_source_changed": false,
+  "regression": {
+    "id": "eff69912-e379-4709-ad29-62ee07ef5a54",
+    "state": "completed",
+    "scope": "full",
+    "exit_code": 0,
+    "source_fingerprint": "48451f1cd47e3409f42fb2d6be1ad67f957d147d189240ca038a06666a48a4fb",
+    "source_changed": false,
+    "duration_seconds": 375.618366
+  },
+  "counts": {
+    "passed": 565
+  },
+  "earlier_attempt": {
+    "passed": 564,
+    "failed": 1,
+    "failure": "tests/test_agent_queue_boundary.py::test_deadline_is_rechecked_after_waiting_for_event_lock",
+    "targeted_retry": "1 passed in 0.55s",
+    "final_full_retry": "565 passed, 1 existing Starlette deprecation warning in 375.28s",
+    "source_changes_between_attempts": false
+  },
+  "checks": {
+    "ruff": "passed src tests",
+    "mypy": "passed 49 source files",
+    "documentation": "20 chapters, 83 sources",
+    "diagrams": "8 verified",
+    "asset_versions": "7 verified",
+    "browser_interaction_groups": 6,
+    "capture_checks": 21,
+    "capture_errors": 0
+  },
+  "screenshots": {
+    "agent-traces-desktop.png": "824b1552760d6e9266be303f737c0fe3a584f9ed99c26017807bf9888e90dad5",
+    "agent-traces-laptop.png": "b5ce6ba5f3296b670c925824ef99cca702f828fdd197b0ef8315024ee8635a84",
+    "agent-traces-mobile.png": "0758f9937edbad3b8dd855ab1f0572df3664b964a1d4b26191c5446a88edc138",
+    "agent-traces-viewport.png": "4fe31f7b106bb8369705c61bdb43217ff91b5b3c5868f42fc19aae9816ae9267",
+    "documentation-desktop.png": "e7c2dd152929f767498d3574256bccd1614cf7f1bc74b2162b1365d14aecf3dc",
+    "documentation-laptop.png": "1ba43ef4bc487546fe322e10f1f0d0f47aa95e03c371e72c04ef5ee170e26642",
+    "documentation-mobile.png": "c6e9be8c7de7ff1cb78559c5fa8543845834ef03d183abeeb4c9f6b67d5e3abe",
+    "documentation-viewport.png": "da4919bffcb7d14b044b89937318babafc5d53452d412b767c3da8251aed6770",
+    "flow-desktop.png": "d968c83b516da5b1cd3f09ee467b43894e4c2494d643113548936ee10294e641",
+    "flow-laptop.png": "a4b8e0c3333be470a73c4e6816829a37c5f5db0436b0ebf21ce40c824f6b5e09",
+    "flow-mobile.png": "d984432ee9d412169eda7162ffad4ef884df969437763569c16cbb4162a4dae7",
+    "flow-viewport.png": "f0748aee9d6febcdf19419158316fe8a23f5386f0cbe8d591bcf9bdbcb36c0b7",
+    "health-desktop.png": "2fa3257b854fb195c12f3c06624063313d6e3ff6de12c642cb559e7b19cc9e45",
+    "health-laptop.png": "2808d8861ef616d2a7de937fc12762de9fbf98ce9b5107692da74caf47ca7658",
+    "health-mobile.png": "7add8415a5cc8fb40f348316bd9dffbc7856d7ce95debde48daacdab9970df16",
+    "health-viewport.png": "011fc0577dbdb0f27828352c551fcacaf736fc3a7d291b7dc4cce9fcc9c79634",
+    "lab-desktop.png": "12d3ae6bbdcd40aabc292d3137dfaaf0160622b691130119d48815d8f99f0a55",
+    "lab-laptop.png": "da2034c4461d2928441e7f150b9a400b799c677dcca59363f839c4db6144d8b7",
+    "lab-mobile.png": "df0677de7d8eefbcac6f4749afeb7a25512131ad47f77ab7746ed9c3460ec57e",
+    "lab-viewport.png": "4e012a14a65b727baff5a3f5096b8a656c1b3a09fc2cbc217e6989689acab627",
+    "madrid-desktop.png": "5ef6aceb5bc3f707e1c5a682efa915295b758de9d257cede359ae23330f50aae",
+    "madrid-laptop.png": "0c0c9f5c1dbb0606871bf36ba224f9cb106421e357e7c2591a61f76d4f5886b9",
+    "madrid-mobile.png": "aae7ffe06ebcb5bb91db850c94cf66bcbbb2f5ffeae377349de04279e0ad0cb3",
+    "madrid-viewport.png": "f2efa5d534dba145ff1cd08f41a32ce81b7f0e96d6d0179fd43078fb137de5d1",
+    "supply-desktop.png": "fa531b6c1249fe07545ba08efe0ba7768df502658452b3ce9c2129a4da88b8a7",
+    "supply-laptop.png": "dd911e82d2057cd96a8383267cff63e091e8c33745daf39e82a71716f6911864",
+    "supply-mobile.png": "6788f7c94e78c1c5724550a91620ec4b32cc0324710fbdb80120c7a122306e60",
+    "supply-viewport.png": "0ca30c375d57ddc6f912ccf2325f712de801720f03dabf5864e8ac164efc4b6d"
+  },
+  "review": {
+    "report": "../media/after/final-review.md",
+    "verdict": "../media/after/verdict-pass.md",
+    "disposition": "ship for seven scored corrections",
+    "remaining_P0": 0,
+    "remaining_original_P1": 0,
+    "comp_gate": "unpassed",
+    "comp_score": 0.578,
+    "workflow_phase": "plates open"
+  }
+}

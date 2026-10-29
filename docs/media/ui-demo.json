@@ -1,0 +1,14 @@
+{
+  "capturedAt": "2026-10-29T16:55:28.059Z",
+  "source": "Actual running local UI, deterministic simulation, no paid calls",
+  "frames": 48,
+  "durationMs": 8524,
+  "viewport": {
+    "width": 1440,
+    "height": 960
+  },
+  "encodedFrameMs": 180,
+  "width": 1080,
+  "height": 720,
+  "loops": 2
+}

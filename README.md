@@ -1,6 +1,13 @@
-﻿# Madrid Delivery Sim
+# Madrid Delivery Sim
 
 A local operations lab for queue-driven delivery agents, with a Madrid baseline and a fictional-city inventory lab. Default demos use local databases and make no provider calls. An optional IAM-authenticated GCP recovery judge deploys through a separate Terraform root; the simulation stays local. The last live lifecycle check on October 25, 2026 found the restored project retained, billing disabled and demo runtime removed. Routine shutdown keeps the project and IAM; use the status command for a later session's live state.
+
+![Live agent operations](docs/media/ui-demo.gif)
+
+The redesigned console is integrated across seven workspaces. In the isolated UI
+worktree, run `docker compose -p mds-ui -f compose.yaml -f compose.ui.yaml up -d --build`
+and open **[localhost:8021](http://localhost:8021/)**. Port 8010 remains the original
+checkout. [Before/after, verification and limits](docs/UI-REDESIGN.md).
 
 The city runs locally. Enable the optional paid judge only for agent tests:
 
@@ -15,12 +22,12 @@ project and free IAM. [Setup and cost boundaries](docs/GCP-AI.md).
 
 ## Agent architecture and GCP client documentation
 
-All six local workspaces share navigation, visual tokens, controls and mobile
+All seven local workspaces share navigation, visual tokens, controls and mobile
 behaviour. The [shared design contract](docs/DESIGN-SYSTEM.md) records the design
 sources, diagram conventions and content-versioning workflow for future changes.
 
 Open the local [Architecture website](http://localhost:8010/architecture) for a
-searchable, nineteen-chapter engineering reference. It includes an interactive
+searchable, twenty-chapter engineering reference. It includes an interactive
 component explorer, rendered diagrams, architecture decision records, the six
 capability evidence map and an allowlisted local code reader. Diagrams and search
 work without external services. The existing `/docs` remains the API reference.
@@ -31,9 +38,10 @@ The newer [durable inference verification record](docs/evidence/durable-inferenc
 retains 442 passing tests, physical worker crash recovery, repeatable scenarios
 and the seven tool-generated diagrams. Read the
 [request/result protocol](docs/DURABLE-INFERENCE.md) for retry and isolation guarantees.
-The latest [shared UI verification record](docs/evidence/shared-ui-local.json)
+The earlier [shared UI verification record](docs/evidence/shared-ui-local.json)
 records the six workspace layouts, eight diagrams, desktop/mobile checks and
-current 442-test regression evidence.
+its 442-test regression evidence. The current redesign evidence and seven-page
+comparison are in the [UI redesign record](docs/UI-REDESIGN.md).
 
 | Read in order | What it explains |
 | --- | --- |
@@ -50,7 +58,7 @@ reading them requires no cloud deployment or paid inference.
 
 Milestone 1 includes 18 bike, moto, and van couriers across Chamberí, Retiro, and Puente de Vallecas; 24 real OSM pickup locations; 180 synthetic customers; and a seeded 10:00 to 22:00 service day. The map renders cached street geometry with no tile API key or external map requests.
 
-![Local operations interface](docs/demo.png)
+
 
 ## Run locally
 
@@ -77,14 +85,14 @@ nodes and 360 directed road segments. Five inventory identities share one local
 agent implementation, with enforced per-store database access, private memory,
 frozen role/soul definitions and durable budgets. See [agent foundation](docs/AGENT-FOUNDATION.md).
 
-```sh
+```bash
 docker compose exec -T app delivery lab-demo
 ```
 
 The default five-product fixture is entirely synthetic. To import a local Bakiano
 collector CSV with verified USD prices (not raw mislabeled bolivares):
 
-```sh
+```bash
 delivery import-catalogue PATH_TO_EXPORT.csv artifacts/daka-snapshot.json --source daka --domain retail --confirmed-usd --limit 10
 delivery lab-demo --catalogue artifacts/daka-snapshot.json
 ```
@@ -124,7 +132,7 @@ routing](docs/ADK-RESTAURANT.md), [memory profiles](docs/AGENT-MEMORY.md), and
 
 The fixed fleet recovery regression remains available from the CLI:
 
-```sh
+```bash
 docker compose exec -T app delivery delivery-demo
 ```
 
@@ -138,7 +146,7 @@ observations for October 14-22 from Gama, Central Madeirense, Plazas, Daka and E
 October 23 had no observations at extraction time and stays explicitly missing.
 Choose a date in the lab, or run:
 
-```sh
+```bash
 docker compose exec -T app delivery lab-demo --sample-date 2026-10-22
 ```
 
@@ -148,7 +156,7 @@ the private package. See [local dataset policy and acquisition](docs/LOCAL-DATA.
 
 Requires Docker with Compose v2.24+ and GNU Make. On Windows, run Make from WSL with Docker Desktop integration enabled. Docker supplies Python and all application dependencies. Ports bind only to localhost: app **8010**, Postgres **55432**, Redis **56379**.
 
-```sh
+```bash
 make demo
 ```
 
@@ -156,7 +164,7 @@ This builds the image, starts healthy PostGIS and Redis services, seeds the city
 
 The checked-in OSM snapshot makes ordinary startup independent of Overpass. Initial Docker builds require internet access. No credentials are required to run: without a configured LLM, complaints are visibly escalated with source `disabled`.
 
-```sh
+```bash
 make setup                                  # stack and UI, no new simulation
 docker compose exec -T app delivery demo --wall-seconds 0  # as fast as possible
 make test                                   # real Postgres integration tests
@@ -237,7 +245,7 @@ Postgres is authoritative. Agent messages use the durable queue exclusively; rea
 
 Inspect `/api/state`, `/api/runs`, and `/api/runs/<uuid>/trace?order=ORDER_ID`. Selections show recorded policies, route estimates, transitions, and replies. These are auditable decision records, not private model reasoning. Queue rows retain event lineage and order correlation IDs.
 
-```sh
+```bash
 docker compose exec postgres psql -U delivery -d delivery -c \
   "select id, topic, attempts, error from dead_letters;"
 docker compose exec -T app delivery replay EVENT_ID
@@ -258,7 +266,7 @@ On-time percentage uses delivered orders as its denominator. Unserved, active, p
 
 Python 3.12 or 3.13 is supported. Dependencies are pinned in `requirements.lock`. Explicitly target a virtual environment for host development:
 
-```sh
+```bash
 python3.12 -m venv .venv
 .venv/bin/python -m pip install -r requirements.lock
 .venv/bin/python -m pip install --no-deps -e .
