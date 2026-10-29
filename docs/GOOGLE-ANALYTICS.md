@@ -70,6 +70,8 @@ Suggested controls are `run_date`, `profile`, `scenario`, and `variant`. Add del
 
 Stop uploads by clearing `DELIVERY_BIGQUERY_ENABLED`. To return to no analytics storage, explicitly remove this disposable dataset while billing is still linked:
 
+`gcp_demo.py status` lists `analytics_in_state` and `telemetry_in_state`; retained optional components are never reported as fully parked. `stop` checks these resources before restarting the app or changing cloud resources and gives cleanup instructions if any remain. Once cleanup is complete, its parking plans explicitly keep both optional flags false so stale opt-in settings cannot recreate them.
+
 ```bash
 unset DELIVERY_BIGQUERY_ENABLED
 terraform -chdir=infra/gcp-ai plan \
