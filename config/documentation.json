@@ -115,6 +115,14 @@
       "status": "Implemented"
     },
     {
+      "id": "dispatch-optimization",
+      "title": "Street dispatch & economics",
+      "group": "City & workflows",
+      "file": "docs/DISPATCH-OPTIMIZATION.md",
+      "summary": "Batch matching, empty travel costs, drop-off continuity and measured alternatives.",
+      "status": "Local / reproducible"
+    },
+    {
       "id": "gcp-components",
       "title": "GCP component inventory",
       "group": "Google Cloud",
@@ -215,6 +223,7 @@
     "config/agents/restaurant-adk/SOUL-speed.md",
     "config/otel-collector-gcp.yaml",
     "docs/evidence/agent-scenarios-local.json",
+    "docs/evidence/dispatch-comparison.json",
     "docs/evidence/gcp-demo-commands.json",
     "docs/evidence/gcp-iam-recovered.json",
     "docs/evidence/gcp-judge-guarded.json",
@@ -238,6 +247,7 @@
     "infra/gcp-ai/tests/bigquery.tftest.hcl",
     "infra/gcp-ai/tests/telemetry.tftest.hcl",
     "infra/gcp-ai/variables.tf",
+    "scripts/benchmark_dispatch.py",
     "scripts/call_a2a.py",
     "scripts/compare_agent_routing.py",
     "scripts/demo_adk_vertex.py",
@@ -257,6 +267,7 @@
     "sql/migrations/024_agent_memory_modes.sql",
     "sql/migrations/025_adk_contract_corrections.sql",
     "sql/migrations/026_telemetry_context.sql",
+    "sql/migrations/027_economic_dispatch.sql",
     "sql/migrations/027_unified_order_telemetry.sql",
     "src/delivery/a2a_server.py",
     "src/delivery/adk_contracts.py",
@@ -268,9 +279,13 @@
     "src/delivery/agent_access.py",
     "src/delivery/agent_runtime.py",
     "src/delivery/agent_specs.py",
+    "src/delivery/agents.py",
     "src/delivery/bigquery_export.py",
     "src/delivery/cloud_ai.py",
     "src/delivery/customer_service.py",
+    "src/delivery/dispatch_optimizer.py",
+    "src/delivery/dispatch_policy.py",
+    "src/delivery/dispatch_reposition.py",
     "src/delivery/durable_inference.py",
     "src/delivery/fleet_policy.py",
     "src/delivery/health.py",
@@ -280,6 +295,7 @@
     "src/delivery/running_city.py",
     "src/delivery/scenario_evals.py",
     "src/delivery/scenario_report.py",
+    "src/delivery/simulation.py",
     "src/delivery/supply.py",
     "src/delivery/supply_api.py",
     "src/delivery/supply_models.py",
@@ -288,6 +304,8 @@
     "src/delivery/telemetry.py",
     "src/delivery/telemetry_api.py",
     "src/delivery/typed_memory.py",
+    "src/delivery/workflow_policy.py",
+    "src/delivery/world.py",
     "tests/test_a2a_server.py",
     "tests/test_adk_customer.py",
     "tests/test_adk_evidence.py",
@@ -298,6 +316,8 @@
     "tests/test_cloud_ai.py",
     "tests/test_cloud_runtime.py",
     "tests/test_delivery_flow.py",
+    "tests/test_dispatch_optimizer.py",
+    "tests/test_economic_dispatch.py",
     "tests/test_fleet_recovery.py",
     "tests/test_gateway_policy.py",
     "tests/test_gcp_demo_commands.py",
@@ -313,6 +333,7 @@
     "tests/test_supply_models.py",
     "tests/test_supply_search_service.py",
     "tests/test_telemetry.py",
-    "tests/test_typed_memory.py"
+    "tests/test_typed_memory.py",
+    "tests/test_workflow_dispatch.py"
   ]
 }

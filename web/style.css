@@ -15,6 +15,12 @@ label{display:flex;flex-direction:column;gap:6px;font-size:12px;color:var(--ui-m
 .simulation-intro p{margin:6px 0 0;color:var(--ui-muted)}#simulation-panel{padding:16px}
 .diagnostic-metrics{display:grid;grid-template-columns:repeat(3,1fr);gap:24px;margin:24px 0}.diagnostic-metrics strong{display:block;font:24px var(--ui-mono);margin:8px 0}
 .diagnostic-metrics p,.diagnostic-metrics span,.run-info{color:var(--ui-muted);font-size:13px}
+.operating-summary{display:flex;align-items:baseline;flex-wrap:wrap;gap:8px 24px;padding:12px 0;color:var(--ui-muted);font-size:12px;line-height:1.6}
+.operating-summary strong{margin-left:4px;color:var(--ui-ink);font-weight:600;font-variant-numeric:tabular-nums}
+.policy-evidence{min-width:0;flex:1 1 300px}.policy-evidence summary{cursor:pointer}
+.policy-evidence pre{max-width:100%;overflow:auto;padding:12px;margin:8px 0 0;border:1px solid var(--ui-line);background:var(--ui-bg);font-size:12px}
+.courier-facts{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px 24px;margin:0;padding:16px;border-bottom:1px solid var(--ui-line);font-size:12px;line-height:1.5}
+.courier-facts[hidden]{display:none}.courier-facts dt{color:var(--ui-muted)}.courier-facts dd{margin:4px 0 0;font-variant-numeric:tabular-nums;overflow-wrap:anywhere}
 .kpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));margin:0 0 8px;border:1px solid var(--ui-line);border-radius:5px;background:var(--ui-bg);min-height:80px}
 .kpis article{position:relative;min-width:0;padding:10px 20px;border-right:1px solid var(--ui-line)}.kpis article:last-child{border-right:0}
 .kpis article>span{font-size:12px;color:var(--ui-muted)}.kpis strong{display:block;font:500 23px/1.2 var(--ui-font);font-variant-numeric:tabular-nums;margin:2px 0}.kpis small{font-size:14px;color:var(--ui-muted);font-weight:400}.kpis p{font-size:11px;color:var(--ui-muted);margin:0}
@@ -45,7 +51,7 @@ label{display:flex;flex-direction:column;gap:6px;font-size:12px;color:var(--ui-m
 .ledger .status-pill{inline-size:104px;justify-content:center}.badge{border-radius:4px;padding:3px 7px}
 .status-pill.working,.status-pill.delivered,.badge.running{background:#0b3537;color:#54e3d7;border-color:#15766f}
 .status-pill.late,.status-pill.unserved{background:#38232c;color:var(--ui-negative);border-color:#71444c}
-.status-pill.to_pickup,.status-pill.returning,.status-pill.assigned{color:#8dccff;background:#102d43;border-color:#2e658f}
+.status-pill.to_pickup,.status-pill.returning,.status-pill.repositioning,.status-pill.assigned{color:#8dccff;background:#102d43;border-color:#2e658f}
 .roster-footnote{display:flex;justify-content:space-between;gap:8px;padding:6px 12px;font-size:10px;color:var(--ui-faint);border-top:1px solid var(--ui-line)}
 #history-scope{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;text-align:right}
 .map-panel{position:relative;height:var(--ops-height);background:#14212e}

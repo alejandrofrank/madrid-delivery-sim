@@ -14,7 +14,9 @@ L.control.scale({imperial:false,position:"bottomleft",maxWidth:90}).addTo(map);
 const roads = L.layerGroup().addTo(map), hubs = L.layerGroup().addTo(map);
 const stores = L.layerGroup().addTo(map), ordersLayer = L.layerGroup().addTo(map);
 const courierMarkers = new Map();
-let routeLine = null, state = null, selected = null, runId = new URLSearchParams(location.search).get("run") || "", lastPacket = 0, traceRows = [];
+const {createDisplayClock, courierPosition} = CourierMotion;
+const displayClock = createDisplayClock();
+let state = null, selected = null, runId = new URLSearchParams(location.search).get("run") || "", traceRows = [];
 let tab = "decisions", busy = false, pollCount = 0, traceBusy = false;
 const narrowMap = matchMedia("(max-width:850px)");
 document.querySelector(".map-key").open = !narrowMap.matches;
@@ -77,7 +79,7 @@ $("open-agent-details").onclick=()=>{
   if(open)$("agent-details").scrollIntoView({behavior:reducedMotion.matches?"instant":"smooth",block:"nearest"});
 };
 map.on("zoomend",()=>{if(state?.run)renderCouriers();});
-function agentStatus(c){return ["to_pickup","delivering","returning"].includes(c.status)?"working":c.status==="off_shift"?"off_shift":"idle";}
+function agentStatus(c){return ["to_pickup","delivering","returning","repositioning"].includes(c.status)?"working":c.status==="off_shift"?"off_shift":"idle";}
 function deliveryCount(id){return state.orders.filter(o=>o.courier===id&&o.status==="delivered").length;}
 function observeMetrics(){
  const run=state.run;
@@ -88,7 +90,7 @@ function observeMetrics(){
  if(observations.length>40)observations.shift();
  for(const key of ["orders","ontime","cost","rate"])$("chart-"+key).innerHTML=Ops.sparkline(observations.map(s=>s[key]),"Observed "+key+" during this visit");
 }
-function courierTask(c){return c.order_id || (c.status==="off_shift"?"Off shift":c.status==="returning"?"Returning to hub":"Available for assignment");}
+function courierTask(c){return c.order_id || (c.status==="off_shift"?"Off shift":c.status==="repositioning"?"Moving toward expected demand":c.status==="returning"?"Returning to hub":"Available for assignment");}
 $("map-symbols").innerHTML='<span class="legend-working">'+Ops.icon("bike")+'Courier · working</span><span class="legend-idle">'+Ops.icon("van")+'Courier · available</span><span class="legend-pickup">'+Ops.icon("store")+'Pickup</span><span class="legend-destination">'+Ops.icon("household")+'Destination</span><span><i class="planned-route"></i>Planned route</span><span><i class="observed-route"></i>Traveled · fading</span>';
 function courierName(c){return c.id.replace(/^chamberi/,"Chamberí").replace(/^retiro/,"Retiro").replace(/^vallecas/,"Vallecas").replaceAll("-"," ");}
 function lastDecision(kind,id){
@@ -96,14 +98,16 @@ function lastDecision(kind,id){
 }
 function taskDetails(c){
   const order=state.orders.find(o=>o.id===c.order_id);
-  return {title:c.order_id|| (c.status==="off_shift"?"Off shift":c.status==="returning"?"Return to hub":"Awaiting order"),
-    note:order?.store || (c.status==="off_shift"?"Not accepting work":c.status==="returning"?human(c.hub):"Ready for dispatch")};
+  return {title:c.order_id|| (c.status==="off_shift"?"Off shift":c.status==="repositioning"?"Moving toward demand":c.status==="returning"?"Return to hub":"Awaiting order"),
+    note:order?.store || (c.status==="off_shift"?"Not accepting work":c.status==="repositioning"?"No active order":c.status==="returning"?human(c.hub):"Ready for dispatch")};
 }
 function agentTraceLink(id){return "/agent-traces?source=madrid&run="+encodeURIComponent(state.run.id)+"&agent="+encodeURIComponent(id);}
 
 const escape = (s) => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const clock = (seconds) => `${String(10 + Math.floor(seconds / 3600)).padStart(2,"0")}:${String(Math.floor(seconds % 3600 / 60)).padStart(2,"0")}`;
 const human = (s) => String(s).replaceAll("_", " ");
+const measured = (value, unit, digits = 1) => Number.isFinite(value) ? value.toFixed(digits) + unit : "—";
+const activeRoute = (courier) => courier?.route || courier?.reposition_route;
 async function api(path, options) {
   const response = await fetch(path, options);
   if (!response.ok) throw new Error(`Request failed (${response.status}). Check the local services.`);
@@ -166,7 +170,8 @@ $("start").onclick = async () => {
   $("start").disabled = true;
   try {
     const result = await api("/api/runs", {method:"POST", headers:{"Content-Type":"application/json"},
-      body:JSON.stringify({seed:Number($("seed").value), wall_seconds:Number($("duration").value)})});
+      body:JSON.stringify({seed:Number($("seed").value), wall_seconds:Number($("duration").value),
+        dispatch:{strategy:$("dispatch-strategy").value, reposition:$("reposition-policy").value}})});
     runId = result.id; selected = null; traceRows = []; renderRoute();
     await refreshRuns(); await poll(); setConsoleView("operations"); error("");
   } catch (e) { error(e.message); }
@@ -200,8 +205,11 @@ function selectedMapBounds() {
   const include = (lat, lon) => {
     if (Number.isFinite(lat) && Number.isFinite(lon) && navigationBounds.contains([lat,lon])) points.push([lat,lon]);
   };
-  for (const point of courier?.route?.points || []) include(point[1], point[0]);
-  if (courier) include(courier.lat, courier.lon);
+  for (const point of activeRoute(courier)?.points || []) include(point[1], point[0]);
+  if (courier) {
+    const [lat, lon] = courierPosition(courier, displayClock.time(performance.now()));
+    include(lat, lon);
+  }
   if (order) include(order.lat, order.lon);
   return points.length ? L.latLngBounds(points) : null;
 }
@@ -210,17 +218,48 @@ function renderRoute() {
   $("frame-selection").disabled=!selectedMapBounds();
   if(!state?.run)return;
   for(const courier of state.couriers){
-    const points=courier.route?.points;if(!points?.length)continue;
+    const points=activeRoute(courier)?.points;if(!points?.length)continue;
     const chosen=selected?.kind==="courier"&&selected.id===courier.id||selected?.kind==="order"&&selected.id===courier.order_id;
-    if(!chosen&&!["to_pickup","delivering"].includes(courier.status))continue;
+    if(!chosen&&!["to_pickup","delivering","repositioning"].includes(courier.status))continue;
     const traveled=points.filter(p=>p[2]<=state.run.sim_time),planned=points.filter(p=>p[2]>state.run.sim_time);
     if(traveled.length&&planned.length)planned.unshift(traveled.at(-1));
     if(planned.length>1)L.polyline(planned.map(p=>[p[1],p[0]]),{color:"#23d8ce",weight:chosen?3:1.5,opacity:chosen?.65:.22,dashArray:"4 6",interactive:false}).addTo(routeLayer);
     for(let i=1;i<traveled.length;i++)L.polyline([[traveled[i-1][1],traveled[i-1][0]],[traveled[i][1],traveled[i][0]]],{color:"#23d8ce",weight:chosen?3:1.5,opacity:(chosen?.8:.25)*(i/traveled.length),interactive:false}).addTo(routeLayer);
   }
 }
+function renderDispatchEvidence() {
+  const m=state.metrics,policy=state.dispatch_policy||state.run.dispatch_policy;
+  $("operating-cost").textContent=Number.isFinite(m.operating_cost_eur)?"€"+m.operating_cost_eur.toFixed(2):"—";
+  $("empty-distance").textContent=measured(m.empty_km," km");
+  $("reposition-distance").textContent=measured(m.reposition_km," km");
+  const strategy=policy?.strategy==="min_cost"?"Deadline + cost":policy?.strategy==="legacy"||!policy?"Earliest completion (legacy)":human(policy.strategy);
+  const reposition=policy?.reposition==="demand_aware"?"Move toward demand":"Stay at drop-off";
+  $("dispatch-policy-summary").textContent="Run policy: "+strategy+" · "+reposition;
+  $("dispatch-policy-evidence").textContent=JSON.stringify(policy||{strategy:"legacy",reposition:"stay"},null,2);
+}
+function renderCourierEconomics() {
+  const facts=$("courier-economics");
+  const courier=selected?.kind==="courier"?state.couriers.find(c=>c.id===selected.id):null;
+  facts.hidden=!courier;
+  if(!courier){facts.replaceChildren();return;}
+  const c=courier;
+  const rows=[
+    ["Home base",human(c.hub||"Not recorded")],
+    ["Current position","Node "+(c.node??"—")+" · "+measured(c.lat,"",5)+", "+measured(c.lon,"",5)],
+    ["Completed jobs",measured(c.completed_jobs,"",0)],
+    ["Distance",measured(c.distance_m/1000," km")],
+    ["Empty travel",measured(Number.isFinite(c.empty_distance_m)?c.empty_distance_m/1000:null," km")],
+    ["Repositioning",measured(Number.isFinite(c.reposition_distance_m)?c.reposition_distance_m/1000:null," km")],
+    ["Operating cost",Number.isFinite(c.operating_cost_eur)?"€"+c.operating_cost_eur.toFixed(2):"—"],
+  ];
+  facts.replaceChildren(...rows.map(([label,value])=>{
+    const row=document.createElement("div"),term=document.createElement("dt"),description=document.createElement("dd");
+    term.textContent=label;description.textContent=value;row.append(term,description);return row;
+  }));
+}
 function renderMetrics() {
   observeMetrics();
+  renderDispatchEvidence();
   const {run,metrics:m,queue:q,complaints} = state;
   $("session-state").textContent=human(run.status);
   $("session-state").className="badge "+run.status;
@@ -246,6 +285,7 @@ function renderMetrics() {
 }
 function renderCouriers() {
   clusterLayer.clearLayers();
+  const sim = displayClock.time(performance.now());
   const groups=[];
   for (const c of state.couriers) {
     const isSelected=selected?.kind==="courier"&&selected.id===c.id;
@@ -253,23 +293,25 @@ function renderCouriers() {
     const shape=Ops.icon(c.mode,"marker-symbol").replace('viewBox="0 0 24 24"','viewBox="-5 -5 34 34"').replace('fill="none"','style="color:'+color+'" fill="none"').replace('stroke-width="1.5"','stroke-width="1.6"');
     const svg=shape.replace(">",'><circle cx="12" cy="12" r="16" fill="#10232e" stroke="'+(isSelected?"#e7edf0":color)+'" stroke-width="'+(isSelected?2:1)+'"/>');
     const icon=L.divIcon({className:"courier-icon"+(isSelected?" selected":""),iconSize:[30,30],iconAnchor:[15,15],html:svg});
+    const location=courierPosition(c,sim);
     let marker=courierMarkers.get(c.id);
-    if(!marker){marker=L.marker([c.lat,c.lon],{icon,title:c.id,keyboard:true});marker.on("click",()=>choose("courier",c.id));courierMarkers.set(c.id,marker);}
-    else marker.setIcon(icon).setLatLng([c.lat,c.lon]);
+    if(!marker){marker=L.marker(location,{icon,title:c.id,keyboard:true});marker.on("click",()=>choose("courier",c.id));courierMarkers.set(c.id,marker);}
+    else marker.setIcon(icon).setLatLng(location);
+    marker.setZIndexOffset(isSelected?1000:0);
     const last=lastDecision("courier",c.id);
     marker.unbindTooltip();
     marker.bindTooltip(isSelected?escape(courierName(c)):escape(c.id)+" · "+escape(human(c.status)),{permanent:isSelected,direction:"right",offset:[14,0],className:isSelected?"agent-map-label":""});
     const content='<div class="map-agent-card"><strong>'+escape(c.id)+'</strong><p>'+escape(human(c.status))+' · '+escape(c.mode)+'</p><p>Task: '+escape(courierTask(c))+'</p><p>Last decision: '+escape(last?human(last.action):"None recorded")+'</p><a href="'+agentTraceLink(c.id)+'">Open agent trace</a></div>';
     if(marker.getPopup())marker.setPopupContent(content);else marker.bindPopup(content,{minWidth:220,autoPan:false});
-    const point=map.project([c.lat,c.lon],map.getZoom());
+    const point=map.project(location,map.getZoom());
     const group=map.getZoom()<13.5&&!isSelected?groups.find(group=>!group.selected&&group.point.distanceTo(point)<38):null;
-    if(group)group.items.push({c,marker});
-    else groups.push({point,selected:isSelected,items:[{c,marker}]});
+    if(group)group.items.push({c,marker,location});
+    else groups.push({point,selected:isSelected,items:[{c,marker,location}]});
   }
   for(const {items:group} of groups){
     if(group.length===1){if(!map.hasLayer(group[0].marker))group[0].marker.addTo(map);continue;}
     group.forEach(({marker})=>map.removeLayer(marker));
-    const lat=group.reduce((n,{c})=>n+c.lat,0)/group.length,lon=group.reduce((n,{c})=>n+c.lon,0)/group.length;
+    const lat=group.reduce((n,{location})=>n+location[0],0)/group.length,lon=group.reduce((n,{location})=>n+location[1],0)/group.length;
     const icon=L.divIcon({className:"cluster-marker",html:String(group.length),iconSize:[30,30]});
     L.marker([lat,lon],{icon,title:group.length+" agents. Zoom to inspect.",keyboard:true}).on("click",()=>map.setView([lat,lon],Math.min(17,map.getZoom()+1),{animate:!reducedMotion.matches})).addTo(clusterLayer);
   }
@@ -331,6 +373,7 @@ function renderLedger() {
 }
 function renderInspector() {
   if(!state?.run)return;
+  renderCourierEconomics();
   $("agent-count").textContent=state.couriers.length;
   $("fleet-activity").textContent=state.couriers.filter(c=>agentStatus(c)==="working").length+" working · "+state.couriers.length+" agents";
   $("open-agent-details").disabled=!selected;
@@ -360,21 +403,11 @@ function renderDecisions() {
   const rows = selected ? traceRows : state?.decisions || [];
   $("decisions").innerHTML = rows.map(d=>`<article class="decision"><div class="decision-top"><span>${escape(d.agent)}</span><time>${clock(d.sim_time)}</time></div><strong>${escape(human(d.action))}</strong><p>${escape(d.detail.rule || d.detail.reply || (d.detail.on_time !== undefined ? (d.detail.on_time?"Delivered within promised window":"Delivered after promised window") : d.detail.store || "State transition recorded"))}</p><code>${escape(d.order_id || "")}${d.courier_id?` / ${escape(d.courier_id)}`:""}</code><details><summary>Inspect recorded evidence</summary><pre>${escape(JSON.stringify(d.detail,null,2))}</pre></details></article>`).join("") || '<p class="empty">No decisions recorded for this selection yet.</p>';
 }
-function pointAt(route, sim) {
-  const ps=route.points;
-  if(sim<=ps[0][2]) return [ps[0][1],ps[0][0]];
-  for(let i=1;i<ps.length;i++) {
-    const a=ps[i-1],b=ps[i];
-    if(sim<=b[2]) { const f=Math.max(0,Math.min(1,(sim-a[2])/Math.max(.001,b[2]-a[2]))); return [a[1]+f*(b[1]-a[1]),a[0]+f*(b[0]-a[0])]; }
-  }
-  return [ps.at(-1)[1],ps.at(-1)[0]];
-}
 function animate() {
   if(!document.hidden && !reducedMotion.matches && state?.run?.status==="running" && state.run.wall_seconds>0) {
-    const speed=state.run.duration/state.run.wall_seconds;
-    const advance=Math.min(speed,(performance.now()-lastPacket)/1000*speed);
-    for(const c of state.couriers) if(c.route && ["to_pickup","delivering"].includes(c.status))
-      courierMarkers.get(c.id)?.setLatLng(pointAt(c.route,state.run.sim_time+advance));
+    const sim=displayClock.time(performance.now());
+    for(const c of state.couriers)
+      courierMarkers.get(c.id)?.setLatLng(courierPosition(c,sim));
   }
   requestAnimationFrame(animate);
 }
@@ -385,10 +418,12 @@ async function poll() {
     const next=await api(`/api/state${runId?`?run=${runId}`:""}`);
     if(next.run?.id!==state?.run?.id) {
       traceRows=[];
-      const courier=next.couriers?.find(c=>["to_pickup","delivering"].includes(c.status))||next.couriers?.[0];
+      for(const marker of courierMarkers.values())marker.remove();
+      courierMarkers.clear();
+      const courier=next.couriers?.find(c=>["to_pickup","delivering","repositioning"].includes(c.status))||next.couriers?.[0];
       selected=courier?{kind:"courier",id:courier.id}:null;
     }
-    state=next; lastPacket=performance.now();
+    state=next; displayClock.accept(state.run, performance.now());
     $("connection").className="dot online"; $("connection-text").textContent="Local services connected";
     if(state.run) { renderMetrics();renderCouriers();renderOrders();renderLedger();renderInspector();renderRoute();await refreshTrace(); }
     else $("fleet").innerHTML='<div class="empty"><strong>No session loaded</strong><p>Start a session to see the fleet, routes and orders.</p><button data-open-simulation>Set up simulation</button></div>';

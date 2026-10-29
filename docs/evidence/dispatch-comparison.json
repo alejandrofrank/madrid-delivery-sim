@@ -1,0 +1,589 @@
+{
+  "schema_version": 1,
+  "kind": "local_dispatch_comparison",
+  "created_at": "2026-10-29T19:20:42.268714+00:00",
+  "status": "complete",
+  "version": {
+    "package": "0.1.0",
+    "python": "3.12.15",
+    "git_commit": null,
+    "source_sha256": "862d44c7e655edcb9dbfe8cf6d76ef67b30233d5cb5a71aa6ff7d09189635f6e",
+    "data_sha256": {
+      "madrid.graphml.gz": "9a16af396800b533c548a38bc885f85ee4904e854d7d154fb53a29e66faf2be3",
+      "stores.json": "8b9e78709726eed3e30a18e363e003b22dda380a5c90acd862764266722c7013",
+      "manifest.json": "f8992cb2fa15b716fdf50306366f8dbdb309e5710d04f7386b5feb75b1ddb861"
+    }
+  },
+  "seeds": [
+    42,
+    73
+  ],
+  "duration_seconds": 43200,
+  "arms": [
+    {
+      "name": "legacy_stay",
+      "policy": {
+        "strategy": "legacy",
+        "reposition": "stay",
+        "initial_positions": "distributed",
+        "time_value_eur_per_hour": 12,
+        "late_weight": 20,
+        "empty_time_weight": 1,
+        "demand_window_seconds": 1800,
+        "reposition_max_m": 1500,
+        "reposition_cooldown_seconds": 900,
+        "reposition_min_saving_seconds": 120
+      }
+    },
+    {
+      "name": "min_cost_stay",
+      "policy": {
+        "strategy": "min_cost",
+        "reposition": "stay",
+        "initial_positions": "distributed",
+        "time_value_eur_per_hour": 12,
+        "late_weight": 20,
+        "empty_time_weight": 1,
+        "demand_window_seconds": 1800,
+        "reposition_max_m": 1500,
+        "reposition_cooldown_seconds": 900,
+        "reposition_min_saving_seconds": 120
+      }
+    },
+    {
+      "name": "min_cost_demand_aware",
+      "policy": {
+        "strategy": "min_cost",
+        "reposition": "demand_aware",
+        "initial_positions": "distributed",
+        "time_value_eur_per_hour": 12,
+        "late_weight": 20,
+        "empty_time_weight": 1,
+        "demand_window_seconds": 1800,
+        "reposition_max_m": 1500,
+        "reposition_cooldown_seconds": 900,
+        "reposition_min_saving_seconds": 120
+      }
+    }
+  ],
+  "assumptions": {
+    "database": "dedicated local delivery_test; existing runs are retained",
+    "pairing": "Same World instance, road data, seed, demand generator, and initial fleet",
+    "providers": "disabled; no model or export calls",
+    "simulation": "60-second ticks; final 1800 seconds drain existing deliveries",
+    "costs": "Synthetic marginal vehicle costs plus task fee; not actual Uber prices",
+    "fairness": "Job spread and standard deviation include idle couriers with zero jobs",
+    "runtime": "Creation plus simulation and its final snapshot; graph loading excluded",
+    "route_cache": "Cleared before each arm so later policies do not inherit cached paths",
+    "feasibility": "Only canonical full-run snapshot metrics are reported as counts",
+    "comparison": "Per-seed deltas subtract legacy_stay; no improvement threshold assumed"
+  },
+  "completed_at": "2026-10-29T19:30:37.555769+00:00",
+  "results": [
+    {
+      "seed": 42,
+      "arms": [
+        {
+          "name": "legacy_stay",
+          "policy": {
+            "strategy": "legacy",
+            "reposition": "stay",
+            "initial_positions": "distributed",
+            "time_value_eur_per_hour": 12,
+            "late_weight": 20,
+            "empty_time_weight": 1,
+            "demand_window_seconds": 1800,
+            "reposition_max_m": 1500,
+            "reposition_cooldown_seconds": 900,
+            "reposition_min_saving_seconds": 120
+          },
+          "run_id": "957dc435-4ac9-4cac-a6b1-aa233f57a86b",
+          "status": "complete",
+          "summary": {
+            "orders": 247,
+            "delivered": 247,
+            "on_time": 247,
+            "on_time_pct": 100.0,
+            "unserved": 0,
+            "pending": 0,
+            "active": 0,
+            "overdue": 0,
+            "empty_km": 336.98,
+            "reposition_km": 0.0,
+            "operating_cost_eur": 453.9626,
+            "cost_per_delivery_eur": 1.8379,
+            "unfinished": 0,
+            "couriers_total": 18,
+            "couriers_used": 18,
+            "completed_jobs_by_courier": {
+              "chamberi-01": 2,
+              "chamberi-02": 3,
+              "chamberi-03": 35,
+              "chamberi-04": 29,
+              "chamberi-05": 10,
+              "chamberi-06": 7,
+              "retiro-01": 3,
+              "retiro-02": 3,
+              "retiro-03": 33,
+              "retiro-04": 29,
+              "retiro-05": 6,
+              "retiro-06": 16,
+              "vallecas-01": 2,
+              "vallecas-02": 2,
+              "vallecas-03": 23,
+              "vallecas-04": 24,
+              "vallecas-05": 12,
+              "vallecas-06": 8
+            },
+            "jobs_min": 2,
+            "jobs_max": 35,
+            "jobs_mean": 13.722222,
+            "jobs_population_stddev": 11.54607,
+            "jobs_spread": 33,
+            "wall_seconds": 96.088541,
+            "feasibility_counts": {}
+          },
+          "queue": {
+            "done": 996
+          },
+          "paid_calls": 0
+        },
+        {
+          "name": "min_cost_stay",
+          "policy": {
+            "strategy": "min_cost",
+            "reposition": "stay",
+            "initial_positions": "distributed",
+            "time_value_eur_per_hour": 12,
+            "late_weight": 20,
+            "empty_time_weight": 1,
+            "demand_window_seconds": 1800,
+            "reposition_max_m": 1500,
+            "reposition_cooldown_seconds": 900,
+            "reposition_min_saving_seconds": 120
+          },
+          "run_id": "314d8398-e0ef-44d5-8101-8c9389a46200",
+          "status": "complete",
+          "summary": {
+            "orders": 247,
+            "delivered": 247,
+            "on_time": 247,
+            "on_time_pct": 100.0,
+            "unserved": 0,
+            "pending": 0,
+            "active": 0,
+            "overdue": 0,
+            "empty_km": 253.93,
+            "reposition_km": 0.0,
+            "operating_cost_eur": 391.5202,
+            "cost_per_delivery_eur": 1.5851,
+            "unfinished": 0,
+            "couriers_total": 18,
+            "couriers_used": 18,
+            "completed_jobs_by_courier": {
+              "chamberi-01": 9,
+              "chamberi-02": 14,
+              "chamberi-03": 22,
+              "chamberi-04": 20,
+              "chamberi-05": 5,
+              "chamberi-06": 4,
+              "retiro-01": 14,
+              "retiro-02": 16,
+              "retiro-03": 19,
+              "retiro-04": 21,
+              "retiro-05": 4,
+              "retiro-06": 7,
+              "vallecas-01": 20,
+              "vallecas-02": 11,
+              "vallecas-03": 18,
+              "vallecas-04": 22,
+              "vallecas-05": 7,
+              "vallecas-06": 14
+            },
+            "jobs_min": 4,
+            "jobs_max": 22,
+            "jobs_mean": 13.722222,
+            "jobs_population_stddev": 6.26104,
+            "jobs_spread": 18,
+            "wall_seconds": 100.609167,
+            "feasibility_counts": {}
+          },
+          "queue": {
+            "done": 996
+          },
+          "paid_calls": 0
+        },
+        {
+          "name": "min_cost_demand_aware",
+          "policy": {
+            "strategy": "min_cost",
+            "reposition": "demand_aware",
+            "initial_positions": "distributed",
+            "time_value_eur_per_hour": 12,
+            "late_weight": 20,
+            "empty_time_weight": 1,
+            "demand_window_seconds": 1800,
+            "reposition_max_m": 1500,
+            "reposition_cooldown_seconds": 900,
+            "reposition_min_saving_seconds": 120
+          },
+          "run_id": "bd77af32-5260-4211-b793-62023622086a",
+          "status": "complete",
+          "summary": {
+            "orders": 247,
+            "delivered": 247,
+            "on_time": 247,
+            "on_time_pct": 100.0,
+            "unserved": 0,
+            "pending": 0,
+            "active": 0,
+            "overdue": 0,
+            "empty_km": 267.316,
+            "reposition_km": 44.951,
+            "operating_cost_eur": 400.7612,
+            "cost_per_delivery_eur": 1.6225,
+            "unfinished": 0,
+            "couriers_total": 18,
+            "couriers_used": 18,
+            "completed_jobs_by_courier": {
+              "chamberi-01": 17,
+              "chamberi-02": 14,
+              "chamberi-03": 14,
+              "chamberi-04": 16,
+              "chamberi-05": 6,
+              "chamberi-06": 5,
+              "retiro-01": 7,
+              "retiro-02": 17,
+              "retiro-03": 20,
+              "retiro-04": 17,
+              "retiro-05": 11,
+              "retiro-06": 8,
+              "vallecas-01": 17,
+              "vallecas-02": 14,
+              "vallecas-03": 22,
+              "vallecas-04": 19,
+              "vallecas-05": 10,
+              "vallecas-06": 13
+            },
+            "jobs_min": 5,
+            "jobs_max": 22,
+            "jobs_mean": 13.722222,
+            "jobs_population_stddev": 4.828222,
+            "jobs_spread": 17,
+            "wall_seconds": 110.75486,
+            "feasibility_counts": {}
+          },
+          "queue": {
+            "done": 1078
+          },
+          "paid_calls": 0
+        }
+      ],
+      "delta_from_legacy": {
+        "min_cost_stay": {
+          "delivered": 0.0,
+          "on_time": 0.0,
+          "on_time_pct": 0.0,
+          "unserved": 0.0,
+          "unfinished": 0.0,
+          "empty_km": -83.05,
+          "reposition_km": 0.0,
+          "operating_cost_eur": -62.4424,
+          "cost_per_delivery_eur": -0.2528,
+          "couriers_used": 0.0,
+          "jobs_spread": -15.0,
+          "wall_seconds": 4.520626
+        },
+        "min_cost_demand_aware": {
+          "delivered": 0.0,
+          "on_time": 0.0,
+          "on_time_pct": 0.0,
+          "unserved": 0.0,
+          "unfinished": 0.0,
+          "empty_km": -69.664,
+          "reposition_km": 44.951,
+          "operating_cost_eur": -53.2014,
+          "cost_per_delivery_eur": -0.2154,
+          "couriers_used": 0.0,
+          "jobs_spread": -16.0,
+          "wall_seconds": 14.666319
+        }
+      }
+    },
+    {
+      "seed": 73,
+      "arms": [
+        {
+          "name": "legacy_stay",
+          "policy": {
+            "strategy": "legacy",
+            "reposition": "stay",
+            "initial_positions": "distributed",
+            "time_value_eur_per_hour": 12,
+            "late_weight": 20,
+            "empty_time_weight": 1,
+            "demand_window_seconds": 1800,
+            "reposition_max_m": 1500,
+            "reposition_cooldown_seconds": 900,
+            "reposition_min_saving_seconds": 120
+          },
+          "run_id": "9ca0f4b0-9a53-406f-b103-c80e2824aa63",
+          "status": "complete",
+          "summary": {
+            "orders": 248,
+            "delivered": 248,
+            "on_time": 248,
+            "on_time_pct": 100.0,
+            "unserved": 0,
+            "pending": 0,
+            "active": 0,
+            "overdue": 0,
+            "empty_km": 357.692,
+            "reposition_km": 0.0,
+            "operating_cost_eur": 470.4507,
+            "cost_per_delivery_eur": 1.897,
+            "unfinished": 0,
+            "couriers_total": 18,
+            "couriers_used": 17,
+            "completed_jobs_by_courier": {
+              "chamberi-01": 4,
+              "chamberi-02": 2,
+              "chamberi-03": 30,
+              "chamberi-04": 24,
+              "chamberi-05": 12,
+              "chamberi-06": 10,
+              "retiro-01": 6,
+              "retiro-02": 4,
+              "retiro-03": 37,
+              "retiro-04": 32,
+              "retiro-05": 14,
+              "retiro-06": 12,
+              "vallecas-01": 2,
+              "vallecas-02": 0,
+              "vallecas-03": 28,
+              "vallecas-04": 20,
+              "vallecas-05": 7,
+              "vallecas-06": 4
+            },
+            "jobs_min": 0,
+            "jobs_max": 37,
+            "jobs_mean": 13.777778,
+            "jobs_population_stddev": 11.453071,
+            "jobs_spread": 37,
+            "wall_seconds": 99.522973,
+            "feasibility_counts": {}
+          },
+          "queue": {
+            "done": 1000
+          },
+          "paid_calls": 0
+        },
+        {
+          "name": "min_cost_stay",
+          "policy": {
+            "strategy": "min_cost",
+            "reposition": "stay",
+            "initial_positions": "distributed",
+            "time_value_eur_per_hour": 12,
+            "late_weight": 20,
+            "empty_time_weight": 1,
+            "demand_window_seconds": 1800,
+            "reposition_max_m": 1500,
+            "reposition_cooldown_seconds": 900,
+            "reposition_min_saving_seconds": 120
+          },
+          "run_id": "af4032e8-3361-4e86-80c9-0d34fdc49888",
+          "status": "complete",
+          "summary": {
+            "orders": 248,
+            "delivered": 248,
+            "on_time": 248,
+            "on_time_pct": 100.0,
+            "unserved": 0,
+            "pending": 0,
+            "active": 0,
+            "overdue": 0,
+            "empty_km": 260.721,
+            "reposition_km": 0.0,
+            "operating_cost_eur": 401.3768,
+            "cost_per_delivery_eur": 1.6185,
+            "unfinished": 0,
+            "couriers_total": 18,
+            "couriers_used": 18,
+            "completed_jobs_by_courier": {
+              "chamberi-01": 10,
+              "chamberi-02": 11,
+              "chamberi-03": 24,
+              "chamberi-04": 23,
+              "chamberi-05": 9,
+              "chamberi-06": 5,
+              "retiro-01": 14,
+              "retiro-02": 14,
+              "retiro-03": 19,
+              "retiro-04": 23,
+              "retiro-05": 8,
+              "retiro-06": 6,
+              "vallecas-01": 20,
+              "vallecas-02": 12,
+              "vallecas-03": 18,
+              "vallecas-04": 18,
+              "vallecas-05": 7,
+              "vallecas-06": 7
+            },
+            "jobs_min": 5,
+            "jobs_max": 24,
+            "jobs_mean": 13.777778,
+            "jobs_population_stddev": 6.178417,
+            "jobs_spread": 19,
+            "wall_seconds": 99.992381,
+            "feasibility_counts": {}
+          },
+          "queue": {
+            "done": 1000
+          },
+          "paid_calls": 0
+        },
+        {
+          "name": "min_cost_demand_aware",
+          "policy": {
+            "strategy": "min_cost",
+            "reposition": "demand_aware",
+            "initial_positions": "distributed",
+            "time_value_eur_per_hour": 12,
+            "late_weight": 20,
+            "empty_time_weight": 1,
+            "demand_window_seconds": 1800,
+            "reposition_max_m": 1500,
+            "reposition_cooldown_seconds": 900,
+            "reposition_min_saving_seconds": 120
+          },
+          "run_id": "1d12a9f6-cbf5-4c54-8ab7-19d1435f6018",
+          "status": "complete",
+          "summary": {
+            "orders": 248,
+            "delivered": 248,
+            "on_time": 248,
+            "on_time_pct": 100.0,
+            "unserved": 0,
+            "pending": 0,
+            "active": 0,
+            "overdue": 0,
+            "empty_km": 279.793,
+            "reposition_km": 42.425,
+            "operating_cost_eur": 410.09,
+            "cost_per_delivery_eur": 1.6536,
+            "unfinished": 0,
+            "couriers_total": 18,
+            "couriers_used": 18,
+            "completed_jobs_by_courier": {
+              "chamberi-01": 13,
+              "chamberi-02": 11,
+              "chamberi-03": 19,
+              "chamberi-04": 19,
+              "chamberi-05": 11,
+              "chamberi-06": 12,
+              "retiro-01": 10,
+              "retiro-02": 13,
+              "retiro-03": 20,
+              "retiro-04": 15,
+              "retiro-05": 7,
+              "retiro-06": 9,
+              "vallecas-01": 12,
+              "vallecas-02": 16,
+              "vallecas-03": 24,
+              "vallecas-04": 21,
+              "vallecas-05": 6,
+              "vallecas-06": 10
+            },
+            "jobs_min": 6,
+            "jobs_max": 24,
+            "jobs_mean": 13.777778,
+            "jobs_population_stddev": 4.927875,
+            "jobs_spread": 18,
+            "wall_seconds": 112.010059,
+            "feasibility_counts": {}
+          },
+          "queue": {
+            "done": 1078
+          },
+          "paid_calls": 0
+        }
+      ],
+      "delta_from_legacy": {
+        "min_cost_stay": {
+          "delivered": 0.0,
+          "on_time": 0.0,
+          "on_time_pct": 0.0,
+          "unserved": 0.0,
+          "unfinished": 0.0,
+          "empty_km": -96.971,
+          "reposition_km": 0.0,
+          "operating_cost_eur": -69.0739,
+          "cost_per_delivery_eur": -0.2785,
+          "couriers_used": 1.0,
+          "jobs_spread": -18.0,
+          "wall_seconds": 0.469408
+        },
+        "min_cost_demand_aware": {
+          "delivered": 0.0,
+          "on_time": 0.0,
+          "on_time_pct": 0.0,
+          "unserved": 0.0,
+          "unfinished": 0.0,
+          "empty_km": -77.899,
+          "reposition_km": 42.425,
+          "operating_cost_eur": -60.3607,
+          "cost_per_delivery_eur": -0.2434,
+          "couriers_used": 1.0,
+          "jobs_spread": -19.0,
+          "wall_seconds": 12.487086
+        }
+      }
+    }
+  ],
+  "verification": {
+    "source_matches_committed_code": true,
+    "matching_code_commit": "6cd340d13c7dc277bddc95185ec217f7c355db2f",
+    "full_local_artifact_sha256": "0e93a90407113b581bb8d6d21e2e04e20f9f569e0bb373bbed2526e965919969",
+    "python_tests_passed": 704,
+    "node_motion_tests_passed": 6,
+    "agent_scenarios_passed": 12,
+    "scenario_reproducibility_runs": 2,
+    "offline_judge_cases_passed": 6,
+    "billing_enabled": false,
+    "browser_visual_check": "unavailable: computer-use service exposed no browsers; HTTP asset and control binding checks passed"
+  },
+  "aggregate": {
+    "legacy_stay": {
+      "orders": 495,
+      "delivered": 495,
+      "on_time": 495,
+      "empty_km": 694.672,
+      "reposition_km": 0.0,
+      "operating_cost_eur": 924.4133,
+      "cost_per_delivery_eur": 1.8675
+    },
+    "min_cost_stay": {
+      "orders": 495,
+      "delivered": 495,
+      "on_time": 495,
+      "empty_km": 514.651,
+      "reposition_km": 0.0,
+      "operating_cost_eur": 792.897,
+      "cost_per_delivery_eur": 1.6018
+    },
+    "min_cost_demand_aware": {
+      "orders": 495,
+      "delivered": 495,
+      "on_time": 495,
+      "empty_km": 547.109,
+      "reposition_km": 87.376,
+      "operating_cost_eur": 810.8512,
+      "cost_per_delivery_eur": 1.6381
+    }
+  },
+  "improvement_pct": {
+    "empty_km": 25.915,
+    "operating_cost_eur": 14.227
+  }
+}

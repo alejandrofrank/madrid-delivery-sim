@@ -148,7 +148,26 @@ class World:
             "pickup_at": sim_time + pickup_at,
             "end_at": sim_time + math.ceil(end_at),
             "destination": customer,
+            "start_node": start,
+            "pickup_node": store,
+            "start_at": sim_time,
+            "pickup_arrival_at": sim_time + arrival,
+            "delivery_arrival_at": sim_time + end_at - 45,
+            "pickup_distance_m": pickup_m,
+            "delivery_distance_m": delivery_m,
+            "pickup_travel_seconds": arrival,
+            "pickup_wait_seconds": max(0, ready_sim - sim_time - arrival),
         }
+
+    def relocation(self, start: int, destination: int, mode: str, sim: int) -> dict[str, Any]:
+        """A real empty trip; reuse the same directed road geometry and speed."""
+        route = self.route(start, destination, destination, mode, sim, sim)
+        route["points"] = [p for p in route["points"] if p[2] <= route["pickup_arrival_at"]]
+        route["end_at"] = sim + math.ceil(route["pickup_travel_seconds"])
+        route["points"].append([*self.coord(destination), route["end_at"]])
+        route["pickup_at"] = route["end_at"]
+        route["delivery_arrival_at"] = route["end_at"]
+        return route
 
     def roads(self) -> dict[str, Any]:
         features = []
@@ -179,6 +198,46 @@ def position(route: dict[str, Any], sim_time: float) -> list[float]:
             fraction = min(1.0, max(0.0, (sim_time - a[2]) / max(0.0001, b[2] - a[2])))
             return [a[i] + fraction * (b[i] - a[i]) for i in (0, 1)]
     return list(points[-1][:2])
+
+
+def route_progress(route: dict[str, Any], sim: float) -> tuple[float, float]:
+    """Cumulative actual metres (all, empty), including partial trips and waits."""
+
+    def fraction(start: float, end: float) -> float:
+        return min(1.0, max(0.0, (sim - start) / max(0.0001, end - start)))
+
+    if "pickup_distance_m" not in route:  # historical routes had one combined ledger
+        return route["distance_m"] * fraction(route["points"][0][2], route["end_at"]), 0
+    empty = route["pickup_distance_m"] * fraction(route["start_at"], route["pickup_arrival_at"])
+    loaded = route["delivery_distance_m"] * fraction(
+        route["pickup_at"], route["delivery_arrival_at"]
+    )
+    return empty + loaded, empty
+
+
+def depart_at(route: dict[str, Any], sim: int, ready: int | None = None) -> dict[str, Any]:
+    """Rebase an approved, not-yet-started route to its actual queue acceptance."""
+    start = route.get("start_at", route["points"][0][2])
+    delay = max(0, sim - start)
+    shifted = dict(route)
+    if ready is None or "pickup_arrival_at" not in route:
+        pickup_shift = delay
+    else:
+        pickup_shift = max(route["pickup_arrival_at"] + delay, ready) + 60 - route["pickup_at"]
+    for field in ("start_at", "pickup_arrival_at"):
+        if field in shifted:
+            shifted[field] += delay
+    for field in ("pickup_at", "delivery_arrival_at", "end_at"):
+        if field in shifted:
+            shifted[field] += pickup_shift
+    if ready is not None and "pickup_arrival_at" in shifted:
+        shifted["pickup_wait_seconds"] = max(0, ready - shifted["pickup_arrival_at"])
+        shifted["end_at"] = math.ceil(shifted["delivery_arrival_at"] + 45)
+    boundary = route.get("pickup_arrival_at", float("inf"))
+    shifted["points"] = [
+        [x, y, t + (delay if t <= boundary else pickup_shift)] for x, y, t in route["points"]
+    ]
+    return shifted
 
 
 def seed_locations(conn: Connection, world: World) -> None:

@@ -19,6 +19,8 @@ jobs:
       - name: Typed Python and failure tests
         run: |
           docker compose exec -T -e DELIVERY_SOURCE_REVISION="$GITHUB_SHA" app python scripts/health_check.py
+      - name: Courier movement regressions
+        run: node --test scripts/test_courier_motion.cjs
       - name: Full seeded day without paid calls
         run: docker compose exec -T app delivery demo --wall-seconds 0
       - name: Verify demo invariants

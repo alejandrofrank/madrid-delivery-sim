@@ -1,6 +1,6 @@
 # Status
 
-2026-10-29 (branch integration): Combined the completed Google-stack/local-app,
+2026-10-29 (first branch integration): Combined the completed Google-stack/local-app,
 Google-native eval, production observability and UI branches. The integration
 passed 738 tests, Ruff, mypy across 62 modules, 20 mocked Terraform checks, 60
 offline model attempts and all twelve SQL scenarios twice with matching outcomes.
@@ -10,9 +10,35 @@ deployment or paid calls were made. Migration 027 supports both shipped telemetr
 histories; separate Terraform addresses preserve both analytics datasets. ADK CLI
 tests now use writable temporary apps, and CI quality verdicts reach the statistical
 gate while execution/integrity failures remain fatal. Existing uncommitted work
-and the active dispatch-optimization branch are preserved separately.
+was preserved separately; dispatch optimization was still active at this point.
 See [integration evidence](docs/evidence/branch-integration.json) and
 [Terraform upgrade notes](infra/gcp-ai/STATE-MIGRATION.md).
+
+2026-10-29 (street dispatch and economics): Replaced lexical courier ties with a
+bounded exact batch matcher. It maximizes served orders, prioritizes deadlines,
+then minimizes road time, lateness, empty travel and synthetic vehicle cost.
+Equal economic choices use idle time/job history. Couriers start across local
+stores, retain their last drop-off and never automatically return to a hub.
+Optional observed-demand relocation has real queued acceptance, route/energy/cost
+meters, cooldown and benefit gates; staying is the default. Delayed normal and
+relocation handoffs rebase departure, with versioned re-dispatch when a shift no
+longer fits. Partial travel is charged once across replay. The map now shares a
+monotonic clock between polls and animation and exposes unique vehicle IDs,
+current versus home location, policy, job counts and economic evidence.
+
+Verified 704 Python tests, six Node motion regressions, Ruff, mypy over 57 modules,
+all twelve agent scenarios twice with matching outcomes, and six offline judge
+cases. A final-code comparison across seeds 42/73 delivered 495/495 on time with
+zero dead letters: empty travel fell 694.672→514.651 km (25.915%) and simulated
+cost €924.4133→€792.8970 (14.227%). Repositioning cost more than staying in both
+examples and remains optional. The scoped lab planner shares the matching
+primitive and directed traffic-weighted search, retaining its single-basket
+projection and SQL/memory authority. No paid model calls or cloud changes were
+made; a live read confirmed GCP billing disabled and the repository private.
+The 25-chapter docs site includes the [algorithm and limitations](docs/DISPATCH-OPTIMIZATION.md)
+and [versioned comparison receipt](docs/evidence/dispatch-comparison.json).
+Browser visual QA was unavailable; movement logic and HTTP assets/control
+bindings were verified. Other checkouts and work in progress were not edited.
 
 2026-10-29 (PR #1 local rollout): Fixed the fresh-database startup race by checking
 PostgreSQL TCP readiness, then merged PR #1 as 69135c9 after both current-head CI
