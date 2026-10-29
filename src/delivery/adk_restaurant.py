@@ -60,6 +60,7 @@ class RestaurantTurn:
         self.plan: RestaurantPlan | None = None
         self.pending_step: int | None = None
         self.model_started: float | None = None
+        self.declared_tool_names: frozenset[str] = frozenset()
 
     def sql(self, function: str, *args: Any) -> Any:
         # Function names are literals in this module, never model arguments.
@@ -161,9 +162,17 @@ class RestaurantTurn:
         return self.stage("restaurant.decline", "decline", reason=reason)
 
     def finish_decision(self, summary: str) -> dict[str, Any]:
-        """Finish the staged decision with a concise explanation; nothing is committed yet."""
+        """Finish the staged decision; nothing is committed yet.
+
+        Args:
+            summary: Factual explanation of 1 to 500 characters, including spaces.
+                Compare quoted values concisely. If rejected, rewrite this text
+                without staging another action. Do not truncate a previous answer.
+        """
         if self.action is None:
             raise ValueError("Stage an action before finishing")
+        if not 1 <= len(summary) <= 500:
+            return dict(self.sql("restaurant_contract_reject", "finish_decision", "summary_length"))
         plan = RestaurantPlan(**self.action, summary=summary)
         result = self.invoke("restaurant.finish", {"summary": summary})
         self.plan = plan
@@ -239,17 +248,26 @@ class RestaurantTurn:
             "restaurant.decline": self.decline_order,
             "restaurant.finish": self.finish_decision,
         }
+        tools = [tool for capability, tool in registry.items() if capability in self.brain.tools]
+        self.declared_tool_names = frozenset(tool.__name__ for tool in tools)
         return LlmAgent(
             name="restaurant",
             model=model,
             instruction=lambda _: effective_instructions(self.brain, self.agent.role.soul),
-            tools=[tool for capability, tool in registry.items() if capability in self.brain.tools],
+            tools=[tool for tool in tools],
             before_model_callback=self.before_model,
             after_model_callback=self.after_model,
             before_tool_callback=self.before_tool,
+            after_tool_callback=self.after_tool,
             generate_content_config=types.GenerateContentConfig(
                 temperature=0,
                 max_output_tokens=self.brain.output_tokens,
+                tool_config=types.ToolConfig(
+                    function_calling_config=types.FunctionCallingConfig(
+                        mode=types.FunctionCallingConfigMode.VALIDATED,
+                        allowed_function_names=sorted(self.declared_tool_names),
+                    )
+                ),
                 thinking_config=(
                     types.ThinkingConfig(thinking_level=types.ThinkingLevel.MINIMAL)
                     if self.brain.vertex and self.brain.vertex.model.startswith("gemini-3")
@@ -258,7 +276,9 @@ class RestaurantTurn:
             ),
         )
 
-    def before_tool(self, tool: Any, args: dict[str, Any], tool_context: Any) -> None:
+    def before_tool(
+        self, tool: Any, args: dict[str, Any], tool_context: Any
+    ) -> dict[str, Any] | None:
         del tool_context
         fields = {
             "read_order": set(),
@@ -275,12 +295,28 @@ class RestaurantTurn:
             "decline_order": {"reason"},
             "finish_decision": {"summary"},
         }
-        if (
-            tool.name not in fields
-            or set(args) != fields[tool.name]
-            or any(type(value) is not str for value in args.values())
-        ):
+        if self.plan is not None:
+            raise PermissionError("Decision already finished")
+        if tool.name in fields and tool.name not in self.declared_tool_names:
+            raise PermissionError("Tool is not enabled by the frozen template")
+        # Do not alias or execute an invented name. Its completed model response
+        # may receive one bounded correction; scope/argument violations stay fatal.
+        if tool.name not in fields:
+            if set(args) - {"summary"} or any(type(value) is not str for value in args.values()):
+                raise PermissionError("Unknown tool cannot carry scope or arbitrary arguments")
+            return dict(self.sql("restaurant_contract_reject", tool.name, "unknown_tool"))
+        if set(args) != fields[tool.name] or any(type(value) is not str for value in args.values()):
             raise PermissionError("Tool arguments cannot alter scope or schema")
+        return None
+
+    def after_tool(
+        self, tool: Any, args: dict[str, Any], tool_context: Any, tool_response: Any
+    ) -> None:
+        del args, tool_response
+        if tool.name == "finish_decision" and self.plan is not None:
+            # The saved factual plan is the response. Do not pay for an extra
+            # summarization turn after the terminal tool has sealed it.
+            tool_context.actions.skip_summarization = True
 
     async def run(self, model: BaseLlm) -> RestaurantPlan:
         service = InMemorySessionService()

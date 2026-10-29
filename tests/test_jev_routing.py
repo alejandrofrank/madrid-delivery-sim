@@ -203,10 +203,12 @@ def test_invented_finish_tool_keeps_staged_supply_unapplied(adk_city):
                         part.function_call.name = "finish_finish_decision"
                 yield response
 
-    city = adk_city(brain_changes={"routing": JevRouting().model_dump()})
+    city = adk_city(
+        brain_changes={"routing": JevRouting().model_dump(), "model_calls_per_event": 8}
+    )
     agent, event = first_call(city)
     assert agent.reserve_budget(event)
-    with pytest.raises(PermissionError):
+    with pytest.raises(psycopg.errors.ProgramLimitExceeded):
         ensure_restaurant_result(
             agent,
             event,
@@ -231,6 +233,99 @@ def test_invented_finish_tool_keeps_staged_supply_unapplied(adk_city):
                 "SELECT state FROM restaurant_turns WHERE event_id=%s", (event.id,)
             ).fetchone()["state"]
             == "failed"
+        )
+        assert (
+            conn.execute(
+                "SELECT count(*) n FROM restaurant_tool_receipts "
+                "WHERE event_id=%s AND tool='restaurant.contract_rejected'",
+                (event.id,),
+            ).fetchone()["n"]
+            == 2
+        )
+
+
+@pytest.mark.integration
+@pytest.mark.parametrize("failure", ["unknown_tool", "summary_length"])
+def test_completed_bad_proposal_can_be_corrected_without_restaging(adk_city, failure):
+    from delivery.adk_offline import OfflineRestaurantModel
+
+    class CorrectingModel(OfflineRestaurantModel):
+        broken: bool = False
+
+        async def generate_content_async(self, llm_request, stream=False):
+            last = llm_request.contents[-1]
+            if any(
+                part.function_response
+                and part.function_response.response.get("error") == "tool_contract"
+                for part in last.parts or []
+            ):
+                yield self.response(
+                    calls=[
+                        (
+                            "finish_decision",
+                            {"summary": "Selected the scoped supplier following the SOUL."},
+                        )
+                    ]
+                )
+                return
+            async for response in super().generate_content_async(llm_request, stream):
+                for part in response.content.parts or []:
+                    if (
+                        not self.broken
+                        and part.function_call
+                        and part.function_call.name == "finish_decision"
+                    ):
+                        self.broken = True
+                        if failure == "unknown_tool":
+                            part.function_call.name = "finish_finish_decision"
+                        else:
+                            part.function_call.args["summary"] = "x" * 574
+                yield response
+
+    city = adk_city(brain_changes={"model_calls_per_event": 8})
+    agent, event = first_call(city)
+    assert agent.reserve_budget(event)
+    assert ensure_restaurant_result(agent, event, model=CorrectingModel())
+    with connect(city.url) as conn:
+        assert (
+            conn.execute(
+                "SELECT count(*) n FROM supply_requests WHERE run_id=%s", (city.run,)
+            ).fetchone()["n"]
+            == 0
+        )
+        receipts = conn.execute(
+            "SELECT tool,result FROM restaurant_tool_receipts WHERE event_id=%s ORDER BY step",
+            (event.id,),
+        ).fetchall()
+        assert sum(r["tool"] == "restaurant.request_supply" for r in receipts) == 1
+        rejected = [r["result"] for r in receipts if r["tool"] == "restaurant.contract_rejected"]
+        assert len(rejected) == 1 and rejected[0]["code"] == failure
+        assert rejected[0]["executed"] is False
+        assert sum(r["tool"] == "restaurant.finish" for r in receipts) == 1
+        calls = conn.execute(
+            "SELECT request_body FROM restaurant_model_calls WHERE event_id=%s ORDER BY step",
+            (event.id,),
+        ).fetchall()
+        assert len(calls) == 4
+        mode = calls[0]["request_body"]["config"]["tool_config"]["function_calling_config"]
+        assert mode["mode"] == "VALIDATED"
+        assert "finish_decision" in mode["allowed_function_names"]
+        assert "finish_finish_decision" not in mode["allowed_function_names"]
+        assert "500 characters" in calls[0]["request_body"]["config"]["system_instruction"]
+    with connect(agent.dsn) as conn:
+        agent.handle(conn, event)
+    with connect(city.url) as conn:
+        assert (
+            conn.execute(
+                "SELECT count(*) n FROM supply_requests WHERE run_id=%s", (city.run,)
+            ).fetchone()["n"]
+            == 4
+        )
+        assert (
+            conn.execute(
+                "SELECT state FROM restaurant_turns WHERE event_id=%s", (event.id,)
+            ).fetchone()["state"]
+            == "applied"
         )
 
 
@@ -264,3 +359,64 @@ def test_full_queue_delivery_uses_one_jev_call_and_five_rule_events(
             (city.run,),
         ).fetchall()
         assert {row["executor"]: row["n"] for row in routes} == {"jev": 1, "rules": 5}
+
+
+@pytest.mark.integration
+@pytest.mark.parametrize(
+    "name,args",
+    [
+        ("read_order", {"order": "foreign-order"}),
+        ("finish_finish_decision", {"owner": "foreign-store"}),
+        ("search_ingredients", {"query": "mozzarella"}),
+    ],
+)
+def test_contract_repair_never_swallows_scope_or_disabled_tool_denials(adk_city, name, args):
+    from delivery.adk_offline import OfflineRestaurantModel
+
+    class ScopeAttack(OfflineRestaurantModel):
+        async def generate_content_async(self, llm_request, stream=False):
+            yield self.response(calls=[(name, args)])
+
+    city = adk_city()
+    agent, event = first_call(city)
+    assert agent.reserve_budget(event)
+    with pytest.raises(PermissionError):
+        ensure_restaurant_result(agent, event, model=ScopeAttack())
+    with connect(city.url) as conn:
+        assert (
+            conn.execute(
+                "SELECT count(*) n FROM restaurant_tool_receipts WHERE event_id=%s", (event.id,)
+            ).fetchone()["n"]
+            == 0
+        )
+        assert (
+            conn.execute(
+                "SELECT count(*) n FROM supply_requests WHERE run_id=%s", (city.run,)
+            ).fetchone()["n"]
+            == 0
+        )
+
+
+@pytest.mark.integration
+def test_contract_rejection_requires_own_completed_live_model_turn(adk_city):
+    from delivery.supply import provision
+
+    city = adk_city()
+    agent, event = first_call(city)
+    assert agent.reserve_budget(event)
+    with connect(agent.dsn) as conn:
+        nonce = conn.execute(
+            "SELECT restaurant_turn_begin(%s,%s,%s) d", (event.id, event.token, event.attempts)
+        ).fetchone()["d"]["nonce"]
+    turn = RestaurantTurn(agent, event, nonce)
+    with pytest.raises(psycopg.errors.InsufficientPrivilege):
+        turn.sql("restaurant_contract_reject", "finish_decision", "summary_length")
+    other = adk_city()
+    foreign = provision(other.run, other.url)["restaurant-pizza"]
+    market = provision(city.run, city.url)["market-a"]
+    for identity in (foreign, market):
+        with pytest.raises(psycopg.errors.InsufficientPrivilege), connect(identity.dsn) as conn:
+            conn.execute(
+                "SELECT restaurant_contract_reject(%s,%s,%s,%s,'finish_decision','summary_length')",
+                (event.id, event.token, event.attempts, nonce),
+            )

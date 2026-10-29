@@ -592,7 +592,8 @@ def test_model_io_has_no_open_agent_database_connection(adk_city):
             observations.append(count)
 
     assert ensure_restaurant_result(agent, event, fault=check)
-    assert len(observations) == 8 and observations == [0] * 8
+    # Three decisions calls (read, stage, finish), with no paid/post-finish summary.
+    assert len(observations) == 6 and observations == [0] * 6
 
 
 def kill_worker_at_saved_plan(agent, event):
@@ -631,7 +632,7 @@ def test_real_process_death_reuses_saved_adk_plan(adk_city):
             conn.execute(
                 "SELECT count(*) n FROM restaurant_model_calls WHERE event_id=%s", (event.id,)
             ).fetchone()["n"]
-            == 4
+            == 3
         )
 
 
