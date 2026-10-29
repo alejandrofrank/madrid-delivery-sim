@@ -85,6 +85,26 @@ resource "google_service_account" "caller" {
   depends_on   = [google_project_service.api]
 }
 
+# Native ADK inference has its own keyless identity, retained when billing is parked.
+resource "google_service_account" "restaurant" {
+  project      = google_project.ai.project_id
+  account_id   = "restaurant-adk"
+  display_name = "Scoped restaurant Vertex inference"
+  depends_on   = [google_project_service.api]
+}
+
+resource "google_project_iam_member" "restaurant_predict" {
+  project = google_project.ai.project_id
+  role    = google_project_iam_custom_role.judge_predict[0].name
+  member  = "serviceAccount:${google_service_account.restaurant.email}"
+}
+
+resource "google_service_account_iam_binding" "restaurant_tokens" {
+  service_account_id = google_service_account.restaurant.name
+  role               = "roles/iam.serviceAccountTokenCreator"
+  members            = var.invoker_members
+}
+
 resource "google_service_account_iam_binding" "caller_tokens" {
   count              = 1 # Persistent, non-billable IAM identity or binding.
   service_account_id = google_service_account.caller[0].name

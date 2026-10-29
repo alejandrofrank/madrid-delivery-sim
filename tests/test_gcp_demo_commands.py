@@ -79,6 +79,41 @@ def test_guard_rejects_wrong_project_and_delete_during_start():
         )
 
 
+def test_vertex_start_guard_allows_only_its_native_identity_and_billing():
+    validate_plan(
+        {
+            "resource_changes": [
+                change(
+                    "google_service_account.restaurant",
+                    ["create"],
+                    after={"project": PROJECT, "account_id": "restaurant-adk"},
+                )
+            ]
+        },
+        PROJECT,
+        "vertex-enable",
+    )
+    for address in (
+        "google_artifact_registry_repository.images[0]",
+        "google_cloud_run_v2_service.judge[0]",
+        "google_storage_bucket.other",
+    ):
+        with pytest.raises(DemoError):
+            validate_plan(
+                {
+                    "resource_changes": [
+                        change(
+                            address,
+                            ["create"],
+                            after={"project": PROJECT},
+                        )
+                    ]
+                },
+                PROJECT,
+                "vertex-enable",
+            )
+
+
 def test_stop_resets_local_first_deletes_runtime_then_unlinks_billing(demo):
     events = []
     demo.compose = lambda cloud: events.append(("compose", cloud))
@@ -245,3 +280,66 @@ def test_existing_gateway_start_does_not_rebuild_or_redeploy(demo, tmp_path):
     demo.apply.assert_not_called()
     demo.image.assert_not_called()
     demo.compose.assert_called_once()
+
+
+def test_vertex_start_enables_billing_without_deploying_a_gateway(demo, tmp_path):
+    demo.adc = Mock(return_value=tmp_path)
+    demo.state = Mock(return_value={})
+    demo.billing = Mock(return_value=True)
+    demo.apply = Mock()
+    demo.compose = Mock()
+    demo.vertex_start()
+    demo.apply.assert_called_once_with("vertex-enable", billing=True, runtime=False, gateway=False)
+    demo.compose.assert_not_called()
+
+
+def test_native_launcher_keeps_adc_outside_ui_mounts_and_cleans_it(
+    demo, tmp_path, monkeypatch, capsys
+):
+    import sys
+
+    monkeypatch.syspath_prepend(str(Path(__file__).resolve().parents[1] / "scripts"))
+    import run_adk_vertex as launcher
+
+    source = tmp_path / "operator-adc"
+    source.mkdir()
+    (source / "application_default_credentials.json").write_text(
+        json.dumps(
+            {
+                "type": "authorized_user",
+                "client_id": "fake-client",
+                "client_secret": "fake-secret",
+                "refresh_token": "synthetic-test-refresh",
+            }
+        )
+    )
+    demo.adc = Mock(return_value=source)
+    demo.state = Mock(
+        return_value={
+            "google_service_account.restaurant": {
+                "email": f"restaurant-adk@{PROJECT}.iam.gserviceaccount.com",
+            }
+        }
+    )
+    demo.billing = Mock(return_value=True)
+    mounts = []
+
+    def run(*args, **kwargs):
+        mounted = Path(args[args.index("-v") + 1].split(":/adk-credentials")[0])
+        assert mounted.parent == tmp_path and mounted.name.startswith(".env.adk-adc-")
+        assert not mounted.is_relative_to(tmp_path / "artifacts")
+        credentials = json.loads((mounted / "adc.json").read_text())
+        assert credentials["type"] == "impersonated_service_account"
+        assert credentials["service_account_impersonation_url"].endswith(
+            f"restaurant-adk@{PROJECT}.iam.gserviceaccount.com:generateAccessToken"
+        )
+        assert all("synthetic-test-refresh" not in arg for arg in args)
+        mounts.append(mounted)
+        return "comparison completed"
+
+    demo.run = run
+    monkeypatch.setattr(launcher, "Demo", lambda: demo)
+    monkeypatch.setattr(sys, "argv", ["run_adk_vertex.py", "--paid"])
+    launcher.main()
+    assert mounts and not mounts[0].exists()
+    assert "synthetic-test-refresh" not in capsys.readouterr().out

@@ -52,7 +52,7 @@ class Demo:
         stdin: str | None = None,
         cwd: Path | None = None,
     ) -> str:
-        executable = shutil.which(args[0])
+        executable = shutil.which(args[0]) or shutil.which(args[0] + ".exe")
         if executable is None:
             raise DemoError(f"{args[0]} is required.")
         result = subprocess.run(
@@ -230,6 +230,17 @@ class Demo:
             flush=True,
         )
 
+    def vertex_start(self) -> None:
+        """Enable inference billing and retained native IAM; deploy no runtime/storage."""
+        self.adc()
+        state = self.state()
+        if RUNTIME.intersection(state):
+            raise DemoError("Park the existing gateway before starting an inference-only session.")
+        self.apply("vertex-enable", billing=True, runtime=False, gateway=False)
+        if not self.billing():
+            raise DemoError("Vertex inference billing was not enabled.")
+        print("Vertex billing ready; city remains local. No inference calls were made.")
+
     def stop(self) -> None:
         # Remove ADC mount and prevent new cloud calls before deleting the runtime.
         local_error = None
@@ -296,6 +307,7 @@ def validate_plan(plan: dict[str, Any], project: str, phase: str) -> None:
         "deploy": {"create", "update"},
         "remove-runtime": {"delete"},
         "unlink-billing": set(),
+        "vertex-enable": {"create"},
     }[phase]
     for change in plan.get("resource_changes", []):
         actions = change["change"]["actions"]
@@ -308,11 +320,41 @@ def validate_plan(plan: dict[str, Any], project: str, phase: str) -> None:
             keys = {k for k in before.keys() | after.keys() if before.get(k) != after.get(k)}
             if keys <= {"billing_account"} and after.get("project_id") == project:
                 continue
+        permitted = (
+            RUNTIME
+            if phase != "vertex-enable"
+            else {
+                "google_service_account.restaurant",
+                "google_project_iam_member.restaurant_predict",
+                "google_service_account_iam_binding.restaurant_tokens",
+            }
+        )
+        resource_project = (after or before).get("project")
+        if address == "google_service_account_iam_binding.restaurant_tokens":
+            identity = after.get("service_account_id") or before.get("service_account_id", "")
+            account = (
+                next(
+                    (
+                        c
+                        for c in plan.get("resource_changes", [])
+                        if c["address"] == "google_service_account.restaurant"
+                    ),
+                    {},
+                )
+                .get("change", {})
+                .get("after", {})
+            )
+            if identity.startswith(f"projects/{project}/serviceAccounts/") or (
+                change["change"].get("after_unknown", {}).get("service_account_id")
+                and account.get("project") == project
+                and account.get("account_id") == "restaurant-adk"
+            ):
+                resource_project = project
         if (
-            address not in RUNTIME
+            address not in permitted
             or len(actions) != 1
             or actions[0] not in allowed
-            or (after or before).get("project") != project
+            or resource_project != project
         ):
             raise DemoError(
                 f"Plan rejected: unexpected {actions} on {address}. "
@@ -340,7 +382,7 @@ def lifecycle_lock(directory: Path):
 
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("action", choices=["start", "stop", "status"])
+    parser.add_argument("action", choices=["start", "vertex-start", "stop", "status"])
     args = parser.parse_args()
     try:
         demo = Demo()
@@ -351,7 +393,7 @@ def main() -> int:
                 demo.env["GOOGLE_OAUTH_ACCESS_TOKEN"] = demo.run(
                     "gcloud", "auth", "print-access-token", "--quiet"
                 )
-                getattr(demo, args.action)()
+                getattr(demo, args.action.replace("-", "_"))()
             print(json.dumps(demo.status(), indent=2))
         return 0
     except (DemoError, OSError, ValueError, KeyError, subprocess.TimeoutExpired) as exc:

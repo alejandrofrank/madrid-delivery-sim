@@ -27,6 +27,10 @@ run "parked_default" {
     error_message = "Parked project must be protected and unlinked from billing."
   }
   assert {
+    condition     = google_service_account.restaurant.account_id == "restaurant-adk" && length(google_project_iam_custom_role.judge_predict[0].permissions) == 1 && contains(google_project_iam_custom_role.judge_predict[0].permissions, "aiplatform.endpoints.predict")
+    error_message = "Native restaurants retain a separate identity with only the scoped prediction role."
+  }
+  assert {
     condition     = length(google_artifact_registry_repository.images) == 0 && length(google_cloud_run_v2_service.judge) == 0 && length(google_service_account.judge) == 1
     error_message = "Parked mode must remove image storage and gateway while retaining its runtime identity."
   }
