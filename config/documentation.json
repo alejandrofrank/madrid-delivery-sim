@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "reviewed_at": "2026-10-28",
+  "reviewed_at": "2026-10-29",
   "pages": [
     {
       "id": "overview",
@@ -9,6 +9,14 @@
       "file": "docs/ARCHITECTURE-OVERVIEW.md",
       "summary": "The city, the agent contract and the optional cloud boundary.",
       "status": "Implemented + roadmap"
+    },
+    {
+      "id": "google-stack",
+      "title": "Google stack demonstration",
+      "group": "Start here",
+      "file": "docs/GOOGLE-STACK.md",
+      "summary": "Trace a business decision through ADK, A2A, telemetry and analytics.",
+      "status": "Implemented locally / cloud opt-in"
     },
     {
       "id": "decisions",
@@ -65,6 +73,14 @@
       "file": "docs/DURABLE-INFERENCE.md",
       "summary": "Committed requests, network calls outside SQL, saved results and safe crash recovery.",
       "status": "Local crash verified / fake provider"
+    },
+    {
+      "id": "a2a",
+      "title": "A2A agent interoperability",
+      "group": "Agent engineering",
+      "file": "docs/A2A.md",
+      "summary": "Real SDK agent discovery and JSON-RPC over the durable queue.",
+      "status": "Local / no paid calls"
     },
     {
       "id": "restaurant-supply",
@@ -131,6 +147,22 @@
       "status": "Historical evidence"
     },
     {
+      "id": "observability",
+      "title": "OpenTelemetry and Cloud Trace",
+      "group": "Google Cloud",
+      "file": "docs/OBSERVABILITY.md",
+      "summary": "Propagate trace context through agents and queue retries; inspect in Jaeger or Cloud Trace.",
+      "status": "Local verified / cloud opt-in"
+    },
+    {
+      "id": "analytics",
+      "title": "Run evidence in BigQuery",
+      "group": "Google Cloud",
+      "file": "docs/GOOGLE-ANALYTICS.md",
+      "summary": "Allowlisted receipts, bounded uploads, scoped IAM and a Looker Studio view.",
+      "status": "Offline verified / cloud opt-in"
+    },
+    {
       "id": "evals",
       "title": "Role scenario evaluations",
       "group": "Verification & operations",
@@ -168,14 +200,18 @@
     "docs/VALIDATION.md",
     "ROADMAP.md",
     "STATUS.md",
-    "README.md"
+    "README.md",
+    "docs/PUBLIC-READINESS.md"
   ],
   "sources": [
+    "compose.tracing-gcp.yaml",
+    "compose.tracing.yaml",
     "compose.yaml",
     "config/agents/judge-gcp/role.json",
     "config/agents/restaurant-adk/PROMPT.md",
     "config/agents/restaurant-adk/SOUL-cost.md",
     "config/agents/restaurant-adk/SOUL-speed.md",
+    "config/otel-collector-gcp.yaml",
     "docs/evidence/agent-scenarios-local.json",
     "docs/evidence/gcp-demo-commands.json",
     "docs/evidence/gcp-iam-recovered.json",
@@ -186,15 +222,23 @@
     "docs/evidence/gcp-switch-verification.json",
     "docs/evidence/gcp-teardown-plan.json",
     "docs/evidence/gcp-teardown-result.json",
+    "docs/evidence/google-stack-local.json",
     "docs/evidence/local-health.json",
     "docs/evidence/restaurant-supply-local.json",
     "docs/evidence/typed-memory-local.json",
     "infra/gcp-ai/Dockerfile",
+    "infra/gcp-ai/bigquery.tf",
     "infra/gcp-ai/gateway.py",
     "infra/gcp-ai/main.tf",
+    "infra/gcp-ai/sql/run_dashboard.sql",
+    "infra/gcp-ai/telemetry.tf",
+    "infra/gcp-ai/tests/bigquery.tftest.hcl",
+    "infra/gcp-ai/tests/telemetry.tftest.hcl",
     "infra/gcp-ai/variables.tf",
+    "scripts/call_a2a.py",
     "scripts/compare_agent_routing.py",
     "scripts/demo_adk_vertex.py",
+    "scripts/export_bigquery.py",
     "scripts/gcp_demo.py",
     "scripts/run_adk_vertex.py",
     "scripts/verify_adk_contracts.py",
@@ -209,7 +253,10 @@
     "sql/migrations/022_jev_decision_routing.sql",
     "sql/migrations/024_agent_memory_modes.sql",
     "sql/migrations/025_adk_contract_corrections.sql",
+    "sql/migrations/026_telemetry_context.sql",
+    "src/delivery/a2a_server.py",
     "src/delivery/adk_contracts.py",
+    "src/delivery/adk_customer.py",
     "src/delivery/adk_evidence.py",
     "src/delivery/adk_models.py",
     "src/delivery/adk_offline.py",
@@ -217,7 +264,9 @@
     "src/delivery/agent_access.py",
     "src/delivery/agent_runtime.py",
     "src/delivery/agent_specs.py",
+    "src/delivery/bigquery_export.py",
     "src/delivery/cloud_ai.py",
+    "src/delivery/customer_service.py",
     "src/delivery/durable_inference.py",
     "src/delivery/fleet_policy.py",
     "src/delivery/health.py",
@@ -232,11 +281,16 @@
     "src/delivery/supply_models.py",
     "src/delivery/supply_policy.py",
     "src/delivery/supply_search_service.py",
+    "src/delivery/telemetry.py",
+    "src/delivery/telemetry_api.py",
     "src/delivery/typed_memory.py",
+    "tests/test_a2a_server.py",
+    "tests/test_adk_customer.py",
     "tests/test_adk_evidence.py",
     "tests/test_adk_restaurant.py",
     "tests/test_agent_queue_boundary.py",
     "tests/test_agent_runtime.py",
+    "tests/test_bigquery_export.py",
     "tests/test_cloud_ai.py",
     "tests/test_cloud_runtime.py",
     "tests/test_delivery_flow.py",
@@ -248,11 +302,13 @@
     "tests/test_jev_routing.py",
     "tests/test_memory_profiles.py",
     "tests/test_queue.py",
+    "tests/test_safety.py",
     "tests/test_scenario_evals.py",
     "tests/test_supply_delivery_facts.py",
     "tests/test_supply_integration.py",
     "tests/test_supply_models.py",
     "tests/test_supply_search_service.py",
+    "tests/test_telemetry.py",
     "tests/test_typed_memory.py"
   ]
 }

@@ -343,3 +343,86 @@ def test_native_launcher_keeps_adc_outside_ui_mounts_and_cleans_it(
     launcher.main()
     assert mounts and not mounts[0].exists()
     assert "synthetic-test-refresh" not in capsys.readouterr().out
+
+
+@pytest.mark.parametrize(
+    "address",
+    [
+        'google_bigquery_table.analytics["run_receipts"]',
+        "google_bigquery_dataset.analytics[0]",
+        "google_service_account.analytics[0]",
+        "google_project_iam_custom_role.analytics_jobs[0]",
+        'google_project_service.telemetry["cloudtrace.googleapis.com"]',
+        'google_project_iam_member.telemetry["roles/telemetry.tracesWriter"]',
+    ],
+)
+def test_stop_requires_optional_cleanup_before_any_mutations(demo, address):
+    demo.state = Mock(return_value={**dict.fromkeys(module.RUNTIME), address: {}})
+    demo.compose = Mock()
+    demo.billing = Mock()
+    demo.apply = Mock()
+    with pytest.raises(DemoError, match="explicit cleanup") as error:
+        demo.stop()
+    assert "-var=enable_bigquery=false" in str(error.value)
+    assert "-var=enable_telemetry=false" in str(error.value)
+    assert "preserve the current runtime flags" in str(error.value)
+    demo.compose.assert_not_called()
+    demo.billing.assert_not_called()
+    demo.apply.assert_not_called()
+
+
+def test_stop_validates_state_before_resetting_the_local_app(demo):
+    demo.state = Mock(side_effect=DemoError("Unexpected project state"))
+    demo.compose = Mock()
+    demo.apply = Mock()
+    with pytest.raises(DemoError, match="Unexpected project state"):
+        demo.stop()
+    demo.compose.assert_not_called()
+    demo.apply.assert_not_called()
+
+
+@pytest.mark.parametrize("billing", [False, True])
+def test_status_exposes_retained_optional_components_without_claiming_parked(demo, billing):
+    analytics = 'google_bigquery_table.analytics["run_kpis"]'
+    telemetry = "google_service_account.telemetry[0]"
+    demo.state = Mock(return_value={"google_project.ai": {}, analytics: {}, telemetry: {}})
+    demo.billing = Mock(return_value=billing)
+    demo.cloud = Mock(side_effect=[{"lifecycleState": "ACTIVE"}, []] + ([[]] if billing else []))
+    demo.local = Mock(return_value={"local": True, "gcp_ai": False})
+    result = demo.status()
+    assert result["analytics_in_state"] == [analytics]
+    assert result["telemetry_in_state"] == [telemetry]
+    assert result["mode"] == ("cloud-enabled" if billing else "optional-components-retained")
+
+
+@pytest.mark.parametrize("component", module.OPTIONAL_COMPONENTS.values())
+def test_optional_resource_detection_covers_partial_iam_and_storage(component):
+    state = {f"{address}[0]": {} for address in component}
+    found = module.optional_resources(state)
+    assert set().union(*map(set, found.values())) == set(state)
+    assert not any(module.optional_resources({"google_service_account.restaurant": {}}).values())
+
+
+def test_plan_guard_still_rejects_optional_resource_deletion():
+    for address in (
+        'google_bigquery_table.analytics["run_receipts"]',
+        "google_service_account.telemetry[0]",
+    ):
+        with pytest.raises(DemoError, match="Plan rejected"):
+            validate_plan(
+                {"resource_changes": [change(address, ["delete"], before={"project": PROJECT})]},
+                PROJECT,
+                "remove-runtime",
+            )
+
+
+@pytest.mark.parametrize("phase", ["remove-runtime", "unlink-billing"])
+def test_parking_cannot_recreate_optionals_from_stale_opt_in_flags(demo, phase):
+    demo.config.update(enable_bigquery=True, enable_telemetry=True)
+    demo.tf = Mock(side_effect=["", '{"resource_changes": []}', ""])
+    demo.apply(phase, billing=phase == "remove-runtime", runtime=False, gateway=False)
+    planned = demo.tf.call_args_list[0].args
+    assert "-var=enable_bigquery=false" in planned
+    assert "-var=enable_telemetry=false" in planned
+    parked = json.loads((demo.infra / "zz-demo.auto.tfvars.json").read_text())
+    assert parked["enable_bigquery"] is False and parked["enable_telemetry"] is False

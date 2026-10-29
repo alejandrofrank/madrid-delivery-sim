@@ -26,6 +26,7 @@ from pydantic import BaseModel, ConfigDict, Field
 from delivery.adk_contracts import effective_instructions
 from delivery.db import connect
 from delivery.queue import Event
+from delivery.telemetry import trace_span, traced_event
 
 if TYPE_CHECKING:
     from delivery.agent_runtime import LocalAgent
@@ -78,7 +79,10 @@ class RestaurantTurn:
             raise PermissionError("Decision already finished")
         if name not in self.brain.tools:
             raise PermissionError("Capability is not enabled by the frozen template")
-        return self.sql("restaurant_tool", name, Jsonb(arguments or {}))
+        with trace_span(
+            "agent.tool", attributes={"delivery.tool": name, "delivery.agent": "restaurant"}
+        ):
+            return self.sql("restaurant_tool", name, Jsonb(arguments or {}))
 
     def read_order(self) -> dict[str, Any]:
         """Read the current order, incoming event, deadline and safe alternative."""
@@ -353,6 +357,7 @@ class RestaurantTurn:
         return self.plan
 
 
+@traced_event("agent.restaurant.inference")
 def ensure_restaurant_result(
     agent: "LocalAgent",
     event: Event,
