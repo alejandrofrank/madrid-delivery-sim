@@ -13,6 +13,7 @@ from pydantic import ValidationError
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 from delivery.cloud_ai import CloudJudge, Judgment  # noqa: E402
+from delivery.scenario_report import EvalAttempt, summarize_arms  # noqa: E402
 
 ROOT = Path(__file__).resolve().parents[1]
 MAX_CASES = 12
@@ -132,6 +133,16 @@ def evaluate(
         report["estimated_cost_usd"] = (
             input_tokens * pricing[0] + output_tokens * pricing[1]
         ) / 1_000_000
+    attempts = [EvalAttempt(
+        arm=label, case_id=row["case_id"], repetition=1, passed=row["passed"],
+        categories={"schema": row["status"] != "schema_failure", "task": row["passed"]},
+        latency_ms=float(row["latency_ms"]),
+        cost_usd=(0.0 if judge is None else
+                  (row["input_tokens"] * pricing[0] + row["output_tokens"] * pricing[1])
+                  / 1_000_000 if pricing and row["status"] == "ok" else None),
+        error=row.get("error_type"),
+    ) for row in rows]
+    report["arms"] = summarize_arms(attempts)
     return report
 
 
