@@ -1,0 +1,10 @@
+{
+  "source_revision": "69135c9",
+  "command": "docker compose -p mds-ui -f compose.yaml -f compose.ui.yaml exec -T app pytest -q",
+  "result": "passed",
+  "passed": 565,
+  "warnings": 1,
+  "seconds": 359.66,
+  "warning": "Existing Starlette httpx deprecation warning",
+  "isolation": "Dedicated mds-ui app, Postgres, Redis and delivery_test database; no provider calls"
+}

@@ -1,0 +1,8 @@
+{
+  "name": "madrid-delivery-sim-ui-checks",
+  "private": true,
+  "description": "Development-only browser evidence tooling; no frontend runtime dependencies.",
+  "engines": {"node": ">=20"},
+  "scripts": {"screenshots": "node scripts/screenshot_ui.ts"},
+  "devDependencies": {"playwright": "1.64.1"}
+}

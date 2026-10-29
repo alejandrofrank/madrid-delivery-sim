@@ -38,6 +38,8 @@ The initial captures show real empty/ready states in a newly seeded, isolated lo
 
 Seven workspaces × three viewports returned HTTP 200 with no browser exceptions, horizontal document overflow, or unlabeled visible controls detected by the lightweight capture checks. Those checks do not certify WCAG conformance. Independent Impeccable design and technical reviews are retained beside the screenshots.
 
+Baseline regression suite: **565 passed**, one existing Starlette/httpx deprecation warning, 359.66 seconds. See docs/media/before/tests.json.
+
 ## Resource references
 
 - IBM Plex Sans and Mono are an OFL font pairing: https://github.com/IBM/plex

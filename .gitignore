@@ -24,3 +24,9 @@ infra/gcp-ai/*.tfplan
 # Local lifecycle command scratch files (no credentials or plans in Git)
 infra/gcp-ai/.demo-command.lock
 infra/gcp-ai/zz-demo.auto.tfvars.tmp
+
+# Isolated UI development
+.venv-ui/
+.impeccable/cache/
+
+node_modules/
