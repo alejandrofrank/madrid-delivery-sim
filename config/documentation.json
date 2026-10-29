@@ -164,11 +164,11 @@
     },
     {
       "id": "evals",
-      "title": "Role scenario evaluations",
+      "title": "Agent evaluations & CI gate",
       "group": "Verification & operations",
       "file": "docs/AGENT-EVALS.md",
-      "summary": "Inventory, restaurant, dispatcher and courier criteria and repeatability.",
-      "status": "Local / no model calls"
+      "summary": "ADK evalsets, error categories, golden traces, reliability and the main comparison gate.",
+      "status": "Offline verified / optional manual judge"
     },
     {
       "id": "health",
