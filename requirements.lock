@@ -11,6 +11,8 @@ anyio==4.15.1
     #   google-genai
     #   httpx
     #   starlette
+asgiref==3.13.0
+    # via opentelemetry-instrumentation-asgi
 attrs==26.1.0
     # via
     #   jsonschema
@@ -32,8 +34,6 @@ click==8.5.0
     # via
     #   google-adk
     #   uvicorn
-colorama==0.4.6
-    # via pytest
 cryptography==50.0.2
     # via
     #   authlib
@@ -50,16 +50,47 @@ geopandas==1.2.0
     # via osmnx
 google-adk==2.13.0
     # via madrid-delivery-sim (pyproject.toml)
+google-api-core==2.43.2
+    # via
+    #   google-cloud-bigquery
+    #   google-cloud-core
+    #   google-cloud-trace
 google-auth==2.62.0
     # via
     #   google-adk
+    #   google-api-core
+    #   google-cloud-bigquery
+    #   google-cloud-core
+    #   google-cloud-trace
     #   google-genai
+google-cloud-bigquery==3.47.0
+    # via madrid-delivery-sim (pyproject.toml)
+google-cloud-core==2.8.0
+    # via google-cloud-bigquery
+google-cloud-trace==1.21.0
+    # via opentelemetry-exporter-gcp-trace
+google-crc32c==1.9.0
+    # via google-resumable-media
 google-genai==2.33.0
     # via
     #   madrid-delivery-sim (pyproject.toml)
     #   google-adk
+google-resumable-media==2.11.0
+    # via google-cloud-bigquery
+googleapis-common-protos==1.76.0
+    # via
+    #   google-api-core
+    #   grpcio-status
+    #   opentelemetry-exporter-otlp-proto-http
 graphviz==0.21
     # via google-adk
+grpcio==1.85.0
+    # via
+    #   google-api-core
+    #   google-cloud-trace
+    #   grpcio-status
+grpcio-status==1.85.0
+    # via google-api-core
 h11==0.16.0
     # via
     #   httpcore
@@ -104,18 +135,65 @@ opentelemetry-api==1.44.0
     # via
     #   fastapi
     #   google-adk
+    #   google-api-core
+    #   opentelemetry-exporter-gcp-trace
+    #   opentelemetry-exporter-otlp-proto-http
+    #   opentelemetry-instrumentation
+    #   opentelemetry-instrumentation-asgi
+    #   opentelemetry-instrumentation-fastapi
+    #   opentelemetry-instrumentation-redis
+    #   opentelemetry-resourcedetector-gcp
     #   opentelemetry-sdk
     #   opentelemetry-semantic-conventions
+opentelemetry-exporter-gcp-trace==1.15.0
+    # via madrid-delivery-sim (pyproject.toml)
+opentelemetry-exporter-otlp-proto-common==1.44.0
+    # via opentelemetry-exporter-otlp-proto-http
+opentelemetry-exporter-otlp-proto-http==1.44.0
+    # via madrid-delivery-sim (pyproject.toml)
+opentelemetry-instrumentation==0.65b0
+    # via
+    #   opentelemetry-instrumentation-asgi
+    #   opentelemetry-instrumentation-fastapi
+    #   opentelemetry-instrumentation-redis
+opentelemetry-instrumentation-asgi==0.65b0
+    # via opentelemetry-instrumentation-fastapi
+opentelemetry-instrumentation-fastapi==0.65b0
+    # via madrid-delivery-sim (pyproject.toml)
+opentelemetry-instrumentation-redis==0.65b0
+    # via madrid-delivery-sim (pyproject.toml)
+opentelemetry-proto==1.44.0
+    # via
+    #   opentelemetry-exporter-otlp-proto-common
+    #   opentelemetry-exporter-otlp-proto-http
+opentelemetry-resourcedetector-gcp==1.14.0
+    # via opentelemetry-exporter-gcp-trace
 opentelemetry-sdk==1.44.0
-    # via google-adk
+    # via
+    #   madrid-delivery-sim (pyproject.toml)
+    #   google-adk
+    #   opentelemetry-exporter-gcp-trace
+    #   opentelemetry-exporter-otlp-proto-http
+    #   opentelemetry-resourcedetector-gcp
 opentelemetry-semantic-conventions==0.65b0
-    # via opentelemetry-sdk
+    # via
+    #   opentelemetry-instrumentation
+    #   opentelemetry-instrumentation-asgi
+    #   opentelemetry-instrumentation-fastapi
+    #   opentelemetry-instrumentation-redis
+    #   opentelemetry-sdk
+opentelemetry-util-http==0.65b0
+    # via
+    #   opentelemetry-instrumentation-asgi
+    #   opentelemetry-instrumentation-fastapi
 osmnx==2.1.1
     # via madrid-delivery-sim (pyproject.toml)
 packaging==26.3
     # via
     #   geopandas
     #   google-adk
+    #   google-cloud-bigquery
+    #   opentelemetry-instrumentation
     #   pyogrio
     #   pytest
 pandas==2.3.3
@@ -127,6 +205,18 @@ pathspec==1.1.1
     # via mypy
 pluggy==1.7.0
     # via pytest
+proto-plus==1.29.0
+    # via
+    #   google-api-core
+    #   google-cloud-trace
+protobuf==7.36.2
+    # via
+    #   google-api-core
+    #   google-cloud-trace
+    #   googleapis-common-protos
+    #   grpcio-status
+    #   opentelemetry-proto
+    #   proto-plus
 psycopg==3.3.6
     # via madrid-delivery-sim (pyproject.toml)
 psycopg-binary==3.3.6
@@ -155,8 +245,10 @@ pyproj==3.8.0
     # via geopandas
 pytest==8.4.2
     # via madrid-delivery-sim (pyproject.toml)
-python-dateutil==3.0.0
-    # via pandas
+python-dateutil==2.9.0.post0
+    # via
+    #   google-cloud-bigquery
+    #   pandas
 python-dotenv==1.2.4
     # via
     #   google-adk
@@ -176,8 +268,12 @@ referencing==0.37.0
 requests==2.34.2
     # via
     #   google-adk
+    #   google-api-core
     #   google-auth
+    #   google-cloud-bigquery
     #   google-genai
+    #   opentelemetry-exporter-otlp-proto-http
+    #   opentelemetry-resourcedetector-gcp
     #   osmnx
 rpds-py==2026.9.1
     # via
@@ -209,8 +305,11 @@ typing-extensions==4.16.0
     #   fastapi
     #   google-adk
     #   google-genai
+    #   grpcio
     #   mypy
     #   opentelemetry-api
+    #   opentelemetry-exporter-gcp-trace
+    #   opentelemetry-exporter-otlp-proto-http
     #   opentelemetry-sdk
     #   opentelemetry-semantic-conventions
     #   psycopg
@@ -226,10 +325,7 @@ typing-inspection==0.4.4
     #   pydantic
     #   pydantic-settings
 tzdata==2026.5
-    # via
-    #   pandas
-    #   psycopg
-    #   python-dateutil
+    # via pandas
 urllib3==2.8.0
     # via requests
 uvicorn==0.54.0
@@ -242,3 +338,7 @@ websockets==15.0.1
     # via
     #   google-adk
     #   google-genai
+wrapt==2.5.1
+    # via
+    #   opentelemetry-instrumentation
+    #   opentelemetry-instrumentation-redis
