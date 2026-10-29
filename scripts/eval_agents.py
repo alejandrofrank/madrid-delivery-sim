@@ -10,6 +10,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "src"))
 
+from delivery.eval_analytics import export_scenarios  # noqa: E402
 from delivery.health_report import atomic_write_json, source_fingerprint, utc_now  # noqa: E402
 from delivery.scenario_evals import evaluate, require_local_test_database  # noqa: E402
 from delivery.scenario_report import (  # noqa: E402
@@ -72,6 +73,7 @@ def main() -> int:
         receipt = validate_receipt(report, manifest)
         result = summarize(manifest, receipt)
         atomic_write_json(ROOT / "artifacts/health/latest-scenarios.json", report)
+    export_scenarios(manifest, receipt)
     for role in result["roles"]:
         print(
             f"{role['name']}: {role['score']}% · "
