@@ -4,17 +4,17 @@ The seven local workspaces share the dark operations system defined in [DESIGN.m
 
 ## Direction and source of truth
 
-The approved replacement direction is a calm, dense operations console: blue graphite ground, local IBM Plex Sans and Mono, teal selection, fine neutral rules and readable working rows. It replaces the previous white/Arial reference. Compact titles and working controls take precedence over decorative presentation. Agents and the map share the operational viewport, while technical reviewers can reach the retained evidence behind each decision.
+The approved replacement direction is a calm, dense operations console: deep blue graphite ground, local IBM Plex Sans and Mono, cyan selection, fine neutral rules and readable working rows. The current rebuild also replaces the rejected raised gray panels and sparse Madrid graph-only map. Compact titles and working controls take precedence over decorative presentation. Agents and the map share the operational viewport, while technical reviewers can reach the retained evidence behind each decision.
 
 Palette and font primitives come from `web/tokens.css`. The page first loads these tokens, then its own layout stylesheet and the shared `web/workspace.css` layer. Delivery and Restaurants also load `web/agents.css` for the shared roster. Page styles still contain older aliases and exceptions; follow the resulting cascade and rendered artifact, not an isolated earlier declaration. `web/console.js` provides small shared SVG symbols, observed-series sparklines and accessible roster/map behavior.
 
-Local font files live in `web/fonts/` with their licenses. Their URLs require no external font service. IBM Plex Sans Regular, Medium and SemiBold and IBM Plex Mono Regular are available; do not assume a full family of additional weights exists.
+Local font files live in `web/fonts/` with their licenses. Their URLs require no external font service. IBM Plex Sans Regular, Medium and SemiBold and IBM Plex Mono Regular are available; do not assume a full family of additional weights exists. The vector basemap is the explicit exception: locally cached Noto Sans Regular glyphs provide cartographic labels, while UI controls, selected-agent labels and operational overlays stay Plex.
 
 ## Workspaces and navigation
 
 | Workspace | Route | Working emphasis |
 | --- | --- | --- |
-| Operations | `/` | Madrid couriers, cached street graph, selected decisions and order ledger |
+| Operations | `/` | Madrid couriers, full local vector basemap plus street graph, selected decisions and order ledger |
 | Delivery | `/delivery-lab` | Agent roster, fictional grid, delivery handoffs and order book |
 | Restaurants | `/restaurant-lab` | Household calls, kitchen and market agents, city network and entity inspector |
 | Inventory | `/lab` | Synthetic stock scenario, checkpoint evidence and recovery |
@@ -26,29 +26,39 @@ Local font files live in `web/fonts/` with their licenses. Their URLs require no
 
 The page identity is `data-page` on the body. Delivery's `data-workspace` attributes remain reserved for its local Overview, Orders, Fleet and Stores controls; assigning that attribute to an ancestor would interfere with its delegated click handler.
 
-The shell collapses at 1080px. Madrid's agent/map columns stack at 800px; Delivery and Restaurants stack at 900px. The Architecture page removes its right outline at 1250px and converts the topic list to a disclosure at 700px. Preserve local overflow for wide tables, roster history, code and expanded diagrams.
+The desktop shell uses a 44px header token, with a 56px token below 600px; it collapses to a menu at 1080px. Madrid's agent/map columns stack at 850px; Delivery and Restaurants stack at 900px. The Architecture page removes its right outline at 1250px and converts the topic list to a disclosure at 700px. Preserve local overflow for wide tables, roster history, code and expanded diagrams.
 
 ## Operational information and truthful evidence
 
 Simulation and definition settings are separate from the operation view in Madrid, Delivery and Restaurants. Starting the Madrid simulation returns to the operational view. Compact metric strips lead into the roster/map pair; selection opens a concise summary before detailed evidence.
 
+Madrid's desktop title uses 25px Plex Sans/600, reducing to 23px below 1400px and 22px below 850px. Four shallow metrics use a single ground-colored band with an 80px minimum height. The roster/map split is 45.5/54.5 with an 8px gap and a shared height of clamp(360px, 45vh, 460px). Its comparison columns expose Agent, Role, Status, Current task, Delivered and Rate/min; responsive layouts hide secondary columns while keeping identity/task/state legible.
+
+The selected-evidence strip has an 88px minimum height and exposes identity, task/energy, last decision and trace/detail actions. The compact ledger follows at an 8px gap, with 11px text, 5px vertical heading padding and 1px vertical cell padding. Completed runs default to existing All orders, preserving a useful populated ledger instead of manufacturing data. First-viewport row count is assessed by fresh captures, not assumed from a CSS change.
+
+Below 850px Madrid uses a 400px map region followed by its legend in normal document flow. The open or closed legend no longer occupies the selected courier's map space. Delivery's controls below 900px also use normal layout after the wrapped entity filters, preventing zoom/Fit city from covering Find customer.
+
 An agent's actual name is distinct from its role template and technical identifier. Restaurants exposes all three when available. Offline couriers are labeled as unavailable for assignment. Search must still find the real entity identity.
 
-Totals and rates are distinct. `Ops.sparkline` renders only after two finite samples exist. Roster curves use observations from the current visit and activity per simulated minute, with at most 30 retained rate samples. A completed run without captured history explicitly reports that history is unavailable. Do not generate a decorative series to fill that gap.
+Totals and rates are distinct. `Ops.sparkline` renders only after two finite samples exist. All curves use observations from the current visit and activity per simulated minute. Madrid retains at most 40 metric observations; the shared Delivery/Restaurant roster retains at most 30 rate samples. A completed run without captured history explicitly reports that history is unavailable. Do not generate a decorative series to fill that gap.
 
 The Madrid cost tile is an operating estimate in EUR. Per-decision latency, step cost and individual tool inputs/outputs remain unknown or not retained when the source does not provide them. Health preserves historical receipt dates and source-change warnings. Inventory's stock, locations and fixture roads remain visibly synthetic. UI polish does not establish model quality or current source health.
 
-## Madrid map navigation
+## Madrid cartography and navigation
 
-Madrid uses the cached local OpenStreetMap road graph and local Leaflet assets. The view does not require a paid map provider, and attribution remains visible. Simulation grid maps elsewhere are explicitly fictional.
+Madrid uses a full local OpenFreeMap vector basemap, rendered by vendored MapLibre GL JS 5.15.0 through the Leaflet bridge. Real street hierarchy, water, land use and Spanish place labels provide continuous geographic context. The simulator's cached OpenStreetMap graph remains a fine service-area overlay rather than the entire map.
 
-Madrid opens in Overview: the wheel scrolls the document, markers remain selectable, and visible zoom buttons work. Explore map enables dragging, wheel/touch zoom and keyboard navigation; Escape returns to Overview without changing the view. There is no inertial panning. Follow selection is an explicit action for a valid selected courier/order; it does not imply automatic following.
+The committed `web/map/manifest.json` records 332 source tiles at zoom levels 10–14 totaling 36,512,766 bytes (36.51 MB), covering longitude/latitude bounds [-3.85, 40.3, -3.52, 40.54]. `web/map/style.json` references local tile and Noto Sans Regular glyph URLs. The two level-10 tiles keep cartography available when fitted MapLibre camera zoom falls below 11 at laptop widths. Higher display zooms overzoom those finite cached tiles. Renderer provenance, licenses and attribution are retained; OpenFreeMap, OpenMapTiles and OpenStreetMap credit stays visible. No live paid map provider is required. The fixture grid maps on the other simulation routes remain explicitly fictional.
 
-Navigation remains bounded to the service rectangle with 12% padding. Minimum zoom adapts to the viewport and maximum zoom is 17. Fit network frames the service area. Selection framing caps zoom at 16 and is enabled only when valid in-bounds geometry exists. Working/idle/attention/order labels, role symbols and planned/traveled route styles explain what the map shows.
+Dragging, mouse-wheel zoom, keyboard movement, touch zoom, double-click zoom and visible zoom buttons are enabled in the initial view. Escape disables wheel zoom so the wheel scrolls the page; the Scroll zoom toggle restores it. Panning has no inertia. Fit network frames the service area, and Locate agent frames valid selection geometry without changing actual route length or coordinates.
+
+The service area remains latitude 40.375–40.455 and longitude -3.73–-3.64. Navigation now uses the wider bounds latitude 40.32–40.52 and longitude -3.83–-3.54, not the superseded 12% padding rule. Minimum zoom adapts to the viewport; maximum display zoom is 17. Locate agent caps its framing zoom at 16.
+
+The current bounded corrections reserve 52px of top clearance for Fit network and 64px for selection framing. Selected-label placement checks visible control geometry and map bounds. On narrow layouts the legend is below the 400px map, in both open and closed states. Resizing invalidates Leaflet dimensions, then resizes and aligns the MapLibre camera before repositioning the selected label. Reduced-motion styles set transition duration to exactly 0s, avoiding a transform transition on map geometry; the generic animation-duration override remains 0.01ms, with the lifecycle animation disabled. This source behavior is recorded separately from the capture/test results; it does not itself establish that every resize frame or touch device has passed.
 
 ## Architecture and diagrams
 
-The reader contains 20 chapters and eight D2 diagrams. The sources in `docs/diagrams/` and published counterparts in `web/diagrams/` retain D2 0.9.0, ELK graph layout and native SVG text. The diagrams use dark graphite surfaces, pale ink, neutral connectors and teal durable-state emphasis. Local IBM Plex source fonts live in `docs/diagrams/fonts/` and are embedded in generated SVGs.
+The reader contains 20 chapters and eight D2 diagrams. The sources in `docs/diagrams/` and published counterparts in `web/diagrams/` retain D2 0.9.0, ELK graph layout and native SVG text. The diagrams retain dark graphite surfaces, pale ink, neutral connectors and teal durable-state emphasis. Their hard-coded `common.d2` palette still uses the earlier surface and teal values; it has not been regenerated to match the newer shared cyan tokens exactly. Treat this as retained visual drift, not a second UI theme. Local IBM Plex source fonts live in `docs/diagrams/fonts/` and are embedded in generated SVGs.
 
 An inline diagram initially shows its whole geometry. Expand opens the same asset for detailed reading with pan and zoom; Fit returns to the complete diagram. Do not clip the initial overview or imply that tiny overview text is the only reading mode. Numbered execution phases, 18px node text and 16px message text are authored at source scale. Source inspection remains available under each diagram.
 
@@ -82,10 +92,14 @@ The second command checks all seven HTML pages for stale URLs and missing local 
 
 Inspect idle and populated states across all seven routes at desktop, laptop and mobile widths. Check navigation, active selection, keyboard focus, Escape, reduced motion and local overflow. Exercise a complete selection-to-evidence path, actual identity search, simulation settings, map modes, order filters, source inspection, chapter search and all eight diagrams. Preserve existing seeded outcome and role-isolation checks as the business-behavior baseline.
 
-Current visual evidence is under `docs/media/after/`: desktop, laptop, mobile and viewport captures for each workspace, plus interaction/audit records. These captures are evidence of the recorded states, not a blanket accessibility or product-quality certification. Full screen-reader, touch-gesture and 200% zoom conformance are not established by the sampled checks.
+Current visual evidence is under `docs/media/after/` and `docs/media/correction/`, including populated running/completed Madrid views, the seven-route set, native 1536×1024 captures, selected-agent states and a supplemental 1036px capture derived from the user's crop. That supplemental width is not a claim about the user's browser viewport.
+
+The [fresh full review](media/correction/full-review.md) records the rebuild's material improvements and the bounded map-clearance, resize synchronization, Delivery mobile-toolbar and ledger-density findings. Its screenshots and checks describe recorded states. Map checks cover local rendering/no external requests, actual selected routes, observed history, keyboard pan and Chromium-emulated touch; physical-device touch remains untested. Sampled overflow and solid-background contrast results do not certify map-pixel contrast, full screen-reader behavior or 200% zoom conformance.
 
 ## Evidence limits
 
-The original comp-led CLI plates phase remains open; downstream phase receipts must not be invented. The fixed-box comparison against the original comp has not passed. The user prioritized integration, and the implementation preserves real behavior, real geography and the pixels visible in the final captures rather than inventing comp data. That priority explains the divergence; it does not convert an open visual gate into a pass.
+The original comp-led CLI workflow remains open at plates; downstream phase receipts must not be invented. The current numerical comparison and verdict are recorded in [comparison/report.json](media/correction/comparison/report.json), which remains drift rather than pass. Use that refreshed record instead of a fixed score copied into this document. A new capture or comparison must retain its actual verdict; this reference does not predict or approve the result.
 
-The detailed redesign findings, verification results and remaining limitations belong in [UI-REDESIGN.md](UI-REDESIGN.md). This design reference records the implemented system and does not certify the unfinished comp workflow. Legacy page-specific typography, uppercase metadata and small map annotations remain existing exceptions; they are not promoted into a new decorative heading or icon language.
+The full review found the rebuilt browser surface materially reviewable and called for bounded fixes, while retaining the workflow acceptance failure. Integration, truthful geography and real runtime data remain binding requirements. Those requirements explain intentional content adaptations, but neither behavior-test totals nor a documentation refresh creates visual acceptance or a fresh user receipt.
+
+The detailed redesign findings, verification results and remaining limitations belong in [UI-REDESIGN.md](UI-REDESIGN.md) and the correction review records. This reference documents the current implementation, including source-level fixes; it does not certify the unfinished comp workflow. Retained D2 palette values, cartographic Noto glyphs and very small page-specific annotations are explicit exceptions. The small annotations are not promoted into a general body-text scale.
