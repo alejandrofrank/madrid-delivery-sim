@@ -1,0 +1,153 @@
+{
+  "schema_version": 1,
+  "verified_on": "2026-10-29",
+  "source_revision": "ef501c7e8567b535800a6d60840c2b3c2c42cdd3",
+  "branch": "feat/evals",
+  "runtime": "Python 3.12; google-adk 2.13.0; requirements.lock",
+  "checks": {
+    "pytest_passed": 662,
+    "ruff": "passed",
+    "mypy_modules": 60,
+    "actionlint": "1.7.7: passed"
+  },
+  "model_evals": {
+    "cases": 20,
+    "attempts": 60,
+    "passed": 60,
+    "repeat": 3,
+    "paid_calls": 0,
+    "network_disabled": true,
+    "native_entrypoints": [
+      "adk eval",
+      "AgentEvaluator"
+    ],
+    "arms": {
+      "adk-offline-customer": {
+        "cases": 10,
+        "attempts": 30,
+        "repeat": 3,
+        "pass_rate": 1.0,
+        "pass_rate_ci95": [
+          1.0,
+          1.0
+        ],
+        "pass_power_k": 1.0,
+        "pass_power_k_ci95": [
+          1.0,
+          1.0
+        ],
+        "pass_power_k_definition": "fraction of cases passing all k independent attempts",
+        "known_cost_usd": 0,
+        "unknown_cost_attempts": 0,
+        "cost_per_success_usd": 0.0,
+        "reserved_cost_per_success_usd": 0.0,
+        "p95_latency_ms": 2.03081775107421,
+        "categories": {
+          "schema": {
+            "pass_rate": 1.0,
+            "ci95": [
+              1.0,
+              1.0
+            ]
+          },
+          "length": {
+            "pass_rate": 1.0,
+            "ci95": [
+              1.0,
+              1.0
+            ]
+          },
+          "invented_tool": {
+            "pass_rate": 1.0,
+            "ci95": [
+              1.0,
+              1.0
+            ]
+          },
+          "task": {
+            "pass_rate": 1.0,
+            "ci95": [
+              1.0,
+              1.0
+            ]
+          },
+          "trajectory": {
+            "pass_rate": 1.0,
+            "ci95": [
+              1.0,
+              1.0
+            ]
+          }
+        }
+      },
+      "adk-offline-restaurant": {
+        "cases": 10,
+        "attempts": 30,
+        "repeat": 3,
+        "pass_rate": 1.0,
+        "pass_rate_ci95": [
+          1.0,
+          1.0
+        ],
+        "pass_power_k": 1.0,
+        "pass_power_k_ci95": [
+          1.0,
+          1.0
+        ],
+        "pass_power_k_definition": "fraction of cases passing all k independent attempts",
+        "known_cost_usd": 0,
+        "unknown_cost_attempts": 0,
+        "cost_per_success_usd": 0.0,
+        "reserved_cost_per_success_usd": 0.0,
+        "p95_latency_ms": 43.008393250056514,
+        "categories": {
+          "schema": {
+            "pass_rate": 1.0,
+            "ci95": [
+              1.0,
+              1.0
+            ]
+          },
+          "length": {
+            "pass_rate": 1.0,
+            "ci95": [
+              1.0,
+              1.0
+            ]
+          },
+          "invented_tool": {
+            "pass_rate": 1.0,
+            "ci95": [
+              1.0,
+              1.0
+            ]
+          },
+          "task": {
+            "pass_rate": 1.0,
+            "ci95": [
+              1.0,
+              1.0
+            ]
+          },
+          "trajectory": {
+            "pass_rate": 1.0,
+            "ci95": [
+              1.0,
+              1.0
+            ]
+          }
+        }
+      }
+    },
+    "golden_regressions_passed": 1
+  },
+  "sql_scenarios": {
+    "cases": 12,
+    "criteria": 49,
+    "repetitions": 2,
+    "matching_outcomes": true
+  },
+  "main_baseline": "Not available until the first successful main run of the evals job",
+  "vertex_judge": "Wire schema, cost caps and mocked transport verified; no live calls",
+  "limitations": "Scripted contract evidence; not live-model reliability or latency. Bootstrap resamples distinct cases. Repeated fixed outputs do not add independent cases."
+}

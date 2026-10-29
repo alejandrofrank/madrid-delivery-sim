@@ -114,6 +114,9 @@ of one architecture/memory strategy. Those remain separate unmeasured benchmarks
 
 ## Google-native model evaluation
 
+[Committed-snapshot verification](evidence/google-native-evals.json) records the
+test counts, scripted-arm metrics and limits of the latest local evaluation.
+
 The native files are `evals/adk/restaurant.evalset.json` and
 `evals/adk/customer_service.test.json`, with ten cases each. Install the pinned
 runtime from `requirements.lock` (including `google-adk[eval]`), then run from the

@@ -17,10 +17,11 @@ gate explicitly reports baseline missing, without a quality-comparison claim.
 The optional Vertex pointwise judge is manual-only, Flash-Lite, cost-capped and
 tested with mocked transport; no paid evaluation ran. User-simulator personas are
 schema-validated scaffolds only. The docs site covers error analysis, promotion,
-statistics and gate operation. Verification: 659 full-suite tests passed, Ruff,
-mypy over 60 modules, both native ADK entrypoints and workflow syntax validation;
-additional targeted recovery/judge checks passed. Clean committed-snapshot
-verification is recorded in the follow-up entry when complete.
+statistics and gate operation. Clean committed snapshot `ef501c7` passed 662 tests,
+Ruff, mypy over 60 modules, both native ADK entrypoints and workflow syntax checks.
+All 60 ADK attempts passed with networking disabled. All twelve SQL scenarios
+passed 49/49 criteria in two runs with matching outcomes. Evidence:
+[`docs/evidence/google-native-evals.json`](docs/evidence/google-native-evals.json).
 
 2026-10-29 (Google stack portfolio branch): Migrated customer advice to the real
 Google ADK Runner with a scripted offline model, bounded schema/request, durable

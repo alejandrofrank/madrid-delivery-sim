@@ -204,6 +204,7 @@
     "docs/PUBLIC-READINESS.md"
   ],
   "sources": [
+    "docs/evidence/google-native-evals.json",
     "compose.tracing-gcp.yaml",
     "compose.tracing.yaml",
     "compose.yaml",
