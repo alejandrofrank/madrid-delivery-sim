@@ -4,9 +4,12 @@ This project is a local engineering environment for studying bounded agent work:
 ingredient sourcing, stock reservations, consent, courier assignment, physical
 delivery and recovery. Its reusable runtime combines authenticated Python workers
 with PostgreSQL transactions. Most decisions use fixed rules. A separately enabled
-GCP recovery judge is the only Google model integration in the current design.
+GCP recovery judge complements Google ADK restaurant and customer-service adapters.
+Both ADK roles have scripted, zero-network models for CI. The dispatcher and
+customer service are discoverable over local A2A; optional OTel spans and
+BigQuery exports connect decisions to operational evidence.
 
-This chapter describes source reviewed on **2026-10-28**. It does not report a new
+This chapter describes source reviewed on **2026-10-29**. It does not report a new
 deployment or a current cloud inventory. Read [capability evidence](CAPABILITY-EVIDENCE.md)
 for measured limits and [architecture decisions](ARCHITECTURE-DECISIONS.md) for
 the alternatives behind these choices.
@@ -53,8 +56,11 @@ The **cloud boundary** accepts a bounded numeric recovery proposal and returns a
 approve/deny verdict. It has no simulation database connection or execution tools.
 Caller and runtime service accounts have separate duties. Cloud Run is reachable
 over the public network with IAM-authenticated invocation; the Terraform module
-does not provide private ingress. Cloud SQL, Pub/Sub, GKE, ADK, managed Agent
-Runtime and Memory Bank are not deployed. See the [exact GCP inventory](GCP-COMPONENTS.md).
+does not provide private ingress. Cloud SQL, Pub/Sub, GKE, managed Agent
+Runtime and Memory Bank are not deployed. Google ADK runs as a local Python
+library; optional Cloud Trace and BigQuery resources are declared but parked.
+See the [Google stack guide](GOOGLE-STACK.md) and
+[exact GCP inventory](GCP-COMPONENTS.md).
 
 ## What an agent actually is
 

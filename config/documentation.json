@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "reviewed_at": "2026-10-28",
+  "reviewed_at": "2026-10-29",
   "pages": [
     {
       "id": "overview",
@@ -161,6 +161,38 @@
       "file": "docs/M2-VALIDATION.md",
       "summary": "Last-unit contention, delayed replenishment and real worker crash recovery.",
       "status": "Seeded slice"
+    },
+    {
+      "id": "google-stack",
+      "title": "Google stack demonstration",
+      "group": "Start here",
+      "file": "docs/GOOGLE-STACK.md",
+      "summary": "Trace a business decision through ADK, A2A, telemetry and analytics.",
+      "status": "Implemented locally / cloud opt-in"
+    },
+    {
+      "id": "a2a",
+      "title": "A2A agent interoperability",
+      "group": "Agent engineering",
+      "file": "docs/A2A.md",
+      "summary": "Real SDK agent discovery and JSON-RPC over the durable queue.",
+      "status": "Local / no paid calls"
+    },
+    {
+      "id": "observability",
+      "title": "OpenTelemetry and Cloud Trace",
+      "group": "Google Cloud",
+      "file": "docs/OBSERVABILITY.md",
+      "summary": "Propagate trace context through agents and queue retries; inspect in Jaeger or Cloud Trace.",
+      "status": "Local verified / cloud opt-in"
+    },
+    {
+      "id": "analytics",
+      "title": "Run evidence in BigQuery",
+      "group": "Google Cloud",
+      "file": "docs/GOOGLE-ANALYTICS.md",
+      "summary": "Allowlisted receipts, bounded uploads, scoped IAM and a Looker Studio view.",
+      "status": "Offline verified / cloud opt-in"
     }
   ],
   "supplementary": [
@@ -168,7 +200,8 @@
     "docs/VALIDATION.md",
     "ROADMAP.md",
     "STATUS.md",
-    "README.md"
+    "README.md",
+    "docs/PUBLIC-READINESS.md"
   ],
   "sources": [
     "compose.yaml",
@@ -193,6 +226,7 @@
     "infra/gcp-ai/gateway.py",
     "infra/gcp-ai/main.tf",
     "infra/gcp-ai/variables.tf",
+    "scripts/call_a2a.py",
     "scripts/compare_agent_routing.py",
     "scripts/demo_adk_vertex.py",
     "scripts/gcp_demo.py",
@@ -207,7 +241,10 @@
     "sql/migrations/021_canonical_supply_context.sql",
     "sql/migrations/022_jev_decision_routing.sql",
     "sql/migrations/024_agent_memory_modes.sql",
+    "sql/migrations/025_adk_contract_corrections.sql",
+    "src/delivery/a2a_server.py",
     "src/delivery/adk_contracts.py",
+    "src/delivery/adk_customer.py",
     "src/delivery/adk_evidence.py",
     "src/delivery/adk_models.py",
     "src/delivery/adk_offline.py",
@@ -216,6 +253,7 @@
     "src/delivery/agent_runtime.py",
     "src/delivery/agent_specs.py",
     "src/delivery/cloud_ai.py",
+    "src/delivery/customer_service.py",
     "src/delivery/durable_inference.py",
     "src/delivery/fleet_policy.py",
     "src/delivery/health.py",
@@ -231,6 +269,8 @@
     "src/delivery/supply_policy.py",
     "src/delivery/supply_search_service.py",
     "src/delivery/typed_memory.py",
+    "tests/test_a2a_server.py",
+    "tests/test_adk_customer.py",
     "tests/test_adk_evidence.py",
     "tests/test_adk_restaurant.py",
     "tests/test_agent_queue_boundary.py",
@@ -246,6 +286,7 @@
     "tests/test_jev_routing.py",
     "tests/test_memory_profiles.py",
     "tests/test_queue.py",
+    "tests/test_safety.py",
     "tests/test_scenario_evals.py",
     "tests/test_supply_delivery_facts.py",
     "tests/test_supply_integration.py",
