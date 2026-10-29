@@ -7,6 +7,7 @@ and durable monetary admission; there is no automatic provider fallback.
 import asyncio
 import hashlib
 import json
+import time
 from collections.abc import Callable
 from typing import TYPE_CHECKING, Any, Literal
 
@@ -58,6 +59,7 @@ class RestaurantTurn:
         self.action: dict[str, Any] | None = None
         self.plan: RestaurantPlan | None = None
         self.pending_step: int | None = None
+        self.model_started: float | None = None
 
     def sql(self, function: str, *args: Any) -> Any:
         # Function names are literals in this module, never model arguments.
@@ -96,6 +98,28 @@ class RestaurantTurn:
     def recall_order_memory(self) -> list[dict[str, Any]]:
         """Recall only current, unexpired typed restaurant facts for this order."""
         return list(self.invoke("memory.read"))
+
+    def search_ingredients(self, query: str) -> dict[str, Any]:
+        """Classify ingredient matches in this restaurant's index; never reserve stock.
+
+        The operator selects local or Jev review and freezes a separate call/token
+        budget. Only ingredient labels and units go to Jev, never order memory.
+        """
+        from delivery.supply_search_service import search_for_agent
+
+        if self.plan is not None or "supply.search" not in self.brain.tools:
+            raise PermissionError("Search capability unavailable")
+        recipe = self.read_recipe()
+        if query not in {item["id"] for item in recipe["ingredients"]}:
+            raise PermissionError("Search can disclose only a canonical current-recipe ingredient")
+        with connect(self.agent.dsn) as conn:
+            row = conn.execute(
+                "SELECT public.supply_search_settings(%s,%s,%s) AS data",
+                (self.event.id, self.event.token, self.event.attempts),
+            ).fetchone()
+            assert row
+            mode = row["data"]["provider"]
+        return search_for_agent(self.agent, self.event, query, mode)
 
     def stage(self, name: str, action: str, **arguments: Any) -> dict[str, Any]:
         if self.action is not None:
@@ -161,6 +185,8 @@ class RestaurantTurn:
         self.pending_step = int(
             self.sql("restaurant_model_admit", len(body), hashlib.sha256(body).hexdigest())
         )
+        self.sql("restaurant_model_trace", self.pending_step, Jsonb(json.loads(body)), None, None)
+        self.model_started = time.monotonic()
         self.fault("before_adk_model")
 
     def after_model(self, callback_context: CallbackContext, llm_response: LlmResponse) -> None:
@@ -177,8 +203,20 @@ class RestaurantTurn:
         }
         if usage is not None:
             receipt.update(usage.model_dump(mode="json", exclude_none=True))
+        self.sql(
+            "restaurant_model_trace",
+            self.pending_step,
+            None,
+            Jsonb(
+                llm_response.content.model_dump(mode="json", exclude_none=True)
+                if llm_response.content
+                else {}
+            ),
+            max(0, round((time.monotonic() - (self.model_started or time.monotonic())) * 1000)),
+        )
         self.sql("restaurant_model_complete", self.pending_step, Jsonb(receipt))
         self.pending_step = None
+        self.model_started = None
 
     def build(self, model: BaseLlm) -> LlmAgent:
         from delivery.adk_models import validate_model
@@ -190,6 +228,7 @@ class RestaurantTurn:
             "restaurant.recipe": self.read_recipe,
             "restaurant.suppliers": self.find_suppliers,
             "memory.read": self.recall_order_memory,
+            "supply.search": self.search_ingredients,
             "restaurant.request_supply": self.request_missing_ingredients,
             "restaurant.confirm": self.confirm_order,
             "restaurant.receive": self.receive_ingredient,
@@ -209,7 +248,11 @@ class RestaurantTurn:
             generate_content_config=types.GenerateContentConfig(
                 temperature=0,
                 max_output_tokens=self.brain.output_tokens,
-                thinking_config=types.ThinkingConfig(thinking_budget=0),
+                thinking_config=(
+                    types.ThinkingConfig(thinking_level=types.ThinkingLevel.MINIMAL)
+                    if self.brain.vertex and self.brain.vertex.model.startswith("gemini-3")
+                    else types.ThinkingConfig(thinking_budget=0)
+                ),
             ),
         )
 
@@ -221,6 +264,7 @@ class RestaurantTurn:
             "read_recipe": set(),
             "find_suppliers": set(),
             "recall_order_memory": set(),
+            "search_ingredients": {"query"},
             "request_missing_ingredients": {"supplier"},
             "confirm_order": set(),
             "receive_ingredient": set(),

@@ -24,6 +24,7 @@ RESTAURANT_TOOLS = frozenset(
         "memory.write",
     }
 )
+OPTIONAL_RESTAURANT_TOOLS = frozenset({"supply.search"})
 
 
 class VertexProfile(BaseModel):
@@ -35,6 +36,7 @@ class VertexProfile(BaseModel):
     model: str = Field(pattern=r"^gemini-[a-z0-9.-]{1,80}$")
     input_usd_per_million: float = Field(gt=0, le=1000)
     output_usd_per_million: float = Field(gt=0, le=1000)
+    cached_input_usd_per_million: float | None = Field(default=None, ge=0, le=1000)
 
 
 class RestaurantBrain(BaseModel):
@@ -60,7 +62,9 @@ class RestaurantBrain(BaseModel):
                 raise ValueError("Vertex requires an approved profile and positive monetary budget")
         elif self.vertex is not None or self.usd_limit:
             raise ValueError("Offline templates cannot reserve money or configure Vertex")
-        if len(set(self.tools)) != len(self.tools) or not set(self.tools) <= RESTAURANT_TOOLS:
+        if len(set(self.tools)) != len(self.tools) or not set(self.tools) <= (
+            RESTAURANT_TOOLS | OPTIONAL_RESTAURANT_TOOLS
+        ):
             raise ValueError("Unknown or duplicate restaurant capability")
         if not {"restaurant.finish", "memory.write"} <= set(self.tools):
             raise ValueError("A restaurant must be able to finish and record its outcome")

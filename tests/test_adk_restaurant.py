@@ -49,6 +49,86 @@ def test_templates_are_editable_but_cannot_grant_authority() -> None:
             RestaurantBrain.model_validate({**brain.model_dump(), **changes})
 
 
+@pytest.mark.integration
+def test_model_trace_is_saved_and_private(adk_city):
+    from delivery.adk_restaurant import ensure_restaurant_result
+
+    city = adk_city()
+    agent, event = first_call(city)
+    assert agent.reserve_budget(event)
+    assert ensure_restaurant_result(agent, event)
+    with connect(city.url) as conn:
+        calls = conn.execute(
+            "SELECT * FROM restaurant_model_calls WHERE event_id=%s ORDER BY step", (event.id,)
+        ).fetchall()
+    assert calls and all(c["latency_ms"] >= 0 and c["response_body"] for c in calls)
+    assert (
+        city.config.entities[1].agent.soul
+        in calls[0]["request_body"]["config"]["system_instruction"]
+    )
+    assert "read_pantry" in str(calls[0]["request_body"])
+    with pytest.raises(psycopg.errors.InsufficientPrivilege), connect(agent.dsn) as conn:
+        conn.execute("SELECT request_body FROM restaurant_model_calls")
+    with pytest.raises(psycopg.errors.InsufficientPrivilege), connect(agent.dsn) as conn:
+        conn.execute(
+            "SELECT restaurant_model_trace(%s,%s,%s,%s,1,NULL,'{}',1)",
+            (event.id, event.token, event.attempts, "00000000-0000-0000-0000-000000000000"),
+        )
+
+
+@pytest.mark.integration
+def test_adk_search_is_scoped_budgeted_and_excludes_memory(adk_city, monkeypatch):
+    from delivery.adk_restaurant import RestaurantTurn
+    from delivery.supply_search import JevClient
+
+    city = adk_city(
+        brain_changes={"tools": [*restaurant_template()[0].tools, "supply.search"]},
+        search_settings={"provider": "jev", "calls_limit": 1, "input_tokens_limit": 12000},
+    )
+    agent, event = first_call(city)
+    assert agent.reserve_budget(event)
+    with connect(agent.dsn) as conn:
+        nonce = conn.execute(
+            "SELECT restaurant_turn_begin(%s,%s,%s) d", (event.id, event.token, event.attempts)
+        ).fetchone()["d"]["nonce"]
+    monkeypatch.setenv("DELIVERY_JEV_ENABLED", "1")
+    monkeypatch.setenv("TYPESAFE_MODEL", "jev-1.14.0")
+    monkeypatch.setenv("TYPESAFE_API_KEY", "test-only-not-a-key")
+    sent = []
+
+    def reviewer(self, payload, **kwargs):
+        sent.append(payload)
+        assert "order" not in str(payload) and "memory" not in str(payload)
+        return {
+            "model": self.model,
+            "usage": {"input_tokens": 100, "output_tokens": 20},
+            "answers": {key: {"choice": "yes", "confidence": 0.9} for key in payload["questions"]},
+        }
+
+    monkeypatch.setattr(JevClient, "__call__", reviewer)
+    turn = RestaurantTurn(agent, event, nonce)
+    result = turn.search_ingredients("mozzarella")
+    assert result["calls"] == 1 and sent
+    assert all(row["available"] == 0 for row in result["results"])
+    assert "budget_denied" == turn.search_ingredients("tomato")["error"]
+    assert len(sent) == 1
+    with pytest.raises(PermissionError, match="canonical"):
+        turn.search_ingredients("PRIVATE_CUSTOMER_MESSAGE")
+    with pytest.raises(psycopg.errors.InsufficientPrivilege), connect(agent.dsn) as conn:
+        conn.execute("SELECT * FROM supply_stock")
+
+
+@pytest.mark.integration
+def test_search_grant_does_not_enable_undeclared_capability(adk_city):
+    city = adk_city()
+    agent, event = first_call(city)
+    assert agent.reserve_budget(event)
+    with pytest.raises(psycopg.errors.InsufficientPrivilege), connect(agent.dsn) as conn:
+        conn.execute(
+            "SELECT supply_search_begin(%s,%s,%s)", (event.id, event.token, event.attempts)
+        )
+
+
 def test_paid_model_adapter_is_rejected_before_execution() -> None:
     from types import SimpleNamespace
 
@@ -77,12 +157,15 @@ def adk_config(
     pantry: int = 0,
     brain_changes: dict[str, Any] | None = None,
     tool_slots: int = 16,
+    search_settings: dict[str, Any] | None = None,
 ) -> SupplyConfig:
     base = default_config()
     brain, instructions = restaurant_template(soul)
     brain = RestaurantBrain.model_validate({**brain.model_dump(), **(brain_changes or {})})
     definition = base.agents["restaurant"].model_dump()
     definition.update(brain=brain, soul=instructions)
+    if search_settings:
+        definition["search"] = search_settings
     definition["limits"]["tool_calls_per_event"] = tool_slots
     agent = AgentDefinition.model_validate(definition)
     home = next(e for e in base.entities if e.kind == "household")
