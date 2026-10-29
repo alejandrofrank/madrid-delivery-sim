@@ -12,7 +12,12 @@ python3 scripts/export_bigquery.py prepare \
   --output artifacts/bigquery/demo
 ```
 
-The ADK routing comparison (`artifacts/adk-route-comparison.json`) and live comparison (`artifacts/adk-live-comparison.json`) receipts also work. Generate a fresh offline receipt with `make demo-adk` if needed. A receipt contains a timezone-qualified `created_at`, `profiles` or `arms`, and per-run `run`, `metrics`, and boolean `invariants` or `outcome_checks` fields.
+The exporter accepts both native receipt formats:
+
+- Baseline simulation: `artifacts/run-<run-id>.json`, with a nested `run` object containing `id`, timezone-qualified `created_at`, `status`, and model accounting, plus top-level `metrics`. Delivery measurements include orders, delivered/on-time counts, on-time percentage, active/unserved work, delivery cost and cost per delivery.
+- ADK comparisons: a top-level timezone-qualified `created_at`, a `profiles` or `arms` list, and per-run `run` UUID, `metrics`, and boolean `invariants` or `outcome_checks`. This includes `artifacts/adk-route-comparison.json` and `artifacts/adk-live-comparison.json`. Generate a fresh offline receipt with `make demo-adk` if needed.
+
+Use either format with the same `prepare --receipt ... --output ...` command. Missing invariant or replay evidence stays unmeasured.
 
 The output contains:
 
@@ -23,6 +28,8 @@ The output contains:
 | `manifest.json` | SHA-256, row count and byte count for both tables. |
 
 Raw prompts, transcripts, provider responses, configuration, credentials, and free-form error text are excluded. Unknown metrics remain absent; incomplete cost accounting remains null. `usage_cost_usd` uses known usage at the receipt's frozen tariffs only when every call is accounted for. It is not a billing invoice. `reserved_cost_usd` remains a separate admission amount; explicit zero-paid-call receipts can report zero cost. A missing status is `recorded`, never inferred to be completed.
+
+Baseline `llm_cost_usd`, `llm_calls`, tokens and reservations are retained as numeric KPIs. Their aggregate values do not prove every admitted model call returned usage. Consequently, a baseline receipt with model calls retains null `usage_cost_usd` even if its observed cost is zero. Only an explicit zero call count proves zero model usage for that format; missing call counts do not. The reserved amount remains separately visible.
 
 Preparation refuses to overwrite a bundle. Keep the bundle unchanged for retries. Source files are capped at 32 MiB; each export is capped at 100 runs and 1 MiB. All generated files belong under ignored `artifacts/`.
 
@@ -86,6 +93,8 @@ Review the removal plan: it deletes the analytics tables and view. Original loca
 ## Verification and API references
 
 `tests/test_bigquery_export.py` covers local-only preparation, allowlisting, incomplete accounting, strict opt-in, artifact tampering, stable load IDs, SDK load configuration and recovery, and payload limits. `infra/gcp-ai/tests/bigquery.tftest.hcl` uses the mocked Google provider to check parked defaults, billing opt-in, retention, scoped permissions and the view. These checks make no paid calls. The cloud path has not been live-uploaded as part of this change.
+
+Inspect the [exporter](../src/delivery/bigquery_export.py), [command](../scripts/export_bigquery.py), [unit tests](../tests/test_bigquery_export.py), [Terraform resources](../infra/gcp-ai/bigquery.tf), [infrastructure tests](../infra/gcp-ai/tests/bigquery.tftest.hcl), and [dashboard SQL view](../infra/gcp-ai/sql/run_dashboard.sql).
 
 Official documentation checked on 2026-10-29:
 

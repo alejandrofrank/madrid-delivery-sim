@@ -208,3 +208,72 @@ def test_oversized_export_is_rejected_before_credentials(tmp_path, monkeypatch):
     monkeypatch.setattr(analytics, "BigQueryLoadClient", lambda *args: pytest.fail("credentials"))
     with pytest.raises(ValueError):
         upload(output)
+
+
+def baseline_receipt():
+    # Shape emitted by Simulation.run, including an admitted call without usage.
+    return {
+        "run": {
+            "id": RUN,
+            "created_at": "2026-10-29T03:00:35.008585+00:00",
+            "status": "complete",
+            "seed": 42,
+            "llm_calls": 1,
+            "llm_reserved_tokens": 3000,
+            "llm_tokens": 0,
+            "llm_reserved_usd": 0.0,
+            "llm_cost_usd": 0.0,
+        },
+        "metrics": {
+            "orders": 7,
+            "delivered": 7,
+            "pending": 0,
+            "active": 0,
+            "unserved": 0,
+            "on_time": 7,
+            "delivery_cost_eur": 10.822515148279479,
+            "overdue": 0,
+            "on_time_pct": 100.0,
+            "cost_per_delivery_eur": 1.55,
+        },
+        "orders": [{"transcript": "must stay local"}],
+        "complaints": [{"body": "private customer complaint"}],
+    }
+
+
+def test_baseline_run_receipt_preserves_kpis_status_and_unknown_model_cost(tmp_path):
+    source = tmp_path / "run.json"
+    source.write_text(json.dumps(baseline_receipt()))
+    output = tmp_path / "baseline"
+    manifest = analytics.prepare_bundle(source, output)
+    row = json.loads((output / "run_receipts.ndjson").read_text())
+    assert row["run_id"] == RUN and row["status"] == "complete"
+    assert row["run_created_at"] == "2026-10-29T03:00:35.008585+00:00"
+    assert row["usage_cost_usd"] is None and row["unknown_usage_calls"] is None
+    assert row["reserved_cost_usd"] == 0
+    assert row["checks_total"] == 0 and row["replay_matches"] is None
+    metrics = {
+        item["metric_name"]: item["metric_value"]
+        for line in (output / "run_kpis.ndjson").read_text().splitlines()
+        if (item := json.loads(line))
+    }
+    assert metrics["orders"] == metrics["on_time"] == 7
+    assert metrics["on_time_pct"] == 100
+    assert metrics["cost_per_delivery_eur"] == 1.55
+    assert metrics["llm_calls"] == 1 and metrics["llm_cost_usd"] == 0
+    assert manifest["tables"]["run_kpis"]["rows"] == 15
+    assert "private customer" not in (output / "run_receipts.ndjson").read_text()
+
+
+def test_baseline_zero_cost_requires_explicit_zero_model_calls():
+    data = baseline_receipt()
+    data["run"]["llm_calls"] = 0
+    rows, _ = analytics.receipt_rows(data, "b" * 64, EXPORTED)
+    assert rows[0]["usage_cost_usd"] == 0 and rows[0]["unknown_usage_calls"] == 0
+    del data["run"]["llm_calls"]
+    rows, _ = analytics.receipt_rows(data, "b" * 64, EXPORTED)
+    assert rows[0]["usage_cost_usd"] is None
+    data["run"].update(llm_calls=2, llm_cost_usd=0.12, llm_reserved_usd=0.4)
+    rows, _ = analytics.receipt_rows(data, "b" * 64, EXPORTED)
+    assert rows[0]["usage_cost_usd"] is None
+    assert rows[0]["reserved_cost_usd"] == 0.4

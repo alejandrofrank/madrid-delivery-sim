@@ -24,7 +24,12 @@ KPI_NAMES = frozenset(
     "search_unknown_usage_calls search_actual_input_tokens search_actual_output_tokens "
     "jev_router_dispatches jev_direct_decisions jev_gemini_escalations jev_no_model_steps "
     "jev_router_unknown_usage_calls jev_router_input_tokens jev_router_reserved_usd "
-    "communication_latency_seconds".split()
+    "communication_latency_seconds orders on_time on_time_pct delivery_cost_eur "
+    "cost_per_delivery_eur active unserved pending overdue llm_calls llm_tokens "
+    "llm_cost_usd llm_reserved_usd llm_reserved_tokens".split()
+)
+BASELINE_USAGE = frozenset(
+    "llm_calls llm_tokens llm_cost_usd llm_reserved_usd llm_reserved_tokens".split()
 )
 
 
@@ -66,7 +71,6 @@ def receipt_rows(
     receipt: dict[str, Any], source_sha256: str, exported_at: str
 ) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
     """Allowlist metadata and numeric KPIs; never export raw prompts, configs or evidence."""
-    created_at = _timestamp(receipt.get("created_at"))
     entries = receipt.get("profiles", receipt.get("arms", [receipt]))
     if not isinstance(entries, list) or not 1 <= len(entries) <= MAX_RUNS:
         raise ValueError(f"Expected 1..{MAX_RUNS} run entries")
@@ -76,7 +80,9 @@ def receipt_rows(
     if fingerprint is not None and not re.fullmatch(r"[a-f0-9]{64}", fingerprint):
         raise ValueError("source_fingerprint must be a SHA-256 digest")
     for entry in entries:
-        run_id = str(UUID(str(entry["run"])))
+        run = entry["run"] if isinstance(entry["run"], dict) else {}
+        run_id = str(UUID(str(run.get("id", entry["run"]))))
+        created_at = _timestamp(run.get("created_at", receipt.get("created_at")))
         if run_id in seen:
             raise ValueError("Duplicate run in receipt")
         seen.add(run_id)
@@ -95,6 +101,7 @@ def receipt_rows(
         metrics = entry.get("metrics", {})
         if not isinstance(metrics, dict):
             raise ValueError("Run metrics must be an object")
+        metrics = {**metrics, **{name: run[name] for name in BASELINE_USAGE.intersection(run)}}
         cost = entry.get("cost", {})
         if not isinstance(cost, dict):
             raise ValueError("Run cost must be an object")
@@ -104,8 +111,22 @@ def receipt_rows(
         unknown = int(unknown_number) if unknown_number is not None else None
         # A partial measured sum is not a completed cost result. Zero is only explicit.
         known_cost = _number(cost.get("total_usd")) if unknown == 0 else None
+        reserved_cost = _number(cost.get("admission_usd"))
         if receipt.get("paid_calls") == 0 and cost == {}:
             known_cost = 0.0
+        if run and cost == {}:
+            reserved_cost = _number(run.get("llm_reserved_usd"))
+            calls = _number(run.get("llm_calls"))
+            if calls is not None and (calls < 0 or not calls.is_integer()):
+                raise ValueError("Model calls must be a nonnegative integer")
+            # Baseline aggregates do not prove every admitted call returned usage.
+            # Retain the observed cost as a KPI, but only claim a complete zero
+            # total when the receipt explicitly proves there were no model calls.
+            if calls == 0:
+                if _number(run.get("llm_cost_usd")) not in (None, 0.0):
+                    raise ValueError("Zero model calls cannot have nonzero model usage cost")
+                known_cost = 0.0
+                unknown = 0
         replay = entry.get("replay_matches")
         if replay is not None and type(replay) is not bool:
             raise ValueError("replay_matches must be a boolean")
@@ -116,12 +137,12 @@ def receipt_rows(
                 "profile": _label(entry.get("profile", entry.get("soul"))),
                 "scenario": _label(entry.get("scenario")),
                 "variant": _label(entry.get("variant")),
-                "status": _label(entry.get("status", "recorded")),
+                "status": _label(entry.get("status", run.get("status", "recorded"))),
                 "replay_matches": replay,
                 "checks_passed": sum(checks.values()),
                 "checks_total": len(checks),
                 "usage_cost_usd": known_cost,
-                "reserved_cost_usd": _number(cost.get("admission_usd")),
+                "reserved_cost_usd": reserved_cost,
                 "unknown_usage_calls": unknown,
             }
         )
