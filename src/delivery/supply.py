@@ -506,7 +506,26 @@ def supply_snapshot(run: str, url: str | None = None) -> dict[str, Any]:
             (run,),
         ).fetchone()
         assert adk_usage
+        route_usage = conn.execute(
+            "SELECT count(*) FILTER(WHERE r.model IS NOT NULL) dispatches,"
+            "count(*) FILTER(WHERE r.executor='jev') direct,"
+            "count(*) FILTER(WHERE r.executor='gemini') escalated,"
+            "count(*) FILTER(WHERE r.executor='rules') rules,"
+            "count(*) FILTER(WHERE r.model IS NOT NULL AND r.input_tokens IS NULL) unknown,"
+            "coalesce(sum(r.input_tokens),0) input_tokens,"
+            "coalesce(sum(r.reserved_usd),0) reserved_usd "
+            "FROM restaurant_routes r JOIN restaurant_turns t USING(event_id) WHERE t.run_id=%s",
+            (run,),
+        ).fetchone()
+        assert route_usage
         state["metrics"] = {
+            "jev_router_dispatches": route_usage["dispatches"],
+            "jev_direct_decisions": route_usage["direct"],
+            "jev_gemini_escalations": route_usage["escalated"],
+            "jev_no_model_steps": route_usage["rules"],
+            "jev_router_unknown_usage_calls": route_usage["unknown"],
+            "jev_router_input_tokens": int(route_usage["input_tokens"]),
+            "jev_router_reserved_usd": float(route_usage["reserved_usd"]),
             "adk_offline_calls": adk_usage["calls"],
             "adk_vertex_dispatches": adk_usage["vertex_calls"],
             "adk_reserved_usd": float(adk_usage["reserved_usd"]),
@@ -527,14 +546,16 @@ def supply_snapshot(run: str, url: str | None = None) -> dict[str, Any]:
                 j["status"] == "delivered" and j["arrive_sim"] > j["deadline_sim"]
                 for j in state["jobs"]
             ),
-            "model_calls": search_usage["confirmed"],
-            "model_provider": "jev" if search_calls else "disabled",
+            "model_calls": search_usage["confirmed"] + route_usage["dispatches"],
+            "model_provider": "jev" if search_calls or route_usage["dispatches"] else "disabled",
             "search_reserved_calls": search_calls,
             "search_reserved_input_tokens": int(search_totals["tokens"]) if search_totals else 0,
             "search_unknown_usage_calls": search_usage["unknown"],
             "search_actual_input_tokens": search_usage["input_tokens"],
             "search_actual_output_tokens": search_usage["output_tokens"],
-            "decision_mode": "mixed_rules_adk"
+            "decision_mode": "jev_first"
+            if route_usage["dispatches"] or route_usage["rules"]
+            else "mixed_rules_adk"
             if adk_usage["calls"] or adk_usage["vertex_calls"]
             else "local_rules",
             "transport": "durable_queue",

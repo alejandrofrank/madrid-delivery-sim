@@ -95,9 +95,11 @@ class RestaurantTurn:
         """Find open markets' public fee and estimated lead-time quotes, without private stock."""
         return list(self.invoke("restaurant.suppliers"))
 
-    def recall_order_memory(self) -> list[dict[str, Any]]:
+    def recall_order_memory(self) -> Any:
         """Recall only current, unexpired typed restaurant facts for this order."""
-        return list(self.invoke("memory.read"))
+        from delivery.memory_profiles import project_memory
+
+        return project_memory(self.agent.role.memory, list(self.invoke("memory.read")))
 
     def search_ingredients(self, query: str) -> dict[str, Any]:
         """Classify ingredient matches in this restaurant's index; never reserve stock.
@@ -321,6 +323,7 @@ def ensure_restaurant_result(
     *,
     model: BaseLlm | None = None,
     fault: Callable[[str], None] | None = None,
+    router_reviewer: Callable[[dict[str, Any]], dict[str, Any]] | None = None,
 ) -> bool:
     with connect(agent.dsn) as conn:
         row = conn.execute(
@@ -342,9 +345,16 @@ def ensure_restaurant_result(
     try:
 
         async def run() -> RestaurantPlan:
-            return await asyncio.wait_for(
-                turn.run(model or create_restaurant_model(turn.brain)), turn.brain.timeout_seconds
-            )
+            async def decide() -> RestaurantPlan:
+                if turn.brain.routing:
+                    from delivery.jev_routing import route_turn
+
+                    if route_turn(turn, router_reviewer):
+                        assert turn.plan
+                        return turn.plan
+                return await turn.run(model or create_restaurant_model(turn.brain))
+
+            return await asyncio.wait_for(decide(), turn.brain.timeout_seconds)
 
         plan = asyncio.run(run())
         turn.fault("before_adk_save")

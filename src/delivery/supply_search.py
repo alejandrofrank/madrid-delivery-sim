@@ -275,6 +275,17 @@ class JevClient:
             raise SearchError("jev_key_missing_or_invalid")
 
     def __call__(self, payload: dict[str, Any], *, timeout_seconds: float = 5) -> dict[str, Any]:
+        result = self.request(payload, timeout_seconds=timeout_seconds)
+        try:
+            parsed = _Response.model_validate(result)
+        except ValidationError:
+            raise SearchError("provider_schema_invalid") from None
+        if parsed.model != self.model or set(parsed.answers) != set(payload.get("questions", {})):
+            raise SearchError("provider_answer_ids_or_model_invalid")
+        return result
+
+    def request(self, payload: dict[str, Any], *, timeout_seconds: float = 5) -> dict[str, Any]:
+        """Fixed-origin transport; each use must validate its own typed answer contract."""
         if payload.get("model") != self.model:
             raise SearchError("model_mismatch")
         request = Request(
@@ -316,12 +327,6 @@ class JevClient:
             raise SearchError("provider_json_invalid") from None
         if not isinstance(result, dict):
             raise SearchError("provider_schema_invalid")
-        try:
-            parsed = _Response.model_validate(result)
-        except ValidationError:
-            raise SearchError("provider_schema_invalid") from None
-        if parsed.model != self.model or set(parsed.answers) != set(payload.get("questions", {})):
-            raise SearchError("provider_answer_ids_or_model_invalid")
         return result
 
 

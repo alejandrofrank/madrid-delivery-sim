@@ -465,7 +465,11 @@ class LocalAgent:
             assert row
             detail = dict(row["data"])
             assert self.role.brain
-            detail["policy"] = f"google_adk_{self.role.brain.provider}"
+            detail["policy"] = (
+                "google_adk_jev_first"
+                if self.role.brain.routing
+                else f"google_adk_{self.role.brain.provider}"
+            )
             tools.memory_reads.append(
                 {
                     "event_id": event.id,
