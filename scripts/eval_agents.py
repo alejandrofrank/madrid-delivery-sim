@@ -38,6 +38,11 @@ def main() -> int:
     if options.suite in {"adk", "all"}:
         from delivery.model_evals import evaluate_model_arms
 
+        atomic_write_json(options.output, {
+            "schema_version": 1, "kind": "model-evals", "state": "running",
+            "mode": "scripted-offline", "repeat": options.repeat,
+            "fixture_hashes": {}, "rows": [],
+        })
         report = asyncio.run(evaluate_model_arms(options.repeat))
         revision = os.environ.get("DELIVERY_SOURCE_REVISION")
         if not revision:

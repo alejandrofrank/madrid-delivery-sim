@@ -65,3 +65,11 @@ def test_missing_rows_are_invalid_and_efficiency_is_recomputed():
     value = compare_reports(baseline, candidate, load_thresholds())["efficiency"]["arm"]
     assert value["p95_latency_ms"]["delta"] == 10
     assert value["cost_per_success_usd"]["candidate"] == pytest.approx(.01)
+
+
+def test_repeat_header_cannot_disguise_different_trial_counts():
+    baseline = report()
+    candidate = report(repeats=1)
+    candidate["repeat"] = 3
+    with pytest.raises(ValueError, match="Declared repeat"):
+        compare_reports(baseline, candidate, load_thresholds())

@@ -53,6 +53,10 @@ def compare_reports(
     for arm in arms:
         before = attempt_groups([r for r in previous if r.arm == arm])
         after = attempt_groups([r for r in current if r.arm == arm])
+        if any(len(group) != baseline["repeat"] for group in before.values()) or any(
+            len(group) != candidate["repeat"] for group in after.values()
+        ):
+            raise ValueError("Declared repeat count differs from measured attempts")
         if set(before) != set(after):
             raise ValueError("Cases were added or removed; do not silently change the cohort")
         for category, threshold in config["categories"].items():
