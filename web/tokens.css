@@ -5,7 +5,7 @@
 @font-face{font-family:"IBM Plex Mono";src:url("/static/fonts/IBMPlexMono-Regular.woff2") format("woff2");font-weight:400 700;font-style:normal;font-display:swap}
 :root{
  color-scheme:dark;
- --ui-bg:#101518;--ui-surface:#151c20;--ui-raised:#1c252a;--ui-hover:#263239;
+ --ui-bg:#0d151c;--ui-surface:#151c20;--ui-raised:#1c252a;--ui-hover:#263239;
  --ui-ink:#e7edf0;--ui-muted:#a8b7c0;--ui-faint:#81949f;
  --ui-line:#2c393f;--ui-strong-line:#536770;
  --ui-accent:#63d5c5;--ui-accent-ink:#082b27;--ui-accent-soft:#193b36;

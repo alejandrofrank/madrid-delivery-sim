@@ -48,8 +48,9 @@ let searchContext = '';
 let searchVersion = 0;
 let orderBookRun = null;
 const orderRows = new Map();
-const supplyRoster = Ops.createRoster($('supply-agents'), id => selectEntity(id));
+const supplyRoster = Ops.createRoster($('supply-agents'), id => selectEntity(id), {scope:'Totals: distinct facts observed during this visit.',rateLabel:'Observed facts per simulated minute'});
 let rosterRun = null;
+let observedRosterFacts = new Map();
 
 function element(tag, text, className) {
   const node = document.createElement(tag);
@@ -1208,15 +1209,16 @@ window.addEventListener('beforeunload', event => { if (draftDirty) { event.preve
 function renderSupplyRoster() {
   const agents = Array.isArray(snapshot?.agents) ? snapshot.agents : Object.values(snapshot?.agents || {});
   const thisRun = snapshot?.run?.id || 'blueprint';
-  if (rosterRun !== thisRun) { supplyRoster.reset(); rosterRun = thisRun; }
+  if (rosterRun !== thisRun) { supplyRoster.reset(); observedRosterFacts.clear(); rosterRun = thisRun; }
+  for (const fact of snapshot?.facts || []) observedRosterFacts.set(fact.sequence, fact);
   const rows = [...mapEntities()].sort((a,b) => Number(a.kind === 'household') - Number(b.kind === 'household')).map(entity => {
     const agent = agents.find(a => a.entity_id === entity.id || a.namespace === entity.id || String(a.agent_id || '').endsWith(':' + entity.id));
     const pending = (snapshot?.events || []).filter(e => ['pending','queued','leased'].includes(e.state) && (e.target_store === entity.id || e.target_store === agent?.agent_id)).length;
-    return {id:entity.id, name:agent?.display_name || entity.name, role:entity.kind, status:!snapshot ? 'ready' : pending ? 'working' : 'idle',
+    return {id:entity.id, name:entity.name || entity.id, identity:agent?.agent_id || entity.id, roleLabel:agent?.display_name || roles[entity.kind], role:entity.kind, status:!snapshot ? 'ready' : pending ? 'working' : 'idle',
       active:pending > 0, task:!snapshot ? 'Awaiting a run' : pending ? pending + ' queued events' : 'No queued events',
-      count:snapshot ? (snapshot.facts || []).filter(f => f.actor === agent?.agent_id || f.actor === entity.id).length : null};
+      count:snapshot ? [...observedRosterFacts.values()].filter(f => f.actor === agent?.agent_id || f.actor === entity.id).length : null};
   });
-  supplyRoster.update(rows, selectedId, thisRun + ':' + (snapshot?.run?.sim_time || 0), snapshot?.run?.sim_time);
+  supplyRoster.update(rows, selectedId, thisRun + ':' + (snapshot?.run?.sim_time || 0), snapshot?.run?.sim_time, snapshot?.run?.status);
   const agent = agentForEntity(), link = $('supply-trace-link');
   link.hidden = !runId || !agent?.agent_id;
   if (!link.hidden) link.href = '/agent-traces?source=supply&run=' + encodeURIComponent(runId) + '&agent=' + encodeURIComponent(agent.agent_id);
@@ -1232,3 +1234,5 @@ function showSupplySimulation(open) {
 $('supply-operations').onclick = () => showSupplySimulation(false);
 $('supply-simulation').onclick = () => showSupplySimulation(true);
 $('close-inspector').onclick = () => { $('supply-inspector').hidden = true; };
+
+Ops.enableMapKeyboard(document.getElementById('city-map'));

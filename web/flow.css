@@ -1134,3 +1134,5 @@ main{grid-template-columns:minmax(380px,.9fr) minmax(0,1.1fr);gap:16px;align-ite
 #agent-view{padding:0 16px 16px}.agent-drilldown>summary{color:var(--ui-accent);padding:10px 0}.agent-trace-link{display:inline-flex;align-items:center;min-height:36px;color:var(--ui-accent)}
 #city .store-marker text{fill:var(--ui-muted)}#city .neighborhood-label{fill:#81949f}
 @media(max-width:900px){main{grid-template-columns:1fr;margin:0 16px 16px}#live-agents,.map-column,#context,.operations-board{grid-column:1;grid-row:auto}.live-agents .roster-list{height:300px}.workspace-heading{padding:18px 16px}.operation-metrics{margin:14px 16px}.delivery-toolbar{margin:12px 16px}#city{height:400px}.workspace-meta{display:none}.entity-tools{flex-wrap:wrap}}
+
+#main>*{min-width:0}.operations-board{max-width:100%}

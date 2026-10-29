@@ -11,3 +11,20 @@ main{max-width:1920px;margin:auto;padding:20px 24px;min-width:0}h1,h2,h3,p{margi
 @media(min-width:1600px){#map{height:430px}.agent-list{height:456px}}
 @media(max-width:1100px){main{padding:18px 16px}.workspace{grid-template-columns:minmax(360px,.9fr) minmax(0,1.1fr)}.agent-filters{padding:10px;gap:6px}.agent-column-labels,.fleet-row{grid-template-columns:minmax(0,1fr) 90px 56px;gap:8px;padding-left:10px;padding-right:10px}.fleet-throughput svg{width:45px}.metric-chart{display:none}.selection{display:block}.selection p{margin-top:4px}#map-mode{display:none}}
 @media(max-width:800px){.workspace{grid-template-columns:1fr}.agents-panel{order:0}.map-panel{order:1}.agent-list{height:300px}#map{height:340px}.kpis{grid-template-columns:repeat(2,minmax(0,1fr))}.kpis article:nth-child(2){border-right:0}.kpis article:nth-child(-n+2){border-bottom:1px solid var(--ui-line)}.selected-agent{flex-wrap:wrap}.selection{flex-basis:100%}.diagnostic-metrics{grid-template-columns:1fr}.console-tabs{gap:16px}.kpis article{padding:12px}.map-footer{font-size:9px}.panel-title{padding:10px 12px}.kpis p{font-size:11px}}
+
+.session-context{display:flex;align-items:center;justify-content:flex-end;flex-wrap:wrap;gap:8px 12px;color:var(--ui-muted);font-size:12px}
+#session-id{font-family:var(--ui-mono)}
+.history-scope{margin:0 0 10px;color:var(--ui-muted);font-size:12px}
+.map-symbols{display:flex;align-items:center;flex-wrap:wrap;gap:8px 14px;padding:6px 12px;color:var(--ui-muted);font-size:11px;border-top:1px solid var(--ui-line)}
+.map-symbols span{display:flex;align-items:center;gap:5px}.map-symbols .role-symbol{width:18px;height:18px}
+.map-symbols i{width:18px;border-top:2px solid var(--ui-accent)}.map-symbols .planned-route{border-top-style:dashed}
+@media(min-width:801px){
+ main{padding:12px 24px}main .page-title{margin-bottom:8px}.page-title>div:first-child{display:flex;align-items:baseline;gap:14px}.page-title p{margin:0}
+ .console-tabs{margin-bottom:10px}.console-tabs button{padding:5px 0;min-height:32px}
+ .kpis{margin-bottom:6px}.kpis article{padding:9px 16px}.kpis strong{font-size:24px;line-height:1.15;margin:1px 0}.metric-chart{top:29px}
+ .panel-title{min-height:40px;padding:6px 12px}.agent-filters{padding:8px 12px;gap:8px}.agent-filters label{gap:3px}
+ .agent-column-labels{padding:6px 12px}.fleet-row{min-height:54px;padding:8px 12px}
+ .agent-list{height:324px}.selected-agent{margin-top:12px;padding:8px 12px}.ledger{margin-top:12px}
+ .map-navigation{padding:6px 12px}#map{height:300px}.map-options{padding:7px 12px}
+}
+@media(max-width:800px){.session-context{justify-content:flex-start}.history-scope{font-size:12px}.map-symbols{gap:8px 12px}}

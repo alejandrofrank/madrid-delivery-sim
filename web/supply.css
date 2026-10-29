@@ -1404,7 +1404,7 @@
 }
 :where(body[data-page="restaurants"]) .chat-memory {
   border: 1px solid #3a6961;
-  border-left: 2px solid var(--green);
+  border-left: 1px solid var(--green);
   border-radius: var(--ui-radius);
   background: var(--ui-accent-soft);
   padding: 12px 12px;

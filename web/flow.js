@@ -243,9 +243,9 @@ function renderDeliveryRoster(data=snapshot){
  const status=id=>!data?'ready':(data?.events||[]).some(e=>['pending','queued','leased'].includes(e.state)&&(e.target_store===id||e.target_store===id.split(':').slice(1).join(':')))?'working':'idle';
  const rows=[{id:"dispatcher:fleet",name:agentName("dispatcher:fleet"),role:"dispatcher",status:status("dispatcher:fleet"),task:"Fleet assignments",active:status("dispatcher:fleet")==="working",count:data?.decisions?.filter(d=>d.agent==="dispatcher:fleet"||d.agent_id==="dispatcher:fleet").length??null},{id:"judge:fleet",name:agentName("judge:fleet"),role:"judge",status:status("judge:fleet"),task:"Recovery decisions",active:status("judge:fleet")==="working",count:data?.reviews?.length??null}];
  for(const store of stores)for(const role of ["inventory","fulfillment"])rows.push({id:role+":"+store.id,name:agentName(role+":"+store.id),role,status:status(role+":"+store.id),task:store.name||store.id,active:status(role+":"+store.id)==="working",count:data?activity(role+":"+store.id).length:null});
- for(const courier of fleet)rows.unshift({id:"courier:"+courier.id,name:agentName("courier:"+courier.id),role:"courier",status:courier.busy_basket?"working":courier.status,task:courier.busy_basket||"Available for assignment",active:Boolean(courier.busy_basket),count:(data.jobs||[]).filter(j=>j.courier===courier.id&&j.status==="delivered").length});
+ for(const courier of fleet)rows.unshift({id:"courier:"+courier.id,name:agentName("courier:"+courier.id),role:"courier",status:courier.busy_basket?"working":courier.status,task:courier.busy_basket||(courier.status==="active"?"Available for assignment":courier.status==="offline"?"Offline · not accepting assignments":"Not accepting assignments"),active:Boolean(courier.busy_basket),count:(data.jobs||[]).filter(j=>j.courier===courier.id&&j.status==="delivered").length});
  if(rosterRunId!==data?.run?.id){deliveryRoster.reset();rosterRunId=data?.run?.id;}
- deliveryRoster.update(rows,selectedAgent,data?data.run.id+":"+data.run.sim_time:null,data?.run?.sim_time);
+ deliveryRoster.update(rows,selectedAgent,data?data.run.id+":"+data.run.sim_time:null,data?.run?.sim_time,data?.run?.status);
 }
 function showDeliverySimulation(open){
  document.querySelector(".delivery-toolbar").hidden=!open;
@@ -253,3 +253,5 @@ function showDeliverySimulation(open){
  if(!open&&$("configuration")&&!$("configuration").hidden)resetPanel();
 }
 $("flow-simulation-toggle").onclick=()=>showDeliverySimulation(document.querySelector(".delivery-toolbar").hidden);
+
+Ops.enableMapKeyboard(document.getElementById('city'));

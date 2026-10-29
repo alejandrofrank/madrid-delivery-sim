@@ -332,7 +332,7 @@ async function renderDiagrams(version) {
     const canvas = element("div", "Loading local SVG…", "diagram-render");
     canvas.tabIndex = 0;
     canvas.setAttribute("role", "region");
-    canvas.setAttribute("aria-label", `Scrollable ${title.toLowerCase()}`);
+    canvas.setAttribute("aria-label", `Overview of ${title.toLowerCase()}; use Expand for readable detail`);
     const details = element("details");
     const code = element("code", source);
     const pre = element("pre");
@@ -387,7 +387,6 @@ async function renderDiagrams(version) {
         image.width = asset.svg.width;
         image.height = asset.svg.height;
         image.decoding = "async";
-        image.style.minWidth = `${Math.ceil(asset.svg.width * 0.9)}px`;
         image.addEventListener("load", () => {
           card.expand.disabled = false;
         });
@@ -406,7 +405,7 @@ async function renderDiagrams(version) {
           asset.title;
         card.canvas.setAttribute(
           "aria-label",
-          `Scrollable ${asset.title.toLowerCase()}`,
+          `Overview of ${asset.title.toLowerCase()}; use Expand for readable detail`,
         );
         card.details.querySelector("summary").textContent =
           "Diagram source · D2 / ELK";

@@ -48,6 +48,8 @@ function observeMetrics(){
  if(observations.length>40)observations.shift();
  for(const key of ["orders","ontime","cost","rate"])$("chart-"+key).innerHTML=Ops.sparkline(observations.map(s=>s[key]),"Observed "+key+" during this visit");
 }
+function courierTask(c){return c.order_id || (c.status==="off_shift"?"Off shift":c.status==="returning"?"Returning to hub":"Available for assignment");}
+$("map-symbols").innerHTML=["bike","moto","van"].map(role=>'<span>'+Ops.icon(role)+role[0].toUpperCase()+role.slice(1)+'</span>').join("")+'<span><i class="planned-route"></i>Planned</span><span><i class="observed-route"></i>Traveled · fading</span>';
 function agentTraceLink(id){return "/agent-traces?source=madrid&run="+encodeURIComponent(state.run.id)+"&agent="+encodeURIComponent(id);}
 
 const escape = (s) => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
@@ -171,6 +173,10 @@ function renderRoute() {
 function renderMetrics() {
   observeMetrics();
   const {run,metrics:m,queue:q,complaints} = state;
+  $("session-state").textContent=human(run.status);
+  $("session-state").className="badge "+run.status;
+  $("session-id").textContent=clock(run.sim_time)+" · "+run.id.slice(0,8);
+  $("history-scope").textContent=(observations.length<2 ? (["complete","failed"].includes(run.status) ? "History unavailable for this completed run." : "Collecting history.") : "Charts observed since opening.")+" Agent totals are delivered orders; curves show deliveries per simulated minute.";
   $("kpi-rate").textContent=run.sim_time>0?(m.orders/(run.sim_time/60)).toFixed(2):"—";
   $("clock").textContent = clock(run.sim_time);
   $("run-status").textContent = run.status.toUpperCase(); $("run-status").className = `badge ${run.status}`;
@@ -202,7 +208,7 @@ function renderCouriers() {
     else marker.setIcon(icon).setLatLng([c.lat,c.lon]);
     const last=state.decisions.find(d=>d.courier_id===c.id);
     marker.bindTooltip(escape(c.id)+" · "+escape(human(c.status)));
-    const content='<div class="map-agent-card"><strong>'+escape(c.id)+'</strong><p>'+escape(human(c.status))+' · '+escape(c.mode)+'</p><p>Task: '+escape(c.order_id||"Available for assignment")+'</p><p>Last decision: '+escape(last?human(last.action):"None recorded")+'</p><a href="'+agentTraceLink(c.id)+'">Open agent trace</a></div>';
+    const content='<div class="map-agent-card"><strong>'+escape(c.id)+'</strong><p>'+escape(human(c.status))+' · '+escape(c.mode)+'</p><p>Task: '+escape(courierTask(c))+'</p><p>Last decision: '+escape(last?human(last.action):"None recorded")+'</p><a href="'+agentTraceLink(c.id)+'">Open agent trace</a></div>';
     if(marker.getPopup())marker.setPopupContent(content);else marker.bindPopup(content,{minWidth:220,autoPan:false});
     const point=map.project([c.lat,c.lon],map.getZoom());
     const key=map.getZoom()<13.5&&!isSelected?Math.floor(point.x/38)+":"+Math.floor(point.y/38):c.id;
@@ -249,7 +255,7 @@ function renderInspector() {
   $("open-agent-details").disabled=!selected;
   if(selected?.kind==="courier"){
     const c=state.couriers.find(c=>c.id===selected.id);
-    if(c)$("selection").innerHTML='<strong>'+escape(c.id)+'</strong><span class="status-pill '+agentStatus(c)+'">'+escape(human(c.status))+'</span><p>'+escape(c.order_id||"Available for the next assignment")+'</p>';
+    if(c)$("selection").innerHTML='<strong>'+escape(c.id)+'</strong><span class="status-pill '+agentStatus(c)+'">'+escape(human(c.status))+'</span><p>'+escape(courierTask(c))+'</p>';
   }else if(selected?.kind==="order"){
     const o=state.orders.find(o=>o.id===selected.id);
     $("selection").innerHTML='<strong>'+escape(selected.id)+'</strong><p>'+escape(o?.store||"Delivery order")+' · '+escape(human(o?.status||"Recorded"))+'</p>';

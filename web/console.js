@@ -26,26 +26,54 @@ window.Ops = (() => {
   return {escape,icon,sparkline,liveHTML};
 })();
 /* Shared live list for agent runtimes. Counters come from persisted events/orders. */
-Ops.createRoster = function(mount,onSelect){
+Ops.createRoster = function(mount,onSelect,options={}){
  const esc=Ops.escape;
- mount.innerHTML='<div class="roster-heading"><h2>Agents <span class="roster-count"></span></h2><span class="roster-state"></span></div><div class="roster-filters"><label>Role<select class="roster-role"><option value="">All roles</option></select></label><label>Status<select class="roster-status"><option value="">All statuses</option></select></label><label>Find agent<input class="roster-search" type="search" placeholder="Name or ID"></label></div><div class="roster-labels"><span>Agent / current task</span><span>Status</span><span>Activity</span></div><div class="roster-list"></div>';
+ mount.innerHTML='<div class="roster-heading"><h2>Agents <span class="roster-count"></span></h2><span class="roster-state"></span></div><div class="roster-filters"><label>Role<select class="roster-role"><option value="">All roles</option></select></label><label>Status<select class="roster-status"><option value="">All statuses</option></select></label><label>Find agent<input class="roster-search" type="search" placeholder="Name or ID"></label></div><div class="roster-labels"><span>Agent / current task</span><span>Status</span><span>Total / rate</span></div><div class="roster-list"></div><p class="roster-history"></p>';
  const role=mount.querySelector(".roster-role"),status=mount.querySelector(".roster-status"),search=mount.querySelector(".roster-search"),list=mount.querySelector(".roster-list");
  let rows=[],selected=null,lastKey=null,histories=new Map(),previous=new Map();
  function filters(select,values,title){const old=select.value;select.replaceChildren(new Option(title,""),...values.map(x=>new Option(x.replaceAll("_"," "),x)));select.value=values.includes(old)?old:"";}
  function render(){
-   const query=search.value.toLowerCase(),shown=rows.filter(r=>(!role.value||r.role===role.value)&&(!status.value||r.status===status.value)&&(!query||(r.name+" "+r.id).toLowerCase().includes(query)));
+   const query=search.value.toLowerCase(),shown=rows.filter(r=>(!role.value||r.role===role.value)&&(!status.value||r.status===status.value)&&(!query||(r.name+" "+r.id+" "+(r.identity||"")+" "+(r.roleLabel||"")+" "+(r.task||"")).toLowerCase().includes(query)));
    const focused=list.contains(document.activeElement)?document.activeElement.closest("[data-roster-id]")?.dataset.rosterId:null,scroll=list.scrollTop;
-   list.innerHTML=shown.map(r=>'<button class="roster-row '+(selected===r.id?"is-selected":"")+'" data-roster-id="'+esc(r.id)+'" aria-pressed="'+(selected===r.id)+'"><span class="roster-identity">'+Ops.icon(r.role)+'<span><strong>'+esc(r.name)+'</strong><small>'+esc(r.task||r.role.replaceAll("_"," "))+'</small></span></span><span class="roster-pill '+(r.active?"is-active":"")+'">'+esc(r.status.replaceAll("_"," "))+'</span><span class="roster-count-value">'+(Number.isFinite(r.count)?r.count:"—")+Ops.sparkline(histories.get(r.id)||[],"Completed activity per simulated minute")+'</span></button>').join("")||'<p class="roster-empty">'+(rows.length?"No agents match your filters.":"No live agents yet. Start a session from Simulation.")+'</p>';
+   list.innerHTML=shown.map(r=>'<button class="roster-row '+(selected===r.id?"is-selected":"")+'" data-roster-id="'+esc(r.id)+'" aria-pressed="'+(selected===r.id)+'"><span class="roster-identity">'+Ops.icon(r.role)+'<span><strong>'+esc(r.name)+'</strong>'+(r.identity?'<small class="roster-id">'+esc(r.identity)+'</small>':'')+'<small>'+esc([r.roleLabel,r.task||r.role.replaceAll("_"," ")].filter(Boolean).join(" · "))+'</small></span></span><span class="roster-pill '+(r.active?"is-active":"")+'">'+esc(r.status.replaceAll("_"," "))+'</span><span class="roster-count-value">'+(Number.isFinite(r.count)?r.count:"—")+Ops.sparkline(histories.get(r.id)||[],(options.rateLabel||"Recorded activity per simulated minute"))+'</span></button>').join("")||'<p class="roster-empty">'+(rows.length?"No agents match your filters.":"No live agents yet. Start a session from Simulation.")+'</p>';
    list.scrollTop=scroll;if(focused)[...list.querySelectorAll("[data-roster-id]")].find(x=>x.dataset.rosterId===focused)?.focus({preventScroll:true});
  }
  [role,status,search].forEach(el=>el.addEventListener("input",render));
  list.addEventListener("click",e=>{const row=e.target.closest("[data-roster-id]");if(row){selected=row.dataset.rosterId;render();onSelect(selected);}});
- return {update(next,selection,key,seconds){
+ return {update(next,selection,key,seconds,runStatus){
    rows=next;selected=selection;
    if(key&&key!==lastKey){lastKey=key;for(const row of rows){let values=histories.get(row.id)||[];if(Number.isFinite(row.count)){const last=previous.get(row.id);if(last&&Number.isFinite(seconds)&&seconds>last.time)values.push(Math.max(0,row.count-last.count)*60/(seconds-last.time));previous.set(row.id,{count:row.count,time:seconds});if(values.length>30)values.shift();histories.set(row.id,values);}}}
    filters(role,[...new Set(rows.map(r=>r.role))].sort(),"All roles");filters(status,[...new Set(rows.map(r=>r.status))].sort(),"All statuses");
    mount.querySelector(".roster-count").textContent=rows.length;
    mount.querySelector(".roster-state").textContent=rows.filter(r=>r.active).length+" working";
+   const sampled=[...histories.values()].some(values=>values.length>=2);
+   const history=sampled?"Curves observed since opening.":["complete","failed"].includes(runStatus)?"History unavailable for this completed run.":"Collecting history.";
+   mount.querySelector(".roster-history").textContent=(options.scope||"Totals: retained decisions / delivered orders.")+" "+history+" Curves: activity / simulated min.";
    render();
  },reset(){histories=new Map();previous=new Map();lastKey=null;}};
+};
+
+/* One map tab stop; arrows reach every marker without trapping page navigation. */
+Ops.enableMapKeyboard = function(svg) {
+ let current = null;
+ const markers = () => [...svg.querySelectorAll('[role="button"]')];
+ function sync() {
+   const nodes=markers();
+   const selected=nodes.find(n=>n.getAttribute('aria-label')===current)||nodes[0];
+   nodes.forEach(n=>n.tabIndex=n===selected?0:-1);
+ }
+ svg.addEventListener('focusin',event=>{
+   const marker=event.target.closest('[role="button"]');
+   if(marker){current=marker.getAttribute('aria-label');sync();}
+ });
+ svg.addEventListener('keydown',event=>{
+   if(!['ArrowDown','ArrowRight','ArrowUp','ArrowLeft','Home','End'].includes(event.key))return;
+   const nodes=markers(),index=nodes.indexOf(document.activeElement);
+   if(index<0)return;
+   event.preventDefault();
+   const next=event.key==='Home'?0:event.key==='End'?nodes.length-1:(index+(['ArrowRight','ArrowDown'].includes(event.key)?1:-1)+nodes.length)%nodes.length;
+   nodes[next].focus();
+ });
+ new MutationObserver(sync).observe(svg,{childList:true,subtree:true});
+ sync();
 };

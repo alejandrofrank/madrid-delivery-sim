@@ -19,6 +19,7 @@
   brand.setAttribute("aria-label", "Bakiano operations home");
   brand.innerHTML =
     '<span class="workspace-mark" aria-hidden="true">b.</span><span class="workspace-wordmark">BAKIANO<small>Operations</small></span>';
+  brand.querySelector("small").textContent = pages.find(([path]) => path === location.pathname)?.[1] || "Operations";
   const nav = document.createElement("nav");
   nav.id = "workspace-navigation";
   nav.className = "workspace-navigation";

@@ -18,6 +18,15 @@ const base=arg('--url','http://127.0.0.1:8021'),runFile=arg('--runs','artifacts/
   await page.locator('#live-agents .roster-row').first().click();
   await page.waitForFunction(()=>document.getElementById('context').hidden===false);
   assert(await page.locator('#agent-content').textContent());
+  assert.equal(await page.locator('#city [role=button][tabindex="0"]').count(),1);
+  await page.locator('#city [role=button][tabindex="0"]').focus();
+  const before=await page.evaluate(()=>document.activeElement.getAttribute('aria-label'));
+  await page.keyboard.press('ArrowRight');
+  assert.notEqual(await page.evaluate(()=>document.activeElement.getAttribute('aria-label')),before);
+  assert.equal(await page.locator('#city [role=button][tabindex="0"]').count(),1);
+  await page.locator('#live-agents .roster-role').selectOption('courier');
+  assert.equal(await page.locator('.roster-row:has-text("offline"):has-text("Available for assignment")').count(),0);
+  await page.locator('#live-agents .roster-role').selectOption('inventory');
   const href=await page.locator('#agent-trace-link').getAttribute('href');
   assert(href.includes('source=delivery'));
   await page.goto(base+href);
@@ -35,6 +44,9 @@ const base=arg('--url','http://127.0.0.1:8021'),runFile=arg('--runs','artifacts/
   await page.waitForFunction(()=>document.getElementById('map-source').textContent.includes('Frozen'));
   assert(await page.locator('#supply-controls').isHidden());
   await page.locator('#supply-agents .roster-role').selectOption('restaurant');
+  await page.locator('#supply-agents .roster-search').fill('Pizza Kitchen');
+  assert.equal(await page.locator('#supply-agents .roster-row').count(),1);
+  assert(await page.locator('#supply-agents .roster-id').innerText());
   await page.locator('#supply-agents .roster-row').first().click();
   assert(await page.locator('#supply-inspector').isVisible());
   assert(await page.locator('#inspection-panel').isVisible());
@@ -70,6 +82,9 @@ const base=arg('--url','http://127.0.0.1:8021'),runFile=arg('--runs','artifacts/
   assert.equal(animation,'none');
   const links=await page.locator('#component-inspector a').evaluateAll(nodes=>nodes.map(el=>el.getBoundingClientRect().height));
   assert(links.every(h=>h>=24));
+  const diagramBounds=await page.locator('.diagram-render').evaluateAll(nodes=>nodes.map(el=>({height:el.clientHeight,scroll:el.scrollHeight,width:el.clientWidth,scrollWidth:el.scrollWidth})));
+  assert(diagramBounds.length>0);
+  assert(diagramBounds.every(d=>d.scroll<=d.height+1&&d.scrollWidth<=d.width+1));
   await page.locator('#open-search').click();
   await page.locator('#search-input').fill('memory');
   await page.waitForSelector('#search-results a');
@@ -87,12 +102,17 @@ const base=arg('--url','http://127.0.0.1:8021'),runFile=arg('--runs','artifacts/
   await page.waitForTimeout(300);
   assert(await page.locator('.leaflet-marker-icon').count()>0);
   assert(await page.locator('#map').evaluate(el=>el.clientWidth>100));
+  assert((await page.locator('#session-state').innerText()).includes('complete'));
+  assert((await page.locator('#history-scope').innerText()).includes('History unavailable'));
+  await page.setViewportSize({width:1440,height:960});
+  assert(await page.locator('.ledger thead').evaluate(el=>el.getBoundingClientRect().bottom<960),'Order headings remain in the first viewport');
   await page.locator('#open-agent-details').click();
   assert(await page.locator('#agent-details').isVisible());
  });
  await check('All pages fit narrow screens and expose current navigation',async()=>{
   for(const route of ['/','/delivery-lab','/restaurant-lab','/lab','/health','/agent-traces','/architecture']){
-   await page.goto(base+route);
+   const run = route === '/delivery-lab' ? runs.flow : route === '/restaurant-lab' ? runs.supply : route === '/lab' ? runs.lab : '';
+   await page.goto(base+route+(run?'?run='+run:''));
    await page.setViewportSize({width:390,height:844});
    await page.waitForTimeout(300);
    assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth),false,route+' overflow');
