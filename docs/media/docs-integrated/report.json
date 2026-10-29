@@ -1,0 +1,46 @@
+{
+  "base": "http://127.0.0.1:8021",
+  "phase": "docs-integrated",
+  "capturedAt": "2026-10-29T16:22:34.533Z",
+  "results": [
+    {
+      "page": "documentation",
+      "route": "/architecture",
+      "run": null,
+      "size": "desktop",
+      "status": 200,
+      "horizontalOverflow": false,
+      "width": 1440,
+      "title": "System overview · Bakiano engineering",
+      "heading": "System overview",
+      "unlabeledControls": [],
+      "errors": []
+    },
+    {
+      "page": "documentation",
+      "route": "/architecture",
+      "run": null,
+      "size": "laptop",
+      "status": 200,
+      "horizontalOverflow": false,
+      "width": 1280,
+      "title": "System overview · Bakiano engineering",
+      "heading": "System overview",
+      "unlabeledControls": [],
+      "errors": []
+    },
+    {
+      "page": "documentation",
+      "route": "/architecture",
+      "run": null,
+      "size": "mobile",
+      "status": 200,
+      "horizontalOverflow": false,
+      "width": 390,
+      "title": "System overview · Bakiano engineering",
+      "heading": "System overview",
+      "unlabeledControls": [],
+      "errors": []
+    }
+  ]
+}

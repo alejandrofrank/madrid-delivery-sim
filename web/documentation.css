@@ -1189,3 +1189,29 @@ dialog::backdrop {
     margin-bottom: 20px;
   }
 }
+
+/* One finite motion sequence explains the persisted request lifecycle. */
+.request-flow {border:1px solid var(--ui-line);padding:16px;margin:24px 0;background:var(--ui-surface)}
+.flow-heading {display:flex;align-items:center;justify-content:space-between;gap:12px}
+.flow-heading h2 {margin:0;font-size:16px}
+.request-flow>p {color:var(--ui-muted);font-size:12px;margin:8px 0 20px}
+.flow-stages {display:grid;grid-template-columns:repeat(4,minmax(0,1fr));position:relative}
+.flow-stages:before {content:"";height:1px;background:var(--ui-strong-line);position:absolute;left:12%;right:12%;top:14px}
+.flow-stages button {position:relative;border:0;background:transparent;text-align:center;padding:0 8px;min-width:0}
+.flow-stage-icon {position:relative;display:block;background:var(--ui-surface);border:1px solid var(--ui-strong-line);border-radius:50%;width:28px;height:28px;margin:0 auto 10px;font:12px/26px var(--ui-mono)}
+.flow-stages strong,.flow-stages small {display:block}
+.flow-stages strong {font-size:13px;font-weight:500}
+.flow-stages small {color:var(--ui-muted);font-size:12px;margin-top:4px}
+.is-playing .flow-stage-icon {animation:flow-stage 4.8s var(--ui-ease) both}
+.is-playing button:nth-child(2) .flow-stage-icon {animation-delay:.5s;animation-duration:4.3s}
+.is-playing button:nth-child(3) .flow-stage-icon {animation-delay:1s;animation-duration:3.8s}
+.is-playing button:nth-child(4) .flow-stage-icon {animation-delay:1.5s;animation-duration:3.3s}
+@keyframes flow-stage {0%,12%{border-color:var(--ui-strong-line);background:var(--ui-surface)}25%,60%{border-color:var(--ui-accent);background:var(--ui-accent-soft)}100%{border-color:var(--ui-strong-line);background:var(--ui-surface)}}
+.component-inspector a {display:inline-flex;align-items:center;min-height:28px;padding:4px 0;margin-right:12px}
+.component-state {display:block;font-size:12px;color:var(--ui-muted);margin:6px 0 12px}
+.prose {max-width:75ch}
+.contents-title {font-size:13px;color:var(--ui-muted)}
+.diagram-heading button,.diagram-card details {font-size:12px;font-family:var(--ui-font)}
+@media(max-width:600px){.flow-heading{align-items:flex-start}.flow-stages{grid-template-columns:repeat(2,minmax(0,1fr));gap:20px}.flow-stages:before{display:none}.component-inspector a{min-height:44px}}
+@media(prefers-reduced-motion:reduce){.is-playing .flow-stage-icon{animation:none}}
+[hidden] {display:none!important}

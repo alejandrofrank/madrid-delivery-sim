@@ -165,8 +165,8 @@ function selectComponent(key) {
   });
   const inspector = $("#component-inspector");
   inspector.replaceChildren(
-    element("span", component.state, "eyebrow"),
     element("h3", component.name),
+    element("span", component.state, "component-state"),
     element("p", component.purpose),
   );
   const details = element("dl");
@@ -517,8 +517,6 @@ async function showPage(id, resetScroll = false) {
   $("#document").hidden = false;
   document.title = `${currentPage.title} · Bakiano engineering`;
   $("#breadcrumb-topic").textContent = currentPage.group;
-  $("#chapter-number").textContent =
-    `CHAPTER ${String(index).padStart(2, "0")} / ${currentPage.group.toUpperCase()}`;
   $("#chapter-title").textContent = currentPage.title;
   $("#chapter-summary").textContent = currentPage.summary;
   $("#chapter-status").textContent = currentPage.status;
@@ -528,6 +526,7 @@ async function showPage(id, resetScroll = false) {
   $("#markdown-link").href = sourceURL(currentPage.file);
   $("#markdown-link").dataset.source = currentPage.file;
   $("#system-explorer").hidden = currentPage.id !== "overview";
+  $("#request-flow").hidden = currentPage.id !== "overview";
   document.querySelectorAll(".topic-link").forEach((link) => {
     if (link.dataset.page === currentPage.id)
       link.setAttribute("aria-current", "page");
@@ -716,6 +715,10 @@ $("#search-input").addEventListener("keydown", (event) => {
 });
 $("#open-search").addEventListener("click", openSearch);
 document.addEventListener("keydown", (event) => {
+  if (event.key === "Escape") {
+    const dialog = document.querySelector("dialog[open]");
+    if (dialog) { event.preventDefault(); dialog.close(); return; }
+  }
   if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === "k") {
     event.preventDefault();
     if (!$("#search-dialog").open) openSearch();
@@ -761,3 +764,10 @@ window.addEventListener("resize", () => {
     $("#loading").hidden = true;
   }
 })();
+
+document.getElementById('replay-flow').addEventListener('click', () => {
+  const flow = document.getElementById('request-flow');
+  flow.classList.remove('is-playing');
+  void flow.offsetWidth;
+  flow.classList.add('is-playing');
+});
