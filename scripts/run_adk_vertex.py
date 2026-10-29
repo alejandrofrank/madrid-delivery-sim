@@ -39,9 +39,18 @@ def main() -> None:
     parser.add_argument("--after-review", action="store_true")
     parser.add_argument("--resume", action="store_true")
     parser.add_argument("--routing-comparison", action="store_true")
+    parser.add_argument("--contract-verification", action="store_true")
     parser.add_argument("--continue-planned", action="store_true")
     parser.add_argument("--reviewed-failure", action="store_true")
     args = parser.parse_args()
+    if args.contract_verification and (
+        args.routing_comparison
+        or args.resume
+        or args.after_review
+        or args.continue_planned
+        or args.reviewed_failure
+    ):
+        raise DemoError("Contract verification is a separate one-shot experiment")
     continuation_flags = routing_continuation_flags(args)
     demo = Demo()
     state = demo.state()
@@ -52,11 +61,18 @@ def main() -> None:
         raise DemoError("Run vertex-start before this explicit paid test")
     if (
         not args.routing_comparison
+        and not args.contract_verification
         and (demo.root / "artifacts/.adk-live-comparison.lock").exists()
         and not (args.after_review or args.resume)
     ):
         raise DemoError("A previous paid experiment is retained; inspect it before another test")
     experiment_dir = demo.root / ".env.adk-experiments"
+    if args.contract_verification:
+        experiment_dir.mkdir(exist_ok=True)
+        if (experiment_dir / "contract-verification.execution.json").exists() or (
+            demo.root / "artifacts/adk-contract-verification.json"
+        ).exists():
+            raise DemoError("Contract verification already claimed; inspect retained evidence")
     if args.routing_comparison:
         experiment_dir.mkdir(exist_ok=True)
         original_claim = experiment_dir / "route-comparison.execution.json"
@@ -111,7 +127,9 @@ def main() -> None:
         )
         print(
             (
-                "Continuing reviewed unstarted arms; original cumulative caps unchanged."
+                "Running three contract/direct-Jev cases; shared ceiling 0.15 USD."
+                if args.contract_verification
+                else "Continuing reviewed unstarted arms; original cumulative caps unchanged."
                 if args.continue_planned
                 else "Running six matched routing arms; shared ceiling $0.60 "
                 "(Vertex ≤ $0.54, Jev ≤ $0.01)."
@@ -150,12 +168,14 @@ def main() -> None:
                         "-e",
                         "DELIVERY_ADK_EXPERIMENT_DIRECTORY=/adk-experiments",
                     ]
-                    if args.routing_comparison
+                    if args.routing_comparison or args.contract_verification
                     else []
                 ),
                 "app",
                 "python",
-                "scripts/compare_agent_routing.py"
+                "scripts/verify_adk_contracts.py"
+                if args.contract_verification
+                else "scripts/compare_agent_routing.py"
                 if args.routing_comparison
                 else "scripts/demo_adk_vertex.py",
                 "--paid",
