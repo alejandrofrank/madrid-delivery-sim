@@ -73,6 +73,8 @@ Connect Looker Studio's BigQuery connector to the Terraform output `dashboard_vi
 
 Suggested controls are `run_date`, `profile`, `scenario`, and `variant`. Add delivery rate, queue events, dead letters, replay result, and evaluation pass rate; compare measured usage cost with reserved cost in separate series. `evaluation_pass_rate` is the run receipt's boolean-check pass rate, not the entire repository's scenario evaluation score. Missing denominators and missing usage stay null. Both source tables are filtered to the last seven export days. Choose bounded refresh intervals and inspect BigQuery billing before making a dashboard public; this feature does not publish one automatically.
 
+The same view supports baseline receipts: `delivery_rate` divides delivered orders by ADK `scheduled_calls` when present, otherwise baseline `orders`. It also exposes baseline `on_time`, `on_time_pct`, `delivery_cost_eur`, `cost_per_delivery_eur`, `active`, `unserved`, `pending`, and `overdue` columns. `delivery_rate` is a fraction (0–1); the simulator's `on_time_pct` is already a percentage (0–100). A zero denominator remains null, and baseline receipts without outcome checks retain a null evaluation pass rate.
+
 ## Park analytics
 
 Stop uploads by clearing `DELIVERY_BIGQUERY_ENABLED`. To return to no analytics storage, explicitly remove this disposable dataset while billing is still linked:

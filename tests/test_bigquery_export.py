@@ -157,6 +157,19 @@ def test_sql_view_prunes_both_tables_and_keeps_zero_denominators_null():
     assert sql.count("WHERE exported_at >= TIMESTAMP_SUB") == 2
     assert "SAFE_DIVIDE(r.checks_passed, r.checks_total)" in sql
     assert "PARTITION BY run_id ORDER BY exported_at DESC" in sql
+    assert "SAFE_DIVIDE(k.delivered, COALESCE(k.scheduled_calls, k.orders)) AS delivery_rate" in sql
+    for metric in (
+        "orders",
+        "on_time",
+        "on_time_pct",
+        "delivery_cost_eur",
+        "cost_per_delivery_eur",
+        "active",
+        "unserved",
+        "pending",
+        "overdue",
+    ):
+        assert f"MAX(IF(metric_name = '{metric}', metric_value, NULL)) AS {metric}" in sql
 
 
 def test_sdk_load_is_append_only_with_fixed_job_id_and_no_table_creation():
