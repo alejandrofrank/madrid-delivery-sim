@@ -11,6 +11,20 @@ from delivery.config import settings
 
 Connection = psycopg.Connection[dict[str, Any]]
 
+# Both immutable files were shipped under the same name on independent branches.
+# Accept only this exact old/new pair; retain the original ledger hash and let
+# 027 converge the schemas. A changed canonical file must still fail closed.
+_MIGRATION_HISTORY = {
+    "026_telemetry_context.sql": (
+        "e653fefc503d701ded74ee51f6a1ebd792a275fef11d244aedd0408dda764277",
+        "c1c197008648301a7e0246a8f7c985dc06c1944d3393484ca3a62df8b830d19d",
+    ),
+}
+
+
+def _compatible_migration(name: str, current: str, applied: str) -> bool:
+    return _MIGRATION_HISTORY.get(name) == (current, applied)
+
 
 @contextmanager
 def connect(url: str | None = None) -> Iterator[Connection]:
@@ -32,7 +46,11 @@ def migrate(url: str | None = None) -> None:
             prior = conn.execute(
                 "SELECT sha256 FROM schema_migrations WHERE name=%s", (path.name,)
             ).fetchone()
-            if prior and prior["sha256"] != checksum:
+            if (
+                prior
+                and prior["sha256"] != checksum
+                and not _compatible_migration(path.name, checksum, prior["sha256"])
+            ):
                 raise RuntimeError(f"Applied migration changed: {path.name}")
             if not prior:
                 conn.execute(source)

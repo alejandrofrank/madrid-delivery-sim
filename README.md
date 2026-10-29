@@ -220,6 +220,20 @@ the [BigQuery runbook](docs/GOOGLE-ANALYTICS.md) and
 [tracing runbook](docs/OBSERVABILITY.md). Historical cloud receipts describe their
 recorded dates; use `status` for a live inventory. No cloud deployment is required
 for the portfolio demo. [Setup and cost boundaries](docs/GCP-AI.md).
+## Observability
+
+Optional OpenTelemetry follows each order through queue workers, ADK agents and
+tools, with FastAPI and Redis spans. Set `MDS_TELEMETRY_ENABLED=1` for console/OTLP
+locally or Cloud Trace when `GOOGLE_CLOUD_PROJECT` is set. Separately,
+`MDS_BIGQUERY_ENABLED=1` batches sanitized spans, agent steps, terminal orders and
+eval results into the Terraform-managed `mds_analytics` dataset. Both flags default
+off; ordinary runs and tests need no GCP credentials.
+
+See [observability setup and limits](docs/ARCHITECTURE-OBSERVABILITY.md), the
+[trace-flow diagram](docs/ARCHITECTURE-OBSERVABILITY.md#trace-flow), and
+[saved analytics queries](sql/analytics) for cost per success, tool p95 and eval
+pass^k trends. Queued telemetry can be lost on crashes; business receipts stay in
+Postgres and local artifacts.
 
 ## LLM configuration
 

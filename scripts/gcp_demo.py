@@ -43,6 +43,18 @@ OPTIONAL_COMPONENTS = {
         "google_project_iam_member.telemetry",
         "google_service_account_iam_binding.telemetry_tokens",
     },
+    "observability": {
+        "google_bigquery_dataset.observability",
+        "google_bigquery_table.observability",
+        "google_project_service.observability",  # Standalone branch state before migration.
+        "google_service_account.observability",
+        "google_service_account_iam_binding.observability_tokens",
+        "google_project_iam_member.trace_writer",
+        "google_project_iam_member.runtime_trace_writer",
+        "google_project_iam_custom_role.analytics_writer",
+        "google_bigquery_dataset_iam_member.analytics_writer",
+        "google_bigquery_dataset_iam_member.runtime_analytics_writer",
+    },
 }
 
 
@@ -52,6 +64,10 @@ def optional_resources(state: dict[str, Any]) -> dict[str, list[str]]:
         component: sorted(address for address in state if address.split("[", 1)[0] in resources)
         for component, resources in OPTIONAL_COMPONENTS.items()
     }
+
+
+def observability_resources(state: dict[str, Any]) -> list[str]:
+    return optional_resources(state)["observability"]
 
 
 class DemoError(RuntimeError):
@@ -166,7 +182,10 @@ class Demo:
         if phase in {"remove-runtime", "unlink-billing"}:
             # stop() has already required explicit removal. Stale opt-in variables
             # must not recreate components while the project is being parked.
-            settings.update(enable_bigquery=False, enable_telemetry=False)
+            settings.update(
+                enable_bigquery=False, enable_telemetry=False,
+                enable_analytics=False, enable_cloud_trace=False,
+            )
         # Saved plans/private override stay in the ignored Terraform directory.
         plan = "demo-command.tfplan"
         flags = [
@@ -276,8 +295,12 @@ class Demo:
     def stop(self) -> None:
         state = self.state()
         optional = optional_resources(state)
-        if any(optional.values()):
+        configured_observability = any(
+            self.config.get(flag) for flag in ("enable_analytics", "enable_cloud_trace")
+        )
+        if any(optional.values()) or configured_observability:
             components = ", ".join(name for name, resources in optional.items() if resources)
+            components = components or "configured observability"
             instructions = []
             if optional["analytics"]:
                 instructions.append(
@@ -286,12 +309,19 @@ class Demo:
                 )
             if optional["telemetry"]:
                 instructions.append("Stop the Cloud Trace collector; follow docs/OBSERVABILITY.md.")
+            if optional["observability"] or configured_observability:
+                instructions.append(
+                    "Cloud observability remains configured: stop exporters and export/back up "
+                    "retained analytics. Apply analytics_deletion_protection=false separately "
+                    "before deleting protected streaming tables. Follow docs/OBSERVABILITY.md."
+                )
             raise DemoError(
                 f"Stop requires explicit cleanup of retained {components} resources. "
                 + " ".join(instructions)
                 + " "
                 "Review a Terraform plan with -var=enable_bigquery=false and "
-                "-var=enable_telemetry=false while billing remains linked; preserve the "
+                "-var=enable_telemetry=false, -var=enable_analytics=false and "
+                "-var=enable_cloud_trace=false while billing remains linked; preserve the "
                 "current runtime flags until those components are removed. "
                 "Review and apply that plan, then rerun python3 scripts/gcp_demo.py stop. "
                 "No app restart, resource deletion or billing change was attempted."
@@ -338,6 +368,7 @@ class Demo:
             modes = None
         runtime = sorted(RUNTIME.intersection(state))
         optional = optional_resources(state)
+        observability = optional["observability"]
         mode = "cloud-enabled" if enabled or runtime or services else "parked"
         if mode == "parked" and any(optional.values()):
             mode = "optional-components-retained"
@@ -348,6 +379,11 @@ class Demo:
             runtime_in_state=runtime,
             analytics_in_state=optional["analytics"],
             telemetry_in_state=optional["telemetry"],
+            observability_in_state=observability,
+            analytics_retained=any(
+                address.startswith("google_bigquery_")
+                for address in [*optional["analytics"], *observability]
+            ),
             cloud_run_services=len(services),
             artifact_repositories=len(repositories) if repositories is not None else None,
             artifact_check="live" if enabled else "unavailable_without_billing",
@@ -361,6 +397,14 @@ class Demo:
 
 # An automated lifecycle command may change billable resources, not the free foundation.
 def validate_plan(plan: dict[str, Any], project: str, phase: str) -> None:
+    if phase == "unlink-billing" and any(
+        any(optional_resources({change["address"]: {}}).values())
+        and change["change"].get("after")
+        for change in plan.get("resource_changes", [])
+    ):
+        raise DemoError(
+            "Plan rejected: explicitly retire cloud observability before unlinking billing."
+        )
     allowed = {
         "bootstrap": {"create"},
         "deploy": {"create", "update"},

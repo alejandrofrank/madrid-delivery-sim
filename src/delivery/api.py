@@ -24,6 +24,7 @@ from delivery.history import history_catalogue, history_manifest
 from delivery.lab import create_lab, export_slice, lab_snapshot
 from delivery.simulation import Simulation, create_run, initialize, snapshot
 from delivery.supply_api import router as supply_router
+from delivery.telemetry import instrument_fastapi, shutdown_telemetry
 from delivery.telemetry_api import router as telemetry_router
 from delivery.world import DATA, World
 
@@ -34,10 +35,14 @@ world: World
 async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     global world
     world = initialize()
-    yield
+    try:
+        yield
+    finally:
+        shutdown_telemetry()
 
 
 app = FastAPI(title="Madrid Delivery Sim", lifespan=lifespan)
+instrument_fastapi(app)
 
 
 class StartLab(BaseModel):

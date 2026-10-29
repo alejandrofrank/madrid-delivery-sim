@@ -240,6 +240,15 @@ case. Successful main runs store `eval-baseline-v1` for 90 days, including revie
 from the successful main run for their exact base SHA. PR changes cannot select
 an alternate baseline or quietly weaken its stored thresholds.
 
+CI collects model attempts with `--record-only`: quality mismatches stay in the
+receipt for the statistical comparison instead of failing the collection step.
+Runner exceptions, incomplete or duplicate repeats, inconsistent pass/category
+values, and missing or failed golden regressions still fail immediately. The
+ordinary CLI retains its nonzero exit for any failed attempt. Native ADK tests
+copy applications into writable temporary directories, so the CLI can save its
+`.adk` history even when container source files are read-only. Both CI jobs
+explicitly disable telemetry and BigQuery export.
+
 No baseline exists before the workflow first lands: that bootstrap run is explicitly
 `baseline_missing`, with no quality comparison claim. Missing or expired artifacts
 have the same status. Obtain a successful main run before relying on comparisons.

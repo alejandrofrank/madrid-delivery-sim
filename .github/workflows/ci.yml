@@ -9,6 +9,9 @@ jobs:
     env:
       LOCAL_UID: "1001"
       LOCAL_GID: "1001"
+      MDS_TELEMETRY_ENABLED: "0"
+      MDS_BIGQUERY_ENABLED: "0"
+      DELIVERY_OTEL_EXPORTER: disabled
     steps:
       - uses: actions/checkout@v4
       - name: Start local stack
@@ -49,6 +52,9 @@ jobs:
     env:
       LLM_PROVIDER: disabled
       DELIVERY_ADK_VERTEX_ENABLED: "0"
+      MDS_TELEMETRY_ENABLED: "0"
+      MDS_BIGQUERY_ENABLED: "0"
+      DELIVERY_OTEL_EXPORTER: disabled
       GOOGLE_API_KEY: ""
       GEMINI_API_KEY: ""
     steps:
@@ -67,7 +73,7 @@ jobs:
       - name: Native ADK eval CLI and AgentEvaluator (network denied)
         run: python3 -m pytest -q tests/test_adk_evalsets.py
       - name: Collect fresh offline attempts
-        run: python3 scripts/eval_agents.py --suite adk --repeat 3
+        run: python3 scripts/eval_agents.py --suite adk --repeat 3 --record-only
       - name: Find stored artifact from the PR's exact main base
         if: github.event_name == 'pull_request'
         id: baseline

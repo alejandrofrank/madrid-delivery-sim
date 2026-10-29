@@ -1,6 +1,7 @@
 """Seeded physical clock and agent scheduler. Database is the source of truth."""
 
 import json
+import logging
 import math
 import time
 from functools import partial
@@ -16,9 +17,43 @@ from delivery.config import settings
 from delivery.customer_service import CustomerService
 from delivery.db import Connection, connect, migrate
 from delivery.queue import Queue, publish
+from delivery.telemetry import active, order_span
 from delivery.world import World, seed_locations
 
 STEP_SECONDS = 60
+
+
+def finish_run(run: str, url: str | None = None) -> None:
+    """Commit the final run state before exporting orders that had no worker ACK."""
+    observe = active()
+    returning = (
+        " RETURNING id, extract(epoch FROM (clock_timestamp()-(SELECT min(e.created_at) "
+        "FROM events e WHERE e.run_id=orders.run_id AND e.trace_id=orders.id)))*1000 AS latency"
+        if observe
+        else ""
+    )
+    with connect(url) as conn:
+        result = conn.execute(
+            "UPDATE orders SET status='unserved' WHERE run_id=%s AND status='pending'" + returning,
+            (run,),
+        )
+        unserved = result.fetchall() if observe else []
+        conn.execute("UPDATE runs SET status='complete' WHERE id=%s", (run,))
+    try:
+        for order in unserved:
+            attributes: dict[str, Any] = {
+                "delivery.agent": "simulation",
+                "delivery.order.terminal": True,
+                "delivery.order.success": False,
+            }
+            if order["latency"] is not None:
+                attributes["delivery.order.latency_ms"] = max(0, float(order["latency"]))
+            with order_span(
+                "order.complete", run_id=run, order_id=order["id"], attributes=attributes
+            ):
+                pass
+    except Exception:
+        logging.getLogger(__name__).warning("Terminal analytics export failed")
 
 
 def demand_rate(hour: float) -> float:
@@ -287,12 +322,7 @@ class Simulation:
                 remaining = target - time.monotonic()
                 if remaining > 0:
                     time.sleep(remaining)
-            with connect(self.url) as conn:
-                conn.execute(
-                    "UPDATE orders SET status='unserved' WHERE run_id=%s AND status='pending'",
-                    (run,),
-                )
-                conn.execute("UPDATE runs SET status='complete' WHERE id=%s", (run,))
+            finish_run(run, self.url)
         except Exception as exc:
             with connect(self.url) as conn:
                 conn.execute(

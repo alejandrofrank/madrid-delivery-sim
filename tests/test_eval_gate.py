@@ -2,7 +2,7 @@ from copy import deepcopy
 
 import pytest
 
-from delivery.eval_gate import compare_reports, load_thresholds
+from delivery.eval_gate import collection_failed, compare_reports, load_thresholds
 from delivery.scenario_report import EvalAttempt
 
 
@@ -73,3 +73,41 @@ def test_repeat_header_cannot_disguise_different_trial_counts():
     candidate["repeat"] = 3
     with pytest.raises(ValueError, match="Declared repeat"):
         compare_reports(baseline, candidate, load_thresholds())
+
+
+def test_collection_defers_only_quality_failures_to_the_statistical_gate():
+    candidate = report()
+    candidate["golden"] = [{"passed": True}]
+    fail(candidate, 1)
+    assert collection_failed(candidate)
+    assert not collection_failed(candidate, record_only=True)
+    assert compare_reports(report(), candidate, load_thresholds())["status"] != "regression"
+    candidate["rows"][0]["error"] = "RunnerFailure"
+    assert collection_failed(candidate, record_only=True)
+    candidate["rows"][0]["error"] = None
+    candidate["golden"][0]["passed"] = False
+    assert collection_failed(candidate, record_only=True)
+
+
+def test_record_only_rejects_incomplete_or_missing_execution_evidence():
+    candidate = report()
+    candidate["golden"] = [{"passed": True}]
+    candidate["repeat"] = 4
+    with pytest.raises(ValueError, match="Declared repeat"):
+        collection_failed(candidate, record_only=True)
+    candidate["repeat"] = 3
+    candidate["rows"].pop()
+    with pytest.raises(ValueError, match="complete"):
+        collection_failed(candidate, record_only=True)
+    candidate = report()
+    candidate["golden"] = []
+    with pytest.raises(ValueError, match="golden"):
+        collection_failed(candidate, record_only=True)
+
+
+def test_record_only_cannot_hide_mismatched_pass_criteria():
+    candidate = report()
+    candidate["golden"] = [{"passed": True}]
+    candidate["rows"][0]["categories"]["schema"] = False
+    with pytest.raises(ValueError, match="Pass must agree"):
+        collection_failed(candidate, record_only=True)

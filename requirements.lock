@@ -26,6 +26,8 @@ anyio==4.15.1
     #   openai
     #   sse-starlette
     #   starlette
+asgiref==3.13.0
+    # via opentelemetry-instrumentation-asgi
 attrs==26.1.0
     # via
     #   aiohttp
@@ -92,7 +94,7 @@ gepa==0.1.4
     # via google-adk
 google-adk==2.13.0
     # via madrid-delivery-sim (pyproject.toml)
-google-api-core==2.43.1
+google-api-core==2.43.2
     # via
     #   a2a-sdk
     #   google-cloud-aiplatform
@@ -101,6 +103,7 @@ google-api-core==2.43.1
     #   google-cloud-resource-manager
     #   google-cloud-storage
     #   google-cloud-texttospeech
+    #   google-cloud-trace
 google-auth==2.62.0
     # via
     #   google-adk
@@ -111,10 +114,11 @@ google-auth==2.62.0
     #   google-cloud-resource-manager
     #   google-cloud-storage
     #   google-cloud-texttospeech
+    #   google-cloud-trace
     #   google-genai
 google-cloud-aiplatform==2.7.0
     # via google-adk
-google-cloud-bigquery==3.46.2
+google-cloud-bigquery==3.47.0
     # via
     #   madrid-delivery-sim (pyproject.toml)
     #   google-cloud-aiplatform
@@ -128,6 +132,8 @@ google-cloud-storage==3.17.1
     # via google-cloud-aiplatform
 google-cloud-texttospeech==2.38.0
     # via google-adk
+google-cloud-trace==1.21.0
+    # via opentelemetry-exporter-gcp-trace
 google-crc32c==1.9.0
     # via
     #   google-cloud-storage
@@ -157,6 +163,7 @@ grpcio==1.85.0
     #   google-api-core
     #   google-cloud-resource-manager
     #   google-cloud-texttospeech
+    #   google-cloud-trace
     #   googleapis-common-protos
     #   grpc-google-iam-v1
     #   grpcio-status
@@ -183,7 +190,7 @@ httpx==0.28.1
     #   openai
 httpx2==2.16.0
     # via huggingface-hub
-huggingface-hub==2.3.0
+huggingface-hub==2.4.0
     # via tokenizers
 idna==3.20
     # via
@@ -259,24 +266,56 @@ opentelemetry-api==1.44.0
     #   fastapi
     #   google-adk
     #   google-api-core
+    #   opentelemetry-exporter-gcp-trace
     #   opentelemetry-exporter-otlp-proto-http
+    #   opentelemetry-instrumentation
+    #   opentelemetry-instrumentation-asgi
+    #   opentelemetry-instrumentation-fastapi
+    #   opentelemetry-instrumentation-redis
+    #   opentelemetry-resourcedetector-gcp
     #   opentelemetry-sdk
     #   opentelemetry-semantic-conventions
+opentelemetry-exporter-gcp-trace==1.15.0
+    # via madrid-delivery-sim (pyproject.toml)
 opentelemetry-exporter-otlp-proto-common==1.44.0
     # via opentelemetry-exporter-otlp-proto-http
 opentelemetry-exporter-otlp-proto-http==1.44.0
+    # via madrid-delivery-sim (pyproject.toml)
+opentelemetry-instrumentation==0.65b0
+    # via
+    #   opentelemetry-instrumentation-asgi
+    #   opentelemetry-instrumentation-fastapi
+    #   opentelemetry-instrumentation-redis
+opentelemetry-instrumentation-asgi==0.65b0
+    # via opentelemetry-instrumentation-fastapi
+opentelemetry-instrumentation-fastapi==0.65b0
+    # via madrid-delivery-sim (pyproject.toml)
+opentelemetry-instrumentation-redis==0.65b0
     # via madrid-delivery-sim (pyproject.toml)
 opentelemetry-proto==1.44.0
     # via
     #   opentelemetry-exporter-otlp-proto-common
     #   opentelemetry-exporter-otlp-proto-http
+opentelemetry-resourcedetector-gcp==1.14.0
+    # via opentelemetry-exporter-gcp-trace
 opentelemetry-sdk==1.44.0
     # via
     #   madrid-delivery-sim (pyproject.toml)
     #   google-adk
+    #   opentelemetry-exporter-gcp-trace
     #   opentelemetry-exporter-otlp-proto-http
+    #   opentelemetry-resourcedetector-gcp
 opentelemetry-semantic-conventions==0.65b0
-    # via opentelemetry-sdk
+    # via
+    #   opentelemetry-instrumentation
+    #   opentelemetry-instrumentation-asgi
+    #   opentelemetry-instrumentation-fastapi
+    #   opentelemetry-instrumentation-redis
+    #   opentelemetry-sdk
+opentelemetry-util-http==0.65b0
+    # via
+    #   opentelemetry-instrumentation-asgi
+    #   opentelemetry-instrumentation-fastapi
 osmnx==2.1.1
     # via madrid-delivery-sim (pyproject.toml)
 packaging==26.3
@@ -287,6 +326,7 @@ packaging==26.3
     #   google-cloud-aiplatform
     #   google-cloud-bigquery
     #   huggingface-hub
+    #   opentelemetry-instrumentation
     #   pyogrio
     #   pytest
 pandas==2.3.3
@@ -310,6 +350,7 @@ proto-plus==1.29.0
     #   google-cloud-aiplatform
     #   google-cloud-resource-manager
     #   google-cloud-texttospeech
+    #   google-cloud-trace
 protobuf==7.36.2
     # via
     #   a2a-sdk
@@ -317,6 +358,7 @@ protobuf==7.36.2
     #   google-cloud-aiplatform
     #   google-cloud-resource-manager
     #   google-cloud-texttospeech
+    #   google-cloud-trace
     #   googleapis-common-protos
     #   grpc-google-iam-v1
     #   grpcio-status
@@ -393,6 +435,7 @@ requests==2.34.2
     #   google-cloud-storage
     #   google-genai
     #   opentelemetry-exporter-otlp-proto-http
+    #   opentelemetry-resourcedetector-gcp
     #   osmnx
     #   tiktoken
 rouge-score==0.1.2
@@ -471,6 +514,7 @@ typing-extensions==4.16.0
     #   mypy
     #   openai
     #   opentelemetry-api
+    #   opentelemetry-exporter-gcp-trace
     #   opentelemetry-exporter-otlp-proto-http
     #   opentelemetry-sdk
     #   opentelemetry-semantic-conventions
@@ -501,7 +545,10 @@ websockets==15.0.1
     #   google-adk
     #   google-genai
 wrapt==2.5.1
-    # via aiologic
+    # via
+    #   aiologic
+    #   opentelemetry-instrumentation
+    #   opentelemetry-instrumentation-redis
 xlrd==2.0.2
     # via google-adk
 yarl==1.25.1

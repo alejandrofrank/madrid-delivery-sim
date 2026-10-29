@@ -35,6 +35,26 @@ def validate_report(report: dict[str, Any]) -> list[EvalAttempt]:
     return rows
 
 
+def collection_failed(report: dict[str, Any], *, record_only: bool = False) -> bool:
+    """Let the comparison gate decide quality, but never suppress broken execution."""
+    rows = validate_report(report)
+    repeat = report.get("repeat")
+    if type(repeat) is not int or not 1 <= repeat <= 100:
+        raise ValueError("Invalid declared repeat count")
+    for arm in {row.arm for row in rows}:
+        groups = attempt_groups([row for row in rows if row.arm == arm])
+        if any(len(group) != repeat for group in groups.values()):
+            raise ValueError("Declared repeat count differs from measured attempts")
+    golden = report.get("golden")
+    if not isinstance(golden, list) or not golden:
+        raise ValueError("Missing golden regression results")
+    return (
+        any(result.get("passed") is not True for result in golden)
+        or any(row.error is not None for row in rows)
+        or (not record_only and any(not row.passed for row in rows))
+    )
+
+
 def compare_reports(
     baseline: dict[str, Any] | None, candidate: dict[str, Any], config: dict[str, Any],
 ) -> dict[str, Any]:

@@ -201,10 +201,11 @@
     "ROADMAP.md",
     "STATUS.md",
     "README.md",
-    "docs/PUBLIC-READINESS.md"
+    "docs/PUBLIC-READINESS.md",
+    "docs/ARCHITECTURE-OBSERVABILITY.md",
+    "infra/gcp-ai/STATE-MIGRATION.md"
   ],
   "sources": [
-    "docs/evidence/google-native-evals.json",
     "compose.tracing-gcp.yaml",
     "compose.tracing.yaml",
     "compose.yaml",
@@ -223,6 +224,7 @@
     "docs/evidence/gcp-switch-verification.json",
     "docs/evidence/gcp-teardown-plan.json",
     "docs/evidence/gcp-teardown-result.json",
+    "docs/evidence/google-native-evals.json",
     "docs/evidence/google-stack-local.json",
     "docs/evidence/local-health.json",
     "docs/evidence/restaurant-supply-local.json",
@@ -255,6 +257,7 @@
     "sql/migrations/024_agent_memory_modes.sql",
     "sql/migrations/025_adk_contract_corrections.sql",
     "sql/migrations/026_telemetry_context.sql",
+    "sql/migrations/027_unified_order_telemetry.sql",
     "src/delivery/a2a_server.py",
     "src/delivery/adk_contracts.py",
     "src/delivery/adk_customer.py",

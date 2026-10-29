@@ -6,9 +6,10 @@ variable "enable_telemetry" {
 }
 
 resource "google_project_service" "telemetry" {
-  for_each = var.enable_telemetry ? toset([
-    "telemetry.googleapis.com", "cloudtrace.googleapis.com"
-  ]) : toset([])
+  for_each = toset(concat(
+    var.enable_telemetry ? ["telemetry.googleapis.com", "cloudtrace.googleapis.com"] : [],
+    var.enable_cloud_trace ? ["cloudtrace.googleapis.com"] : []
+  ))
   project            = google_project.ai.project_id
   service            = each.value
   disable_on_destroy = false
