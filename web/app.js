@@ -14,7 +14,7 @@ map.attributionControl.addAttribution('<a href="https://www.openstreetmap.org/co
 const roads = L.layerGroup().addTo(map), hubs = L.layerGroup().addTo(map);
 const stores = L.layerGroup().addTo(map), ordersLayer = L.layerGroup().addTo(map);
 const courierMarkers = new Map();
-let routeLine = null, state = null, selected = null, runId = "", lastPacket = 0, traceRows = [];
+let routeLine = null, state = null, selected = null, runId = new URLSearchParams(location.search).get("run") || "", lastPacket = 0, traceRows = [];
 let tab = "decisions", busy = false, pollCount = 0, traceBusy = false;
 let exploringMap = false;
 
@@ -256,7 +256,7 @@ function renderInspector() {
   }else $("selection").innerHTML='<strong>Choose an agent</strong><p>Select a roster row or map marker to see its current task.</p>';
   const role=$("agent-role").value,status=$("agent-status").value,query=$("agent-search").value.trim().toLowerCase();
   const rows=state.couriers.filter(c=>(role==="all"||c.mode===role)&&(status==="all"||(status==="active"?agentStatus(c)==="working":agentStatus(c)===status))&&c.id.toLowerCase().includes(query));
-  Ops.liveHTML($("fleet"),rows.map(c=>'<button class="fleet-row '+(selected?.id===c.id?"active":"")+'" data-courier="'+escape(c.id)+'" aria-pressed="'+(selected?.id===c.id)+'"><span class="fleet-person">'+Ops.icon(c.mode)+'<span><strong>'+escape(c.id)+'</strong><small>'+escape(c.order_id||human(c.mode)+" courier")+'</small></span></span><span class="status-pill '+agentStatus(c)+'">'+escape(human(c.status))+'</span><span class="fleet-throughput">'+deliveryCount(c.id)+Ops.sparkline(observations.map(s=>s.agents[c.id]),"Delivered orders observed this visit")+'</span></button>').join("")||'<p class="empty">No agents match these filters.</p>');
+  Ops.liveHTML($("fleet"),rows.map(c=>'<button class="fleet-row '+(selected?.id===c.id?"active":"")+'" data-courier="'+escape(c.id)+'" aria-pressed="'+(selected?.id===c.id)+'"><span class="fleet-person">'+Ops.icon(c.mode)+'<span><strong>'+escape(c.id)+'</strong><small>'+escape(c.order_id||human(c.mode)+" courier")+'</small></span></span><span class="status-pill '+agentStatus(c)+'">'+escape(human(c.status))+'</span><span class="fleet-throughput">'+deliveryCount(c.id)+Ops.sparkline(observations.map((s,i)=>i&&s.time>observations[i-1].time?(s.agents[c.id]-observations[i-1].agents[c.id])*60/(s.time-observations[i-1].time):null),"Deliveries per simulated minute during this visit")+'</span></button>').join("")||'<p class="empty">No agents match these filters.</p>');
   renderDecisions();
   $("service").innerHTML=state.complaints.map(c=>'<article class="complaint"><span class="badge">'+escape(human(c.status))+'</span><p>'+escape(c.text)+'</p>'+(c.response?'<blockquote>'+escape(c.response)+'</blockquote>':'')+'<small>'+escape(c.source||"pending")+' · approved refund €'+c.approved_refund_eur.toFixed(2)+'<br>'+escape(c.order_id)+'</small></article>').join("")||'<p class="empty">No service cases recorded.</p>';
 }

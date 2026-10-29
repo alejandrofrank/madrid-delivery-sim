@@ -6,10 +6,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Restaurant supply lab · Bakiano</title>
     <link rel="icon" href="data:," />
-    <link rel="stylesheet" href="/static/supply.css?v=db5de4c013fe" />
+    <link rel="stylesheet" href="/static/supply.css?v=642a27ea1583" />
     <link rel="stylesheet" href="/static/workspace.css?v=5c17fb1a2e19" />
     <script defer src="/static/workspace.js?v=811c4220f28d"></script>
-    <script defer src="/static/supply.js?v=4efb411fc4cc"></script>
+    <link rel="stylesheet" href="/static/agents.css?v=ba261405b3a8">
+    <script defer src="/static/console.js?v=9c097a4dc943"></script>
+    <script defer src="/static/supply.js?v=7f9d872b69fe"></script>
   </head>
   <body data-page="restaurants">
     <div id="workspace-shell">
@@ -32,7 +34,8 @@
         </div>
         <span class="page-context">32 × 32 city · local execution</span>
       </div>
-      <section class="toolbar" aria-label="Simulation controls">
+      <nav class="console-views" aria-label="Restaurant views"><button id="supply-operations" aria-pressed="true">Operations</button><button id="supply-simulation" aria-pressed="false">Simulation &amp; definitions</button></nav>
+      <section id="supply-controls" hidden class="toolbar" aria-label="Simulation controls">
         <button id="start-run" class="primary" disabled>
           Start simulation
         </button>
@@ -57,7 +60,7 @@
       </section>
       <p id="error" class="notice error" role="alert" hidden></p>
       <p id="notice" class="notice" role="status" hidden></p>
-      <details class="settings-panel">
+      <details id="supply-settings" hidden class="settings-panel">
         <summary>
           Next-run settings <span id="settings-summary" class="subtle"></span>
         </summary>
@@ -157,6 +160,7 @@
         aria-label="Supply network metrics"
       ></section>
       <div class="workspace">
+        <section id="supply-agents" class="live-agents" aria-label="Restaurant agents"></section>
         <section class="map-panel panel" aria-labelledby="map-title">
           <div class="panel-heading">
             <div>
@@ -192,7 +196,7 @@
             ><span id="map-source">Next-run blueprint</span>
           </div>
         </section>
-        <aside class="inspector panel" aria-labelledby="inspector-title">
+        <aside id="supply-inspector" hidden class="inspector panel" aria-labelledby="inspector-title">
           <div class="panel-heading">
             <div>
               <h2 id="inspector-title">Entity inspector</h2>
@@ -206,6 +210,7 @@
               aria-label="Select an entity"
             ></select
           ></label>
+          <div class="inspector-actions"><a id="supply-trace-link" hidden>Open decision timeline ↗</a><button id="close-inspector" aria-label="Close entity inspector">Close</button></div>
           <div class="tab-row" role="tablist" aria-label="Entity views">
             <button
               id="definition-tab"

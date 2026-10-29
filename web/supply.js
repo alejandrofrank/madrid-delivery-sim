@@ -5,7 +5,7 @@ const $ = id => document.getElementById(id);
 const clone = value => JSON.parse(JSON.stringify(value));
 const pretty = value => JSON.stringify(value, null, 2);
 const roles = {household: 'Household', restaurant: 'Restaurant', market: 'Supermarket'};
-const colors = {household: '#68737e', restaurant: '#9b4c28', market: '#2b6755'};
+const colors = {household: '#81949f', restaurant: '#b4c8ce', market: '#a8b7c0'};
 const budgetLabels = {
   events_per_run: ['Events / run', 1, 1000],
   tool_calls_per_event: ['Tool calls / event', 1, 16],
@@ -48,6 +48,8 @@ let searchContext = '';
 let searchVersion = 0;
 let orderBookRun = null;
 const orderRows = new Map();
+const supplyRoster = Ops.createRoster($('supply-agents'), id => selectEntity(id));
+let rosterRun = null;
 
 function element(tag, text, className) {
   const node = document.createElement(tag);
@@ -387,6 +389,7 @@ async function startRun() {
     $('replay-state').textContent = 'Replay becomes available after this run finishes.';
     notice('Simulation started. Calls, ingredient requests, and deliveries are synthetic local events.');
     await pollRun();
+    showSupplySimulation(false);
   } catch (error) { showError(error); }
   finally { busy = false; updateButtons(); }
 }
@@ -427,6 +430,7 @@ async function pollRun() {
 }
 
 function renderMetrics() {
+  renderSupplyRoster();
   const orders = snapshot?.orders || [];
   const usage = snapshot?.metrics || {};
   const provider = String(usage.model_provider || usage.provider || 'disabled');
@@ -448,12 +452,11 @@ function renderMetrics() {
   const delivered = orders.filter(order => order.status === 'delivered');
   const failed = orders.filter(order => ['failed', 'rejected', 'cancelled'].includes(order.status));
   const stats = [
-    ['Entities', mapEntities().length, 'Homes, kitchens & markets'],
     ['Orders', snapshot ? orders.length : '—', 'Simulated household demand'],
     ['In progress', snapshot ? active.length : '—', 'Calls, sourcing & cooking'],
     ['Delivered', snapshot ? delivered.length : '—', 'Completed meal orders'],
     ['Failed', snapshot ? failed.length : '—', 'Inspect facts for the reason'],
-    ['Provider calls', calls, usageCaption],
+
   ];
   $('metrics').replaceChildren(...stats.map(([label, value, caption]) => {
     const metric = element(label === 'Orders' ? 'button' : 'article', null, 'metric');
@@ -494,20 +497,20 @@ function drawMap(force = false) {
     const fabric = svgNode('g', {'aria-hidden': 'true', 'pointer-events': 'none'});
     const spacing = Number(city.spacing_m || 500);
     for (const area of city.neighborhoods || []) {
-      fabric.append(svgNode('rect', {x: Number(area.x) / spacing, y: Number(area.y) / spacing, width: Number(area.width) / spacing, height: Number(area.height) / spacing, fill: '#f1f2f3', stroke: '#d4d8dc', 'stroke-width': '.03'}));
+      fabric.append(svgNode('rect', {x: Number(area.x) / spacing, y: Number(area.y) / spacing, width: Number(area.width) / spacing, height: Number(area.height) / spacing, fill: '#172126', stroke: '#26373e', 'stroke-width': '.03'}));
       const label = svgNode('text', {x: Number(area.x) / spacing + .5, y: Number(area.y) / spacing + .75, class: 'district-label'});
       label.textContent = area.name;
       fabric.append(label);
     }
     for (const building of city.buildings || []) {
       if (['home', 'apartment'].includes(building.kind)) continue;
-      fabric.append(svgNode('rect', {x: Number(building.x) / spacing, y: Number(building.y) / spacing, width: Math.max(.2, Number(building.width) / spacing), height: Math.max(.2, Number(building.height) / spacing), rx: '.05', fill: building.kind === 'park' ? '#e5ece7' : '#d4d8dc'}));
+      fabric.append(svgNode('rect', {x: Number(building.x) / spacing, y: Number(building.y) / spacing, width: Math.max(.2, Number(building.width) / spacing), height: Math.max(.2, Number(building.height) / spacing), rx: '.05', fill: building.kind === 'park' ? '#1b302d' : '#26373e'}));
     }
     svg.append(fabric);
     const roads = svgNode('g', {'aria-hidden': 'true', 'pointer-events': 'none'});
     for (let n = 0; n < 32; n++) {
-      roads.append(svgNode('line', {x1: 0, x2: 31, y1: n, y2: n, stroke: n % 4 ? '#dfe2e5' : '#b6bdc3', 'stroke-width': n % 4 ? '.045' : '.08'}));
-      roads.append(svgNode('line', {y1: 0, y2: 31, x1: n, x2: n, stroke: n % 4 ? '#dfe2e5' : '#b6bdc3', 'stroke-width': n % 4 ? '.045' : '.08'}));
+      roads.append(svgNode('line', {x1: 0, x2: 31, y1: n, y2: n, stroke: n % 4 ? '#2a3c44' : '#49606a', 'stroke-width': n % 4 ? '.045' : '.08'}));
+      roads.append(svgNode('line', {y1: 0, y2: 31, x1: n, x2: n, stroke: n % 4 ? '#2a3c44' : '#49606a', 'stroke-width': n % 4 ? '.045' : '.08'}));
     }
     svg.append(roads, svgNode('g', {id: 'activity-routes', 'aria-hidden': 'true'}));
     const markers = svgNode('g');
@@ -525,8 +528,8 @@ function drawMap(force = false) {
       if (entity.kind === 'household') shape = svgNode('path', {d: `M${x - radius},${y - .02}L${x},${y - radius}L${x + radius},${y - .02}V${y + radius}H${x - radius}Z`});
       else if (entity.kind === 'restaurant') shape = svgNode('rect', {x: x - radius, y: y - radius, width: radius * 2, height: radius * 2, rx: '.11'});
       else shape = svgNode('path', {d: `M${x},${y - radius - .06}L${x + radius + .06},${y}L${x},${y + radius + .06}L${x - radius - .06},${y}Z`});
-      shape.setAttribute('fill', colors[entity.kind] || '#3d596c');
-      shape.setAttribute('stroke', '#ffffff');
+      shape.setAttribute('fill', selected ? '#63d5c5' : colors[entity.kind] || '#a8b7c0');
+      shape.setAttribute('stroke', '#101518');
       shape.setAttribute('stroke-width', '.075');
       shape.setAttribute('class', 'marker-body');
       group.append(shape);
@@ -581,14 +584,17 @@ function animate(now) {
   if (text !== displayedClock) { $('sim-clock').textContent = text; displayedClock = text; }
   for (const route of activityRoutes) {
     const fraction = Math.max(0, Math.min(1, (time - route.due + route.latency) / route.latency));
-    route.dot.setAttribute('cx', route.a.x + (route.b.x - route.a.x) * fraction);
-    route.dot.setAttribute('cy', route.a.y + (route.b.y - route.a.y) * fraction);
+    const progress = matchMedia('(prefers-reduced-motion: reduce)').matches ? 1 : fraction;
+    route.dot.setAttribute('cx', route.a.x + (route.b.x - route.a.x) * progress);
+    route.dot.setAttribute('cy', route.a.y + (route.b.y - route.a.y) * progress);
   }
   requestAnimationFrame(animate);
 }
 
 function selectEntity(id) {
-  if (id === selectedId) return;
+  $('supply-inspector').hidden = false;
+  activateTab($('inspection-tab'), $('inspection-tab').parentElement);
+  if (id === selectedId) { renderSupplyRoster(); return; }
   if (!captureEditor()) { $('entity-select').value = selectedId; return; }
   selectedId = id;
   if (!currentEntity()) return;
@@ -602,6 +608,7 @@ function selectEntity(id) {
   renderInspection();
   renderEvidence();
   loadAgentInspection();
+  renderSupplyRoster();
 }
 
 function agentForEntity() {
@@ -1197,3 +1204,31 @@ window.addEventListener('beforeunload', event => { if (draftDirty) { event.preve
     if (runId) await pollRun();
   } catch (error) { showError(error); $('map-empty').textContent = 'City unavailable. Check the local API error above.'; }
 })();
+
+function renderSupplyRoster() {
+  const agents = Array.isArray(snapshot?.agents) ? snapshot.agents : Object.values(snapshot?.agents || {});
+  const thisRun = snapshot?.run?.id || 'blueprint';
+  if (rosterRun !== thisRun) { supplyRoster.reset(); rosterRun = thisRun; }
+  const rows = [...mapEntities()].sort((a,b) => Number(a.kind === 'household') - Number(b.kind === 'household')).map(entity => {
+    const agent = agents.find(a => a.entity_id === entity.id || a.namespace === entity.id || String(a.agent_id || '').endsWith(':' + entity.id));
+    const pending = (snapshot?.events || []).filter(e => ['pending','queued','leased'].includes(e.state) && (e.target_store === entity.id || e.target_store === agent?.agent_id)).length;
+    return {id:entity.id, name:agent?.display_name || entity.name, role:entity.kind, status:!snapshot ? 'ready' : pending ? 'working' : 'idle',
+      active:pending > 0, task:!snapshot ? 'Awaiting a run' : pending ? pending + ' queued events' : 'No queued events',
+      count:snapshot ? (snapshot.facts || []).filter(f => f.actor === agent?.agent_id || f.actor === entity.id).length : null};
+  });
+  supplyRoster.update(rows, selectedId, thisRun + ':' + (snapshot?.run?.sim_time || 0), snapshot?.run?.sim_time);
+  const agent = agentForEntity(), link = $('supply-trace-link');
+  link.hidden = !runId || !agent?.agent_id;
+  if (!link.hidden) link.href = '/agent-traces?source=supply&run=' + encodeURIComponent(runId) + '&agent=' + encodeURIComponent(agent.agent_id);
+}
+function showSupplySimulation(open) {
+  $('supply-controls').hidden = !open;
+  $('supply-settings').hidden = !open;
+  $('supply-operations').setAttribute('aria-pressed', String(!open));
+  $('supply-simulation').setAttribute('aria-pressed', String(open));
+  $('supply-inspector').hidden = !open;
+  if (open) activateTab($('definition-tab'), $('definition-tab').parentElement);
+}
+$('supply-operations').onclick = () => showSupplySimulation(false);
+$('supply-simulation').onclick = () => showSupplySimulation(true);
+$('close-inspector').onclick = () => { $('supply-inspector').hidden = true; };

@@ -1,0 +1,85 @@
+{
+  "base": "http://127.0.0.1:8021",
+  "phase": "restaurants-integrated",
+  "capturedAt": "2026-10-29T16:16:28.013Z",
+  "results": [
+    {
+      "page": "supply",
+      "route": "/restaurant-lab",
+      "run": null,
+      "size": "desktop",
+      "status": 200,
+      "horizontalOverflow": false,
+      "width": 1440,
+      "title": "Restaurant supply lab · Bakiano",
+      "heading": "Restaurant operations",
+      "unlabeledControls": [],
+      "errors": []
+    },
+    {
+      "page": "supply",
+      "route": "/restaurant-lab",
+      "run": null,
+      "size": "laptop",
+      "status": 200,
+      "horizontalOverflow": false,
+      "width": 1280,
+      "title": "Restaurant supply lab · Bakiano",
+      "heading": "Restaurant operations",
+      "unlabeledControls": [],
+      "errors": []
+    },
+    {
+      "page": "supply",
+      "route": "/restaurant-lab",
+      "run": null,
+      "size": "mobile",
+      "status": 200,
+      "horizontalOverflow": false,
+      "width": 390,
+      "title": "Restaurant supply lab · Bakiano",
+      "heading": "Restaurant operations",
+      "unlabeledControls": [],
+      "errors": []
+    },
+    {
+      "page": "lab",
+      "route": "/lab",
+      "run": null,
+      "size": "desktop",
+      "status": 200,
+      "horizontalOverflow": false,
+      "width": 1440,
+      "title": "Inventory operations · Bakiano",
+      "heading": "Inventory operations",
+      "unlabeledControls": [],
+      "errors": []
+    },
+    {
+      "page": "lab",
+      "route": "/lab",
+      "run": null,
+      "size": "laptop",
+      "status": 200,
+      "horizontalOverflow": false,
+      "width": 1280,
+      "title": "Inventory operations · Bakiano",
+      "heading": "Inventory operations",
+      "unlabeledControls": [],
+      "errors": []
+    },
+    {
+      "page": "lab",
+      "route": "/lab",
+      "run": null,
+      "size": "mobile",
+      "status": 200,
+      "horizontalOverflow": false,
+      "width": 390,
+      "title": "Inventory operations · Bakiano",
+      "heading": "Inventory operations",
+      "unlabeledControls": [],
+      "errors": []
+    }
+  ]
+}

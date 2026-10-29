@@ -11,7 +11,7 @@ window.Ops = (() => {
     household:'<path d="m3 11 9-8 9 8M5 9v12h14V9M10 21v-7h4v7"/>',
     judge:'<path d="M12 3v18M5 6h14M5 6l-3 8h6zM19 6l-3 8h6zM7 21h10"/>'
   };
-  function icon(role, className="role-symbol") {return '<svg class="'+className+'" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">'+(paths[role]||paths.courier)+'</svg>';}
+  function icon(role, className="role-symbol") {return '<svg class="'+className+'" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">'+(paths[role]||paths[{restaurant:'store',market:'store',inventory:'store',fulfillment:'courier'}[role]]||paths.courier)+'</svg>';}
   function sparkline(values,label="Observed history") {
     const samples=values.filter(Number.isFinite);if(samples.length<2)return "";
     const max=Math.max(...samples),min=Math.min(...samples),range=max-min||1;
@@ -30,22 +30,22 @@ Ops.createRoster = function(mount,onSelect){
  const esc=Ops.escape;
  mount.innerHTML='<div class="roster-heading"><h2>Agents <span class="roster-count"></span></h2><span class="roster-state"></span></div><div class="roster-filters"><label>Role<select class="roster-role"><option value="">All roles</option></select></label><label>Status<select class="roster-status"><option value="">All statuses</option></select></label><label>Find agent<input class="roster-search" type="search" placeholder="Name or ID"></label></div><div class="roster-labels"><span>Agent / current task</span><span>Status</span><span>Activity</span></div><div class="roster-list"></div>';
  const role=mount.querySelector(".roster-role"),status=mount.querySelector(".roster-status"),search=mount.querySelector(".roster-search"),list=mount.querySelector(".roster-list");
- let rows=[],selected=null,lastKey=null,histories=new Map();
+ let rows=[],selected=null,lastKey=null,histories=new Map(),previous=new Map();
  function filters(select,values,title){const old=select.value;select.replaceChildren(new Option(title,""),...values.map(x=>new Option(x.replaceAll("_"," "),x)));select.value=values.includes(old)?old:"";}
  function render(){
    const query=search.value.toLowerCase(),shown=rows.filter(r=>(!role.value||r.role===role.value)&&(!status.value||r.status===status.value)&&(!query||(r.name+" "+r.id).toLowerCase().includes(query)));
    const focused=list.contains(document.activeElement)?document.activeElement.closest("[data-roster-id]")?.dataset.rosterId:null,scroll=list.scrollTop;
-   list.innerHTML=shown.map(r=>'<button class="roster-row '+(selected===r.id?"is-selected":"")+'" data-roster-id="'+esc(r.id)+'" aria-pressed="'+(selected===r.id)+'"><span class="roster-identity">'+Ops.icon(r.role)+'<span><strong>'+esc(r.name)+'</strong><small>'+esc(r.task||r.role.replaceAll("_"," "))+'</small></span></span><span class="roster-pill '+(r.active?"is-active":"")+'">'+esc(r.status.replaceAll("_"," "))+'</span><span class="roster-count-value">'+(Number.isFinite(r.count)?r.count:"—")+Ops.sparkline(histories.get(r.id)||[],"Observed completed activity")+'</span></button>').join("")||'<p class="roster-empty">'+(rows.length?"No agents match your filters.":"No live agents yet. Start a session from Simulation.")+'</p>';
+   list.innerHTML=shown.map(r=>'<button class="roster-row '+(selected===r.id?"is-selected":"")+'" data-roster-id="'+esc(r.id)+'" aria-pressed="'+(selected===r.id)+'"><span class="roster-identity">'+Ops.icon(r.role)+'<span><strong>'+esc(r.name)+'</strong><small>'+esc(r.task||r.role.replaceAll("_"," "))+'</small></span></span><span class="roster-pill '+(r.active?"is-active":"")+'">'+esc(r.status.replaceAll("_"," "))+'</span><span class="roster-count-value">'+(Number.isFinite(r.count)?r.count:"—")+Ops.sparkline(histories.get(r.id)||[],"Completed activity per simulated minute")+'</span></button>').join("")||'<p class="roster-empty">'+(rows.length?"No agents match your filters.":"No live agents yet. Start a session from Simulation.")+'</p>';
    list.scrollTop=scroll;if(focused)[...list.querySelectorAll("[data-roster-id]")].find(x=>x.dataset.rosterId===focused)?.focus({preventScroll:true});
  }
  [role,status,search].forEach(el=>el.addEventListener("input",render));
  list.addEventListener("click",e=>{const row=e.target.closest("[data-roster-id]");if(row){selected=row.dataset.rosterId;render();onSelect(selected);}});
- return {update(next,selection,key){
+ return {update(next,selection,key,seconds){
    rows=next;selected=selection;
-   if(key&&key!==lastKey){lastKey=key;for(const row of rows){let values=histories.get(row.id)||[];if(Number.isFinite(row.count)){values.push(row.count);if(values.length>30)values.shift();histories.set(row.id,values);}}}
+   if(key&&key!==lastKey){lastKey=key;for(const row of rows){let values=histories.get(row.id)||[];if(Number.isFinite(row.count)){const last=previous.get(row.id);if(last&&Number.isFinite(seconds)&&seconds>last.time)values.push(Math.max(0,row.count-last.count)*60/(seconds-last.time));previous.set(row.id,{count:row.count,time:seconds});if(values.length>30)values.shift();histories.set(row.id,values);}}}
    filters(role,[...new Set(rows.map(r=>r.role))].sort(),"All roles");filters(status,[...new Set(rows.map(r=>r.status))].sort(),"All statuses");
    mount.querySelector(".roster-count").textContent=rows.length;
    mount.querySelector(".roster-state").textContent=rows.filter(r=>r.active).length+" working";
    render();
- },reset(){histories=new Map();lastKey=null;}};
+ },reset(){histories=new Map();previous=new Map();lastKey=null;}};
 };
