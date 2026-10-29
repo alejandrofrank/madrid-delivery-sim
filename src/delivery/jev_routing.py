@@ -42,7 +42,10 @@ def decision_request(turn: "RestaurantTurn", order: dict[str, Any]) -> dict[str,
                 "available": stock.get("on_hand", 0) - stock.get("reserved", 0),
             }
         )
-    suppliers = turn.find_suppliers()
+    needs_supplier = order["event"] != "household.call" or any(
+        item["available"] < item["required"] for item in ingredients
+    )
+    suppliers = turn.find_suppliers() if needs_supplier else []
     memory = turn.recall_order_memory()
     actions = (
         {
@@ -56,7 +59,7 @@ def decision_request(turn: "RestaurantTurn", order: dict[str, Any]) -> dict[str,
             "decline": "Decline if no safe, consented option is possible",
         }
     )
-    return {
+    request: dict[str, Any] = {
         "model": routing.model,
         "state": {
             "policy": turn.brain.instructions,
@@ -67,6 +70,9 @@ def decision_request(turn: "RestaurantTurn", order: dict[str, Any]) -> dict[str,
                 "deadline": order["deadline"],
                 "sim_time": order["sim_time"],
                 "ingredients": ingredients,
+                "pantry_covers_recipe": not any(
+                    item["available"] < item["required"] for item in ingredients
+                ),
                 "suppliers": suppliers,
                 "safe_alternative": order.get("safe_alternative"),
                 "selected_memory": memory,
@@ -77,9 +83,10 @@ def decision_request(turn: "RestaurantTurn", order: dict[str, Any]) -> dict[str,
                 "type": "choice",
                 "instructions": routing.instructions,
                 "criteria": {
-                    "direct": "A safe bounded decision is clear; no additional model needed",
+                    "direct": "A declared action and a short factual receipt are requested",
                     "gemini": (
-                        "Uncertain, conflicting, missing evidence, or a requested reasoned tradeoff"
+                        "An explicit reasoned tradeoff, complaint or unresolved "
+                        "policy interpretation"
                     ),
                 },
             },
@@ -106,6 +113,9 @@ def decision_request(turn: "RestaurantTurn", order: dict[str, Any]) -> dict[str,
             },
         },
     }
+    if not needs_supplier:
+        del request["questions"]["supplier"]
+    return request
 
 
 def checked_answer(raw: dict[str, Any], request: dict[str, Any]) -> dict[str, Any]:
@@ -238,7 +248,7 @@ def route_turn(turn: "RestaurantTurn", reviewer: Review | None = None) -> bool:
             and conf >= routing.confidence_threshold
             and gap >= routing.margin_threshold
         )
-        supplier = answers["supplier"]["choice"]
+        supplier = answers.get("supplier", {}).get("choice")
         obs = request["state"]["observations"]
         # Feasibility is independent of the classifier's certainty.
         if (

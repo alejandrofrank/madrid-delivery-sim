@@ -1,6 +1,7 @@
 """One retained three-case live verification, capped at 0.15 USD; no retries/resume."""
 
 import argparse
+import hashlib
 import json
 import os
 import time
@@ -52,6 +53,12 @@ def planned_cases(profile: VertexProfile) -> list[dict]:
             )
         route = JevRouting(calls_per_run=1, input_tokens_per_run=8192, usd_limit=0.0005)
         if direct:
+            agent["soul"] = (
+                "You are Iris, the pantry acceptance coordinator. Assess this order using "
+                "the kitchen's physical stock and required recipe quantities. Supplier "
+                "selection is relevant only for shortages. Never confirm unavailable stock "
+                "or override exclusions, consent or the declared tools."
+            )
             route = route.model_copy(
                 update={
                     "instructions": route.instructions
@@ -202,20 +209,62 @@ def isolation_checks(run: str) -> dict[str, bool]:
     return checks
 
 
+def followup_budget(previous: dict, budget: dict) -> dict:
+    """Carry the stopped probe's reservations without refund or erasure."""
+    if previous.get("status") != "failed" or len(previous.get("arms", [])) != 3:
+        raise PermissionError("A reviewed stopped three-case verification is required")
+    first, *rest = previous["arms"]
+    if (
+        first.get("id") != "pantry-direct"
+        or first.get("status") != "failed"
+        or not first.get("run")
+    ):
+        raise PermissionError("The original failed direct probe must be retained")
+    if any(a.get("status") != "planned" or a.get("run") is not None for a in rest):
+        raise PermissionError("Follow-up cannot redispatch an attempted Gemini case")
+    from compare_agent_routing import account_evidence
+
+    accounting = account_evidence(first["evidence"], first["route_decisions"])["cost"]
+    if first["cost"] != accounting or first["provider_calls"]["gemini"] != 0:
+        raise PermissionError("Prior raw receipts and accounting must remain intact")
+    historical = previous.get("previous_attempt")
+    carry = followup_budget(historical, budget) if historical else {}
+    if historical and previous.get("carryover") != carry:
+        raise PermissionError("The earlier attempt's carryover cannot be dropped")
+    prior_jev = Decimal(accounting["jev_accounted_usd"]) + Decimal(
+        carry.get("prior_jev_accounted_usd", "0")
+    )
+    prior_total = Decimal(accounting["accounted_usd"]) + Decimal(
+        carry.get("prior_total_accounted_usd", "0")
+    )
+    if (
+        prior_jev + Decimal(budget["jev_conservative_admission_usd"]) > JEV_CAP
+        or prior_total + Decimal(budget["combined_conservative_admission_usd"]) > TOTAL_CAP
+    ):
+        raise PermissionError("Prior work plus follow-up exceeds the shared allowance")
+    return {
+        "prior_jev_accounted_usd": str(prior_jev),
+        "prior_total_accounted_usd": str(prior_total),
+    }
+
+
 def update(receipt: dict, final: bool = False) -> None:
     arms = receipt["arms"]
     vertex = sum(
         (Decimal(a.get("cost", {}).get("vertex_reserved_usd", "0")) for a in arms), Decimal(0)
     )
-    jev = sum((Decimal(a.get("cost", {}).get("jev_accounted_usd", "0")) for a in arms), Decimal(0))
-    accounted = sum(
+    carry = receipt.get("carryover", {})
+    jev = Decimal(carry.get("prior_jev_accounted_usd", "0")) + sum(
+        (Decimal(a.get("cost", {}).get("jev_accounted_usd", "0")) for a in arms), Decimal(0)
+    )
+    accounted = Decimal(carry.get("prior_total_accounted_usd", "0")) + sum(
         (Decimal(a.get("cost", {}).get("accounted_usd", "0")) for a in arms), Decimal(0)
     )
     receipt["accounting"] = {
         "vertex_reserved_usd": str(vertex),
         "jev_accounted_usd": str(jev),
         "total_accounted_usd": str(accounted),
-        "known_usage_total_usd": str(
+        "current_known_usage_usd": str(
             sum((Decimal(a.get("cost", {}).get("total_usd", "0")) for a in arms), Decimal(0))
         ),
     }
@@ -240,16 +289,30 @@ def update(receipt: dict, final: bool = False) -> None:
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--paid", action="store_true", required=True)
-    parser.parse_args()
+    parser.add_argument("--reviewed-followup", type=int, choices=(1, 2), nargs="?", const=1)
+    args = parser.parse_args()
     profile = approved_profile()
     cases = planned_cases(profile)
     budget = admission(cases)
     root = Path(__file__).resolve().parents[1]
-    output = root / "artifacts/adk-contract-verification.json"
+    original = root / "artifacts/adk-contract-verification.json"
+    if args.reviewed_followup == 2:
+        original = root / "artifacts/adk-contract-followup.json"
+        output = root / "artifacts/adk-contract-final.json"
+    else:
+        output = (
+            root / "artifacts/adk-contract-followup.json" if args.reviewed_followup else original
+        )
     directory = Path(os.environ.get("DELIVERY_ADK_EXPERIMENT_DIRECTORY", ""))
     if not directory.is_absolute() or not directory.is_dir():
         raise PermissionError("Dedicated operator experiment-marker mount required")
-    marker = directory / "contract-verification.execution.json"
+    marker = directory / (
+        "contract-final.execution.json"
+        if args.reviewed_followup == 2
+        else "contract-followup.execution.json"
+        if args.reviewed_followup
+        else "contract-verification.execution.json"
+    )
     if output.exists() or marker.exists():
         raise PermissionError("Verification already claimed; no automatic retries or resumption")
     receipt = {
@@ -262,6 +325,13 @@ def main() -> None:
         "comparisons": [],
         "previous_evidence": "artifacts/adk-route-comparison.json",
     }
+    if args.reviewed_followup:
+        previous_bytes = original.read_bytes()
+        previous = json.loads(previous_bytes)
+        receipt["carryover"] = followup_budget(previous, budget)
+        receipt["previous_attempt"] = previous
+        receipt["previous_attempt_sha256"] = hashlib.sha256(previous_bytes).hexdigest()
+        receipt["reviewed_followup"] = args.reviewed_followup
     with marker.open("x", encoding="utf-8") as lock:
         json.dump(
             {"created_at": receipt["created_at"], "budget": budget, "receipt": str(output)}, lock
@@ -275,6 +345,9 @@ def main() -> None:
             started = time.monotonic()
             try:
                 case["run"] = new_supply(SupplyConfig.model_validate(case["configuration"]))
+                case["isolation_checks"] = isolation_checks(case["run"])
+                if not all(case["isolation_checks"].values()):
+                    raise PermissionError("Actual scoped login failed isolation checks")
                 case["status"] = "running"
                 save_receipt(output, receipt)
                 run_supply(case["run"])
@@ -286,7 +359,7 @@ def main() -> None:
                 if case["run"]:
                     finish_arm(case, profile)
                     case["outcome_checks"].update(verification_checks(case))
-                    case["outcome_checks"].update(isolation_checks(case["run"]))
+                    case["outcome_checks"].update(case.get("isolation_checks", {}))
                     case["status"] = (
                         "completed" if all(case["outcome_checks"].values()) else "failed"
                     )
