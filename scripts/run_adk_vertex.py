@@ -26,6 +26,7 @@ def main() -> None:
     parser.add_argument("--paid", action="store_true", required=True)
     parser.add_argument("--after-review", action="store_true")
     parser.add_argument("--resume", action="store_true")
+    parser.add_argument("--routing-comparison", action="store_true")
     args = parser.parse_args()
     demo = Demo()
     state = demo.state()
@@ -34,10 +35,21 @@ def main() -> None:
         raise DemoError("Dedicated Terraform restaurant identity is missing")
     if not demo.billing():
         raise DemoError("Run vertex-start before this explicit paid test")
-    if (demo.root / "artifacts/.adk-live-comparison.lock").exists() and not (
-        args.after_review or args.resume
+    if args.routing_comparison and (args.resume or args.after_review):
+        raise DemoError("Routing comparisons never resume or automatically replace an experiment")
+    if (
+        not args.routing_comparison
+        and (demo.root / "artifacts/.adk-live-comparison.lock").exists()
+        and not (args.after_review or args.resume)
     ):
         raise DemoError("A previous paid experiment is retained; inspect it before another test")
+    experiment_dir = demo.root / ".env.adk-experiments"
+    if args.routing_comparison:
+        experiment_dir.mkdir(exist_ok=True)
+        if (experiment_dir / "route-comparison.execution.json").exists():
+            raise DemoError(
+                "Routing experiment already claimed; inspect receipts before any new spend"
+            )
     profile = {
         "project": demo.project,
         "location": "global",
@@ -73,7 +85,13 @@ def main() -> None:
             DELIVERY_ADK_VERTEX_PROFILE=json.dumps(profile),
         )
         print(
-            "Running two synthetic restaurant SOULs; Vertex admission ≤ $0.40, Jev ≤ $0.002016.",
+            (
+                "Running six matched routing arms; shared ceiling $0.60 "
+                "(Vertex ≤ $0.54, Jev ≤ $0.01)."
+                if args.routing_comparison
+                else "Running two synthetic restaurant SOULs; "
+                "Vertex admission ≤ $0.40, Jev ≤ $0.002016."
+            ),
             flush=True,
         )
         print(
@@ -98,9 +116,21 @@ def main() -> None:
                 "TYPESAFE_MODEL=jev-1.14.0",
                 "-v",
                 f"{docker_path(Path(folder))}:/adk-credentials:ro",
+                *(
+                    [
+                        "-v",
+                        f"{docker_path(experiment_dir)}:/adk-experiments:rw",
+                        "-e",
+                        "DELIVERY_ADK_EXPERIMENT_DIRECTORY=/adk-experiments",
+                    ]
+                    if args.routing_comparison
+                    else []
+                ),
                 "app",
                 "python",
-                "scripts/demo_adk_vertex.py",
+                "scripts/compare_agent_routing.py"
+                if args.routing_comparison
+                else "scripts/demo_adk_vertex.py",
                 "--paid",
                 *(["--after-review"] if args.after_review else []),
                 *(["--resume"] if args.resume else []),

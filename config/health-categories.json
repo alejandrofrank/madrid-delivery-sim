@@ -5,7 +5,7 @@
       "id": "adk",
       "name": "ADK restaurant agents",
       "description": "Google ADK tool loop, SOUL fixtures, scoped capabilities, budgets and crash recovery; zero paid calls",
-      "files": ["tests/test_adk_restaurant.py", "tests/test_adk_evidence.py"]
+      "files": ["tests/test_adk_restaurant.py", "tests/test_adk_evidence.py", "tests/test_jev_routing.py", "tests/test_routing_benchmark.py"]
     },
     {
       "id": "agents",
@@ -31,7 +31,8 @@
       "name": "Typed memory & recall",
       "description": "Source events, current-order recall, expiry, history and capacity",
       "files": [
-        "tests/test_typed_memory.py"
+        "tests/test_typed_memory.py",
+        "tests/test_memory_profiles.py"
       ]
     },
     {

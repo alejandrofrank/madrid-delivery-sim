@@ -32,9 +32,12 @@ eval-agents:
 	$(DOCKER) compose run --rm --no-deps --build app python scripts/eval_agents.py
 
 # City development remains local. These explicitly opt into/out of the paid judge.
-.PHONY: gcp-start gcp-stop gcp-status gcp-vertex-start demo-adk-vertex
+.PHONY: gcp-start gcp-stop gcp-status gcp-vertex-start demo-adk-vertex demo-adk-routing
 gcp-vertex-start:
 	$(PYTHON) scripts/gcp_demo.py vertex-start
+demo-adk-routing:
+	$(PYTHON) scripts/run_adk_vertex.py --paid --routing-comparison
+
 demo-adk-vertex:
 	$(PYTHON) scripts/run_adk_vertex.py --paid
 gcp-start:
