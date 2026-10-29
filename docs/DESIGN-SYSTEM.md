@@ -1,103 +1,105 @@
 # Shared workspace design
 
-The six local workspaces use one navigation shell and visual contract. Restaurant
-operations, delivery, inventory, health, architecture and the Madrid baseline keep
-their own working layouts and inspectable evidence. Their typography, controls,
-surfaces, focus, state colours and navigation come from the same source.
+The seven local workspaces share the dark operations system defined in [DESIGN.md](../DESIGN.md). Its frontmatter is the normative portable token record; [the design sidecar](../.impeccable/design.json) adds component specimens, focus behavior, motion, elevation and responsive metadata. This file describes how that system fits the existing application.
 
-## Direction and evidence
+## Direction and source of truth
 
-The visual direction is a compact operations tool: white surfaces, near-black
-text, precise neutral borders and restrained red focus. State colours distinguish
-successful, failed and delayed work. Titles remain small and the working controls
-stay near the top. There are no decorative hero sections or background effects.
+The approved replacement direction is a calm, dense operations console: deep blue graphite ground, local IBM Plex Sans and Mono, cyan selection, fine neutral rules and readable working rows. The current rebuild also replaces the rejected raised gray panels and sparse Madrid graph-only map. Compact titles and working controls take precedence over decorative presentation. Agents and the map share the operational viewport, while technical reviewers can reach the retained evidence behind each decision.
 
-The user's Nothing reference informed the monochrome treatment and precise
-information hierarchy. This is an interpretation of its visual direction, not a
-copy of Nothing's website or a claim to use its private design system.
+Palette and font primitives come from `web/tokens.css`. The page first loads these tokens, then its own layout stylesheet and the shared `web/workspace.css` layer. Delivery and Restaurants also load `web/agents.css` for the shared roster. Page styles still contain older aliases and exceptions; follow the resulting cascade and rendered artifact, not an isolated earlier declaration. `web/console.js` provides small shared SVG symbols, observed-series sparklines and accessible roster/map behavior.
 
-The review used these public sources on 2026-10-28:
+Local font files live in `web/fonts/` with their licenses. Their URLs require no external font service. IBM Plex Sans Regular, Medium and SemiBold and IBM Plex Mono Regular are available; do not assume a full family of additional weights exists. The vector basemap is the explicit exception: locally cached Noto Sans Regular glyphs provide cartographic labels, while UI controls, selected-agent labels and operational overlays stay Plex.
 
-- [USWDS typography](https://designsystem.digital.gov/components/typography/)
-  for legibility, hierarchy and shared typesetting tokens.
-- [Home Office layout and typography](https://design.homeoffice.gov.uk/accessibility/page-structure/layout-typography)
-  for consistent landmarks, readable headings, reflow and navigation.
-- [Queensland spacing guidance](https://www.designsystem.qld.gov.au/styles/spacing)
-  for a small reusable spacing scale and alignment.
-- [No AI Slop UI skill](https://github.com/claudiusararu/unslop-ui-skill/blob/main/.claude/skills/no-ai-slop/SKILL.md)
-  as an opinionated review checklist for component consistency, contrast and
-  responsive navigation. Its sample marketing layout was not applied to this tool.
+## Workspaces and navigation
 
-## Shared implementation
+| Workspace | Route | Working emphasis |
+| --- | --- | --- |
+| Operations | `/` | Madrid couriers, full local vector basemap plus street graph, selected decisions and order ledger |
+| Delivery | `/delivery-lab` | Agent roster, fictional grid, delivery handoffs and order book |
+| Restaurants | `/restaurant-lab` | Household calls, kitchen and market agents, city network and entity inspector |
+| Inventory | `/lab` | Synthetic stock scenario, checkpoint evidence and recovery |
+| Health | `/health` | Test categories, evaluations, source freshness and operational checks |
+| Traces | `/agent-traces` | Recorded decisions, scoped tools and retained model evidence |
+| Architecture | `/architecture` | Twenty chapters, component explorer and eight source-backed diagrams |
 
-`web/workspace.css` defines the neutral palette, state colours, Arial/Helvetica
-body stack, mono values, control states, focus and responsive navigation. These
-system fonts require no external font service. The 4/8/12/16/24/32 spacing scale,
-2px control radius and tabular numbers keep operational data aligned.
+`web/workspace.js` mounts the same seven-link navigation, active-page indication, skip link and mobile disclosure everywhere. Escape closes the mobile menu and restores focus; ordinary anchors preserve browser navigation. Existing no-script links are a fallback rather than an alternate interactive application.
 
-Every HTML page loads the page stylesheet first, then the shared stylesheet.
-Page styles define map, inspector, editor or evidence-table layout. The shared
-layer owns the common control states. `web/workspace.js` mounts the same six-link
-navigation, active-page indication, skip link and mobile disclosure everywhere.
-The disclosure supports Escape and leaves the links available as normal anchors.
-An HTML fallback provides navigation when JavaScript is disabled.
+The page identity is `data-page` on the body. Delivery's `data-workspace` attributes remain reserved for its local Overview, Orders, Fleet and Stores controls; assigning that attribute to an ancestor would interfere with its delegated click handler.
 
-The page identity is `data-page` on the body. Delivery's `data-workspace` attributes
-remain reserved for its local Overview, Orders, Fleet and Stores controls; using
-that attribute on an ancestor would interfere with its delegated click handler.
+The desktop shell uses a 44px header token, with a 56px token below 600px; it collapses to a menu at 1080px. Madrid's agent/map columns stack at 850px; Delivery and Restaurants stack at 900px. The Architecture page removes its right outline at 1250px and converts the topic list to a disclosure at 700px. Preserve local overflow for wide tables, roster history, code and expanded diagrams.
 
-CSS and JavaScript URLs contain their content digest. After editing assets:
+## Operational information and truthful evidence
+
+Simulation and definition settings are separate from the operation view in Madrid, Delivery and Restaurants. Starting the Madrid simulation returns to the operational view. Compact metric strips lead into the roster/map pair; selection opens a concise summary before detailed evidence.
+
+Madrid's desktop title uses 25px Plex Sans/600, reducing to 23px below 1400px and 22px below 850px. Four shallow metrics use a single ground-colored band with an 80px minimum height. The roster/map split is 45.5/54.5 with an 8px gap and a shared height of clamp(360px, 45vh, 460px). Its comparison columns expose Agent, Role, Status, Current task, Delivered and Rate/min; responsive layouts hide secondary columns while keeping identity/task/state legible.
+
+The selected-evidence strip has an 88px minimum height and exposes identity, task/energy, last decision and trace/detail actions. The compact ledger follows at an 8px gap, with 11px text, 5px vertical heading padding and 1px vertical cell padding. Completed runs default to existing All orders, preserving a useful populated ledger instead of manufacturing data. First-viewport row count is assessed by fresh captures, not assumed from a CSS change.
+
+Below 850px Madrid uses a 400px map region followed by its legend in normal document flow. The open or closed legend no longer occupies the selected courier's map space. Delivery's controls below 900px also use normal layout after the wrapped entity filters, preventing zoom/Fit city from covering Find customer.
+
+An agent's actual name is distinct from its role template and technical identifier. Restaurants exposes all three when available. Offline couriers are labeled as unavailable for assignment. Search must still find the real entity identity.
+
+Totals and rates are distinct. `Ops.sparkline` renders only after two finite samples exist. All curves use observations from the current visit and activity per simulated minute. Madrid retains at most 40 metric observations; the shared Delivery/Restaurant roster retains at most 30 rate samples. A completed run without captured history explicitly reports that history is unavailable. Do not generate a decorative series to fill that gap.
+
+The Madrid cost tile is an operating estimate in EUR. Per-decision latency, step cost and individual tool inputs/outputs remain unknown or not retained when the source does not provide them. Health preserves historical receipt dates and source-change warnings. Inventory's stock, locations and fixture roads remain visibly synthetic. UI polish does not establish model quality or current source health.
+
+## Madrid cartography and navigation
+
+Madrid uses a full local OpenFreeMap vector basemap, rendered by vendored MapLibre GL JS 5.15.0 through the Leaflet bridge. Real street hierarchy, water, land use and Spanish place labels provide continuous geographic context. The simulator's cached OpenStreetMap graph remains a fine service-area overlay rather than the entire map.
+
+The committed `web/map/manifest.json` records 332 source tiles at zoom levels 10–14 totaling 36,512,766 bytes (36.51 MB), covering longitude/latitude bounds [-3.85, 40.3, -3.52, 40.54]. `web/map/style.json` references local tile and Noto Sans Regular glyph URLs. The two level-10 tiles keep cartography available when fitted MapLibre camera zoom falls below 11 at laptop widths. Higher display zooms overzoom those finite cached tiles. Renderer provenance, licenses and attribution are retained; OpenFreeMap, OpenMapTiles and OpenStreetMap credit stays visible. No live paid map provider is required. The fixture grid maps on the other simulation routes remain explicitly fictional.
+
+Dragging, mouse-wheel zoom, keyboard movement, touch zoom, double-click zoom and visible zoom buttons are enabled in the initial view. Escape disables wheel zoom so the wheel scrolls the page; the Scroll zoom toggle restores it. Panning has no inertia. Fit network frames the service area, and Locate agent frames valid selection geometry without changing actual route length or coordinates.
+
+The service area remains latitude 40.375–40.455 and longitude -3.73–-3.64. Navigation now uses the wider bounds latitude 40.32–40.52 and longitude -3.83–-3.54, not the superseded 12% padding rule. Minimum zoom adapts to the viewport; maximum display zoom is 17. Locate agent caps its framing zoom at 16.
+
+The current bounded corrections reserve 52px of top clearance for Fit network and 64px for selection framing. Selected-label placement checks visible control geometry and map bounds. On narrow layouts the legend is below the 400px map, in both open and closed states. Resizing invalidates Leaflet dimensions, then resizes and aligns the MapLibre camera before repositioning the selected label. Reduced-motion styles set transition duration to exactly 0s, avoiding a transform transition on map geometry; the generic animation-duration override remains 0.01ms, with the lifecycle animation disabled. This source behavior is recorded separately from the capture/test results; it does not itself establish that every resize frame or touch device has passed.
+
+## Architecture and diagrams
+
+The reader contains 20 chapters and eight D2 diagrams. The sources in `docs/diagrams/` and published counterparts in `web/diagrams/` retain D2 0.9.0, ELK graph layout and native SVG text. The diagrams retain dark graphite surfaces, pale ink, neutral connectors and teal durable-state emphasis. Their hard-coded `common.d2` palette still uses the earlier surface and teal values; it has not been regenerated to match the newer shared cyan tokens exactly. Treat this as retained visual drift, not a second UI theme. Local IBM Plex source fonts live in `docs/diagrams/fonts/` and are embedded in generated SVGs.
+
+An inline diagram initially shows its whole geometry. Expand opens the same asset for detailed reading with pan and zoom; Fit returns to the complete diagram. Do not clip the initial overview or imply that tiny overview text is the only reading mode. Numbered execution phases, 18px node text and 16px message text are authored at source scale. Source inspection remains available under each diagram.
+
+The four-stage request → queue → agent → commit illustration is finite and replayable. It is labeled as an illustrated lifecycle, not runtime telemetry. Reduced-motion settings disable the stage animation.
+
+Rebuild and verify diagrams from Bash:
+
+```bash
+python3 scripts/render_documentation_diagrams.py --install
+python3 scripts/render_documentation_diagrams.py --check
+```
+
+The installer obtains and verifies the pinned D2 binary in ignored cache storage. Once installed, an offline rebuild uses:
+
+```bash
+python3 scripts/render_documentation_diagrams.py
+```
+
+The check validates chapter/fence mapping, source/reference fingerprints, generated checksums, native text and the absence of external-image/script/HTML-label content. Generated assets and their sources travel together.
+
+## Asset versions and checks
+
+CSS and JavaScript URLs contain content digests. After editing assets, refresh and check them:
 
 ```bash
 python3 scripts/version_web_assets.py --write
 python3 scripts/version_web_assets.py
 ```
 
-The second command checks all six pages for stale URLs and missing assets. This
-keeps an older cached page theme from surviving an updated HTML shell. Asset
-versioning changes no API endpoint, simulation definition or permissions.
+The second command checks all seven HTML pages for stale URLs and missing local assets. This prevents an older cached theme from surviving a new HTML shell without changing API endpoints or simulation definitions.
 
-## Madrid map navigation
+Inspect idle and populated states across all seven routes at desktop, laptop and mobile widths. Check navigation, active selection, keyboard focus, Escape, reduced motion and local overflow. Exercise a complete selection-to-evidence path, actual identity search, simulation settings, map modes, order filters, source inspection, chapter search and all eight diagrams. Preserve existing seeded outcome and role-isolation checks as the business-behavior baseline.
 
-Madrid opens in Overview: the wheel scrolls the document, markers remain
-selectable, and the visible zoom buttons work. Explore map explicitly enables
-dragging, wheel/touch zoom and keyboard navigation; Escape returns to Overview
-without changing the view. There is no automatic following or inertial panning.
+Current visual evidence is under `docs/media/after/` and `docs/media/correction/`, including populated running/completed Madrid views, the seven-route set, native 1536×1024 captures, selected-agent states and a supplemental 1036px capture derived from the user's crop. That supplemental width is not a claim about the user's browser viewport.
 
-Navigation is bounded to the existing service rectangle with 12% padding. The
-minimum zoom adapts to the viewport; maximum zoom is 17. Reset view frames the
-service area. Frame selection is enabled only when the selected courier/order
-has a valid point or route within those bounds; framing caps zoom at 16. Map
-height follows the viewport rather than imposing a tall scrolling surface.
-This changes navigation, not the road dataset or simulation behavior.
+The [fresh full review](media/correction/full-review.md) records the rebuild's material improvements and the bounded map-clearance, resize synchronization, Delivery mobile-toolbar and ledger-density findings. Its screenshots and checks describe recorded states. Map checks cover local rendering/no external requests, actual selected routes, observed history, keyboard pan and Chromium-emulated touch; physical-device touch remains untested. Sampled overflow and solid-background contrast results do not certify map-pixel contrast, full screen-reader behavior or 200% zoom conformance.
 
-Browser verification covers page scrolling over Overview, wheel zoom in Explore,
-repeated panning stopping at the bounds, Escape/focus, selection framing and
-clearing, Reset, and 375px reflow. The inspector and ledger retain their existing
-scroll containers; their interaction and pagination are separate work.
+## Evidence limits
 
-## Diagrams
+The original comp-led CLI workflow remains open at plates; downstream phase receipts must not be invented. The current numerical comparison and verdict are recorded in [comparison/report.json](media/correction/comparison/report.json), which remains drift rather than pass. Use that refreshed record instead of a fixed score copied into this document. A new capture or comparison must retain its actual verdict; this reference does not predict or approve the result.
 
-Eight diagrams share D2 0.9.0 sources and generated local SVGs. ELK owns layered
-graph placement and orthogonal routing; D2 sequences preserve ordered handoffs.
-Native labels, numbered execution phases, white nodes and graphite edges match
-the workspace. Layered connectors are 1px; sequence lifelines use D2's default
-dashes. Text is 18px for nodes and 16px for messages in the source SVG.
+The full review found the rebuilt browser surface materially reviewable and called for bounded fixes, while retaining the workflow acceptance failure. Integration, truthful geography and real runtime data remain binding requirements. Those requirements explain intentional content adaptations, but neither behavior-test totals nor a documentation refresh creates visual acceptance or a fresh user receipt.
 
-Expand starts at readable size. Pan and zoom support long sequences, while Fit
-explicitly shows the entire graph. The fleet-recovery view distinguishes review,
-dispatcher gates and physical handoff without implying a direct agent call or
-teleporting custody. See `docs/diagrams/README.md` for reproducible generation.
-
-## Acceptance checks
-
-Check all six pages at desktop width and 375px. Verify the shared active-page
-indicator, opening and closing the mobile menu, keyboard focus and Escape, and
-the absence of page-level horizontal overflow. Wide tables and diagrams may
-scroll within their labelled containers.
-
-Inspect both idle and populated states: entity selection and editing, a complete
-order conversation with memory changes, delivery view switching, stock evidence,
-health filters and scenarios, chapter search, source inspection and all eight
-expanded diagrams. Existing seeded outcome and role-isolation tests remain the
-business-behaviour baseline. A visual change does not prove model quality.
+The detailed redesign findings, verification results and remaining limitations belong in [UI-REDESIGN.md](UI-REDESIGN.md) and the correction review records. This reference documents the current implementation, including source-level fixes; it does not certify the unfinished comp workflow. Retained D2 palette values, cartographic Noto glyphs and very small page-specific annotations are explicit exceptions. The small annotations are not promoted into a general body-text scale.

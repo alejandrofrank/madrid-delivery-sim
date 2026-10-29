@@ -31,6 +31,10 @@ resource "google_project" "ai" {
       condition     = !var.enable_gateway || var.enable_runtime
       error_message = "Gateway requires enable_runtime=true; turn both flags off to park the project."
     }
+    precondition {
+      condition     = !(var.enable_analytics || var.enable_cloud_trace) || var.enable_billing
+      error_message = "Cloud observability requires enable_billing=true. Export retained analytics and explicitly disable observability before unlinking billing."
+    }
   }
 }
 

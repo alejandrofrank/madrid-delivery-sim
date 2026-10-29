@@ -14,7 +14,8 @@ from pydantic import BaseModel, ConfigDict, Field
 from delivery.agent_specs import RoleSpec
 from delivery.db import Connection, connect
 from delivery.inventory import receive, release, reserve
-from delivery.queue import Event, Queue, publish
+from delivery.queue import Event, Queue, persist_trace_context, publish
+from delivery.telemetry import active, trace_fields, trace_span, traced_event
 
 
 class BasketRequest(BaseModel):
@@ -80,6 +81,12 @@ class ScopedTools:
         self.sim = int(row["sim"])
 
     def invoke(self, name: str, **arguments: Any) -> Any:
+        with trace_span(
+            "agent.tool", attributes={"delivery.agent": self.role.name, "delivery.tool": name}
+        ):
+            return self._invoke(name, **arguments)
+
+    def _invoke(self, name: str, **arguments: Any) -> Any:
         if name not in self.role.tools:
             raise PermissionError("Tool is not granted to this role")
         for key in ("run", "run_id", "store", "owner", "namespace", "agent_id"):
@@ -503,6 +510,8 @@ class LocalAgent:
 
             detail = WorkflowPolicy().decide(event, tools)
         detail["reserved_tool_slots"] = ticket["slots"]
+        if telemetry := trace_fields():
+            detail["telemetry"] = telemetry
         # Persist actual writes with the decision/ACK transaction, so order
         # inspection survives TTL cleanup without changing agent recall access.
         detail["memory_writes"] = tools.memory_writes
@@ -547,12 +556,16 @@ class LocalAgent:
             ),
         )
 
+    @traced_event("agent.process")
     def process(self, event: Event, *, fault: Callable[[str], None] | None = None) -> bool:
         from delivery.durable_inference import checkpoint, ensure_result
 
         if not self.reserve_budget(event):
             Queue(self.dsn).fail(event, "BudgetExceeded")
             return False
+        if active():
+            with connect(self.dsn) as conn:
+                persist_trace_context(conn, event)
         if self.role.policy == "gcp_ai":
             try:
                 if not ensure_result(self, event, fault=fault):

@@ -3,21 +3,23 @@
   const mount = document.getElementById("workspace-shell");
   if (!mount) return;
   const pages = [
-    ["/restaurant-lab", "Restaurants"],
+    ["/", "Operations"],
     ["/delivery-lab", "Delivery"],
+    ["/restaurant-lab", "Restaurants"],
     ["/lab", "Inventory"],
-    ["/health", "Health & evals"],
+    ["/health", "Health"],
+    ["/agent-traces", "Traces"],
     ["/architecture", "Architecture"],
-    ["/", "Madrid baseline"],
   ];
   const header = document.createElement("header");
   header.className = "workspace-header";
   const brand = document.createElement("a");
-  brand.href = "/restaurant-lab";
+  brand.href = "/";
   brand.className = "workspace-brand";
   brand.setAttribute("aria-label", "Bakiano operations home");
   brand.innerHTML =
-    '<span class="workspace-mark" aria-hidden="true">b.</span><span class="workspace-wordmark">BAKIANO<small>Operations lab</small></span>';
+    '<span class="workspace-wordmark">Bakiano<small>Operations</small></span><span class="workspace-project">Madrid Delivery Sim</span>';
+  brand.querySelector("small").textContent = pages.find(([path]) => path === location.pathname)?.[1] || "Operations";
   const nav = document.createElement("nav");
   nav.id = "workspace-navigation";
   nav.className = "workspace-navigation";
@@ -33,7 +35,7 @@
   actions.className = "workspace-actions";
   const local = document.createElement("span");
   local.className = "workspace-local";
-  local.textContent = "Local environment";
+  local.textContent = "Local · synthetic";
   actions.append(local);
   const search = document.getElementById("open-search");
   if (search) actions.append(search);

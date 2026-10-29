@@ -1,18 +1,29 @@
 <!doctype html>
 <html lang="en">
 <head>
+    <link rel="stylesheet" href="/static/tokens.css?v=657eeda273de">
   <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
   <title>Agent evidence · Bakiano</title><link rel="icon" href="data:,">
-  <link rel="stylesheet" href="/static/workspace.css?v=6c6854d75885">
-  <link rel="stylesheet" href="/static/agent-traces.css?v=88dea077415e">
-  <script defer src="/static/workspace.js?v=887294277a47"></script>
-  <script defer src="/static/agent-traces.js?v=e7aee2a00d7a"></script>
+  <link rel="stylesheet" href="/static/agent-traces.css?v=a28e740a0007">
+  <script defer src="/static/workspace.js?v=4163be67ea66"></script>
+  <script defer src="/static/agent-traces.js?v=230bbd598b56"></script>
+
+  <link rel="stylesheet" href="/static/workspace.css?v=ae6b1f54d770">
 </head>
-<body data-page="restaurants">
+<body data-page="traces">
 <div id="workspace-shell"></div>
 <main id="main" tabindex="-1">
-  <header><div><h1>Restaurant agent evidence</h1><p>Retained SOUL and routing comparisons from synthetic city runs.</p></div><button id="refresh">Refresh evidence</button></header>
-  <section id="contract-evidence" aria-labelledby="contract-title">
+  <header><div><h1>Agent traces</h1><p>Decisions, scoped tools and model calls, with the evidence behind each step.</p></div><button id="refresh">Refresh evidence</button></header>
+  <section class="live-trace" aria-labelledby="live-trace-title">
+    <div class="profile-header"><h2 id="live-trace-title">Decision timeline</h2><label class="trace-filter">Show<select id="trace-kind"><option value="all">All steps</option><option value="decision">Decisions</option><option value="tool">Tool calls</option><option value="model">Model calls</option></select></label></div>
+    <p id="live-trace-context" class="note" role="status">Choose an agent to inspect its run.</p>
+    <div id="trace-summary" class="trace-summary"></div>
+    <ol id="live-timeline" class="timeline"></ol>
+    <div id="trace-empty" class="trace-empty"><h3>Follow an agent’s decisions</h3><p>Select an agent in a live console, then open its trace. Recorded tools, model usage and decisions appear here.</p><nav aria-label="Open an agent console"><a href="/">Madrid operations</a><a href="/delivery-lab">Delivery</a><a href="/restaurant-lab">Restaurants</a></nav></div>
+  </section>
+  <details class="retained-evidence"><summary>Retained comparisons and verification receipts</summary>
+  <p class="note">Historical experiments are independent of the selected live run. Opening these receipts makes no model calls.</p>
+  <section id="contract-evidence"  aria-labelledby="contract-title">
     <div class="profile-header"><h2 id="contract-title">Tool contracts and direct Jev</h2><span class="pill">Read only · no model calls</span></div>
     <p id="contract-state" role="status">Loading the retained contract verification…</p>
     <p id="contract-summary" class="note" hidden></p>
@@ -33,5 +44,7 @@
   <section id="comparison" aria-label="SOUL comparison"></section>
   <p class="note">Cost uses reported tokens and the frozen public tariff. Invoice totals, credits and taxes are not yet reconciled. Reservations are admission limits. This page makes no model calls.</p>
   <section id="traces" aria-label="Prompts, tool calls and memory"></section>
+</details>
 </main>
+<script defer src="/static/telemetry-traces.js?v=97fbb32eafaa"></script>
 </body></html>

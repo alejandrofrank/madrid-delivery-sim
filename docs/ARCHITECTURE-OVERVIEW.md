@@ -4,9 +4,12 @@ This project is a local engineering environment for studying bounded agent work:
 ingredient sourcing, stock reservations, consent, courier assignment, physical
 delivery and recovery. Its reusable runtime combines authenticated Python workers
 with PostgreSQL transactions. Most decisions use fixed rules. A separately enabled
-GCP recovery judge is the only Google model integration in the current design.
+GCP recovery judge complements Google ADK restaurant and customer-service adapters.
+Both ADK roles have scripted, zero-network models for CI. The dispatcher and
+customer service are discoverable over local A2A; optional OTel spans and
+BigQuery exports connect decisions to operational evidence.
 
-This chapter describes source reviewed on **2026-10-28**. It does not report a new
+This chapter describes source reviewed on **2026-10-29**. It does not report a new
 deployment or a current cloud inventory. Read [capability evidence](CAPABILITY-EVIDENCE.md)
 for measured limits and [architecture decisions](ARCHITECTURE-DECISIONS.md) for
 the alternatives behind these choices.
@@ -53,8 +56,11 @@ The **cloud boundary** accepts a bounded numeric recovery proposal and returns a
 approve/deny verdict. It has no simulation database connection or execution tools.
 Caller and runtime service accounts have separate duties. Cloud Run is reachable
 over the public network with IAM-authenticated invocation; the Terraform module
-does not provide private ingress. Cloud SQL, Pub/Sub, GKE, ADK, managed Agent
-Runtime and Memory Bank are not deployed. See the [exact GCP inventory](GCP-COMPONENTS.md).
+does not provide private ingress. Cloud SQL, Pub/Sub, GKE, managed Agent
+Runtime and Memory Bank are not deployed. Google ADK runs as a local Python
+library; optional Cloud Trace and BigQuery resources are declared but parked.
+See the [Google stack guide](GOOGLE-STACK.md) and
+[exact GCP inventory](GCP-COMPONENTS.md).
 
 ## What an agent actually is
 
@@ -120,6 +126,23 @@ its own briefing before departure; the world advances it along directed edges.
 Ingredient transfer uses scheduled transitions rather than a separate moving
 supplier vehicle. The restaurant-to-courier handoff **is implemented**; it is
 covered by [delivery-fact regressions](../tests/test_supply_delivery_facts.py).
+
+## Observability trace flow
+
+Observability is disabled by default. One run-scoped order trace continues across
+durable queue handoffs and lease retries. Explicit agent, ADK model and tool spans
+record names, usage and estimated cost; FastAPI and Redis use OpenTelemetry
+instrumentors. Exporters remove payloads and exception text before sending data.
+
+The [Mermaid trace-flow diagram](ARCHITECTURE-OBSERVABILITY.md#trace-flow) follows
+the API, persisted queue context, agent/tool spans and both export paths.
+
+Trace and analytics flags are independent. Analytics outages do not change task
+outcomes; Postgres and local receipts remain authoritative. The four BigQuery
+tables have daily partitions, agent clustering and bounded retention. Saved SQL
+deduplicates streaming rows before calculating cost per successful task, p95 tool
+latency and eval pass^k trends. See [setup, privacy, reporting limits and
+retention](ARCHITECTURE-OBSERVABILITY.md).
 
 ## Distinct workspaces and reading paths
 

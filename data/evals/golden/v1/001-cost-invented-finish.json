@@ -1,0 +1,35 @@
+{
+  "schema_version": 1,
+  "version": 1,
+  "id": "001-cost-invented-finish",
+  "description": "Historical cost-mode failure: invented finish_finish_decision rather than the declared finish_decision. Minimal terminal-call excerpt; not a successful trajectory.",
+  "source": "adk-route-comparison.json /arms/3/evidence/calls/5",
+  "source_sha256": "0d4ca4d78149687ce5064078f0c630078170c8c38fc43ac96e7bc50856e2bbd1",
+  "trace": {
+    "model_steps": 1,
+    "incomplete_steps": 0,
+    "calls": [
+      {
+        "name": "finish_finish_decision",
+        "args": {
+          "summary": "Placeholder"
+        },
+        "allowed_tools": [
+          "finish_decision"
+        ],
+        "model_step": 6
+      }
+    ]
+  },
+  "reference": [
+    {
+      "name": "finish_decision",
+      "args": {
+        "summary": "Placeholder"
+      }
+    }
+  ],
+  "expected_categories": [
+    "invented_tool"
+  ]
+}

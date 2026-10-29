@@ -9,6 +9,7 @@ COPY pyproject.toml ./
 COPY src ./src
 RUN pip install --no-deps -e . && useradd -m -u 10001 sim
 COPY data ./data
+COPY evals ./evals
 COPY sql ./sql
 COPY web ./web
 COPY docs ./docs
@@ -16,7 +17,10 @@ COPY README.md ROADMAP.md STATUS.md ./
 COPY config ./config
 COPY tests ./tests
 COPY infra/gcp-ai/gateway.py ./infra/gcp-ai/gateway.py
-COPY infra/gcp-ai/main.tf infra/gcp-ai/variables.tf infra/gcp-ai/Dockerfile infra/gcp-ai/requirements.lock infra/gcp-ai/requirements.txt ./infra/gcp-ai/
+COPY infra/gcp-ai/*.tf infra/gcp-ai/Dockerfile infra/gcp-ai/requirements.lock infra/gcp-ai/requirements.txt ./infra/gcp-ai/
+COPY infra/gcp-ai/STATE-MIGRATION.md ./infra/gcp-ai/
+COPY infra/gcp-ai/sql ./infra/gcp-ai/sql
+COPY infra/gcp-ai/schemas ./infra/gcp-ai/schemas
 COPY infra/gcp-ai/tests ./infra/gcp-ai/tests
 COPY compose*.yml compose*.yaml AGENTS.md ./
 COPY scripts ./scripts

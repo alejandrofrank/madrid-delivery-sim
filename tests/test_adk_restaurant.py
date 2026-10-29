@@ -67,6 +67,15 @@ def test_model_trace_is_saved_and_private(adk_city):
         in calls[0]["request_body"]["config"]["system_instruction"]
     )
     assert "read_pantry" in str(calls[0]["request_body"])
+    from delivery.trajectory_evals import read_trace, score_trajectory
+
+    trace = read_trace(city.url, event.id)
+    reference = [{"name": c["name"], "args": c["args"]} for c in trace["calls"]]
+    score = score_trajectory(trace, reference)
+    assert score["tool_precision"] == score["tool_recall"] == 1
+    assert score["code_failures"] == []
+    assert trace["calls"][-1]["name"] == "finish_decision"
+    assert "result" in trace["calls"][-1]
     with pytest.raises(psycopg.errors.InsufficientPrivilege), connect(agent.dsn) as conn:
         conn.execute("SELECT request_body FROM restaurant_model_calls")
     with pytest.raises(psycopg.errors.InsufficientPrivilege), connect(agent.dsn) as conn:

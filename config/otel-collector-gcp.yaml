@@ -1,0 +1,40 @@
+# Trace-only configuration based on Google's current OTLP collector sample.
+# ADC needs roles/telemetry.tracesWriter on the destination project and
+# roles/serviceusage.serviceUsageConsumer on its quota project.
+receivers:
+  otlp:
+    protocols:
+      http:
+        endpoint: 0.0.0.0:4318
+processors:
+  memory_limiter:
+    check_interval: 1s
+    limit_mib: 128
+    spike_limit_mib: 32
+  resource/gcp_project_id:
+    attributes:
+      - action: upsert
+        key: gcp.project_id
+        value: ${env:GOOGLE_CLOUD_PROJECT}
+  batch:
+    send_batch_size: 200
+    send_batch_max_size: 200
+    timeout: 5s
+exporters:
+  otlp_grpc:
+    endpoint: telemetry.googleapis.com:443
+    auth:
+      authenticator: googleclientauth
+    sending_queue:
+      queue_size: 128
+    retry_on_failure:
+      max_elapsed_time: 15s
+extensions:
+  googleclientauth: {}
+service:
+  extensions: [googleclientauth]
+  pipelines:
+    traces:
+      receivers: [otlp]
+      processors: [memory_limiter, resource/gcp_project_id, batch]
+      exporters: [otlp_grpc]

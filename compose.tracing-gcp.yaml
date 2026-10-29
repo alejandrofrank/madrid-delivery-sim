@@ -1,0 +1,20 @@
+# Explicit cloud opt-in; do not combine with compose.tracing.yaml.
+services:
+  otel-collector:
+    image: us-docker.pkg.dev/cloud-ops-agents-artifacts/google-cloud-opentelemetry-collector/otelcol-google:0.160.0
+    command: ["--config=/etc/otel/config.yaml"]
+    environment:
+      GOOGLE_CLOUD_PROJECT: ${GOOGLE_CLOUD_PROJECT:?Set the trace destination project}
+      GOOGLE_APPLICATION_CREDENTIALS: /gcp-adc/application_default_credentials.json
+    volumes:
+      - ./config/otel-collector-gcp.yaml:/etc/otel/config.yaml:ro
+      - ${GCP_ADC_DIRECTORY:?Set the directory containing local ADC}:/gcp-adc:ro
+  app:
+    environment:
+      DELIVERY_OTEL_EXPORTER: gcp
+      DELIVERY_OTEL_CLOUD_ENABLED: ${DELIVERY_OTEL_CLOUD_ENABLED:?Explicitly set to 1 to export to GCP}
+      GOOGLE_CLOUD_PROJECT: ${GOOGLE_CLOUD_PROJECT:?Set the trace destination project}
+      OTEL_EXPORTER_OTLP_TRACES_ENDPOINT: http://otel-collector:4318/v1/traces
+      DELIVERY_OTEL_SAMPLE_RATIO: ${DELIVERY_OTEL_SAMPLE_RATIO:-0.1}
+    depends_on:
+      otel-collector: {condition: service_started}

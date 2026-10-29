@@ -1,0 +1,46 @@
+{
+  "base": "http://127.0.0.1:8021",
+  "phase": "delivery-integrated",
+  "capturedAt": "2026-10-29T16:14:04.821Z",
+  "results": [
+    {
+      "page": "flow",
+      "route": "/delivery-lab",
+      "run": null,
+      "size": "desktop",
+      "status": 200,
+      "horizontalOverflow": false,
+      "width": 1440,
+      "title": "Bakiano · Delivery operations",
+      "heading": "Delivery operations",
+      "unlabeledControls": [],
+      "errors": []
+    },
+    {
+      "page": "flow",
+      "route": "/delivery-lab",
+      "run": null,
+      "size": "laptop",
+      "status": 200,
+      "horizontalOverflow": false,
+      "width": 1280,
+      "title": "Bakiano · Delivery operations",
+      "heading": "Delivery operations",
+      "unlabeledControls": [],
+      "errors": []
+    },
+    {
+      "page": "flow",
+      "route": "/delivery-lab",
+      "run": null,
+      "size": "mobile",
+      "status": 200,
+      "horizontalOverflow": false,
+      "width": 390,
+      "title": "Bakiano · Delivery operations",
+      "heading": "Delivery operations",
+      "unlabeledControls": [],
+      "errors": []
+    }
+  ]
+}

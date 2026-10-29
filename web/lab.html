@@ -1,14 +1,15 @@
 <!doctype html>
 <html lang="en">
   <head>
+    <link rel="stylesheet" href="/static/tokens.css?v=657eeda273de">
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Inventory operations · Bakiano</title>
     <link rel="icon" href="data:," />
-    <link rel="stylesheet" href="/static/lab.css?v=9c908032c987" />
-    <link rel="stylesheet" href="/static/workspace.css?v=6c6854d75885" />
-    <script defer src="/static/workspace.js?v=887294277a47"></script>
-    <script defer src="/static/lab.js?v=987950f319d7"></script>
+    <link rel="stylesheet" href="/static/lab.css?v=bed7e16a28dd" />
+    <link rel="stylesheet" href="/static/workspace.css?v=ae6b1f54d770" />
+    <script defer src="/static/workspace.js?v=4163be67ea66"></script>
+    <script defer src="/static/lab.js?v=04c54c1daf44"></script>
   </head>
   <body data-page="inventory">
     <div id="workspace-shell">
@@ -91,6 +92,7 @@
             stock. Roads are a generated fixture; traffic and courier movement
             are later milestones.
           </p>
+          <p id="inventory-empty" class="inventory-empty">No inventory run yet. Start the last-unit scenario to inspect stock, reservations and recovery.</p>
           <svg
             id="city"
             viewBox="-160 -160 1900 1900"
@@ -102,7 +104,7 @@
           <h2>Availability by product</h2>
           <label
             >Store
-            <select id="store"></select
+            <select id="store" disabled><option>Run a scenario to load stores</option></select
           ></label>
           <div class="scroll">
             <table>
@@ -115,7 +117,7 @@
                   <th>Version</th>
                 </tr>
               </thead>
-              <tbody id="stock"></tbody>
+              <tbody id="stock"><tr><td colspan="5">Stock appears after the scenario starts.</td></tr></tbody>
             </table>
           </div>
           <p id="provenance"></p>

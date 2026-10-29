@@ -1,0 +1,612 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-10-29T18:31:11.522371+00:00",
+  "title": "Design System: Bakiano operations",
+  "extensions": {
+    "colorMeta": {
+      "accent": {
+        "role": "primary",
+        "displayName": "Signal cyan",
+        "tonalRamp": [
+          "oklch(15.0% 0.0485 188.7)",
+          "oklch(26.4% 0.0788 188.7)",
+          "oklch(37.9% 0.0991 188.7)",
+          "oklch(49.3% 0.1068 188.7)",
+          "oklch(60.7% 0.1008 188.7)",
+          "oklch(72.1% 0.0820 188.7)",
+          "oklch(83.6% 0.0527 188.7)",
+          "oklch(95.0% 0.0167 188.7)"
+        ]
+      },
+      "accent-ink": {
+        "role": "primary",
+        "displayName": "Deep cyan ink",
+        "tonalRamp": [
+          "oklch(15.0% 0.0146 200.3)",
+          "oklch(26.4% 0.0238 200.3)",
+          "oklch(37.9% 0.0299 200.3)",
+          "oklch(49.3% 0.0323 200.3)",
+          "oklch(60.7% 0.0304 200.3)",
+          "oklch(72.1% 0.0248 200.3)",
+          "oklch(83.6% 0.0159 200.3)",
+          "oklch(95.0% 0.0050 200.3)"
+        ]
+      },
+      "accent-soft": {
+        "role": "primary",
+        "displayName": "Cyan selection surface",
+        "tonalRamp": [
+          "oklch(15.0% 0.0146 211.0)",
+          "oklch(26.4% 0.0238 211.0)",
+          "oklch(37.9% 0.0299 211.0)",
+          "oklch(49.3% 0.0322 211.0)",
+          "oklch(60.7% 0.0304 211.0)",
+          "oklch(72.1% 0.0247 211.0)",
+          "oklch(83.6% 0.0159 211.0)",
+          "oklch(95.0% 0.0050 211.0)"
+        ]
+      },
+      "accent-hover": {
+        "role": "primary",
+        "displayName": "Light signal teal",
+        "tonalRamp": [
+          "oklch(15.0% 0.0304 184.4)",
+          "oklch(26.4% 0.0495 184.4)",
+          "oklch(37.9% 0.0622 184.4)",
+          "oklch(49.3% 0.0670 184.4)",
+          "oklch(60.7% 0.0632 184.4)",
+          "oklch(72.1% 0.0514 184.4)",
+          "oklch(83.6% 0.0331 184.4)",
+          "oklch(95.0% 0.0105 184.4)"
+        ]
+      },
+      "bg": {
+        "role": "neutral",
+        "displayName": "Blue graphite ground",
+        "tonalRamp": [
+          "oklch(15.0% 0.0071 242.4)",
+          "oklch(26.4% 0.0116 242.4)",
+          "oklch(37.9% 0.0146 242.4)",
+          "oklch(49.3% 0.0157 242.4)",
+          "oklch(60.7% 0.0148 242.4)",
+          "oklch(72.1% 0.0120 242.4)",
+          "oklch(83.6% 0.0077 242.4)",
+          "oklch(95.0% 0.0025 242.4)"
+        ]
+      },
+      "surface": {
+        "role": "neutral",
+        "displayName": "Graphite surface",
+        "tonalRamp": [
+          "oklch(15.0% 0.0085 238.5)",
+          "oklch(26.4% 0.0137 238.5)",
+          "oklch(37.9% 0.0173 238.5)",
+          "oklch(49.3% 0.0186 238.5)",
+          "oklch(60.7% 0.0176 238.5)",
+          "oklch(72.1% 0.0143 238.5)",
+          "oklch(83.6% 0.0092 238.5)",
+          "oklch(95.0% 0.0029 238.5)"
+        ]
+      },
+      "raised": {
+        "role": "neutral",
+        "displayName": "Raised graphite",
+        "tonalRamp": [
+          "oklch(15.0% 0.0104 236.8)",
+          "oklch(26.4% 0.0169 236.8)",
+          "oklch(37.9% 0.0213 236.8)",
+          "oklch(49.3% 0.0229 236.8)",
+          "oklch(60.7% 0.0216 236.8)",
+          "oklch(72.1% 0.0176 236.8)",
+          "oklch(83.6% 0.0113 236.8)",
+          "oklch(95.0% 0.0036 236.8)"
+        ]
+      },
+      "hover": {
+        "role": "neutral",
+        "displayName": "Hover graphite",
+        "tonalRamp": [
+          "oklch(15.0% 0.0119 233.5)",
+          "oklch(26.4% 0.0193 233.5)",
+          "oklch(37.9% 0.0242 233.5)",
+          "oklch(49.3% 0.0261 233.5)",
+          "oklch(60.7% 0.0247 233.5)",
+          "oklch(72.1% 0.0201 233.5)",
+          "oklch(83.6% 0.0129 233.5)",
+          "oklch(95.0% 0.0041 233.5)"
+        ]
+      },
+      "ink": {
+        "role": "neutral",
+        "displayName": "Pale ink",
+        "tonalRamp": [
+          "oklch(15.0% 0.0049 241.0)",
+          "oklch(26.4% 0.0080 241.0)",
+          "oklch(37.9% 0.0100 241.0)",
+          "oklch(49.3% 0.0108 241.0)",
+          "oklch(60.7% 0.0102 241.0)",
+          "oklch(72.1% 0.0083 241.0)",
+          "oklch(83.6% 0.0053 241.0)",
+          "oklch(95.0% 0.0017 241.0)"
+        ]
+      },
+      "muted": {
+        "role": "neutral",
+        "displayName": "Muted ink",
+        "tonalRamp": [
+          "oklch(15.0% 0.0118 240.8)",
+          "oklch(26.4% 0.0192 240.8)",
+          "oklch(37.9% 0.0241 240.8)",
+          "oklch(49.3% 0.0259 240.8)",
+          "oklch(60.7% 0.0245 240.8)",
+          "oklch(72.1% 0.0199 240.8)",
+          "oklch(83.6% 0.0128 240.8)",
+          "oklch(95.0% 0.0041 240.8)"
+        ]
+      },
+      "faint": {
+        "role": "neutral",
+        "displayName": "Faint ink",
+        "tonalRamp": [
+          "oklch(15.0% 0.0137 240.5)",
+          "oklch(26.4% 0.0223 240.5)",
+          "oklch(37.9% 0.0280 240.5)",
+          "oklch(49.3% 0.0301 240.5)",
+          "oklch(60.7% 0.0285 240.5)",
+          "oklch(72.1% 0.0231 240.5)",
+          "oklch(83.6% 0.0149 240.5)",
+          "oklch(95.0% 0.0047 240.5)"
+        ]
+      },
+      "line": {
+        "role": "neutral",
+        "displayName": "Fine rule",
+        "tonalRamp": [
+          "oklch(15.0% 0.0129 239.7)",
+          "oklch(26.4% 0.0210 239.7)",
+          "oklch(37.9% 0.0264 239.7)",
+          "oklch(49.3% 0.0285 239.7)",
+          "oklch(60.7% 0.0269 239.7)",
+          "oklch(72.1% 0.0219 239.7)",
+          "oklch(83.6% 0.0140 239.7)",
+          "oklch(95.0% 0.0045 239.7)"
+        ]
+      },
+      "strong-line": {
+        "role": "neutral",
+        "displayName": "Strong rule",
+        "tonalRamp": [
+          "oklch(15.0% 0.0146 233.0)",
+          "oklch(26.4% 0.0237 233.0)",
+          "oklch(37.9% 0.0298 233.0)",
+          "oklch(49.3% 0.0321 233.0)",
+          "oklch(60.7% 0.0303 233.0)",
+          "oklch(72.1% 0.0246 233.0)",
+          "oklch(83.6% 0.0158 233.0)",
+          "oklch(95.0% 0.0050 233.0)"
+        ]
+      },
+      "positive": {
+        "role": "semantic",
+        "displayName": "Positive outcome",
+        "tonalRamp": [
+          "oklch(15.0% 0.0394 163.1)",
+          "oklch(26.4% 0.0641 163.1)",
+          "oklch(37.9% 0.0806 163.1)",
+          "oklch(49.3% 0.0868 163.1)",
+          "oklch(60.7% 0.0819 163.1)",
+          "oklch(72.1% 0.0666 163.1)",
+          "oklch(83.6% 0.0428 163.1)",
+          "oklch(95.0% 0.0136 163.1)"
+        ]
+      },
+      "negative": {
+        "role": "semantic",
+        "displayName": "Negative outcome",
+        "tonalRamp": [
+          "oklch(15.0% 0.0442 20.3)",
+          "oklch(26.4% 0.0719 20.3)",
+          "oklch(37.9% 0.0904 20.3)",
+          "oklch(49.3% 0.0973 20.3)",
+          "oklch(60.7% 0.0919 20.3)",
+          "oklch(72.1% 0.0747 20.3)",
+          "oklch(83.6% 0.0480 20.3)",
+          "oklch(95.0% 0.0152 20.3)"
+        ]
+      },
+      "warning": {
+        "role": "semantic",
+        "displayName": "Attention",
+        "tonalRamp": [
+          "oklch(15.0% 0.0387 79.2)",
+          "oklch(26.4% 0.0630 79.2)",
+          "oklch(37.9% 0.0792 79.2)",
+          "oklch(49.3% 0.0853 79.2)",
+          "oklch(60.7% 0.0806 79.2)",
+          "oklch(72.1% 0.0655 79.2)",
+          "oklch(83.6% 0.0421 79.2)",
+          "oklch(95.0% 0.0134 79.2)"
+        ]
+      },
+      "info": {
+        "role": "semantic",
+        "displayName": "Information",
+        "tonalRamp": [
+          "oklch(15.0% 0.0278 247.7)",
+          "oklch(26.4% 0.0453 247.7)",
+          "oklch(37.9% 0.0569 247.7)",
+          "oklch(49.3% 0.0613 247.7)",
+          "oklch(60.7% 0.0579 247.7)",
+          "oklch(72.1% 0.0471 247.7)",
+          "oklch(83.6% 0.0303 247.7)",
+          "oklch(95.0% 0.0096 247.7)"
+        ]
+      },
+      "map-ground": {
+        "role": "neutral",
+        "displayName": "Cartographic ground",
+        "tonalRamp": [
+          "oklch(15.0% 0.0112 249.2)",
+          "oklch(26.4% 0.0183 249.2)",
+          "oklch(37.9% 0.0230 249.2)",
+          "oklch(49.3% 0.0247 249.2)",
+          "oklch(60.7% 0.0234 249.2)",
+          "oklch(72.1% 0.0190 249.2)",
+          "oklch(83.6% 0.0122 249.2)",
+          "oklch(95.0% 0.0039 249.2)"
+        ]
+      },
+      "map-chrome": {
+        "role": "neutral",
+        "displayName": "Map control background",
+        "tonalRamp": [
+          "oklch(15.0% 0.0096 244.8)",
+          "oklch(26.4% 0.0156 244.8)",
+          "oklch(37.9% 0.0196 244.8)",
+          "oklch(49.3% 0.0212 244.8)",
+          "oklch(60.7% 0.0200 244.8)",
+          "oklch(72.1% 0.0162 244.8)",
+          "oklch(83.6% 0.0104 244.8)",
+          "oklch(95.0% 0.0033 244.8)"
+        ]
+      },
+      "map-rule": {
+        "role": "neutral",
+        "displayName": "Map control rule",
+        "tonalRamp": [
+          "oklch(15.0% 0.0138 234.6)",
+          "oklch(26.4% 0.0224 234.6)",
+          "oklch(37.9% 0.0282 234.6)",
+          "oklch(49.3% 0.0303 234.6)",
+          "oklch(60.7% 0.0286 234.6)",
+          "oklch(72.1% 0.0233 234.6)",
+          "oklch(83.6% 0.0150 234.6)",
+          "oklch(95.0% 0.0047 234.6)"
+        ]
+      },
+      "map-ink": {
+        "role": "neutral",
+        "displayName": "Map legend ink",
+        "tonalRamp": [
+          "oklch(15.0% 0.0119 239.4)",
+          "oklch(26.4% 0.0194 239.4)",
+          "oklch(37.9% 0.0244 239.4)",
+          "oklch(49.3% 0.0262 239.4)",
+          "oklch(60.7% 0.0248 239.4)",
+          "oklch(72.1% 0.0202 239.4)",
+          "oklch(83.6% 0.0130 239.4)",
+          "oklch(95.0% 0.0041 239.4)"
+        ]
+      },
+      "working-fill": {
+        "role": "semantic",
+        "displayName": "Madrid working state fill",
+        "tonalRamp": [
+          "oklch(15.0% 0.0162 199.7)",
+          "oklch(26.4% 0.0264 199.7)",
+          "oklch(37.9% 0.0332 199.7)",
+          "oklch(49.3% 0.0358 199.7)",
+          "oklch(60.7% 0.0338 199.7)",
+          "oklch(72.1% 0.0275 199.7)",
+          "oklch(83.6% 0.0177 199.7)",
+          "oklch(95.0% 0.0056 199.7)"
+        ]
+      },
+      "working-ink": {
+        "role": "semantic",
+        "displayName": "Madrid working state ink",
+        "tonalRamp": [
+          "oklch(15.0% 0.0445 187.2)",
+          "oklch(26.4% 0.0724 187.2)",
+          "oklch(37.9% 0.0910 187.2)",
+          "oklch(49.3% 0.0981 187.2)",
+          "oklch(60.7% 0.0926 187.2)",
+          "oklch(72.1% 0.0753 187.2)",
+          "oklch(83.6% 0.0484 187.2)",
+          "oklch(95.0% 0.0153 187.2)"
+        ]
+      },
+      "working-line": {
+        "role": "semantic",
+        "displayName": "Madrid working state rule",
+        "tonalRamp": [
+          "oklch(15.0% 0.0305 187.3)",
+          "oklch(26.4% 0.0496 187.3)",
+          "oklch(37.9% 0.0624 187.3)",
+          "oklch(49.3% 0.0672 187.3)",
+          "oklch(60.7% 0.0635 187.3)",
+          "oklch(72.1% 0.0516 187.3)",
+          "oklch(83.6% 0.0332 187.3)",
+          "oklch(95.0% 0.0105 187.3)"
+        ]
+      }
+    },
+    "typographyMeta": {
+      "title": {
+        "displayName": "Workspace title",
+        "purpose": "Compact shared page heading; no display headline."
+      },
+      "chapter-title": {
+        "displayName": "Chapter title",
+        "purpose": "Architecture's compact reading title."
+      },
+      "section": {
+        "displayName": "Section title",
+        "purpose": "Roster, panel and evidence section headings."
+      },
+      "body": {
+        "displayName": "Body",
+        "purpose": "Interface prose and working content."
+      },
+      "body-small": {
+        "displayName": "Supporting body",
+        "purpose": "Subtitles, row identities and compact explanations."
+      },
+      "label": {
+        "displayName": "Label",
+        "purpose": "Control labels, navigation and supporting values."
+      },
+      "annotation": {
+        "displayName": "Annotation",
+        "purpose": "Dense row details, status chips and map metadata."
+      },
+      "mono": {
+        "displayName": "Technical metadata",
+        "purpose": "IDs, time, trace metadata and code."
+      },
+      "metric": {
+        "displayName": "Madrid metric",
+        "purpose": "23px/500 value in the shallow four-part KPI band."
+      },
+      "operations-title": {
+        "displayName": "Madrid title",
+        "purpose": "Compact 25px/600 full-width title, 23px below 1400px and 22px below 850px."
+      },
+      "cartographic-label": {
+        "displayName": "Local cartographic label",
+        "purpose": "Noto Sans Regular glyphs for the map only; UI remains Plex."
+      },
+      "operational-status": {
+        "displayName": "Madrid status",
+        "purpose": "Compact rounded state pills with centered readable labels, consistent column widths and no redundant dots."
+      }
+    },
+    "shadows": [
+      {
+        "name": "map-overlay",
+        "value": "0 8px 24px #0005",
+        "purpose": "Map tooltips and popups only."
+      },
+      {
+        "name": "marker-legibility",
+        "value": "0 2px 3px #0008",
+        "purpose": "Drop shadow for courier SVG markers; not panel elevation."
+      },
+      {
+        "name": "selected-row",
+        "value": "inset 2px 0 var(--ui-accent)",
+        "purpose": "Selected roster edge; no lifted depth."
+      },
+      {
+        "name": "madrid-selected-row",
+        "value": "inset 1px 0 var(--ui-accent)",
+        "purpose": "Madrid's compact selection edge; shared rosters retain their 2px edge."
+      }
+    ],
+    "motion": [
+      {
+        "name": "control-duration",
+        "value": "180ms",
+        "purpose": "Background and border feedback."
+      },
+      {
+        "name": "control-ease",
+        "value": "cubic-bezier(.16,1,.3,1)",
+        "purpose": "Shared control transitions and the illustrated request flow."
+      },
+      {
+        "name": "request-flow",
+        "value": "4.8s",
+        "purpose": "Finite lifecycle sequence with staggered stages, replayable on request."
+      },
+      {
+        "name": "reduced-motion-transitions",
+        "value": "0s",
+        "purpose": "Disable transitions completely, including map geometry transforms, under reduced motion."
+      },
+      {
+        "name": "reduced-motion-animations",
+        "value": "0.01ms",
+        "purpose": "Shared animation-duration override under reduced motion; the illustrated lifecycle animation is disabled."
+      }
+    ],
+    "breakpoints": [
+      {
+        "name": "reader-outline-collapse",
+        "value": "1250px"
+      },
+      {
+        "name": "global-menu",
+        "value": "1080px"
+      },
+      {
+        "name": "delivery-and-restaurant-stack",
+        "value": "900px"
+      },
+      {
+        "name": "madrid-stack",
+        "value": "850px"
+      },
+      {
+        "name": "reader-topics-disclosure",
+        "value": "700px"
+      },
+      {
+        "name": "shared-mobile-controls",
+        "value": "600px"
+      },
+      {
+        "name": "restaurant-metrics-two-column",
+        "value": "520px"
+      },
+      {
+        "name": "madrid-hide-role-column",
+        "value": "1400px"
+      },
+      {
+        "name": "madrid-compact-roster",
+        "value": "1150px"
+      },
+      {
+        "name": "madrid-hide-rate-column",
+        "value": "560px"
+      }
+    ]
+  },
+  "components": [
+    {
+      "name": "Primary action",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "Run actions with clear hover, focus and disabled states.",
+      "html": "<button class=\"ds-button ds-primary\">Run scenario</button>",
+      "css": ".ds-button{min-height:36px;padding:7px 12px;border:1px solid var(--ui-strong-line);border-radius:var(--ui-radius);background:var(--ui-surface);color:var(--ui-ink);font:500 14px/1.5 var(--ui-font);cursor:pointer;transition:background-color var(--ui-motion) var(--ui-ease),border-color var(--ui-motion) var(--ui-ease)}.ds-button:hover:not(:disabled){background:var(--ui-hover);border-color:var(--ui-ink)}.ds-button:active:not(:disabled){background:var(--ui-hover)}.ds-button:focus-visible{outline:2px solid var(--ui-accent);outline-offset:3px}.ds-button:disabled{background:var(--ui-raised);color:var(--ui-faint);border-color:var(--ui-line);cursor:not-allowed}@media(prefers-reduced-motion:reduce){.ds-button{transition-duration:0s}}.ds-primary{background:var(--ui-accent);border-color:var(--ui-accent);color:var(--ui-accent-ink);font-weight:600}.ds-primary:hover:not(:disabled){background:#90e4d8;border-color:#90e4d8}"
+    },
+    {
+      "name": "Secondary action",
+      "kind": "button",
+      "refersTo": "button-secondary",
+      "description": "Refresh, inspect and navigation controls.",
+      "html": "<button class=\"ds-button\">Refresh evidence</button>",
+      "css": ".ds-button{min-height:36px;padding:7px 12px;border:1px solid var(--ui-strong-line);border-radius:var(--ui-radius);background:var(--ui-surface);color:var(--ui-ink);font:500 14px/1.5 var(--ui-font);cursor:pointer;transition:background-color var(--ui-motion) var(--ui-ease),border-color var(--ui-motion) var(--ui-ease)}.ds-button:hover:not(:disabled){background:var(--ui-hover);border-color:var(--ui-ink)}.ds-button:active:not(:disabled){background:var(--ui-hover)}.ds-button:focus-visible{outline:2px solid var(--ui-accent);outline-offset:3px}.ds-button:disabled{background:var(--ui-raised);color:var(--ui-faint);border-color:var(--ui-line);cursor:not-allowed}@media(prefers-reduced-motion:reduce){.ds-button{transition-duration:0s}}"
+    },
+    {
+      "name": "Disabled action",
+      "kind": "button",
+      "refersTo": "button-disabled",
+      "description": "Unavailable action with explicit native disabled state.",
+      "html": "<button class=\"ds-button\" disabled>View decisions</button>",
+      "css": ".ds-button{min-height:36px;padding:7px 12px;border:1px solid var(--ui-strong-line);border-radius:var(--ui-radius);background:var(--ui-surface);color:var(--ui-ink);font:500 14px/1.5 var(--ui-font);cursor:pointer;transition:background-color var(--ui-motion) var(--ui-ease),border-color var(--ui-motion) var(--ui-ease)}.ds-button:hover:not(:disabled){background:var(--ui-hover);border-color:var(--ui-ink)}.ds-button:active:not(:disabled){background:var(--ui-hover)}.ds-button:focus-visible{outline:2px solid var(--ui-accent);outline-offset:3px}.ds-button:disabled{background:var(--ui-raised);color:var(--ui-faint);border-color:var(--ui-line);cursor:not-allowed}@media(prefers-reduced-motion:reduce){.ds-button{transition-duration:0s}}"
+    },
+    {
+      "name": "Labeled field",
+      "kind": "input",
+      "refersTo": "input",
+      "description": "Search or configuration field with a persistent label.",
+      "html": "<label class=\"ds-label\">Find agent<input class=\"ds-input\" type=\"search\" placeholder=\"Name or ID\"></label>",
+      "css": ".ds-label{display:flex;flex-direction:column;gap:6px;font:12px/1.5 var(--ui-font);color:var(--ui-muted)}.ds-input{min-height:36px;min-width:0;padding:7px 9px;border:1px solid var(--ui-strong-line);border-radius:var(--ui-radius);background:var(--ui-surface);color:var(--ui-ink);font:14px/1.5 var(--ui-font);transition:background-color var(--ui-motion) var(--ui-ease),border-color var(--ui-motion) var(--ui-ease)}.ds-input::placeholder{color:var(--ui-muted)}.ds-input:focus-visible{outline:2px solid var(--ui-accent);outline-offset:3px}.ds-input:disabled{background:var(--ui-raised);color:var(--ui-muted)}@media(prefers-reduced-motion:reduce){.ds-input{transition-duration:0s}}"
+    },
+    {
+      "name": "Workspace navigation",
+      "kind": "nav",
+      "refersTo": "navigation-active",
+      "description": "A subset of the seven ordinary workspace anchors, with current-page state.",
+      "html": "<nav class=\"ds-nav\" aria-label=\"Workspaces\"><a href=\"/\" aria-current=\"page\">Operations</a><a href=\"/delivery-lab\">Delivery</a><a href=\"/restaurant-lab\">Restaurants</a></nav>",
+      "css": ".ds-nav{display:flex;gap:18px;background:var(--ui-bg)}.ds-nav a{display:inline-flex;align-items:center;min-height:44px;border-bottom:2px solid transparent;color:var(--ui-muted);text-decoration:none;font:12px/1.5 var(--ui-font)}.ds-nav a:hover{color:var(--ui-ink);border-bottom-color:var(--ui-line)}.ds-nav a[aria-current=page]{color:var(--ui-accent);border-bottom-color:var(--ui-accent);font-weight:500}.ds-nav a:focus-visible{outline:2px solid var(--ui-accent);outline-offset:3px}"
+    },
+    {
+      "name": "State chips",
+      "kind": "chip",
+      "refersTo": "status-chip-active",
+      "description": "Text states; color supplements the label.",
+      "html": "<span class=\"ds-chip\">Idle</span> <span class=\"ds-chip ds-active\">Working</span>",
+      "css": ".ds-chip{display:inline-flex;align-items:center;gap:5px;max-width:max-content;border:1px solid var(--ui-line);border-radius:4px;padding:3px 6px;color:var(--ui-muted);font:11px/1.5 var(--ui-font);white-space:nowrap}.ds-active{background:var(--ui-accent-soft);color:var(--ui-accent);border-color:#3a6961}"
+    },
+    {
+      "name": "Shared evidence panel",
+      "kind": "card",
+      "refersTo": "panel",
+      "description": "Shared surface panel used outside Madrid's ground-color operations panels.",
+      "html": "<section class=\"ds-panel\"><div class=\"ds-panel-title\"><h2>Agents</h2><span>No session loaded</span></div><p class=\"ds-panel-note\">Start a session from Simulation to inspect live agents.</p></section>",
+      "css": ".ds-panel{border:1px solid var(--ui-line);background:var(--ui-surface);border-radius:var(--ui-radius);color:var(--ui-ink);overflow:hidden;font:14px/1.5 var(--ui-font)}.ds-panel-title{display:flex;align-items:center;gap:12px;min-height:40px;padding:6px 12px;border-bottom:1px solid var(--ui-line)}.ds-panel-title h2{margin:0;font-size:15px;font-weight:600}.ds-panel-title span{color:var(--ui-muted);font-size:12px}.ds-panel-note{padding:12px 16px;color:var(--ui-muted);font-size:13px}"
+    },
+    {
+      "name": "Shared selected agent row",
+      "kind": "custom",
+      "refersTo": "agent-row-selected",
+      "description": "Delivery/Restaurant specimen; Madrid uses explicit comparison columns.",
+      "html": "<button class=\"ds-agent\" aria-pressed=\"true\"><span class=\"ds-identity\"><svg class=\"ds-symbol\" viewBox=\"0 0 24 24\" aria-hidden=\"true\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.5\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M3 7 12 3l9 4v11l-9 4-9-4zM3 7l9 4 9-4M12 11v11M7 5l10 4\"/></svg><span><strong>Agent identity</strong><small>Role and current task</small></span></span><span class=\"ds-row-state\">State</span><span class=\"ds-value\">—</span></button>",
+      "css": ".ds-agent{display:grid;grid-template-columns:minmax(0,1fr) 98px 60px;align-items:center;gap:10px;width:100%;min-height:56px;padding:8px 12px;border:0;border-bottom:1px solid var(--ui-line);border-radius:0;text-align:left;background:var(--ui-accent-soft);color:var(--ui-ink);box-shadow:inset 2px 0 var(--ui-accent);font:400 14px/1.5 var(--ui-font);cursor:pointer}.ds-agent:hover{background:var(--ui-hover)}.ds-agent:active{background:var(--ui-hover)}.ds-agent:focus-visible{outline:2px solid var(--ui-accent);outline-offset:3px}.ds-identity{display:flex;gap:10px;align-items:center;min-width:0}.ds-identity strong{display:block;font-size:13px;font-weight:500}.ds-identity small{display:block;font-size:11px;color:var(--ui-muted)}.ds-symbol{width:28px;height:28px;flex-shrink:0;color:var(--ui-muted)}.ds-row-state{justify-self:start;font-size:11px;padding:3px 6px;border:1px solid var(--ui-line);border-radius:4px;color:var(--ui-muted)}.ds-value{text-align:right;font:12px var(--ui-mono)}"
+    },
+    {
+      "name": "Madrid selected agent row",
+      "kind": "custom",
+      "refersTo": "madrid-agent-row-selected",
+      "description": "Explicit identity, role, state, task, delivered and rate columns; illustrative placeholders only.",
+      "html": "<button class=\"ds-madrid-row\" aria-pressed=\"true\"><span class=\"ds-madrid-person\"><svg class=\"ds-madrid-symbol\" viewBox=\"0 0 24 24\" aria-hidden=\"true\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.5\"><circle cx=\"6\" cy=\"16\" r=\"4\"/><circle cx=\"18\" cy=\"16\" r=\"4\"/><path d=\"m6 16 5-9 7 9h-7L7 7H4m7 0h4\"/></svg><span><strong>Agent identity</strong><small>Technical ID</small></span></span><span>Role</span><span class=\"ds-madrid-pill\">State</span><span>Current task</span><span class=\"ds-madrid-total\">—</span><span class=\"ds-madrid-rate\">—</span></button>",
+      "css": ".ds-madrid-row{display:grid;grid-template-columns:minmax(130px,1.4fr) 54px 94px minmax(88px,1fr) 55px 72px;align-items:center;gap:8px;width:100%;min-height:51px;padding:7px 12px;border:0;border-bottom:1px solid var(--ui-line);border-radius:0;background:var(--ui-accent-soft);box-shadow:inset 1px 0 var(--ui-accent);color:var(--ui-muted);text-align:left;font:400 11px/1.5 var(--ui-font);cursor:pointer}.ds-madrid-row:hover,.ds-madrid-row:active{background:var(--ui-hover)}.ds-madrid-row:focus-visible{outline:2px solid var(--ui-accent);outline-offset:3px}.ds-madrid-person{display:flex;gap:8px;align-items:center;min-width:0}.ds-madrid-person strong{display:block;font-size:12px;font-weight:500;color:var(--ui-ink)}.ds-madrid-person small{display:block;font-size:10px}.ds-madrid-symbol{width:29px;height:29px;padding:5px;border:1px solid #3b586a;border-radius:50%;background:#193342;color:#c8e2ef;flex-shrink:0}.ds-madrid-pill{justify-self:stretch;justify-content:center;display:inline-flex;align-items:center;gap:5px;border:1px solid #3b5361;border-radius:12px;padding:2px 7px;font-size:10px;line-height:1.35}.ds-madrid-total{text-align:right;font:11px var(--ui-mono)}.ds-madrid-rate{text-align:right;font:10px var(--ui-mono);color:var(--ui-faint)}"
+    },
+    {
+      "name": "Madrid map toolbar",
+      "kind": "custom",
+      "refersTo": "map-toolbar",
+      "description": "Wheel zoom is enabled by default. Escape releases the wheel to page scrolling; Scroll zoom restores it. Preserve selected-agent clearance.",
+      "html": "<div class=\"ds-map-toolbar\" role=\"group\" aria-label=\"Map controls\"><span>Madrid</span><button>Fit network</button><button>Locate agent</button><button aria-pressed=\"true\">Scroll zoom</button></div>",
+      "css": ".ds-map-toolbar{display:inline-flex;align-items:center;gap:4px;padding:3px 4px;background:#0c1822;border:1px solid #314957;border-radius:4px;font:11px/1.5 var(--ui-font);color:#c6d7e6}.ds-map-toolbar>span{padding:0 6px;font-weight:500}.ds-map-toolbar button{font:500 10px/1.5 var(--ui-font);min-height:28px;padding:4px 6px;border:1px solid transparent;border-radius:var(--ui-radius);background:transparent;color:var(--ui-ink);cursor:pointer}.ds-map-toolbar button:hover,.ds-map-toolbar button:active{background:var(--ui-hover);border-color:var(--ui-ink)}.ds-map-toolbar button[aria-pressed=true]{background:var(--ui-accent-soft);color:var(--ui-accent)}.ds-map-toolbar button:focus-visible{outline:2px solid var(--ui-accent);outline-offset:3px}"
+    }
+  ],
+  "narrative": {
+    "northStar": "Calm, dense operations console",
+    "overview": "Dark blue graphite surfaces, cyan selection, restrained state colors, IBM Plex Sans and Mono, fine rules and dense readable rows. The interface follows the user's Linear-style dark operations-console direction: calm, dense, one accent color. Technical reviewers can inspect the same working evidence that operators use.\n\nCompact plain titles keep the working interface near the top. Agents are the protagonist and their shared city stays visible beside them on operational screens; reading and evaluation screens use the same material language without imitating the map layout. Color communicates state, selection or data. The confirmed anti-references are decorative heroes, oversized marketing headlines, split-color or gradient headline text, purple gradients, Inter-everywhere and nested cards.",
+    "keyCharacteristics": [
+      "Local IBM Plex fonts, tabular operational values and explicit technical identifiers.",
+      "Flat dark graphite surfaces separated by fine rules; cyan marks actions and selection.",
+      "Readable rows, plain labels, visible focus and progressive disclosure of evidence.",
+      "Runtime data remains inspectable; missing history and measurements remain explicit."
+    ],
+    "rules": [
+      {
+        "name": "One Accent",
+        "body": "Cyan identifies primary action, selection and observed activity. Positive, negative, warning and information colors carry operational meaning; they are not alternate brand accents.",
+        "section": "colors"
+      },
+      {
+        "name": "Compact Title",
+        "body": "Start with a plain workspace title and the working interface. Do not add a display headline, decorative hero or slogan.",
+        "section": "typography"
+      },
+      {
+        "name": "Flat Surface",
+        "body": "Separate working areas with tonal changes and fine rules. Keep ordinary panels and rows shadowless; reserve the small ambient shadow for map overlays.",
+        "section": "elevation"
+      }
+    ],
+    "dos": [
+      "Do keep simulation setup separate from the operation view where that separation is implemented.",
+      "Do preserve distinct entity names, technical IDs and role labels when inspecting agents.",
+      "Do use SVG symbols with text labels and state descriptions; color alone must not carry meaning.",
+      "Do label the history window, units, simulation clock and session state; render curves only from observed samples.",
+      "Do keep unavailable metrics, synthetic fixtures, retained-evidence limits and stale-source caveats visible.",
+      "Do keep selected map markers, labels and actual route geometry clear of toolbar and legend controls.",
+      "Do retain keyboard focus, reduced-motion behavior, local overflow containers and mobile disclosure controls."
+    ],
+    "donts": [
+      "Don't introduce oversized marketing headlines, split-color headlines, headline gradients or decorative hero sections.",
+      "Don't add purple gradients, Inter-everywhere, nested cards or ornamental dashboard effects.",
+      "Don't turn an empty history, unknown cost or unknown latency into a fabricated chart or zero.",
+      "Don't use a sparse graph overlay as a substitute for Madrid's continuous local basemap.",
+      "Don't substitute a role template name for the actual entity identity.",
+      "Don't shrink a diagram's detailed reading view merely to force every label into one viewport; provide a whole-diagram overview plus an expanded inspection view."
+    ]
+  }
+}

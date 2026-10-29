@@ -1,0 +1,8 @@
+# Written by Impeccable: local runtime state, never committed.
+state.json
+
+# Reproducible local measurement previews; the original comp and spec are tracked.
+approved-comp.png
+approved-comp.json
+comp-grid.png
+map-inspections/

@@ -14,7 +14,7 @@ and browser acceptance checks.
 
 ## Reading and inspection
 
-Nineteen numbered chapters cover architecture decisions, the agent factory,
+Twenty-five chapters cover architecture decisions, the agent factory,
 authenticated scope, SOUL, tools, memory, queue transactions, city workflows,
 declared GCP resources, enterprise alternatives, operations and evaluations.
 The structure follows Scrapmarket's topic-oriented engineering documentation:

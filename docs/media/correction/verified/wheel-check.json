@@ -1,0 +1,7 @@
+{
+  "before": 12,
+  "after": 14.75,
+  "enabledByDefault": true,
+  "escapeReleasesWheel": true,
+  "buttonReenablesWheel": true
+}

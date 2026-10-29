@@ -285,3 +285,92 @@ def summarize(manifest: Manifest, receipt: Receipt | None) -> dict[str, Any]:
             result["status"] = "failed"
             result["note"] += " Repeated inputs or outcomes differed; reproducibility failed."
     return result
+
+
+class EvalAttempt(Record):
+    """One fresh model session; failures remain in cost and latency denominators."""
+
+    arm: str
+    case_id: str
+    repetition: int = Field(ge=1, le=100)
+    passed: bool
+    categories: dict[str, StrictBool]
+    latency_ms: float = Field(ge=0, allow_inf_nan=False)
+    cost_usd: float | None = Field(default=None, ge=0, allow_inf_nan=False)
+    reserved_usd: float | None = Field(default=None, ge=0, allow_inf_nan=False)
+    error: str | None = None
+
+
+def percentile(values: list[float], q: float) -> float:
+    import math
+
+    ordered = sorted(values)
+    position = (len(ordered) - 1) * q
+    lo, hi = math.floor(position), math.ceil(position)
+    return ordered[lo] + (ordered[hi] - ordered[lo]) * (position - lo)
+
+
+def bootstrap_ci(
+    values: list[float], *, seed: int = 731, samples: int = 4000,
+) -> list[float] | None:
+    """Percentile CI over independent cases; never count repeats as new cases."""
+    import random
+
+    if len(values) < 2:
+        return None
+    rng = random.Random(seed)
+    means = [sum(rng.choices(values, k=len(values))) / len(values) for _ in range(samples)]
+    return [percentile(means, .025), percentile(means, .975)]
+
+
+def attempt_groups(rows: list[EvalAttempt]) -> dict[str, list[EvalAttempt]]:
+    groups: dict[str, list[EvalAttempt]] = {}
+    for row in rows:
+        groups.setdefault(row.case_id, []).append(row)
+    sizes = {len(group) for group in groups.values()}
+    if len(sizes) != 1 or any(
+        sorted(r.repetition for r in group) != list(range(1, len(group) + 1))
+        for group in groups.values()
+    ):
+        raise ValueError("Each case needs the same complete, unique repetition sequence")
+    categories = [set(r.categories) for r in rows]
+    if any(c != categories[0] for c in categories):
+        raise ValueError("Missing or inconsistent evaluation categories")
+    if any(r.passed != all(r.categories.values()) for r in rows):
+        raise ValueError("Pass must agree with every code and task criterion")
+    return groups
+
+
+def summarize_arms(rows: list[EvalAttempt]) -> dict[str, Any]:
+    result = {}
+    for arm in sorted({r.arm for r in rows}):
+        selected = [r for r in rows if r.arm == arm]
+        groups = attempt_groups(selected)
+        k = len(next(iter(groups.values())))
+        rates = [sum(r.passed for r in group) / k for group in groups.values()]
+        all_pass = [float(all(r.passed for r in group)) for group in groups.values()]
+        successes = sum(r.passed for r in selected)
+        known = sum(r.cost_usd or 0 for r in selected)
+        unknown = sum(r.cost_usd is None for r in selected)
+        bounded = all(r.cost_usd is not None or r.reserved_usd is not None for r in selected)
+        upper = sum(max(r.cost_usd or 0, r.reserved_usd or 0) for r in selected)
+        result[arm] = {
+            "cases": len(groups), "attempts": len(selected), "repeat": k,
+            "pass_rate": sum(rates) / len(rates), "pass_rate_ci95": bootstrap_ci(rates),
+            "pass_power_k": sum(all_pass) / len(all_pass),
+            "pass_power_k_ci95": bootstrap_ci(all_pass),
+            "pass_power_k_definition": "fraction of cases passing all k independent attempts",
+            "known_cost_usd": known, "unknown_cost_attempts": unknown,
+            "cost_per_success_usd": known / successes if successes and not unknown else None,
+            "reserved_cost_per_success_usd": upper / successes if successes and bounded else None,
+            "p95_latency_ms": percentile([r.latency_ms for r in selected], .95),
+            "categories": {
+                category: {
+                    "pass_rate": sum(r.categories[category] for r in selected) / len(selected),
+                    "ci95": bootstrap_ci([
+                        sum(r.categories[category] for r in group) / k for group in groups.values()
+                    ]),
+                } for category in selected[0].categories
+            },
+        }
+    return result

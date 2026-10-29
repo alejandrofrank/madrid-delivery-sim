@@ -31,7 +31,7 @@ const components = {
     name: "Scoped role workers",
     state: "IMPLEMENTED · LOCAL",
     purpose:
-      "One reusable LocalAgent object binds a frozen role definition to an authenticated database scope. Most policies are deterministic Python. The optional judge is the only Google model caller.",
+      "One reusable LocalAgent object binds a frozen role definition to an authenticated database scope. Deterministic policies work alongside Google ADK restaurant and customer-service adapters, with scripted offline models and separately enabled paid inference.",
     inputs:
       "An addressed event, fenced lease, approved tools and relevant recall.",
     outputs:
@@ -165,8 +165,8 @@ function selectComponent(key) {
   });
   const inspector = $("#component-inspector");
   inspector.replaceChildren(
-    element("span", component.state, "eyebrow"),
     element("h3", component.name),
+    element("span", component.state, "component-state"),
     element("p", component.purpose),
   );
   const details = element("dl");
@@ -332,7 +332,7 @@ async function renderDiagrams(version) {
     const canvas = element("div", "Loading local SVG…", "diagram-render");
     canvas.tabIndex = 0;
     canvas.setAttribute("role", "region");
-    canvas.setAttribute("aria-label", `Scrollable ${title.toLowerCase()}`);
+    canvas.setAttribute("aria-label", `Overview of ${title.toLowerCase()}; use Expand for readable detail`);
     const details = element("details");
     const code = element("code", source);
     const pre = element("pre");
@@ -387,7 +387,6 @@ async function renderDiagrams(version) {
         image.width = asset.svg.width;
         image.height = asset.svg.height;
         image.decoding = "async";
-        image.style.minWidth = `${Math.ceil(asset.svg.width * 0.9)}px`;
         image.addEventListener("load", () => {
           card.expand.disabled = false;
         });
@@ -406,7 +405,7 @@ async function renderDiagrams(version) {
           asset.title;
         card.canvas.setAttribute(
           "aria-label",
-          `Scrollable ${asset.title.toLowerCase()}`,
+          `Overview of ${asset.title.toLowerCase()}; use Expand for readable detail`,
         );
         card.details.querySelector("summary").textContent =
           "Diagram source · D2 / ELK";
@@ -517,8 +516,6 @@ async function showPage(id, resetScroll = false) {
   $("#document").hidden = false;
   document.title = `${currentPage.title} · Bakiano engineering`;
   $("#breadcrumb-topic").textContent = currentPage.group;
-  $("#chapter-number").textContent =
-    `CHAPTER ${String(index).padStart(2, "0")} / ${currentPage.group.toUpperCase()}`;
   $("#chapter-title").textContent = currentPage.title;
   $("#chapter-summary").textContent = currentPage.summary;
   $("#chapter-status").textContent = currentPage.status;
@@ -528,6 +525,7 @@ async function showPage(id, resetScroll = false) {
   $("#markdown-link").href = sourceURL(currentPage.file);
   $("#markdown-link").dataset.source = currentPage.file;
   $("#system-explorer").hidden = currentPage.id !== "overview";
+  $("#request-flow").hidden = currentPage.id !== "overview";
   document.querySelectorAll(".topic-link").forEach((link) => {
     if (link.dataset.page === currentPage.id)
       link.setAttribute("aria-current", "page");
@@ -716,6 +714,10 @@ $("#search-input").addEventListener("keydown", (event) => {
 });
 $("#open-search").addEventListener("click", openSearch);
 document.addEventListener("keydown", (event) => {
+  if (event.key === "Escape") {
+    const dialog = document.querySelector("dialog[open]");
+    if (dialog) { event.preventDefault(); dialog.close(); return; }
+  }
   if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === "k") {
     event.preventDefault();
     if (!$("#search-dialog").open) openSearch();
@@ -761,3 +763,10 @@ window.addEventListener("resize", () => {
     $("#loading").hidden = true;
   }
 })();
+
+document.getElementById('replay-flow').addEventListener('click', () => {
+  const flow = document.getElementById('request-flow');
+  flow.classList.remove('is-playing');
+  void flow.offsetWidth;
+  flow.classList.add('is-playing');
+});
