@@ -6,7 +6,7 @@ const navigationBounds = L.latLngBounds([[40.32,-3.83],[40.52,-3.54]]);
 const map = L.map("map", {
   preferCanvas:true, zoomControl:true, zoomSnap:.25, zoomDelta:.5,
   minZoom:11, maxZoom:17, maxBounds:navigationBounds, maxBoundsViscosity:1,
-  dragging:true, inertia:false, scrollWheelZoom:false, doubleClickZoom:true,
+  dragging:true, inertia:false, scrollWheelZoom:true, doubleClickZoom:true,
   touchZoom:true, boxZoom:true, keyboard:true
 }).setView([40.416, -3.687], 13);
 map.zoomControl.setPosition("topright");
@@ -19,7 +19,7 @@ let tab = "decisions", busy = false, pollCount = 0, traceBusy = false;
 const narrowMap = matchMedia("(max-width:850px)");
 document.querySelector(".map-key").open = !narrowMap.matches;
 narrowMap.addEventListener("change",event=>{document.querySelector(".map-key").open=!event.matches;});
-let exploringMap = false, orderFilterTouched = false, orderViewRun = null;
+let exploringMap = true, orderFilterTouched = false, orderViewRun = null;
 let basemapReady = false, mapResizeFrame;
 const mapResizeObserver=new ResizeObserver(()=>{
   if(!$("map").clientWidth||!$("map").clientHeight)return;
@@ -130,6 +130,7 @@ function setMapExploration(active) {
     ? "Drag to pan; scroll to zoom. Press Escape to turn off scroll zoom."
     : "Drag to pan. Use plus and minus to zoom; scroll to move the page.";
 }
+setMapExploration(true);
 $("explore-map").onclick = () => setMapExploration(!exploringMap);
 document.addEventListener("keydown", (event) => {
   if (event.key !== "Escape" || !exploringMap) return;
