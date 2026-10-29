@@ -80,6 +80,17 @@ Compose cloud override is a local opt-in demonstration, not a deployed service.
 
 ## Verification
 
+Inspect the [tracer and privacy limits](../src/delivery/telemetry.py),
+[durable context migration](../sql/migrations/026_telemetry_context.sql),
+[trace API](../src/delivery/telemetry_api.py),
+[Jaeger override](../compose.tracing.yaml),
+[cloud override](../compose.tracing-gcp.yaml),
+[collector configuration](../config/otel-collector-gcp.yaml), and
+[trace-only Terraform identity](../infra/gcp-ai/telemetry.tf).
+The [propagation tests](../tests/test_telemetry.py) and
+[mocked infrastructure checks](../infra/gcp-ai/tests/telemetry.tftest.hcl)
+are available in the documentation source reader.
+
 ```bash
 docker compose run --rm --no-deps app pytest -q tests/test_telemetry.py
 ```
