@@ -2,12 +2,15 @@
 
 from typing import Any
 
+import networkx as nx
 from psycopg.types.json import Jsonb
 
 from delivery.customer_service import Advice, refund_policy
 from delivery.db import Connection
+from delivery.dispatch_optimizer import Candidate, optimize_dispatch
+from delivery.dispatch_policy import assignment_score, fair_ranks, load_policy, operating_cost
 from delivery.queue import Event, publish
-from delivery.world import COST_PER_KM, ENERGY_PER_KM, World, position, trace
+from delivery.world import ENERGY_PER_KM, World, position, route_progress, trace
 
 
 class Dispatcher:
@@ -15,9 +18,10 @@ class Dispatcher:
         self.world = world
 
     def handle(self, conn: Connection, event: Event) -> None:
-        row = conn.execute("SELECT sim_time FROM runs WHERE id=%s", (event.run_id,)).fetchone()
+        row = conn.execute("SELECT * FROM runs WHERE id=%s", (event.run_id,)).fetchone()
         assert row
         sim = row["sim_time"]
+        policy = load_policy(row["dispatch_config"])
         pending = conn.execute(
             """SELECT o.*, s.node AS store_node, c.node AS customer_node
                FROM orders o JOIN locations s ON s.id=o.store JOIN locations c ON c.id=o.customer
@@ -25,31 +29,61 @@ class Dispatcher:
                FOR UPDATE OF o SKIP LOCKED LIMIT 100""",
             (event.run_id,),
         ).fetchall()
+        couriers = conn.execute(
+            """SELECT * FROM couriers WHERE run_id=%s AND status='idle'
+               AND energy>10 AND shift_end>%s ORDER BY idle_since_sim,completed_jobs,id
+               FOR UPDATE SKIP LOCKED LIMIT 100""",
+            (event.run_id, sim),
+        ).fetchall()
+        routes: dict[tuple[str, str], dict[str, Any]] = {}
+        scores: dict[tuple[str, str], dict[str, float]] = {}
+        candidates = []
+        ranks = fair_ranks(couriers, f"{row['seed']}:{sim}")
         for order in pending:
-            couriers = conn.execute(
-                """SELECT * FROM couriers WHERE run_id=%s AND status='idle'
-                   AND energy>10 AND shift_end>%s ORDER BY id FOR UPDATE SKIP LOCKED""",
-                (event.run_id, sim),
-            ).fetchall()
-            if not couriers:
-                break
-            ranked: list[tuple[float, str, dict[str, Any], dict[str, Any]]] = []
             for courier in couriers:
-                route = self.world.route(
-                    courier["node"],
-                    order["store_node"],
-                    order["customer_node"],
-                    courier["mode"],
-                    sim,
-                    order["ready_sim"],
-                )
+                try:
+                    route = self.world.route(
+                        courier["node"],
+                        order["store_node"],
+                        order["customer_node"],
+                        courier["mode"],
+                        sim,
+                        order["ready_sim"],
+                    )
+                except (nx.NetworkXNoPath, nx.NodeNotFound):
+                    continue
                 required = route["distance_m"] / 1000 * ENERGY_PER_KM[courier["mode"]]
                 if courier["energy"] - required >= 5 and route["end_at"] <= courier["shift_end"]:
-                    ranked.append((route["end_at"], courier["id"], courier, route))
-            if not ranked:
-                continue
-            _, _, courier, route = min(ranked, key=lambda item: (item[0], item[1]))
-            cost = 1.0 + route["distance_m"] / 1000 * COST_PER_KM[courier["mode"]]
+                    pair = order["id"], courier["id"]
+                    routes[pair] = route
+                    score = assignment_score(route, courier["mode"], sim, order["due_sim"], policy)
+                    scores[pair] = score
+                    candidates.append(
+                        Candidate(*pair, round(score["total"] * 1000), ranks[courier["id"]])
+                    )
+        if policy.strategy == "legacy":
+            # A frozen reference for same-demand A/B evaluations.
+            selected = []
+            used: set[str] = set()
+            for order in pending:
+                options = [
+                    c for c in candidates if c.order_id == order["id"] and c.courier_id not in used
+                ]
+                if options:
+                    chosen = min(
+                        options,
+                        key=lambda c: (routes[c.order_id, c.courier_id]["end_at"], c.courier_id),
+                    )
+                    selected.append(chosen)
+                    used.add(chosen.courier_id)
+        else:
+            selected = list(optimize_dispatch(candidates))
+        orders_by_id = {o["id"]: o for o in pending}
+        couriers_by_id = {c["id"]: c for c in couriers}
+        for chosen in selected:
+            order, courier = orders_by_id[chosen.order_id], couriers_by_id[chosen.courier_id]
+            route = routes[chosen.order_id, chosen.courier_id]
+            cost = operating_cost(route["distance_m"], courier["mode"], job=True)
             changed = conn.execute(
                 """UPDATE orders SET status='assigned',courier=%s,assigned_sim=%s,route=%s,
                    route_m=%s,cost_eur=%s,version=version+1
@@ -67,7 +101,8 @@ class Dispatcher:
             if not changed:
                 continue
             conn.execute(
-                "UPDATE couriers SET status='reserved' WHERE run_id=%s AND id=%s",
+                "UPDATE couriers SET status='reserved',leg_accounted_m=0,leg_empty_accounted_m=0 "
+                "WHERE run_id=%s AND id=%s",
                 (event.run_id, courier["id"]),
             )
             publish(
@@ -89,8 +124,33 @@ class Dispatcher:
                 "dispatcher",
                 "assigned",
                 {
-                    "rule": "earliest road-route completion within energy and shift limits",
-                    "eligible_couriers": len(ranked),
+                    "rule": policy.strategy,
+                    "objective": (
+                        "max served; min generalized seconds; longest idle/fewer jobs"
+                        if policy.strategy == "min_cost"
+                        else "earliest completion, then courier ID"
+                    ),
+                    "eligible_couriers": sum(c.order_id == order["id"] for c in candidates),
+                    "batch_orders": len(pending),
+                    "batch_couriers": len(couriers),
+                    "score": scores[chosen.order_id, chosen.courier_id],
+                    "alternatives": [
+                        {
+                            "courier": c.courier_id,
+                            "score": scores[c.order_id, c.courier_id],
+                            "pickup_m": round(
+                                routes[c.order_id, c.courier_id]["pickup_distance_m"]
+                            ),
+                            "fair_rank": c.tie_break_rank,
+                        }
+                        for c in sorted(
+                            (c for c in candidates if c.order_id == order["id"]),
+                            key=lambda c: (c.cost, c.tie_break_rank),
+                        )[:5]
+                    ],
+                    "start_node": courier["node"],
+                    "pickup_distance_m": round(route["pickup_distance_m"]),
+                    "operating_cost_eur": round(cost, 4),
                     "eta_sim": route["end_at"],
                     "distance_m": round(route["distance_m"]),
                     "version": order["version"] + 1,
@@ -99,11 +159,78 @@ class Dispatcher:
                 courier["id"],
                 event.id,
             )
+        if policy.reposition == "demand_aware" and not pending:
+            from delivery.dispatch_reposition import reposition_idle
+
+            reposition_idle(conn, event, self.world, row, policy)
 
 
 class Courier:
     def handle(self, conn: Connection, event: Event) -> None:
         courier = event.payload["courier_id"]
+        if event.topic == "courier.reposition":
+            row = conn.execute(
+                "SELECT c.*,r.sim_time,r.duration FROM couriers c JOIN runs r ON r.id=c.run_id "
+                "WHERE c.run_id=%s AND c.id=%s AND c.status='reposition_reserved' FOR UPDATE OF c",
+                (event.run_id, courier),
+            ).fetchone()
+            if not row:
+                return
+            route = row["reposition_route"]
+            delay = max(0, row["sim_time"] - route["start_at"])
+            for field in (
+                "start_at",
+                "pickup_arrival_at",
+                "pickup_at",
+                "delivery_arrival_at",
+                "end_at",
+            ):
+                route[field] += delay
+            route["points"] = [[x, y, t + delay] for x, y, t in route["points"]]
+            if route["end_at"] + 600 > min(row["duration"], row["shift_end"]):
+                conn.execute(
+                    "UPDATE couriers SET status='idle',reposition_route=NULL "
+                    "WHERE run_id=%s AND id=%s",
+                    (event.run_id, courier),
+                )
+                publish(
+                    conn,
+                    run_id=event.run_id,
+                    producer="courier",
+                    topic="courier.available",
+                    payload={"courier_id": courier},
+                    key=f"reposition-cancelled:{event.id}",
+                    trace_id=event.trace_id,
+                    parent_id=event.id,
+                    due_sim=row["sim_time"],
+                )
+                trace(
+                    conn,
+                    str(event.run_id),
+                    row["sim_time"],
+                    "courier",
+                    "reposition_cancelled",
+                    {"reason": "delayed handoff exceeds shift/run horizon", "distance_m": 0},
+                    courier=courier,
+                    event=event.id,
+                )
+                return
+            conn.execute(
+                "UPDATE couriers SET status='repositioning',reposition_route=%s "
+                "WHERE run_id=%s AND id=%s",
+                (Jsonb(route), event.run_id, courier),
+            )
+            trace(
+                conn,
+                str(event.run_id),
+                row["sim_time"],
+                "courier",
+                "reposition_accepted",
+                {"queue_delay_seconds": delay, "departure_sim": route["start_at"]},
+                courier=courier,
+                event=event.id,
+            )
+            return
         conn.execute(
             "UPDATE couriers SET status='to_pickup' WHERE run_id=%s AND id=%s "
             "AND status='reserved'",
@@ -122,6 +249,39 @@ class Courier:
         )
 
     def advance(self, conn: Connection, run: str, sim: int) -> None:
+        relocating = conn.execute(
+            "SELECT * FROM couriers WHERE run_id=%s AND status='repositioning' FOR UPDATE",
+            (run,),
+        ).fetchall()
+        for courier in relocating:
+            route = courier["reposition_route"]
+            self._travel(conn, run, courier["id"], courier["mode"], route, sim, reposition=True)
+            if sim >= route["end_at"]:
+                conn.execute(
+                    "UPDATE couriers SET status='idle',node=%s,reposition_route=NULL,"
+                    "idle_since_sim=%s "
+                    "WHERE run_id=%s AND id=%s",
+                    (route["destination"], sim, run, courier["id"]),
+                )
+                publish(
+                    conn,
+                    run_id=run,
+                    producer="courier",
+                    topic="courier.available",
+                    payload={"courier_id": courier["id"]},
+                    key=f"relocated:{courier['id']}:{route['start_at']}",
+                    trace_id=f"reposition:{courier['id']}:{route['start_at']}",
+                    due_sim=sim,
+                )
+                trace(
+                    conn,
+                    run,
+                    sim,
+                    "courier",
+                    "repositioned",
+                    {"destination": route["destination"], "distance_m": route["distance_m"]},
+                    courier=courier["id"],
+                )
         orders = conn.execute(
             """SELECT o.*, c.mode, c.status AS courier_status FROM orders o JOIN couriers c
                ON c.run_id=o.run_id AND c.id=o.courier
@@ -137,12 +297,7 @@ class Courier:
                 (run, order["id"]),
             ).fetchone()
             parent_id = assignment["id"] if assignment else None
-            x, y = position(route, sim)
-            conn.execute(
-                "UPDATE couriers SET point=ST_SetSRID(ST_MakePoint(%s,%s),4326) "
-                "WHERE run_id=%s AND id=%s",
-                (x, y, run, order["courier"]),
-            )
+            self._travel(conn, run, order["courier"], order["mode"], route, sim)
             if sim >= route["pickup_at"] and order["status"] == "assigned":
                 conn.execute(
                     "UPDATE orders SET status='picked_up',version=version+1 "
@@ -171,9 +326,10 @@ class Courier:
                     (route["end_at"], run, order["id"]),
                 )
                 conn.execute(
-                    """UPDATE couriers SET status='idle',node=%s,energy=energy-%s,
-                       distance_m=distance_m+%s WHERE run_id=%s AND id=%s""",
-                    (route["destination"], consumption, route["distance_m"], run, order["courier"]),
+                    """UPDATE couriers SET status='idle',node=%s,idle_since_sim=%s,
+                       completed_jobs=completed_jobs+1,operating_cost_eur=operating_cost_eur+1
+                       WHERE run_id=%s AND id=%s""",
+                    (route["destination"], sim, run, order["courier"]),
                 )
                 for topic in ("order.delivered", "courier.available"):
                     publish(
@@ -204,6 +360,49 @@ class Courier:
             "UPDATE couriers SET status='off_shift' WHERE run_id=%s "
             "AND status='idle' AND shift_end<=%s",
             (run, sim),
+        )
+
+    @staticmethod
+    def _travel(
+        conn: Connection,
+        run: str,
+        courier: str,
+        mode: str,
+        route: dict[str, Any],
+        sim: int,
+        *,
+        reposition: bool = False,
+    ) -> None:
+        total, empty = route_progress(route, sim)
+        x, y = position(route, sim)
+        # Stored cumulative leg progress makes repeated ticks/restarts idempotent.
+        conn.execute(
+            """UPDATE couriers SET point=ST_SetSRID(ST_MakePoint(%s,%s),4326),
+               energy=greatest(0,energy-greatest(0,%s-leg_accounted_m)*%s/1000),
+               distance_m=distance_m+greatest(0,%s-leg_accounted_m),
+               empty_distance_m=empty_distance_m+greatest(0,%s-leg_empty_accounted_m),
+               reposition_distance_m=reposition_distance_m+CASE WHEN %s
+                 THEN greatest(0,%s-leg_accounted_m) ELSE 0 END,
+               operating_cost_eur=operating_cost_eur+greatest(0,%s-leg_accounted_m)*%s/1000,
+               leg_accounted_m=greatest(leg_accounted_m,%s),
+               leg_empty_accounted_m=greatest(leg_empty_accounted_m,%s)
+               WHERE run_id=%s AND id=%s""",
+            (
+                x,
+                y,
+                total,
+                ENERGY_PER_KM[mode],
+                total,
+                empty,
+                reposition,
+                total,
+                total,
+                operating_cost(1000, mode),
+                total,
+                empty,
+                run,
+                courier,
+            ),
         )
 
 

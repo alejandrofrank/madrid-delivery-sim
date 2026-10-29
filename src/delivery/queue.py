@@ -23,6 +23,7 @@ PUBLISH: dict[str, set[str]] = {
     "generator": {"order.created", "complaint.created"},
     "dispatcher": {
         "courier.assigned",
+        "courier.reposition",
         "delivery.assigned",
         "delivery.completed",
         "courier.briefed",
@@ -61,7 +62,7 @@ SUBSCRIBE: dict[str, set[str]] = {
         "recovery.requested",
     },
     "judge": {"delivery.failed"},
-    "courier": {"courier.assigned", "courier.briefed"},
+    "courier": {"courier.assigned", "courier.briefed", "courier.reposition"},
     "customer_service": {"complaint.created"},
     "audit": {"order.delivered", "complaint.resolved", "approval.requested"},
 }

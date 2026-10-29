@@ -10,11 +10,13 @@ from uuid import uuid4
 
 import numpy as np
 import redis
+from psycopg.types.json import Jsonb
 
 from delivery.agents import Courier, Dispatcher, resolve_complaint
 from delivery.config import settings
 from delivery.customer_service import CustomerService
 from delivery.db import Connection, connect, migrate
+from delivery.dispatch_policy import DispatchPolicy, load_policy
 from delivery.queue import Queue, publish
 from delivery.world import World, seed_locations
 
@@ -35,17 +37,28 @@ def create_run(
     wall_seconds: float = 600,
     duration: int = 43200,
     url: str | None = None,
+    dispatch: DispatchPolicy | None = None,
 ) -> str:
     run = str(uuid4())
+    policy = dispatch or DispatchPolicy()
     with connect(url) as conn:
         seed_locations(conn, world)
         conn.execute(
-            "INSERT INTO runs(id,seed,wall_seconds,duration) VALUES (%s,%s,%s,%s)",
-            (run, seed, wall_seconds, duration),
+            "INSERT INTO runs(id,seed,wall_seconds,duration,dispatch_config) "
+            "VALUES (%s,%s,%s,%s,%s)",
+            (run, seed, wall_seconds, duration, Jsonb(policy.model_dump())),
         )
         hubs = conn.execute("SELECT * FROM locations WHERE kind='hub' ORDER BY id").fetchall()
         for hub in hubs:
+            starts = [hub]
+            if policy.initial_positions == "distributed":
+                starts = conn.execute(
+                    "SELECT DISTINCT ON (node) node,point FROM locations "
+                    "WHERE kind='store' AND district=%s ORDER BY node,id",
+                    (hub["district"],),
+                ).fetchall() or [hub]
             for index, mode in enumerate(("bike", "bike", "moto", "moto", "van", "van")):
+                start = starts[index % len(starts)]
                 conn.execute(
                     """INSERT INTO couriers(run_id,id,hub,mode,node,point,shift_end)
                        VALUES (%s,%s,%s,%s,%s,%s,%s)""",
@@ -54,8 +67,8 @@ def create_run(
                         f"{hub['id']}-{index + 1:02d}",
                         hub["id"],
                         mode,
-                        hub["node"],
-                        hub["point"],
+                        start["node"],
+                        start["point"],
                         duration,
                     ),
                 )
@@ -125,6 +138,7 @@ def generate(conn: Connection, run: str, sim: int, seed: int, duration: int) -> 
 
 def snapshot(run: str | None = None, url: str | None = None) -> dict[str, Any]:
     with connect(url) as conn:
+        conn.execute("SET TRANSACTION ISOLATION LEVEL REPEATABLE READ, READ ONLY")
         if run:
             state = conn.execute("SELECT * FROM runs WHERE id=%s", (run,)).fetchone()
         else:
@@ -158,12 +172,39 @@ def snapshot(run: str | None = None, url: str | None = None) -> dict[str, Any]:
             else None
         )
         couriers = conn.execute(
-            """SELECT c.id,c.hub,c.mode,c.status,c.energy,c.distance_m,ST_X(c.point) AS lon,
-               ST_Y(c.point) AS lat,o.id AS order_id,o.route FROM couriers c LEFT JOIN orders o
+            """SELECT c.id,c.hub,c.node,c.mode,c.status,c.energy,c.distance_m,
+               c.completed_jobs,c.empty_distance_m,c.reposition_distance_m,c.operating_cost_eur,
+               ST_X(c.point) AS lon,ST_Y(c.point) AS lat,o.id AS order_id,
+               coalesce(o.route,c.reposition_route) AS route FROM couriers c LEFT JOIN orders o
                ON o.run_id=c.run_id AND o.courier=c.id AND o.status IN ('assigned','picked_up')
                WHERE c.run_id=%s ORDER BY c.id""",
             (run,),
         ).fetchall()
+        metrics["empty_km"] = round(sum(c["empty_distance_m"] for c in couriers) / 1000, 3)
+        metrics["reposition_km"] = round(
+            sum(c["reposition_distance_m"] for c in couriers) / 1000, 3
+        )
+        metrics["operating_cost_eur"] = round(sum(c["operating_cost_eur"] for c in couriers), 4)
+        metrics["cost_basis"] = "realized_fleet_ledger"
+        if not state["dispatch_config"]:
+            # Old completed runs predate metering; do not present missing ledger data as zero.
+            metrics["cost_basis"] = "legacy_completed_task_estimate"
+            metrics["empty_km"] = metrics["reposition_km"] = None
+            metrics["operating_cost_eur"] = metrics["delivery_cost_eur"]
+            for courier in couriers:
+                for field in (
+                    "empty_distance_m",
+                    "reposition_distance_m",
+                    "operating_cost_eur",
+                    "completed_jobs",
+                ):
+                    courier[field] = None
+        # Whole-fleet realized cost includes empty repositioning and unfinished travel.
+        metrics["cost_per_delivery_eur"] = (
+            round(metrics["operating_cost_eur"] / metrics["delivered"], 4)
+            if metrics["delivered"]
+            else None
+        )
         orders = conn.execute(
             """SELECT o.id,o.status,o.courier,o.created_sim,o.due_sim,o.delivered_sim,
                ST_X(c.point) AS lon,ST_Y(c.point) AS lat,s.name AS store
@@ -187,6 +228,7 @@ def snapshot(run: str | None = None, url: str | None = None) -> dict[str, Any]:
             (run,),
         ).fetchall()
     state["id"] = run
+    state["dispatch_policy"] = load_policy(state["dispatch_config"]).model_dump()
     state["created_at"] = state["created_at"].isoformat()
     for row in decisions:
         row["run_id"] = str(row["run_id"])
