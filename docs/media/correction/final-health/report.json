@@ -1,0 +1,46 @@
+{
+  "base": "http://localhost:8021",
+  "phase": "after",
+  "capturedAt": "2026-10-29T18:39:23.647Z",
+  "results": [
+    {
+      "page": "health",
+      "route": "/health",
+      "run": null,
+      "size": "desktop",
+      "status": 200,
+      "horizontalOverflow": false,
+      "width": 1440,
+      "title": "Health & evaluations · Bakiano",
+      "heading": "Health & evaluations",
+      "unlabeledControls": [],
+      "errors": []
+    },
+    {
+      "page": "health",
+      "route": "/health",
+      "run": null,
+      "size": "laptop",
+      "status": 200,
+      "horizontalOverflow": false,
+      "width": 1280,
+      "title": "Health & evaluations · Bakiano",
+      "heading": "Health & evaluations",
+      "unlabeledControls": [],
+      "errors": []
+    },
+    {
+      "page": "health",
+      "route": "/health",
+      "run": null,
+      "size": "mobile",
+      "status": 200,
+      "horizontalOverflow": false,
+      "width": 390,
+      "title": "Health & evaluations · Bakiano",
+      "heading": "Health & evaluations",
+      "unlabeledControls": [],
+      "errors": []
+    }
+  ]
+}

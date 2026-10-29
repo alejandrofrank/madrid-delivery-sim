@@ -21,30 +21,38 @@ The product view shows business metrics and concise evidence, with deeper detail
 | Traces · `/agent-traces` | Filterable decision/tool/model timeline, readable step summaries, latency/cost where recorded, explicit unavailable values, raw receipts behind disclosure. |
 | Architecture · `/architecture` | Twenty searchable chapters, eight restyled D2 diagrams with embedded Plex fonts, complete initial graph overviews, expandable details and a finite, replayable request-flow illustration. |
 
-Every route uses shared graphite/teal tokens, local IBM Plex Sans and Mono, the same navigation, visible keyboard focus and reduced-motion handling. No paid map or chart service was added. Madrid retains cached OpenStreetMap street geometry; fictional labs retain their source-backed SVG geography.
+Every route uses shared graphite/teal tokens, local IBM Plex Sans and Mono, the same navigation, visible keyboard focus and reduced-motion handling. No paid map or chart service was added. Madrid now has a complete locally served OpenFreeMap vector basemap, with the cached OpenStreetMap routing graph as a fine overlay. The pack contains 332 tiles (36.51 MB, zoom 10–14); no key or runtime map request is needed. Fictional labs retain their source-backed SVG geography.
 
 ## Verification
 
-- The final full regression run against the rebuilt isolated image passed **565 tests** in 375.28 seconds. Its source fingerprint matches the running app; no source changed during the run. Ruff passes and mypy reports no issues in 49 source files. [Verification receipt](evidence/ui-redesign-local.json).
+- The final correction regression passed **565 tests** in 396.22 seconds. Its source fingerprint matches the running app and no source changed during the run. Ruff passes and mypy reports no issues in 49 source files. [Verification receipt](evidence/ui-redesign-local.json).
 - Six Playwright integration groups pass: roster filters/identity, map selection and keyboard navigation, trace filtering/disclosure, inventory checkpoints, documentation interactions/whole diagrams, and all seven populated mobile layouts.
 - Final screenshots cover 1440×960 desktop, 1280×800 laptop and 390×844 mobile; the approved-comp comparison uses 1536×1024.
 - Solid-background DOM contrast checks found no candidates below the thresholds; document overflow checks pass at 320, 390, 1280 and 1440 px. This is not a full accessibility certification. Small spatial map targets retain equivalent roster controls and keyboard access.
 - Documentation checks resolve **20 chapters / 83 source files**. All **eight** generated diagram sources, labels and fingerprints verify.
 - No backend source, database schema, agent policy or provider behavior changed.
 
-Evidence: [interaction checks](media/after/interactions.json), [browser measurements](media/after/browser-audit.json), [capture report](media/after/report.json), [independent finish review](media/after/final-review.md), [scoped verdict](media/after/verdict-pass.md).
+Evidence: [interaction checks](media/after/interactions.json), [browser measurements](media/after/browser-audit.json), [capture report](media/after/report.json), [rebuild review](media/correction/full-review.md), [correction verdict](media/correction/verdict-pass.md), [map checks](media/correction/functional/map-checks.json), [layout checks](media/correction/verified/layout-checks.json), [wheel check](media/correction/verified/wheel-check.json).
 
 An earlier attempt recorded 564 passes and one queue-lock deadline timing failure. That unchanged test passed alone, then the complete unchanged suite passed 565/565 without concurrent browser recording. The existing Starlette/httpx deprecation warning remains. No backend or test code was changed to obtain the pass.
 
-### Final review disposition
+### Correction after the rejected implementation
 
-The independent reviewer scored all seven requested corrections resolved. No P0 was found; the sole original P1 (restaurant identity) is resolved. Its **ship** disposition covers those fixes, not an unrestricted certification of the entire product.
+The user correctly rejected the first integrated version: the light-to-gray reskin and sparse routing mesh did not reproduce the approved direction. The previous scoped finish report is historical evidence, not acceptance of that result.
+
+The correction restores the dark ground, compact shell and title, four shallow metrics, a dense agent roster beside the full city map, concise selected-agent evidence and six readable ledger rows at 1536×1024. Role, status, task and actual delivery history stay visible. Completed sessions default to recorded orders instead of an empty active-only ledger.
+
+Map work includes a real local vector basemap, geometry-aligned resize transitions, low-zoom coverage, selected-label placement, route framing and a mobile legend below the canvas. Delivery's mobile map controls follow the wrapped filters. Mouse-wheel zoom is enabled by default as requested; Escape releases the wheel to the page and the Scroll zoom button restores it.
+
+The final verdict resolves all five bounded review findings, with no remaining P0/P1 in that scope. Browser quality, exact image reproduction and user acceptance remain separate.
 
 ### Honest limits
 
 History curves are collected during the current visit, not reconstructed from unavailable historical samples. Completed sessions opened afresh say that history is unavailable. Restaurant activity totals count distinct retained facts observed during that visit, not lifetime work. Missing per-step latency/cost remains “not recorded”; the p95 diagnostic does not invent a measurement. The demo is a local simulation, not a claim of a live cloud deployment.
 
-The independent review used the packaged Impeccable reviewer definition because the named custom agent was unavailable. The original comp-led CLI workflow stopped with the **plates phase open**. The final fixed-box image comparison is **0.578, contradicted**; this is not a passed pixel-reproduction gate. The user-authorized simulation-tab move, business-metric replacement and truthful runtime geography are documented adaptations. The application review and the incomplete reproduction workflow are separate evidence; no approvals or closed phases were fabricated. The final CLI finish attempt explicitly refused to close the workflow because plates, hero, sections, motion and responsive were not closed; its [receipt](media/after/impeccable-finish.txt) is retained.
+The independent review used the packaged Impeccable reviewer definition because the named custom agent was unavailable. The comp-led workflow still has the **plates phase open**; no new approval receipt is fabricated. The current [fixed-region comparison](media/correction/comparison/report.json) remains **drift**, not a passed reproduction gate. The parent inspected the full comparison and worst crops: actual agents and geography differ from illustrative names/locations, and the separately accepted simulation view differs from the comp's start controls. The earlier 0.578 contradicted comparison is retained in historical evidence and is superseded by this correction.
+
+The eight D2 diagrams retain the earlier graphite/teal palette rather than the exact revised map cyan. Their shapes, labels and embedded Plex type remain consistent. Physical-device touch is untested; Chromium-emulated touch pan and legend interaction pass. Map coverage is bounded to Madrid.
 
 ## Before / after
 
@@ -66,7 +74,7 @@ Full-page, laptop and mobile captures are retained alongside each viewport image
 
 ![Actual local agent and map activity](media/ui-demo.gif)
 
-The GIF records a real free local run with agent selection, changing metrics and moving markers.
+The refreshed GIF records the corrected live interface during a real free local run with agent selection, changing metrics and moving markers.
 It plays twice; the [capture metadata](media/ui-demo.json) records provenance and duration.
 The application itself honors reduced motion.
 

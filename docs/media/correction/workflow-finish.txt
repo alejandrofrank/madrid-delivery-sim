@@ -1,0 +1,1 @@
+build-phase: finish --disposition ship refused: plates, hero, sections, motion, responsive are not closed (phase plates). Record fix or rebuild, or close the phases first; a page shipped over an open hero is a page shipped against its own gate.

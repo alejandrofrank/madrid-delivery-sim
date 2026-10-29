@@ -1,7 +1,7 @@
 {
-  "base": "http://127.0.0.1:8021",
+  "base": "http://localhost:8021",
   "phase": "after",
-  "capturedAt": "2026-10-29T17:08:02.672Z",
+  "capturedAt": "2026-10-29T18:39:23.647Z",
   "results": [
     {
       "page": "flow",
@@ -11,7 +11,7 @@
       "status": 200,
       "horizontalOverflow": false,
       "width": 1440,
-      "title": "Bakiano · Delivery operations",
+      "title": "Bakiano \u00b7 Delivery operations",
       "heading": "Delivery operations",
       "unlabeledControls": [],
       "errors": []
@@ -24,7 +24,7 @@
       "status": 200,
       "horizontalOverflow": false,
       "width": 1280,
-      "title": "Bakiano · Delivery operations",
+      "title": "Bakiano \u00b7 Delivery operations",
       "heading": "Delivery operations",
       "unlabeledControls": [],
       "errors": []
@@ -37,7 +37,7 @@
       "status": 200,
       "horizontalOverflow": false,
       "width": 390,
-      "title": "Bakiano · Delivery operations",
+      "title": "Bakiano \u00b7 Delivery operations",
       "heading": "Delivery operations",
       "unlabeledControls": [],
       "errors": []
@@ -50,7 +50,7 @@
       "status": 200,
       "horizontalOverflow": false,
       "width": 1440,
-      "title": "Restaurant supply lab · Bakiano",
+      "title": "Restaurant supply lab \u00b7 Bakiano",
       "heading": "Restaurant operations",
       "unlabeledControls": [],
       "errors": []
@@ -63,7 +63,7 @@
       "status": 200,
       "horizontalOverflow": false,
       "width": 1280,
-      "title": "Restaurant supply lab · Bakiano",
+      "title": "Restaurant supply lab \u00b7 Bakiano",
       "heading": "Restaurant operations",
       "unlabeledControls": [],
       "errors": []
@@ -76,7 +76,7 @@
       "status": 200,
       "horizontalOverflow": false,
       "width": 390,
-      "title": "Restaurant supply lab · Bakiano",
+      "title": "Restaurant supply lab \u00b7 Bakiano",
       "heading": "Restaurant operations",
       "unlabeledControls": [],
       "errors": []
@@ -89,7 +89,7 @@
       "status": 200,
       "horizontalOverflow": false,
       "width": 1440,
-      "title": "Inventory operations · Bakiano",
+      "title": "Inventory operations \u00b7 Bakiano",
       "heading": "Inventory operations",
       "unlabeledControls": [],
       "errors": []
@@ -102,7 +102,7 @@
       "status": 200,
       "horizontalOverflow": false,
       "width": 1280,
-      "title": "Inventory operations · Bakiano",
+      "title": "Inventory operations \u00b7 Bakiano",
       "heading": "Inventory operations",
       "unlabeledControls": [],
       "errors": []
@@ -115,51 +115,12 @@
       "status": 200,
       "horizontalOverflow": false,
       "width": 390,
-      "title": "Inventory operations · Bakiano",
+      "title": "Inventory operations \u00b7 Bakiano",
       "heading": "Inventory operations",
       "unlabeledControls": [],
       "errors": []
     },
     {
-      "page": "health",
-      "route": "/health",
-      "run": null,
-      "size": "desktop",
-      "status": 200,
-      "horizontalOverflow": false,
-      "width": 1440,
-      "title": "Health & evaluations · Bakiano",
-      "heading": "Health & evaluations",
-      "unlabeledControls": [],
-      "errors": []
-    },
-    {
-      "page": "health",
-      "route": "/health",
-      "run": null,
-      "size": "laptop",
-      "status": 200,
-      "horizontalOverflow": false,
-      "width": 1280,
-      "title": "Health & evaluations · Bakiano",
-      "heading": "Health & evaluations",
-      "unlabeledControls": [],
-      "errors": []
-    },
-    {
-      "page": "health",
-      "route": "/health",
-      "run": null,
-      "size": "mobile",
-      "status": 200,
-      "horizontalOverflow": false,
-      "width": 390,
-      "title": "Health & evaluations · Bakiano",
-      "heading": "Health & evaluations",
-      "unlabeledControls": [],
-      "errors": []
-    },
-    {
       "page": "agent-traces",
       "route": "/agent-traces",
       "run": "6ab8067d-69ca-4c7d-88b7-98c455ffe60c",
@@ -167,7 +128,7 @@
       "status": 200,
       "horizontalOverflow": false,
       "width": 1440,
-      "title": "Agent evidence · Bakiano",
+      "title": "Agent evidence \u00b7 Bakiano",
       "heading": "Agent traces",
       "unlabeledControls": [],
       "errors": []
@@ -180,7 +141,7 @@
       "status": 200,
       "horizontalOverflow": false,
       "width": 1280,
-      "title": "Agent evidence · Bakiano",
+      "title": "Agent evidence \u00b7 Bakiano",
       "heading": "Agent traces",
       "unlabeledControls": [],
       "errors": []
@@ -193,7 +154,7 @@
       "status": 200,
       "horizontalOverflow": false,
       "width": 390,
-      "title": "Agent evidence · Bakiano",
+      "title": "Agent evidence \u00b7 Bakiano",
       "heading": "Agent traces",
       "unlabeledControls": [],
       "errors": []
@@ -206,7 +167,7 @@
       "status": 200,
       "horizontalOverflow": false,
       "width": 1440,
-      "title": "System overview · Bakiano engineering",
+      "title": "System overview \u00b7 Bakiano engineering",
       "heading": "System overview",
       "unlabeledControls": [],
       "errors": []
@@ -219,7 +180,7 @@
       "status": 200,
       "horizontalOverflow": false,
       "width": 1280,
-      "title": "System overview · Bakiano engineering",
+      "title": "System overview \u00b7 Bakiano engineering",
       "heading": "System overview",
       "unlabeledControls": [],
       "errors": []
@@ -232,7 +193,7 @@
       "status": 200,
       "horizontalOverflow": false,
       "width": 390,
-      "title": "System overview · Bakiano engineering",
+      "title": "System overview \u00b7 Bakiano engineering",
       "heading": "System overview",
       "unlabeledControls": [],
       "errors": []
@@ -245,7 +206,7 @@
       "status": 200,
       "horizontalOverflow": false,
       "width": 1440,
-      "title": "Madrid operations · Bakiano",
+      "title": "Madrid operations \u00b7 Bakiano",
       "heading": "Madrid operations",
       "unlabeledControls": [],
       "errors": []
@@ -258,7 +219,7 @@
       "status": 200,
       "horizontalOverflow": false,
       "width": 1280,
-      "title": "Madrid operations · Bakiano",
+      "title": "Madrid operations \u00b7 Bakiano",
       "heading": "Madrid operations",
       "unlabeledControls": [],
       "errors": []
@@ -271,8 +232,47 @@
       "status": 200,
       "horizontalOverflow": false,
       "width": 390,
-      "title": "Madrid operations · Bakiano",
+      "title": "Madrid operations \u00b7 Bakiano",
       "heading": "Madrid operations",
+      "unlabeledControls": [],
+      "errors": []
+    },
+    {
+      "page": "health",
+      "route": "/health",
+      "run": null,
+      "size": "desktop",
+      "status": 200,
+      "horizontalOverflow": false,
+      "width": 1440,
+      "title": "Health & evaluations \u00b7 Bakiano",
+      "heading": "Health & evaluations",
+      "unlabeledControls": [],
+      "errors": []
+    },
+    {
+      "page": "health",
+      "route": "/health",
+      "run": null,
+      "size": "laptop",
+      "status": 200,
+      "horizontalOverflow": false,
+      "width": 1280,
+      "title": "Health & evaluations \u00b7 Bakiano",
+      "heading": "Health & evaluations",
+      "unlabeledControls": [],
+      "errors": []
+    },
+    {
+      "page": "health",
+      "route": "/health",
+      "run": null,
+      "size": "mobile",
+      "status": 200,
+      "horizontalOverflow": false,
+      "width": 390,
+      "title": "Health & evaluations \u00b7 Bakiano",
+      "heading": "Health & evaluations",
       "unlabeledControls": [],
       "errors": []
     }

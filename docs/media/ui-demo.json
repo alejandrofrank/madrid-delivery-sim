@@ -1,13 +1,14 @@
 {
-  "capturedAt": "2026-10-29T16:55:28.059Z",
-  "source": "Actual running local UI, deterministic simulation, no paid calls",
+  "capturedAt": "2026-10-29T18:30:20.957Z",
+  "source": "Actual local operations UI; seed 42, 120-second playback, models disabled",
+  "run": "3bdcb633-ebb0-4d37-a9a2-2974bcf3267a",
   "frames": 48,
-  "durationMs": 8524,
+  "durationMs": 9826,
   "viewport": {
     "width": 1440,
     "height": 960
   },
-  "encodedFrameMs": 180,
+  "encodedFrameMs": 200,
   "width": 1080,
   "height": 720,
   "loops": 2

@@ -1,0 +1,46 @@
+{
+  "base": "http://localhost:8021",
+  "phase": "after",
+  "capturedAt": "2026-10-29T18:30:32.029Z",
+  "results": [
+    {
+      "page": "madrid",
+      "route": "/",
+      "run": "b0195b8f-35e8-453c-b308-c86ee0ded9ea",
+      "size": "desktop",
+      "status": 200,
+      "horizontalOverflow": false,
+      "width": 1440,
+      "title": "Madrid operations · Bakiano",
+      "heading": "Madrid operations",
+      "unlabeledControls": [],
+      "errors": []
+    },
+    {
+      "page": "madrid",
+      "route": "/",
+      "run": "b0195b8f-35e8-453c-b308-c86ee0ded9ea",
+      "size": "laptop",
+      "status": 200,
+      "horizontalOverflow": false,
+      "width": 1280,
+      "title": "Madrid operations · Bakiano",
+      "heading": "Madrid operations",
+      "unlabeledControls": [],
+      "errors": []
+    },
+    {
+      "page": "madrid",
+      "route": "/",
+      "run": "b0195b8f-35e8-453c-b308-c86ee0ded9ea",
+      "size": "mobile",
+      "status": 200,
+      "horizontalOverflow": false,
+      "width": 390,
+      "title": "Madrid operations · Bakiano",
+      "heading": "Madrid operations",
+      "unlabeledControls": [],
+      "errors": []
+    }
+  ]
+}

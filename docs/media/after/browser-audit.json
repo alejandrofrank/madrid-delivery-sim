@@ -33,6 +33,12 @@
       "contrastCandidates": [],
       "under24Controls": [
         {
+          "selector": "a.workspace-brand",
+          "text": "Bakiano operations home",
+          "width": 202,
+          "height": 22.1
+        },
+        {
           "selector": "g",
           "text": "Aster Household 001 · customer-001",
           "width": 13.5,
@@ -808,8 +814,8 @@
       ],
       "navigation": [
         {
-          "domContentLoadedMs": 80,
-          "loadMs": 179
+          "domContentLoadedMs": 83,
+          "loadMs": 199
         }
       ],
       "resources": [
@@ -817,48 +823,48 @@
           "name": "city-config",
           "type": "fetch",
           "bytes": 452429,
-          "duration": 60
+          "duration": 74
         },
         {
           "name": "IBMPlexSans-SemiBold.woff2",
           "type": "css",
           "bytes": 67360,
-          "duration": 54
+          "duration": 71
         },
         {
           "name": "IBMPlexSans-Medium.woff2",
           "type": "css",
           "bytes": 67040,
-          "duration": 53
+          "duration": 69
         },
         {
           "name": "IBMPlexSans-Regular.woff2",
           "type": "css",
           "bytes": 63320,
-          "duration": 56
+          "duration": 71
         },
         {
           "name": "IBMPlexMono-Regular.woff2",
           "type": "css",
           "bytes": 49548,
-          "duration": 40
+          "duration": 50
         },
         {
           "name": "flow.js?v=9c638d278ae6",
           "type": "script",
           "bytes": 45330,
+          "duration": 25
+        },
+        {
+          "name": "flow.css?v=8212f56c1123",
+          "type": "link",
+          "bytes": 23444,
           "duration": 22
         },
         {
-          "name": "flow.css?v=0f5fa63ae6ad",
+          "name": "workspace.css?v=ae6b1f54d770",
           "type": "link",
-          "bytes": 23294,
-          "duration": 16
-        },
-        {
-          "name": "workspace.css?v=5c17fb1a2e19",
-          "type": "link",
-          "bytes": 9012,
+          "bytes": 9610,
           "duration": 17
         }
       ],
@@ -887,7 +893,7 @@
       "menuOpen": {
         "expanded": "true",
         "visibleLinks": 7,
-        "outline": "rgb(99, 213, 197) solid 2px"
+        "outline": "rgb(35, 216, 206) solid 2px"
       },
       "menuClosed": {
         "expanded": "false",
@@ -898,56 +904,56 @@
           "element": "A",
           "id": "",
           "text": "Skip to workspace",
-          "outline": "rgb(231, 237, 240) solid 3px",
+          "outline": "rgb(35, 216, 206) solid 2px",
           "focusVisible": true
         },
         {
           "element": "A",
           "id": "",
           "text": "Bakiano operations home",
-          "outline": "rgb(231, 237, 240) solid 3px",
+          "outline": "rgb(35, 216, 206) solid 2px",
           "focusVisible": true
         },
         {
           "element": "BUTTON",
           "id": "",
           "text": "Menu",
-          "outline": "rgb(99, 213, 197) solid 2px",
+          "outline": "rgb(35, 216, 206) solid 2px",
           "focusVisible": true
         },
         {
           "element": "BUTTON",
           "id": "",
           "text": "Overview",
-          "outline": "rgb(99, 213, 197) solid 2px",
+          "outline": "rgb(35, 216, 206) solid 2px",
           "focusVisible": true
         },
         {
           "element": "BUTTON",
           "id": "",
           "text": "Orders",
-          "outline": "rgb(99, 213, 197) solid 2px",
+          "outline": "rgb(35, 216, 206) solid 2px",
           "focusVisible": true
         },
         {
           "element": "BUTTON",
           "id": "",
           "text": "Fleet",
-          "outline": "rgb(99, 213, 197) solid 2px",
+          "outline": "rgb(35, 216, 206) solid 2px",
           "focusVisible": true
         },
         {
           "element": "BUTTON",
           "id": "",
           "text": "Stores",
-          "outline": "rgb(99, 213, 197) solid 2px",
+          "outline": "rgb(35, 216, 206) solid 2px",
           "focusVisible": true
         },
         {
           "element": "BUTTON",
           "id": "flow-simulation-toggle",
           "text": "Simulation",
-          "outline": "rgb(99, 213, 197) solid 2px",
+          "outline": "rgb(35, 216, 206) solid 2px",
           "focusVisible": true
         }
       ],
@@ -1046,6 +1052,12 @@
       "bodySize": "14px",
       "contrastCandidates": [],
       "under24Controls": [
+        {
+          "selector": "a.workspace-brand",
+          "text": "Bakiano operations home",
+          "width": 202,
+          "height": 22.1
+        },
         {
           "selector": "g",
           "text": "Aster Household 001, Household, grid 17, 12",
@@ -1882,8 +1894,8 @@
       ],
       "navigation": [
         {
-          "domContentLoadedMs": 54,
-          "loadMs": 113
+          "domContentLoadedMs": 57,
+          "loadMs": 323
         }
       ],
       "resources": [
@@ -1891,49 +1903,49 @@
           "name": "blueprint",
           "type": "fetch",
           "bytes": 477543,
-          "duration": 106
+          "duration": 260
         },
         {
           "name": "supply.js?v=b0be49acdc6e",
           "type": "script",
           "bytes": 70404,
-          "duration": 24
+          "duration": 28
         },
         {
           "name": "IBMPlexSans-SemiBold.woff2",
           "type": "css",
           "bytes": 67360,
-          "duration": 69
+          "duration": 273
         },
         {
           "name": "IBMPlexSans-Medium.woff2",
           "type": "css",
           "bytes": 67040,
-          "duration": 68
+          "duration": 275
         },
         {
           "name": "IBMPlexSans-Regular.woff2",
           "type": "css",
           "bytes": 63320,
-          "duration": 64
+          "duration": 272
         },
         {
           "name": "IBMPlexMono-Regular.woff2",
           "type": "css",
           "bytes": 49548,
-          "duration": 43
+          "duration": 267
         },
         {
           "name": "supply.css?v=2a81fee96c56",
           "type": "link",
           "bytes": 42467,
-          "duration": 16
+          "duration": 18
         },
         {
-          "name": "workspace.css?v=5c17fb1a2e19",
+          "name": "workspace.css?v=ae6b1f54d770",
           "type": "link",
-          "bytes": 9012,
-          "duration": 16
+          "bytes": 9610,
+          "duration": 17
         }
       ],
       "widths": [
@@ -1961,7 +1973,7 @@
       "menuOpen": {
         "expanded": "true",
         "visibleLinks": 7,
-        "outline": "rgb(99, 213, 197) solid 2px"
+        "outline": "rgb(35, 216, 206) solid 2px"
       },
       "menuClosed": {
         "expanded": "false",
@@ -1972,56 +1984,56 @@
           "element": "A",
           "id": "",
           "text": "Skip to workspace",
-          "outline": "rgb(231, 237, 240) solid 3px",
+          "outline": "rgb(35, 216, 206) solid 2px",
           "focusVisible": true
         },
         {
           "element": "A",
           "id": "",
           "text": "Bakiano operations home",
-          "outline": "rgb(231, 237, 240) solid 3px",
+          "outline": "rgb(35, 216, 206) solid 2px",
           "focusVisible": true
         },
         {
           "element": "BUTTON",
           "id": "",
           "text": "Menu",
-          "outline": "rgb(99, 213, 197) solid 2px",
+          "outline": "rgb(35, 216, 206) solid 2px",
           "focusVisible": true
         },
         {
           "element": "BUTTON",
           "id": "supply-operations",
           "text": "Operations",
-          "outline": "rgb(99, 213, 197) solid 2px",
+          "outline": "rgb(35, 216, 206) solid 2px",
           "focusVisible": true
         },
         {
           "element": "BUTTON",
           "id": "supply-simulation",
           "text": "Simulation & definitions",
-          "outline": "rgb(99, 213, 197) solid 2px",
+          "outline": "rgb(35, 216, 206) solid 2px",
           "focusVisible": true
         },
         {
           "element": "SELECT",
           "id": "",
           "text": "All roleshouseholdmarketrestaurant",
-          "outline": "rgb(99, 213, 197) solid 2px",
+          "outline": "rgb(35, 216, 206) solid 2px",
           "focusVisible": true
         },
         {
           "element": "SELECT",
           "id": "",
           "text": "All statusesready",
-          "outline": "rgb(99, 213, 197) solid 2px",
+          "outline": "rgb(35, 216, 206) solid 2px",
           "focusVisible": true
         },
         {
           "element": "INPUT",
           "id": "",
           "text": "",
-          "outline": "rgb(99, 213, 197) solid 2px",
+          "outline": "rgb(35, 216, 206) solid 2px",
           "focusVisible": true
         }
       ],
@@ -2134,7 +2146,14 @@
       ],
       "bodySize": "14px",
       "contrastCandidates": [],
-      "under24Controls": [],
+      "under24Controls": [
+        {
+          "selector": "a.workspace-brand",
+          "text": "Bakiano operations home",
+          "width": 202,
+          "height": 22.1
+        }
+      ],
       "domElements": 5163,
       "svgButtons": 12,
       "landmarks": [
@@ -2142,8 +2161,8 @@
       ],
       "navigation": [
         {
-          "domContentLoadedMs": 24,
-          "loadMs": 84
+          "domContentLoadedMs": 25,
+          "loadMs": 81
         }
       ],
       "resources": [
@@ -2151,49 +2170,49 @@
           "name": "state",
           "type": "fetch",
           "bytes": 783805,
-          "duration": 67
+          "duration": 79
         },
         {
           "name": "state?run=6ab8067d-69ca-4c7d-88b7-98c455ffe60c",
           "type": "fetch",
           "bytes": 783805,
-          "duration": 55
+          "duration": 58
         },
         {
           "name": "state?run=6ab8067d-69ca-4c7d-88b7-98c455ffe60c",
           "type": "fetch",
           "bytes": 783805,
-          "duration": 56
+          "duration": 58
         },
         {
           "name": "state?run=6ab8067d-69ca-4c7d-88b7-98c455ffe60c",
           "type": "fetch",
           "bytes": 783805,
-          "duration": 53
+          "duration": 61
         },
         {
           "name": "IBMPlexSans-SemiBold.woff2",
           "type": "css",
           "bytes": 67360,
-          "duration": 50
+          "duration": 45
         },
         {
           "name": "IBMPlexSans-Medium.woff2",
           "type": "css",
           "bytes": 67040,
-          "duration": 50
+          "duration": 45
         },
         {
           "name": "IBMPlexSans-Regular.woff2",
           "type": "css",
           "bytes": 63320,
-          "duration": 40
+          "duration": 46
         },
         {
           "name": "IBMPlexMono-Regular.woff2",
           "type": "css",
           "bytes": 49548,
-          "duration": 49
+          "duration": 43
         }
       ],
       "widths": [
@@ -2221,7 +2240,7 @@
       "menuOpen": {
         "expanded": "true",
         "visibleLinks": 7,
-        "outline": "rgb(99, 213, 197) solid 2px"
+        "outline": "rgb(35, 216, 206) solid 2px"
       },
       "menuClosed": {
         "expanded": "false",
@@ -2232,56 +2251,56 @@
           "element": "A",
           "id": "",
           "text": "Skip to workspace",
-          "outline": "rgb(231, 237, 240) solid 3px",
+          "outline": "rgb(35, 216, 206) solid 2px",
           "focusVisible": true
         },
         {
           "element": "A",
           "id": "",
           "text": "Bakiano operations home",
-          "outline": "rgb(231, 237, 240) solid 3px",
+          "outline": "rgb(35, 216, 206) solid 2px",
           "focusVisible": true
         },
         {
           "element": "BUTTON",
           "id": "",
           "text": "Menu",
-          "outline": "rgb(99, 213, 197) solid 2px",
+          "outline": "rgb(35, 216, 206) solid 2px",
           "focusVisible": true
         },
         {
           "element": "SELECT",
           "id": "catalogue",
           "text": "Offline synthetic products",
-          "outline": "rgb(99, 213, 197) solid 2px",
+          "outline": "rgb(35, 216, 206) solid 2px",
           "focusVisible": true
         },
         {
           "element": "INPUT",
           "id": "seed",
           "text": "",
-          "outline": "rgb(99, 213, 197) solid 2px",
+          "outline": "rgb(35, 216, 206) solid 2px",
           "focusVisible": true
         },
         {
           "element": "BUTTON",
           "id": "start",
           "text": "Run last-unit scenario",
-          "outline": "rgb(99, 213, 197) solid 2px",
+          "outline": "rgb(35, 216, 206) solid 2px",
           "focusVisible": true
         },
         {
           "element": "SELECT",
           "id": "checkpoint",
           "text": "Live / final state",
-          "outline": "rgb(99, 213, 197) solid 2px",
+          "outline": "rgb(35, 216, 206) solid 2px",
           "focusVisible": true
         },
         {
           "element": "g",
           "id": "",
           "text": "Inspect North Market",
-          "outline": "rgb(231, 237, 240) solid 3px",
+          "outline": "rgb(35, 216, 206) solid 2px",
           "focusVisible": true
         }
       ],
@@ -2357,66 +2376,73 @@
       ],
       "bodySize": "14px",
       "contrastCandidates": [],
-      "under24Controls": [],
-      "domElements": 7361,
+      "under24Controls": [
+        {
+          "selector": "a.workspace-brand",
+          "text": "Bakiano operations home",
+          "width": 202,
+          "height": 22.1
+        }
+      ],
+      "domElements": 192,
       "svgButtons": 0,
       "landmarks": [
         "#main"
       ],
       "navigation": [
         {
-          "domContentLoadedMs": 35,
-          "loadMs": 78
+          "domContentLoadedMs": 31,
+          "loadMs": 70
         }
       ],
       "resources": [
         {
-          "name": "evidence",
-          "type": "fetch",
-          "bytes": 266341,
-          "duration": 435
-        },
-        {
           "name": "IBMPlexSans-SemiBold.woff2",
           "type": "css",
           "bytes": 67360,
-          "duration": 30
+          "duration": 28
         },
         {
           "name": "IBMPlexSans-Medium.woff2",
           "type": "css",
           "bytes": 67040,
-          "duration": 31
+          "duration": 26
         },
         {
           "name": "IBMPlexSans-Regular.woff2",
           "type": "css",
           "bytes": 63320,
-          "duration": 30
+          "duration": 28
         },
         {
           "name": "IBMPlexMono-Regular.woff2",
           "type": "css",
           "bytes": 49548,
-          "duration": 29
+          "duration": 26
         },
         {
           "name": "health.js?v=1a913ecdfe18",
           "type": "script",
           "bytes": 30843,
-          "duration": 16
+          "duration": 17
         },
         {
           "name": "health.css?v=d7935c2c1ed9",
           "type": "link",
           "bytes": 26960,
-          "duration": 13
+          "duration": 15
         },
         {
-          "name": "workspace.css?v=5c17fb1a2e19",
+          "name": "workspace.css?v=ae6b1f54d770",
           "type": "link",
-          "bytes": 9012,
-          "duration": 13
+          "bytes": 9610,
+          "duration": 15
+        },
+        {
+          "name": "workspace.js?v=4163be67ea66",
+          "type": "script",
+          "bytes": 3254,
+          "duration": 17
         }
       ],
       "widths": [
@@ -2444,7 +2470,7 @@
       "menuOpen": {
         "expanded": "true",
         "visibleLinks": 7,
-        "outline": "rgb(99, 213, 197) solid 2px"
+        "outline": "rgb(35, 216, 206) solid 2px"
       },
       "menuClosed": {
         "expanded": "false",
@@ -2455,56 +2481,56 @@
           "element": "A",
           "id": "",
           "text": "Skip to workspace",
-          "outline": "rgb(231, 237, 240) solid 3px",
+          "outline": "rgb(35, 216, 206) solid 2px",
           "focusVisible": true
         },
         {
           "element": "A",
           "id": "",
           "text": "Bakiano operations home",
-          "outline": "rgb(231, 237, 240) solid 3px",
+          "outline": "rgb(35, 216, 206) solid 2px",
           "focusVisible": true
         },
         {
           "element": "BUTTON",
           "id": "",
           "text": "Menu",
-          "outline": "rgb(99, 213, 197) solid 2px",
+          "outline": "rgb(35, 216, 206) solid 2px",
           "focusVisible": true
         },
         {
           "element": "BUTTON",
           "id": "copy-command",
           "text": "Copy check command",
-          "outline": "rgb(99, 213, 197) solid 2px",
+          "outline": "rgb(35, 216, 206) solid 2px",
           "focusVisible": true
         },
         {
           "element": "BUTTON",
           "id": "refresh",
           "text": "Refresh results",
-          "outline": "rgb(99, 213, 197) solid 2px",
+          "outline": "rgb(35, 216, 206) solid 2px",
           "focusVisible": true
         },
         {
           "element": "BUTTON",
           "id": "tests-tab",
           "text": "Test catalogue",
-          "outline": "rgb(99, 213, 197) solid 2px",
+          "outline": "rgb(35, 216, 206) solid 2px",
           "focusVisible": true
         },
         {
           "element": "BUTTON",
           "id": "",
           "text": "All tests565/56546 files · Every collected case, including parameters",
-          "outline": "rgb(99, 213, 197) solid 2px",
+          "outline": "rgb(35, 216, 206) solid 2px",
           "focusVisible": true
         },
         {
           "element": "BUTTON",
           "id": "",
           "text": "ADK restaurant agents80/804 files · Google ADK tool loop, SOUL fixture",
-          "outline": "rgb(99, 213, 197) solid 2px",
+          "outline": "rgb(35, 216, 206) solid 2px",
           "focusVisible": true
         }
       ],
@@ -2555,7 +2581,14 @@
       ],
       "bodySize": "14px",
       "contrastCandidates": [],
-      "under24Controls": [],
+      "under24Controls": [
+        {
+          "selector": "a.workspace-brand",
+          "text": "Bakiano operations home",
+          "width": 202,
+          "height": 22.1
+        }
+      ],
       "domElements": 81,
       "svgButtons": 0,
       "landmarks": [
@@ -2563,8 +2596,8 @@
       ],
       "navigation": [
         {
-          "domContentLoadedMs": 32,
-          "loadMs": 61
+          "domContentLoadedMs": 28,
+          "loadMs": 54
         }
       ],
       "resources": [
@@ -2572,49 +2605,49 @@
           "name": "IBMPlexSans-SemiBold.woff2",
           "type": "css",
           "bytes": 67360,
-          "duration": 21
+          "duration": 18
         },
         {
           "name": "IBMPlexSans-Medium.woff2",
           "type": "css",
           "bytes": 67040,
-          "duration": 20
+          "duration": 18
         },
         {
           "name": "IBMPlexSans-Regular.woff2",
           "type": "css",
           "bytes": 63320,
-          "duration": 23
+          "duration": 19
         },
         {
           "name": "agent-traces.js?v=230bbd598b56",
           "type": "script",
           "bytes": 30746,
-          "duration": 18
+          "duration": 17
         },
         {
-          "name": "workspace.css?v=5c17fb1a2e19",
+          "name": "workspace.css?v=ae6b1f54d770",
           "type": "link",
-          "bytes": 9012,
-          "duration": 17
+          "bytes": 9610,
+          "duration": 13
         },
         {
           "name": "agent-traces.css?v=a28e740a0007",
           "type": "link",
           "bytes": 5948,
+          "duration": 12
+        },
+        {
+          "name": "workspace.js?v=4163be67ea66",
+          "type": "script",
+          "bytes": 3254,
           "duration": 17
         },
         {
-          "name": "workspace.js?v=41d867270659",
-          "type": "script",
-          "bytes": 3244,
-          "duration": 19
-        },
-        {
-          "name": "tokens.css?v=41baf92f749f",
+          "name": "tokens.css?v=657eeda273de",
           "type": "link",
           "bytes": 1797,
-          "duration": 15
+          "duration": 14
         }
       ],
       "widths": [
@@ -2642,7 +2675,7 @@
       "menuOpen": {
         "expanded": "true",
         "visibleLinks": 7,
-        "outline": "rgb(99, 213, 197) solid 2px"
+        "outline": "rgb(35, 216, 206) solid 2px"
       },
       "menuClosed": {
         "expanded": "false",
@@ -2653,56 +2686,56 @@
           "element": "A",
           "id": "",
           "text": "Skip to workspace",
-          "outline": "rgb(231, 237, 240) solid 3px",
+          "outline": "rgb(35, 216, 206) solid 2px",
           "focusVisible": true
         },
         {
           "element": "A",
           "id": "",
           "text": "Bakiano operations home",
-          "outline": "rgb(231, 237, 240) solid 3px",
+          "outline": "rgb(35, 216, 206) solid 2px",
           "focusVisible": true
         },
         {
           "element": "BUTTON",
           "id": "",
           "text": "Menu",
-          "outline": "rgb(99, 213, 197) solid 2px",
+          "outline": "rgb(35, 216, 206) solid 2px",
           "focusVisible": true
         },
         {
           "element": "BUTTON",
           "id": "refresh",
           "text": "Refresh evidence",
-          "outline": "rgb(99, 213, 197) solid 2px",
+          "outline": "rgb(35, 216, 206) solid 2px",
           "focusVisible": true
         },
         {
           "element": "SELECT",
           "id": "trace-kind",
           "text": "All stepsDecisionsTool callsModel calls",
-          "outline": "rgb(99, 213, 197) solid 2px",
+          "outline": "rgb(35, 216, 206) solid 2px",
           "focusVisible": true
         },
         {
           "element": "A",
           "id": "",
           "text": "Madrid operations",
-          "outline": "rgb(231, 237, 240) solid 3px",
+          "outline": "rgb(35, 216, 206) solid 2px",
           "focusVisible": true
         },
         {
           "element": "A",
           "id": "",
           "text": "Delivery",
-          "outline": "rgb(231, 237, 240) solid 3px",
+          "outline": "rgb(35, 216, 206) solid 2px",
           "focusVisible": true
         },
         {
           "element": "A",
           "id": "",
           "text": "Restaurants",
-          "outline": "rgb(231, 237, 240) solid 3px",
+          "outline": "rgb(35, 216, 206) solid 2px",
           "focusVisible": true
         }
       ],
@@ -2758,6 +2791,12 @@
       "bodySize": "14px",
       "contrastCandidates": [],
       "under24Controls": [
+        {
+          "selector": "a.workspace-brand",
+          "text": "Bakiano operations home",
+          "width": 202,
+          "height": 22.1
+        },
         {
           "selector": "a",
           "text": "Inspect local health evidence ↗",
@@ -2862,8 +2901,8 @@
       ],
       "navigation": [
         {
-          "domContentLoadedMs": 41,
-          "loadMs": 72
+          "domContentLoadedMs": 47,
+          "loadMs": 52
         }
       ],
       "resources": [
@@ -2871,49 +2910,49 @@
           "name": "documentation",
           "type": "fetch",
           "bytes": 254996,
-          "duration": 114
+          "duration": 109
         },
         {
           "name": "IBMPlexSans-SemiBold.woff2",
           "type": "css",
           "bytes": 67360,
-          "duration": 26
+          "duration": 23
         },
         {
           "name": "IBMPlexSans-Medium.woff2",
           "type": "css",
           "bytes": 67040,
-          "duration": 26
+          "duration": 22
         },
         {
           "name": "IBMPlexSans-Regular.woff2",
           "type": "css",
           "bytes": 63320,
-          "duration": 8
+          "duration": 21
         },
         {
           "name": "IBMPlexMono-Regular.woff2",
           "type": "css",
           "bytes": 49548,
-          "duration": 24
+          "duration": 20
         },
         {
           "name": "marked.umd.js?v=9eb730d2362a",
           "type": "script",
           "bytes": 49507,
-          "duration": 20
+          "duration": 19
         },
         {
           "name": "manifest.json",
           "type": "fetch",
           "bytes": 37824,
-          "duration": 8
+          "duration": 9
         },
         {
           "name": "purify.min.js?v=cd37898f9782",
           "type": "script",
           "bytes": 30128,
-          "duration": 19
+          "duration": 18
         }
       ],
       "widths": [
@@ -2941,7 +2980,7 @@
       "menuOpen": {
         "expanded": "true",
         "visibleLinks": 7,
-        "outline": "rgb(99, 213, 197) solid 2px"
+        "outline": "rgb(35, 216, 206) solid 2px"
       },
       "menuClosed": {
         "expanded": "false",
@@ -2952,56 +2991,56 @@
           "element": "A",
           "id": "",
           "text": "Skip to workspace",
-          "outline": "rgb(231, 237, 240) solid 3px",
+          "outline": "rgb(35, 216, 206) solid 2px",
           "focusVisible": true
         },
         {
           "element": "A",
           "id": "",
           "text": "Bakiano operations home",
-          "outline": "rgb(231, 237, 240) solid 3px",
+          "outline": "rgb(35, 216, 206) solid 2px",
           "focusVisible": true
         },
         {
           "element": "BUTTON",
           "id": "open-search",
           "text": "Search chaptersCtrl K",
-          "outline": "rgb(99, 213, 197) solid 2px",
+          "outline": "rgb(35, 216, 206) solid 2px",
           "focusVisible": true
         },
         {
           "element": "BUTTON",
           "id": "",
           "text": "Menu",
-          "outline": "rgb(99, 213, 197) solid 2px",
+          "outline": "rgb(35, 216, 206) solid 2px",
           "focusVisible": true
         },
         {
           "element": "BUTTON",
           "id": "toggle-topics",
           "text": "Topics",
-          "outline": "rgb(99, 213, 197) solid 2px",
+          "outline": "rgb(35, 216, 206) solid 2px",
           "focusVisible": true
         },
         {
           "element": "BUTTON",
           "id": "copy-link",
           "text": "Copy link",
-          "outline": "rgb(99, 213, 197) solid 2px",
+          "outline": "rgb(35, 216, 206) solid 2px",
           "focusVisible": true
         },
         {
           "element": "BUTTON",
           "id": "print-page",
           "text": "Print",
-          "outline": "rgb(99, 213, 197) solid 2px",
+          "outline": "rgb(35, 216, 206) solid 2px",
           "focusVisible": true
         },
         {
           "element": "A",
           "id": "markdown-link",
           "text": "View Markdown",
-          "outline": "rgb(168, 183, 192) solid 3px",
+          "outline": "rgb(35, 216, 206) solid 2px",
           "focusVisible": true
         }
       ],
@@ -3024,7 +3063,7 @@
       "headingSizes": [
         {
           "role": "H1",
-          "font": "24px",
+          "font": "25px",
           "text": "Madrid operations"
         },
         {
@@ -3035,46 +3074,203 @@
         {
           "role": "H2",
           "font": "15px",
-          "text": "Network map"
-        },
-        {
-          "role": "H2",
-          "font": "15px",
-          "text": "Orders"
+          "text": "Orders 247 total · 100 shown"
         }
       ],
       "bodySize": "14px",
       "contrastCandidates": [],
       "under24Controls": [
         {
+          "selector": "a.workspace-brand",
+          "text": "Bakiano operations home",
+          "width": 202,
+          "height": 22.1
+        },
+        {
           "selector": "div.leaflet-marker-icon.hub-marker.leaflet-zoom-animated.leaflet-interactive",
           "text": "Chamberí",
-          "width": 58,
-          "height": 21
+          "width": 55.6,
+          "height": 13
         },
         {
           "selector": "div.leaflet-marker-icon.hub-marker.leaflet-zoom-animated.leaflet-interactive",
           "text": "Retiro",
-          "width": 42,
-          "height": 21
+          "width": 39.2,
+          "height": 13
+        },
+        {
+          "selector": "div.leaflet-marker-icon.pickup-icon.leaflet-zoom-animated.leaflet-interactive",
+          "text": "",
+          "width": 22,
+          "height": 22
+        },
+        {
+          "selector": "div.leaflet-marker-icon.pickup-icon.leaflet-zoom-animated.leaflet-interactive",
+          "text": "",
+          "width": 22,
+          "height": 22
+        },
+        {
+          "selector": "div.leaflet-marker-icon.pickup-icon.leaflet-zoom-animated.leaflet-interactive",
+          "text": "",
+          "width": 22,
+          "height": 22
+        },
+        {
+          "selector": "div.leaflet-marker-icon.pickup-icon.leaflet-zoom-animated.leaflet-interactive",
+          "text": "",
+          "width": 22,
+          "height": 22
+        },
+        {
+          "selector": "div.leaflet-marker-icon.pickup-icon.leaflet-zoom-animated.leaflet-interactive",
+          "text": "",
+          "width": 22,
+          "height": 22
+        },
+        {
+          "selector": "div.leaflet-marker-icon.pickup-icon.leaflet-zoom-animated.leaflet-interactive",
+          "text": "",
+          "width": 22,
+          "height": 22
+        },
+        {
+          "selector": "div.leaflet-marker-icon.pickup-icon.leaflet-zoom-animated.leaflet-interactive",
+          "text": "",
+          "width": 22,
+          "height": 22
+        },
+        {
+          "selector": "div.leaflet-marker-icon.pickup-icon.leaflet-zoom-animated.leaflet-interactive",
+          "text": "",
+          "width": 22,
+          "height": 22
+        },
+        {
+          "selector": "div.leaflet-marker-icon.pickup-icon.leaflet-zoom-animated.leaflet-interactive",
+          "text": "",
+          "width": 22,
+          "height": 22
+        },
+        {
+          "selector": "div.leaflet-marker-icon.pickup-icon.leaflet-zoom-animated.leaflet-interactive",
+          "text": "",
+          "width": 22,
+          "height": 22
+        },
+        {
+          "selector": "div.leaflet-marker-icon.pickup-icon.leaflet-zoom-animated.leaflet-interactive",
+          "text": "",
+          "width": 22,
+          "height": 22
+        },
+        {
+          "selector": "div.leaflet-marker-icon.pickup-icon.leaflet-zoom-animated.leaflet-interactive",
+          "text": "",
+          "width": 22,
+          "height": 22
+        },
+        {
+          "selector": "div.leaflet-marker-icon.pickup-icon.leaflet-zoom-animated.leaflet-interactive",
+          "text": "",
+          "width": 22,
+          "height": 22
+        },
+        {
+          "selector": "div.leaflet-marker-icon.pickup-icon.leaflet-zoom-animated.leaflet-interactive",
+          "text": "",
+          "width": 22,
+          "height": 22
+        },
+        {
+          "selector": "div.leaflet-marker-icon.pickup-icon.leaflet-zoom-animated.leaflet-interactive",
+          "text": "",
+          "width": 22,
+          "height": 22
+        },
+        {
+          "selector": "div.leaflet-marker-icon.pickup-icon.leaflet-zoom-animated.leaflet-interactive",
+          "text": "",
+          "width": 22,
+          "height": 22
+        },
+        {
+          "selector": "div.leaflet-marker-icon.pickup-icon.leaflet-zoom-animated.leaflet-interactive",
+          "text": "",
+          "width": 22,
+          "height": 22
+        },
+        {
+          "selector": "div.leaflet-marker-icon.pickup-icon.leaflet-zoom-animated.leaflet-interactive",
+          "text": "",
+          "width": 22,
+          "height": 22
+        },
+        {
+          "selector": "div.leaflet-marker-icon.pickup-icon.leaflet-zoom-animated.leaflet-interactive",
+          "text": "",
+          "width": 22,
+          "height": 22
+        },
+        {
+          "selector": "div.leaflet-marker-icon.pickup-icon.leaflet-zoom-animated.leaflet-interactive",
+          "text": "",
+          "width": 22,
+          "height": 22
+        },
+        {
+          "selector": "div.leaflet-marker-icon.pickup-icon.leaflet-zoom-animated.leaflet-interactive",
+          "text": "",
+          "width": 22,
+          "height": 22
+        },
+        {
+          "selector": "div.leaflet-marker-icon.pickup-icon.leaflet-zoom-animated.leaflet-interactive",
+          "text": "",
+          "width": 22,
+          "height": 22
+        },
+        {
+          "selector": "div.leaflet-marker-icon.pickup-icon.leaflet-zoom-animated.leaflet-interactive",
+          "text": "",
+          "width": 22,
+          "height": 22
+        },
+        {
+          "selector": "div.leaflet-marker-icon.pickup-icon.leaflet-zoom-animated.leaflet-interactive",
+          "text": "",
+          "width": 22,
+          "height": 22
         },
         {
           "selector": "div.leaflet-marker-icon.hub-marker.leaflet-zoom-animated.leaflet-interactive",
           "text": "Puente de Vallecas",
-          "width": 98,
-          "height": 21
+          "width": 113.6,
+          "height": 13
         },
         {
           "selector": "a",
           "text": "Leaflet",
-          "width": 42,
-          "height": 13
+          "width": 39,
+          "height": 11
         },
         {
           "selector": "a",
-          "text": "© OpenStreetMap contributors",
-          "width": 142,
-          "height": 13
+          "text": "OpenFreeMap",
+          "width": 56,
+          "height": 11
+        },
+        {
+          "selector": "a",
+          "text": "OpenMapTiles",
+          "width": 55,
+          "height": 11
+        },
+        {
+          "selector": "a",
+          "text": "© OpenStreetMap",
+          "width": 71,
+          "height": 11
         },
         {
           "selector": "#show-stores",
@@ -3089,15 +3285,15 @@
           "height": 13
         }
       ],
-      "domElements": 1087,
+      "domElements": 1783,
       "svgButtons": 0,
       "landmarks": [
         "#main"
       ],
       "navigation": [
         {
-          "domContentLoadedMs": 63,
-          "loadMs": 381
+          "domContentLoadedMs": 122,
+          "loadMs": 133
         }
       ],
       "resources": [
@@ -3105,49 +3301,49 @@
           "name": "roads",
           "type": "fetch",
           "bytes": 2751999,
-          "duration": 316
+          "duration": 200
+        },
+        {
+          "name": "maplibre-gl.js?v=29f5c00792a3",
+          "type": "script",
+          "bytes": 1015118,
+          "duration": 43
+        },
+        {
+          "name": "trace?courier=chamberi-01",
+          "type": "fetch",
+          "bytes": 161288,
+          "duration": 25
         },
         {
           "name": "leaflet.js?v=db49d009c841",
           "type": "script",
           "bytes": 147852,
-          "duration": 20
+          "duration": 33
+        },
+        {
+          "name": "0-255.pbf",
+          "type": "fetch",
+          "bytes": 76880,
+          "duration": 19
+        },
+        {
+          "name": "maplibre-gl.css?v=1dae8925ee59",
+          "type": "link",
+          "bytes": 69749,
+          "duration": 25
         },
         {
           "name": "state",
           "type": "fetch",
-          "bytes": 68025,
-          "duration": 28
-        },
-        {
-          "name": "state",
-          "type": "fetch",
-          "bytes": 68025,
-          "duration": 32
+          "bytes": 68112,
+          "duration": 29
         },
         {
           "name": "IBMPlexSans-SemiBold.woff2",
           "type": "css",
           "bytes": 67360,
-          "duration": 332
-        },
-        {
-          "name": "IBMPlexSans-Medium.woff2",
-          "type": "css",
-          "bytes": 67040,
-          "duration": 329
-        },
-        {
-          "name": "IBMPlexSans-Regular.woff2",
-          "type": "css",
-          "bytes": 63320,
-          "duration": 324
-        },
-        {
-          "name": "IBMPlexMono-Regular.woff2",
-          "type": "css",
-          "bytes": 49548,
-          "duration": 13
+          "duration": 25
         }
       ],
       "widths": [
@@ -3175,7 +3371,7 @@
       "menuOpen": {
         "expanded": "true",
         "visibleLinks": 7,
-        "outline": "rgb(99, 213, 197) solid 2px"
+        "outline": "rgb(35, 216, 206) solid 2px"
       },
       "menuClosed": {
         "expanded": "false",
@@ -3186,56 +3382,56 @@
           "element": "A",
           "id": "",
           "text": "Skip to workspace",
-          "outline": "rgb(231, 237, 240) solid 3px",
+          "outline": "rgb(35, 216, 206) solid 2px",
           "focusVisible": true
         },
         {
           "element": "A",
           "id": "",
           "text": "Bakiano operations home",
-          "outline": "rgb(231, 237, 240) solid 3px",
+          "outline": "rgb(35, 216, 206) solid 2px",
           "focusVisible": true
         },
         {
           "element": "BUTTON",
           "id": "",
           "text": "Menu",
-          "outline": "rgb(99, 213, 197) solid 2px",
+          "outline": "rgb(35, 216, 206) solid 2px",
           "focusVisible": true
         },
         {
           "element": "BUTTON",
           "id": "view-operations",
           "text": "Operations",
-          "outline": "rgb(99, 213, 197) solid 2px",
+          "outline": "rgb(35, 216, 206) solid 2px",
           "focusVisible": true
         },
         {
           "element": "BUTTON",
           "id": "view-simulation",
           "text": "Simulation & diagnostics",
-          "outline": "rgb(99, 213, 197) solid 2px",
+          "outline": "rgb(35, 216, 206) solid 2px",
           "focusVisible": true
         },
         {
           "element": "SELECT",
           "id": "agent-role",
-          "text": "All couriersBikeMotoVan",
-          "outline": "rgb(99, 213, 197) solid 2px",
+          "text": "All rolesBikeMotoVan",
+          "outline": "rgb(35, 216, 206) solid 2px",
           "focusVisible": true
         },
         {
           "element": "SELECT",
           "id": "agent-status",
           "text": "All statusesWorkingAvailableOff shift",
-          "outline": "rgb(99, 213, 197) solid 2px",
+          "outline": "rgb(35, 216, 206) solid 2px",
           "focusVisible": true
         },
         {
           "element": "INPUT",
           "id": "agent-search",
           "text": "",
-          "outline": "rgb(99, 213, 197) solid 2px",
+          "outline": "rgb(35, 216, 206) solid 2px",
           "focusVisible": true
         }
       ],
