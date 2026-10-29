@@ -49,6 +49,19 @@ def test_recovery_requires_an_observed_successful_retry():
     assert score_trajectory(trace, [])["error_recovery"] == 1
 
 
+def test_terminal_receipts_capture_recovery_from_an_invented_finish():
+    rows = [{"step": i, "request_body": {}, "response_body": {"parts": [
+        {"function_call": {"name": name, "args": {"summary": "OK"}}}]}}
+        for i, name in enumerate(["finish_finish_decision", "finish_decision"], 1)]
+    receipts = [
+        {"tool": "restaurant.contract_rejected", "result": {
+            "ok": False, "code": "unknown_tool", "rejected_tool": "finish_finish_decision"}},
+        {"tool": "restaurant.finish", "result": {"ok": True}},
+    ]
+    score = score_trajectory(normalize_trace(rows, receipts), [])
+    assert score["error_count"] == 1 and score["error_recovery"] == 1
+
+
 def test_golden_one_is_the_recorded_invented_finish():
     rows = evaluate_golden(Path(__file__).resolve().parents[1] / "data/evals/golden")
     assert rows and all(row["passed"] for row in rows)

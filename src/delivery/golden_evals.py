@@ -22,7 +22,10 @@ def artifact_trace(path: Path, pointer: str, event_id: int | None = None) -> dic
         rows = [r for r in rows if r.get("event_id") == event_id]
     if not rows or len({r.get("event_id") for r in rows}) > 1:
         raise ValueError("Select exactly one event with --event-id and --pointer")
-    return normalize_trace(rows)
+    receipts = value.get("tools", []) if isinstance(value, dict) else []
+    if event_id is not None:
+        receipts = [r for r in receipts if r.get("event_id") == event_id]
+    return normalize_trace(rows, receipts)
 
 
 def promote(
@@ -46,6 +49,13 @@ def promote(
             raise ValueError("Review and redact out-of-contract arguments before promotion")
         clean_calls.append({k: call[k] for k in ("name", "args", "allowed_tools", "model_step")
                             if k in call})
+        if "result" in call:
+            result = call["result"]
+            clean_calls[-1]["result"] = {
+                "ok": not bool(result.get("error") or result.get("ok") is False),
+                "code": result.get("code") if result.get("code") in
+                {"unknown_tool", "summary_length"} else None,
+            }
     clean = {**trace, "calls": clean_calls}
     for ref in reference:
         if ref["name"] not in TOOL_FIELDS or set(ref["args"]) != TOOL_FIELDS[ref["name"]]:
@@ -75,6 +85,9 @@ def evaluate_golden(root: Path) -> list[dict[str, Any]]:
     for case in latest.values():
         score = score_trajectory(case["trace"], case["reference"])
         categories = sorted({f["category"] for f in score["code_failures"]})
+        passed = categories == sorted(case["expected_categories"])
+        if not case["expected_categories"]:
+            passed = passed and score["ordered_match"] == 1 and score["incomplete_steps"] == 0
         results.append({"id": case["id"], "version": case["version"], "score": score,
-                        "passed": categories == sorted(case["expected_categories"])})
+                        "passed": passed})
     return results

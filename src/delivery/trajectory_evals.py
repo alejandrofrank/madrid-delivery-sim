@@ -17,12 +17,18 @@ def read_trace(url: str, event_id: int) -> dict[str, Any]:
             "SELECT step,request_body,response_body,latency_ms,state "
             "FROM restaurant_model_calls WHERE event_id=%s ORDER BY step", (event_id,),
         ).fetchall()
+        receipts = conn.execute(
+            "SELECT tool,result FROM restaurant_tool_receipts WHERE event_id=%s ORDER BY step",
+            (event_id,),
+        ).fetchall()
     if not calls:
         raise ValueError("No model trace for this event")
-    return normalize_trace(calls)
+    return normalize_trace(calls, receipts)
 
 
-def normalize_trace(rows: list[dict[str, Any]]) -> dict[str, Any]:
+def normalize_trace(
+    rows: list[dict[str, Any]], receipts: list[dict[str, Any]] | None = None,
+) -> dict[str, Any]:
     """Responses contain new calls; requests contain accumulated tool responses.
 
     Never count the request's repeated function-call history as new tool use.
@@ -62,6 +68,25 @@ def normalize_trace(rows: list[dict[str, Any]]) -> dict[str, Any]:
             call["result"] = match.get("response", {})
             unused.remove(match)
         call.pop("id")
+    # The terminal tool skips summarization, so its response may never appear in
+    # a later model request. Migration 019's durable tool receipts close this gap.
+    names = {"restaurant.order": "read_order", "restaurant.recipe": "read_recipe",
+             "restaurant.pantry": "read_pantry", "restaurant.suppliers": "find_suppliers",
+             "memory.read": "recall_order_memory", "restaurant.finish": "finish_decision",
+             "restaurant.request_supply": "request_missing_ingredients",
+             "restaurant.confirm": "confirm_order", "restaurant.receive": "receive_ingredient",
+             "restaurant.cook": "prepare_meal", "restaurant.offer": "offer_substitution",
+             "restaurant.decline": "decline_order"}
+    consumed: set[int] = set()
+    for receipt in receipts or []:
+        result = receipt["result"]
+        name = (result.get("rejected_tool") if receipt["tool"] == "restaurant.contract_rejected"
+                else names.get(receipt["tool"]))
+        index = next((i for i, call in enumerate(calls)
+                      if i not in consumed and call["name"] == name), None)
+        if index is not None:
+            calls[index]["result"] = result if isinstance(result, dict) else {"ok": True}
+            consumed.add(index)
     return {
         "calls": calls, "model_steps": len(rows),
         "latency_ms": sum(latencies) if all(v is not None for v in latencies) else None,
@@ -122,7 +147,10 @@ def score_trajectory(trace: dict[str, Any], reference: list[dict[str, Any]]) -> 
         previous = current
     errors = [i for i, call in enumerate(calls) if _error(call)]
     recovered = sum(any(
-        later["name"] == calls[i]["name"] and "result" in later and not _error(later)
+        (later["name"] == calls[i]["name"] or
+         (calls[i].get("result", {}).get("code") == "unknown_tool"
+          and later["name"] == "finish_decision"))
+        and "result" in later and not _error(later)
         for later in calls[i + 1:]
     ) for i in errors)
     return {
