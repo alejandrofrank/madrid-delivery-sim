@@ -2,10 +2,39 @@
   "schema_version": 1,
   "categories": [
     {
+      "id": "invented_tool",
+      "name": "Invented Tool checks",
+      "description": "Reject names absent from the declared capability set; evaluated before any model judge",
+      "files": [
+        "tests/test_eval_invented_tool.py"
+      ]
+    },
+    {
+      "id": "length",
+      "name": "Length checks",
+      "description": "Bounded replies and 1\u2013500 character decision summaries; evaluated before any model judge",
+      "files": [
+        "tests/test_eval_length.py"
+      ]
+    },
+    {
+      "id": "schema",
+      "name": "Schema checks",
+      "description": "Malformed structured replies and tool arguments; evaluated before any model judge",
+      "files": [
+        "tests/test_eval_schema.py"
+      ]
+    },
+    {
       "id": "adk",
       "name": "ADK restaurant agents",
       "description": "Google ADK tool loop, SOUL fixtures, scoped capabilities, budgets and crash recovery; zero paid calls",
-      "files": ["tests/test_adk_restaurant.py", "tests/test_adk_evidence.py", "tests/test_jev_routing.py", "tests/test_routing_benchmark.py"]
+      "files": [
+        "tests/test_adk_restaurant.py",
+        "tests/test_adk_evidence.py",
+        "tests/test_jev_routing.py",
+        "tests/test_routing_benchmark.py"
+      ]
     },
     {
       "id": "agents",
