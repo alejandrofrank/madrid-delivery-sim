@@ -1,5 +1,33 @@
 # Status
 
+2026-10-29 (tool contracts and direct Jev): Gemini now receives a validated
+function allowlist; bounded, audited tool corrections handle the captured invented
+finish name and excessive summary without alias execution or silent truncation.
+Both failure regressions pass locally. Three new real-provider repair cases
+delivered: Iris used one Jev call and zero secondary model calls, while Mateo and
+Elena each used one Jev routing call plus six Gemini calls and chose their expected
+suppliers with legal summaries. Iris's direct/confirm confidence was 1.0 at the
+unchanged 0.85 gate, with 172 ms router latency and 4.783 seconds run wall time.
+Stock, replay, queue and actual-login raw-table isolation checks passed throughout.
+
+Two stopped Jev probes remain retained. The final classifier asks what work is
+requested, and stocked-pantry calls omit unrelated supplier context. Across all
+attempts, known token cost was 0.005610540 USD and conservative accounting was
+0.06073198 USD under the 0.15 USD cap; invoice reconciliation remains pending.
+Billing is parked, with the project and fifteen free foundation resources retained.
+The local evidence page shows the new results above the unchanged failed historical
+comparison. See `docs/evidence/adk-contract-verification.json` and
+`docs/ADK-RESTAURANT.md`. These are repair smoke checks, not held-out quality or
+general savings evidence. Work and the test database were isolated from concurrent
+changes in other chats.
+
+Verified 565 local tests, Ruff, mypy over 49 modules, all host JavaScript syntax
+checks and documentation/source links. Twelve role scenarios passed twice with
+matching business outcomes; all six offline judge cases and all six capability
+evidence groups passed. The Python-only container has no Node runtime; host syntax
+checks cover that unavailable container check. Browser inspection confirmed the
+retained direct response, tools/memory, no console errors and no page overflow.
+
 2026-10-29 (Jev routing and memory profiles): Added a durable Jev-first decision
 adapter for ADK restaurants. Editable prompts/SOUL drive action and supplier
 choices; confidence/margin, tool authority, stock, consent, queue effects and

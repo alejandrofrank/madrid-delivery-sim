@@ -13,6 +13,26 @@ from delivery.api import app
 from delivery.config import settings
 
 
+def test_capability_selectors_resolve_to_current_test_functions():
+    import ast
+    from pathlib import Path
+
+    root = Path(__file__).resolve().parents[1]
+    manifest = json.loads((root / "config/health-categories.json").read_text())
+    for capability in manifest["capabilities"]:
+        for selector in capability["selectors"]:
+            path, _, function = selector.partition("::")
+            source = root / path
+            assert source.is_file(), selector
+            if function:
+                names = {
+                    node.name
+                    for node in ast.walk(ast.parse(source.read_text()))
+                    if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef))
+                }
+                assert function in names, selector
+
+
 def receipt(**changes):
     now = datetime.now(UTC).isoformat()
     row = {

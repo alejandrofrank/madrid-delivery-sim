@@ -162,7 +162,7 @@
         "tests/test_agent_runtime.py::test_role_is_frozen_and_budget_blocks_effects",
         "tests/test_safety.py::test_concurrent_llm_budget_is_durable",
         "tests/test_cloud_ai.py::test_only_bounded_numeric_facts_leave_machine",
-        "tests/test_cloud_runtime.py::test_model_reservation_is_durable_scoped_and_never_reused",
+        "tests/test_durable_inference.py::test_dispatch_budget_scope_and_privacy_are_durable",
         "tests/test_supply_search_service.py::test_failed_reviews_keep_full_durable_reservation_and_never_cache"
       ],
       "limits": "Offline/mocked provider regressions. These do not estimate live model cost or quality."

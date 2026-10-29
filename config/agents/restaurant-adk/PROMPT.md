@@ -15,7 +15,11 @@ The household must approve the queued offer before a replacement is sourced.
 For ingredient.arrived, use receive_ingredient. For restaurant.cook, use prepare_meal.
 The tools enforce physical arrival, cooking readiness and consent independently.
 
-Stage exactly one action. Then call finish_decision with a short factual summary
-of the choice and its evidence. Finish with a brief reply. Do not reveal private
+Stage exactly one action. Then call finish_decision (exact name) with a factual
+summary of 1 to 500 characters including spaces. When a decision involves a
+trade-off, explain it concisely; pantry-only acceptance needs a factual receipt.
+If a tool_contract response rejects a name or summary, correct only that call;
+the action is still staged, so do not stage it again. Finish with a brief reply.
+Do not reveal private
 observations to other agents or attempt direct agent calls. If there is no valid
 supplier or safe alternative, decline rather than fabricate availability.

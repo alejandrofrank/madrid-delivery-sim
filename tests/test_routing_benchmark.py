@@ -13,6 +13,119 @@ ROOT = Path(__file__).resolve().parents[1]
 
 
 @pytest.fixture
+def contracts(benchmark, monkeypatch):
+    module = importlib.import_module("verify_adk_contracts")
+
+    def forbidden(*args, **kwargs):
+        raise AssertionError("Contract harness tests must not dispatch providers or access DB")
+
+    for name in ("connect", "migrate", "new_supply", "provision", "run_supply", "finish_arm"):
+        monkeypatch.setattr(module, name, forbidden)
+    return module
+
+
+def test_contract_plan_caps_and_direct_probe_fence_all_secondary_models(contracts, profile):
+    cases = contracts.planned_cases(profile)
+    budget = contracts.admission(cases)
+    assert Decimal(budget["vertex_admission_limit_usd"]) == Decimal(".12")
+    assert Decimal(budget["jev_conservative_admission_usd"]) == Decimal(".0015")
+    assert Decimal(budget["combined_conservative_admission_usd"]) == Decimal(".1215")
+    direct = next(
+        e["agent"] for e in cases[0]["configuration"]["entities"] if e["kind"] == "restaurant"
+    )
+    assert direct["brain"]["provider"] == "offline"
+    assert direct["brain"]["reserved_tokens_per_run"] == 1
+    assert cases[0]["configuration"]["restaurant_stock_servings"] == 2
+    for case in cases:
+        agent = next(
+            e["agent"] for e in case["configuration"]["entities"] if e["kind"] == "restaurant"
+        )
+        assert agent["brain"]["routing"]["confidence_threshold"] == 0.85
+        assert agent["brain"]["routing"]["calls_per_run"] == 1
+        assert agent["search"]["calls_limit"] == 0
+    for altered in ([*cases, cases[0]], list(reversed(cases))):
+        with pytest.raises(PermissionError):
+            contracts.admission(altered)
+    direct["brain"]["reserved_tokens_per_run"] = 1024
+    with pytest.raises(PermissionError, match="fence"):
+        contracts.admission(cases)
+
+
+def test_direct_proof_cannot_hide_an_offline_or_gemini_call(contracts, route):
+    direct = copy.deepcopy(route)
+    direct.update(
+        executor="jev", decision={"action": "confirm"}, reason="confident_bounded_jev_decision"
+    )
+    direct["response_body"]["answers"]["executor"].update(
+        choice="direct", probabilities={"direct": 0.95, "gemini": 0.05}
+    )
+    direct["response_body"]["answers"]["action"].update(
+        choice="confirm", probabilities={"source": 0.05, "confirm": 0.9, "decline": 0.05}
+    )
+    case = {
+        "id": "pantry-direct",
+        "evidence": {
+            "calls": [],
+            "turns": [{"result": {"summary": "Pantry covers recipe."}}],
+            "jev_calls": [],
+        },
+        "route_decisions": [direct],
+        "cost": {"unknown_calls": 0, "vertex_usd": "0"},
+    }
+    assert all(contracts.verification_checks(case).values())
+    for provider in ("offline", "vertex"):
+        case["evidence"]["calls"] = [{"provider": provider}]
+        assert contracts.verification_checks(case)["zero_secondary_model_dispatches"] is False
+    case["evidence"]["calls"] = []
+    direct["response_body"]["answers"]["executor"]["choice"] = "gemini"
+    assert not contracts.verification_checks(case)["real_jev_direct_confirmation"]
+
+
+def test_reviewed_followup_retains_prior_reservations_and_never_repeats_gemini(
+    contracts, benchmark, profile, evidence, route
+):
+    evidence["calls"] = []
+    evidence["jev_calls"] = []
+    cost = benchmark.account_evidence(evidence, [route])["cost"]
+    previous = {
+        "status": "failed",
+        "arms": [
+            {
+                "id": "pantry-direct",
+                "status": "failed",
+                "run": "old-probe",
+                "evidence": evidence,
+                "route_decisions": [route],
+                "cost": cost,
+                "provider_calls": {"gemini": 0},
+            },
+            {"status": "planned", "run": None},
+            {"status": "planned", "run": None},
+        ],
+    }
+    budget = contracts.admission(contracts.planned_cases(profile))
+    carry = contracts.followup_budget(previous, budget)
+    assert Decimal(carry["prior_total_accounted_usd"]) >= Decimal(route["reserved_usd"])
+    changed = copy.deepcopy(previous)
+    changed["arms"][0]["cost"]["accounted_usd"] = "0"
+    with pytest.raises(PermissionError):
+        contracts.followup_budget(changed, budget)
+    next_attempt = copy.deepcopy(previous)
+    next_attempt["previous_attempt"] = previous
+    next_attempt["carryover"] = carry
+    combined = contracts.followup_budget(next_attempt, budget)
+    assert Decimal(combined["prior_jev_accounted_usd"]) == 2 * Decimal(
+        carry["prior_jev_accounted_usd"]
+    )
+    next_attempt["carryover"] = {}
+    with pytest.raises(PermissionError, match="carryover"):
+        contracts.followup_budget(next_attempt, budget)
+    previous["arms"][1].update(status="failed", run="attempted-gemini")
+    with pytest.raises(PermissionError):
+        contracts.followup_budget(previous, budget)
+
+
+@pytest.fixture
 def benchmark(monkeypatch):
     def forbidden(*args, **kwargs):
         raise AssertionError("Benchmark regression checks cannot access DB or provider services")

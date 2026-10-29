@@ -210,10 +210,10 @@
     }
     document.getElementById("comparison").replaceChildren(wrap);
   }
-  function renderRouting(data) {
-    const arms = list(data.arms), state = document.getElementById("route-state");
-    const summary = document.getElementById("route-summary"), comparison = document.getElementById("route-comparison");
-    const outcomes = document.getElementById("route-outcomes"), traces = document.getElementById("route-traces");
+  function renderRouting(data, prefix = "route") {
+    const arms = list(data.arms), state = document.getElementById(`${prefix}-state`);
+    const summary = document.getElementById(`${prefix}-summary`), comparison = document.getElementById(`${prefix}-comparison`);
+    const outcomes = document.getElementById(`${prefix}-outcomes`), traces = document.getElementById(`${prefix}-traces`);
     comparison.replaceChildren(); outcomes.replaceChildren(); traces.replaceChildren();
     const created = data.created_at ? new Date(data.created_at).toLocaleString() : "Date unavailable";
     state.textContent = `${label(data.status || "retained")} · ${created} · ${arms.length} retained arm(s)`;
@@ -243,6 +243,14 @@
     }
     comparisonDeltas(outcomes, data);
     if (data.budget) disclosure(outcomes, "Frozen comparison admission ceilings and accounted usage", {budget: data.budget, accounting: data.accounting});
+    if (prefix === "contract" && data.previous_attempt) {
+      let known = 0, attempts = 0, cursor = data;
+      while (cursor) {
+        known += list(cursor.arms).reduce((sum, arm) => sum + Number(arm.cost?.total_usd || 0), 0);
+        attempts += 1; cursor = cursor.previous_attempt;
+      }
+      outcomes.append(node("p", `${attempts} retained attempts · cumulative known token cost ${usd(known)} · conservative accounting ${usd(data.accounting?.total_accounted_usd)} · shared cap ${usd(data.budget?.total_ceiling_usd)}. Includes stopped probes; invoice reconciliation pending.`, "note"));
+    }
     for (const arm of arms) {
       const section = node("section", undefined, "profile route-profile"), header = node("div", undefined, "profile-header");
       header.append(node("h3", `${arm.label || arm.id || "Unnamed arm"}${arm.soul ? ` · ${arm.soul} SOUL` : ""}`));
@@ -260,6 +268,7 @@
       section.append(details); armBuildingBlocks(section, arm); traces.append(section);
     }
     disclosure(traces, "Retained routing comparison JSON", data);
+    if (data.previous_attempt) disclosure(traces, "Earlier verification attempt · retained failure and accounted cost", data.previous_attempt);
     outcomes.append(node("p", "Costs use retained provider usage and the recorded tariff. Missing usage is unknown. Provider medians use measured Gemini and Jev router calls; older aggregate search timings are shown separately. Baseline and cascade provider mixes may differ. This page makes no model calls.", "note"));
   }
   async function loadModelComparison() {
@@ -279,9 +288,16 @@
       document.getElementById("route-state").textContent = `${error.message}${retained ? " Previously loaded evidence remains below." : " This does not affect the SOUL comparison."}`;
     }
   }
+  async function loadContractVerification() {
+    try {
+      const response = await fetch("/api/supply/contract-verification", {cache:"no-store"});
+      if (!response.ok) throw new Error(response.status === 404 ? "No retained contract verification yet." : "Contract evidence is temporarily unavailable.");
+      renderRouting(await response.json(), "contract");
+    } catch (error) { document.getElementById("contract-state").textContent = error.message; }
+  }
   async function load() {
     const refresh = document.getElementById("refresh"); refresh.disabled = true;
-    try { await Promise.allSettled([loadModelComparison(), loadRoutingComparison()]); }
+    try { await Promise.allSettled([loadModelComparison(), loadRoutingComparison(), loadContractVerification()]); }
     finally { refresh.disabled = false; }
   }
   document.getElementById("refresh").addEventListener("click",load);load();
