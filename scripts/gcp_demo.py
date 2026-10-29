@@ -24,6 +24,19 @@ RUNTIME = {
     "google_cloud_run_v2_service.judge[0]",
     "google_cloud_run_v2_service_iam_binding.invoker[0]",
 }
+OBSERVABILITY_PREFIXES = (
+    "google_bigquery_dataset.analytics[",
+    "google_bigquery_table.analytics[",
+    "google_project_service.observability[",
+    "google_project_iam_member.trace_writer[",
+    "google_project_iam_member.runtime_trace_writer[",
+    "google_bigquery_dataset_iam_member.analytics_writer[",
+    "google_bigquery_dataset_iam_member.runtime_analytics_writer[",
+)
+
+
+def observability_resources(state: dict[str, Any]) -> list[str]:
+    return sorted(address for address in state if address.startswith(OBSERVABILITY_PREFIXES))
 
 
 class DemoError(RuntimeError):
@@ -250,6 +263,16 @@ class Demo:
             local_error = str(exc)
             print("Local app reset failed; continuing cloud cleanup.", flush=True)
         state = self.state()
+        if observability_resources(state) or any(
+            self.config.get(flag) for flag in ("enable_analytics", "enable_cloud_trace")
+        ):
+            raise DemoError(
+                "Cloud observability remains configured. Stop exporters and export/back up "
+                "retained analytics, then explicitly disable enable_analytics and "
+                "enable_cloud_trace with Terraform before parking. Apply "
+                "analytics_deletion_protection=false before deleting tables. "
+                "Billing and cloud resources were not changed."
+            )
         if RUNTIME.intersection(state):
             if not self.billing():
                 raise DemoError(
@@ -284,17 +307,26 @@ class Demo:
         except (OSError, ValueError):
             modes = None
         runtime = sorted(RUNTIME.intersection(state))
+        observability = observability_resources(state)
         return dict(
             project=self.project,
             lifecycle=project["lifecycleState"],
             billing_enabled=enabled,
             runtime_in_state=runtime,
+            observability_in_state=observability,
+            analytics_retained=any(
+                address.startswith("google_bigquery_") for address in observability
+            ),
             cloud_run_services=len(services),
             artifact_repositories=len(repositories) if repositories is not None else None,
             artifact_check="live" if enabled else "unavailable_without_billing",
-            foundation_resources=len(set(state) - RUNTIME),
+            foundation_resources=len(set(state) - RUNTIME - set(observability)),
             agent_modes=modes,
-            mode="parked" if not enabled and not runtime and not services else "cloud-enabled",
+            mode=(
+                "parked"
+                if not enabled and not runtime and not services and not observability
+                else "cloud-enabled"
+            ),
             lifecycle_command_running=(self.infra / ".demo-command.lock").exists(),
             inference_calls_from_lifecycle_commands=0,
         )
@@ -302,6 +334,14 @@ class Demo:
 
 # An automated lifecycle command may change billable resources, not the free foundation.
 def validate_plan(plan: dict[str, Any], project: str, phase: str) -> None:
+    if phase == "unlink-billing" and any(
+        change["address"].startswith(OBSERVABILITY_PREFIXES)
+        and change["change"].get("after")
+        for change in plan.get("resource_changes", [])
+    ):
+        raise DemoError(
+            "Plan rejected: explicitly retire cloud observability before unlinking billing."
+        )
     allowed = {
         "bootstrap": {"create"},
         "deploy": {"create", "update"},

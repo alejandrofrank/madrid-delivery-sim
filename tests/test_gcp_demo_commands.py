@@ -136,6 +136,54 @@ def test_stop_already_parked_never_relinks_billing(demo):
 
 
 @pytest.mark.parametrize(
+    "address",
+    [
+        "google_bigquery_dataset.analytics[0]",
+        'google_bigquery_table.analytics["orders"]',
+        "google_project_iam_member.trace_writer[0]",
+        'google_project_iam_member.runtime_trace_writer["restaurant"]',
+        'google_bigquery_dataset_iam_member.runtime_analytics_writer["judge"]',
+    ],
+)
+def test_stop_preserves_observability_data_and_billing_for_explicit_retirement(demo, address):
+    demo.compose = Mock()
+    demo.state = Mock(return_value={address: {"project": PROJECT}})
+    demo.apply = Mock()
+    with pytest.raises(DemoError, match="export/back up retained analytics"):
+        demo.stop()
+    demo.compose.assert_called_once_with(False)
+    demo.apply.assert_not_called()
+
+
+def test_stop_rejects_configured_analytics_before_first_apply(demo):
+    demo.config["enable_analytics"] = True
+    demo.compose = Mock()
+    demo.state = Mock(return_value={})
+    demo.apply = Mock()
+    with pytest.raises(DemoError, match="Cloud observability remains configured"):
+        demo.stop()
+    demo.apply.assert_not_called()
+
+
+def test_unlink_plan_rejects_retained_analytics_even_when_unchanged():
+    with pytest.raises(DemoError, match="retire cloud observability"):
+        validate_plan(
+            {
+                "resource_changes": [
+                    change(
+                        "google_bigquery_dataset.analytics[0]",
+                        ["no-op"],
+                        before={"project": PROJECT},
+                        after={"project": PROJECT},
+                    )
+                ]
+            },
+            PROJECT,
+            "unlink-billing",
+        )
+
+
+@pytest.mark.parametrize(
     "error", [DemoError("Docker unavailable"), module.subprocess.TimeoutExpired("docker", 900)]
 )
 def test_cloud_cleanup_continues_when_local_app_is_unavailable(demo, error):
@@ -229,6 +277,18 @@ def test_status_does_not_enable_billing_to_list_artifacts(demo):
     assert result["mode"] == "parked"
     assert result["artifact_repositories"] is None
     assert not any("artifacts" in call.args for call in demo.cloud.call_args_list)
+
+
+def test_status_reports_analytics_storage_even_with_billing_disabled(demo):
+    demo.state = Mock(return_value={"google_bigquery_dataset.analytics[0]": {}})
+    demo.billing = Mock(return_value=False)
+    demo.cloud = Mock(side_effect=[{"lifecycleState": "ACTIVE"}, []])
+    demo.local = Mock(return_value={"local": True, "gcp_ai": False})
+    result = demo.status()
+    assert result["mode"] == "cloud-enabled"
+    assert result["analytics_retained"] is True
+    assert result["observability_in_state"] == ["google_bigquery_dataset.analytics[0]"]
+    assert result["foundation_resources"] == 0
 
 
 def test_concurrent_lifecycle_commands_are_blocked(demo):
