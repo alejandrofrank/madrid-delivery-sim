@@ -1,5 +1,27 @@
 # Status
 
+2026-10-29 (`feat/evals`): Added native Google ADK restaurant/customer-service
+evalsets, tested through both AgentEvaluator and `adk eval` with network access
+denied. Twenty scripted cases pass across sixty fresh attempts at zero model
+cost. Migration-019 trajectory scoring measures tool precision/recall, argument
+differences, ordering, steps and recovery, including terminal tool receipts.
+Golden case 001 preserves the cost-mode invented `finish_finish_decision` failure;
+the promotion command writes immutable, reviewed versions. Schema, length and
+invented-tool checks precede semantic judging. Reports now include empirical
+pass^k, case-bootstrap 95% intervals, cost per success and p95 latency.
+
+PR evaluation compares matching main artifacts using per-category thresholds,
+paired significance tests and multiplicity correction, with a red/green comment.
+Main will publish its first baseline after this workflow lands; until then the
+gate explicitly reports baseline missing, without a quality-comparison claim.
+The optional Vertex pointwise judge is manual-only, Flash-Lite, cost-capped and
+tested with mocked transport; no paid evaluation ran. User-simulator personas are
+schema-validated scaffolds only. The docs site covers error analysis, promotion,
+statistics and gate operation. Verification: 659 full-suite tests passed, Ruff,
+mypy over 60 modules, both native ADK entrypoints and workflow syntax validation;
+additional targeted recovery/judge checks passed. Clean committed-snapshot
+verification is recorded in the follow-up entry when complete.
+
 2026-10-29 (Google stack portfolio branch): Migrated customer advice to the real
 Google ADK Runner with a scripted offline model, bounded schema/request, durable
 budget admission and the existing rules/refund fallback. Added dispatcher and

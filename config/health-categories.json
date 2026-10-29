@@ -33,7 +33,9 @@
         "tests/test_adk_restaurant.py",
         "tests/test_adk_evidence.py",
         "tests/test_jev_routing.py",
-        "tests/test_routing_benchmark.py"
+        "tests/test_routing_benchmark.py",
+        "tests/test_adk_evalsets.py",
+        "tests/test_trajectory_evals.py"
       ]
     },
     {
@@ -134,7 +136,8 @@
         "tests/test_gateway_policy.py",
         "tests/test_judge_evals.py",
         "tests/test_gcp_demo_commands.py",
-        "tests/test_local_defaults.py"
+        "tests/test_local_defaults.py",
+        "tests/test_vertex_eval.py"
       ]
     },
     {
@@ -144,7 +147,9 @@
       "files": [
         "tests/test_health.py",
         "tests/test_health_report.py",
-        "tests/test_scenario_evals.py"
+        "tests/test_scenario_evals.py",
+        "tests/test_eval_statistics.py",
+        "tests/test_eval_gate.py"
       ]
     }
   ],
