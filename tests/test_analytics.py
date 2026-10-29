@@ -1,10 +1,12 @@
 from __future__ import annotations
 
+import json
 import logging
 import threading
 from collections import deque
 from collections.abc import Mapping, Sequence
 from concurrent.futures import ThreadPoolExecutor
+from pathlib import Path
 from typing import Any
 
 import pytest
@@ -52,6 +54,19 @@ def row(case: str = "case-1") -> dict[str, Any]:
         "agent": "restaurant", "case_id": case, "passed": True,
         "observed_at": "2026-10-29T12:00:00+02:00",
     }
+
+
+def test_writer_fields_match_deployed_bigquery_schemas() -> None:
+    schema_dir = Path(__file__).resolve().parents[1] / "infra/gcp-ai/schemas"
+    for table, fields in analytics.FIELDS.items():
+        schema = json.loads((schema_dir / f"{table}.json").read_text())
+        by_name = {field["name"]: field for field in schema}
+        assert fields == by_name.keys(), table
+        assert by_name["observed_at"]["type"] == "TIMESTAMP"
+        for name in ("event_id", "observed_at", "agent"):
+            assert by_name[name]["mode"] == "REQUIRED"
+        for name in fields & {"latency_ms", "cost_usd"}:
+            assert by_name[name]["type"] in {"FLOAT", "FLOAT64"}
 
 
 def test_disabled_writer_never_loads_client_or_starts_worker(
@@ -295,7 +310,11 @@ def test_span_exporter_maps_only_allowed_fields_and_terminal_order() -> None:
     assert sum(table == "agent_steps" for table, _ in rows) == 4
     orders = [row for table, row in rows if table == "orders"]
     assert len(orders) == 2 and orders[0]["success"]
-    assert orders[0]["event_id"] == orders[1]["event_id"]
+    # Different acknowledgements must not reuse insertId with different timing
+    # facts: BigQuery's best-effort dedupe can retain either occurrence. SQL
+    # chooses the earliest observed terminal span per lifecycle trace instead.
+    assert orders[0]["event_id"] != orders[1]["event_id"]
+    assert orders[0]["trace_id"] == orders[1]["trace_id"]
     assert orders[0]["latency_ms"] == 1200
     steps = [row for table, row in rows if table == "agent_steps"]
     assert sum(row.get("cost_usd", 0) for row in steps) == 0.003
@@ -303,6 +322,27 @@ def test_span_exporter_maps_only_allowed_fields_and_terminal_order() -> None:
     assert "private" not in str(rows)
     provider.shutdown()
     assert client.closed
+
+
+def test_reexporting_same_terminal_span_keeps_identical_row_and_insert_id() -> None:
+    client = FakeClient()
+    writer = writer_for(client)
+    provider = TracerProvider()
+    with provider.get_tracer("test").start_as_current_span("order.complete", attributes={
+        "delivery.order_id": "order-1", "delivery.order.terminal": True,
+        "delivery.order.success": True, "delivery.order.latency_ms": 1200,
+    }) as span:
+        pass
+    exporter = AnalyticsSpanExporter(writer)
+    assert exporter.export([span]) == SpanExportResult.SUCCESS
+    assert exporter.export([span]) == SpanExportResult.SUCCESS
+    assert writer.flush()
+    orders = [call for call in client.calls if call["table"].endswith(".orders")]
+    assert len(orders) == 1
+    assert orders[0]["row_ids"][0] == orders[0]["row_ids"][1]
+    assert orders[0]["rows"][0] == orders[0]["rows"][1]
+    writer.shutdown()
+    provider.shutdown()
 
 
 def test_exporter_reports_queue_overflow_without_throwing() -> None:

@@ -54,6 +54,8 @@ def export_scenarios(
     )
     rows = []
     attempts = [*receipt.reproduction.previous_results, receipt.results]
+    configurations = [*receipt.reproduction.previous_configurations, receipt.configurations]
+    inputs_changed = any(config != configurations[0] for config in configurations[1:])
     for repetition, outcomes in enumerate(attempts, 1):
         by_id = {outcome.id: outcome for outcome in outcomes}
         for case in manifest.cases:
@@ -62,6 +64,7 @@ def export_scenarios(
                 outcome
                 and not outcome.error
                 and not receipt.source_changed
+                and not inputs_changed
                 and all(
                     type(outcome.observed.get(check.id)) is type(check.expected)
                     and outcome.observed.get(check.id) == check.expected
@@ -71,6 +74,8 @@ def export_scenarios(
             category = (
                 "source_changed"
                 if receipt.source_changed
+                else "input_changed"
+                if inputs_changed
                 else "missing"
                 if outcome is None
                 else outcome.error or "criteria"

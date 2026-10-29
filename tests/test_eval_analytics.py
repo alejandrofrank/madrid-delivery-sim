@@ -102,6 +102,16 @@ def test_analytics_outage_does_not_change_local_receipt_or_leak_errors(caplog):
     assert "secret-credential" not in caplog.text
 
 
+def test_changed_repeat_inputs_cannot_publish_green_analytics():
+    manifest, receipt = scenario_receipt()
+    receipt.reproduction.previous_configurations = [dict(receipt.configurations)]
+    fixture = next(iter(receipt.configurations))
+    receipt.reproduction.previous_configurations[0][fixture] = "c" * 64
+    writer = Writer()
+    export_scenarios(manifest, receipt, writer=writer)
+    assert all(not row["passed"] and row["category"] == "input_changed" for row in writer.rows)
+
+
 def judge_report():
     return {
         "created_at": "2026-10-29T00:00:00+00:00",

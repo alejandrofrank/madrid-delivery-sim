@@ -400,9 +400,6 @@ def _span_rows(span: Any) -> list[tuple[str, dict[str, Any]]]:
     if attrs.get("delivery.order.terminal") is True:
         result.append(("orders", {
             **{key: row.get(key) for key in _COMMON}, "status": status,
-            "event_id": uuid.uuid5(
-                uuid.NAMESPACE_URL, f"mds.order:{trace_id}:{row.get('order_id')}"
-            ).hex,
             "success": attrs.get("delivery.order.success", attrs.get("delivery.success")),
             "latency_ms": attrs.get("delivery.order.latency_ms"),
         }))
