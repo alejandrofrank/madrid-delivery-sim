@@ -2,6 +2,8 @@
 
 import copy
 import importlib
+import json
+from argparse import Namespace
 from decimal import Decimal
 from pathlib import Path
 
@@ -316,3 +318,224 @@ def test_report_withholds_savings_for_unknown_usage_or_unproven_jev_escalation(b
     assert receipt["status"] == "failed"
     assert receipt["comparisons"][0]["cost_savings_usd"] is None
     assert receipt["outcome_comparison"]["reasoning_jev_requested_gemini"] is False
+
+
+def stopped_receipt(benchmark, profile, evidence, route, output):
+    arms = benchmark.planned_arms(profile)
+    budget = benchmark.admission_plan(arms)
+    for index, arm in enumerate(arms[:4]):
+        raw = copy.deepcopy(evidence)
+        raw["routing_decisions"] = [copy.deepcopy(route)] if arm["variant"] == "cascade" else []
+        arm.update(
+            status="failed" if index == 3 else "completed",
+            run=f"original-run-{index}",
+            evidence=raw,
+            supplier=arm["expected_supplier"],
+            outcome_checks={"delivered": index != 3},
+            **benchmark.account_evidence(raw, raw["routing_decisions"]),
+        )
+    receipt = {
+        "status": "partial",
+        "created_at": "2026-10-29T12:00:00+00:00",
+        "source_fingerprint": "a" * 64,
+        "profile": profile.model_dump(mode="json"),
+        "jev_model": "jev-1.14.0",
+        "budget": budget,
+        "arms": arms,
+        "execution_error": "PermissionError",
+    }
+    benchmark.update_report(receipt, final=True)
+    marker = {"created_at": receipt["created_at"], "receipt": str(output), "budget": budget}
+    return receipt, marker
+
+
+def test_continuation_selects_only_untouched_plans_without_mutating_prior_arms(
+    benchmark,
+    profile,
+    evidence,
+    route,
+    tmp_path,
+):
+    output = tmp_path / "receipt.json"
+    receipt, marker = stopped_receipt(benchmark, profile, evidence, route, output)
+    prior = copy.deepcopy(receipt)
+    selected = benchmark.continuation_arms(
+        receipt,
+        marker,
+        benchmark.planned_arms(profile),
+        profile,
+        receipt["budget"],
+        output,
+    )
+    assert [arm["id"] for arm in selected] == ["reasoning-baseline", "reasoning-cascade"]
+    assert receipt == prior
+    assert selected[0] is receipt["arms"][4]
+
+
+@pytest.mark.parametrize(
+    "tamper",
+    [
+        "source",
+        "profile",
+        "caps",
+        "duplicate_arm",
+        "config",
+        "planned_run",
+        "planned_cost",
+        "active_run",
+        "duplicate_run",
+        "prior_cost",
+        "spending_header",
+        "prior_continuation",
+    ],
+)
+def test_continuation_refuses_changed_evidence_or_existing_runs(
+    benchmark,
+    profile,
+    evidence,
+    route,
+    tmp_path,
+    tamper,
+):
+    output = tmp_path / "receipt.json"
+    receipt, marker = stopped_receipt(benchmark, profile, evidence, route, output)
+    expected_budget = copy.deepcopy(receipt["budget"])
+    if tamper == "source":
+        receipt["source_fingerprint"] = ""
+    elif tamper == "profile":
+        receipt["profile"]["model"] = "gemini-other"
+    elif tamper == "caps":
+        receipt["budget"]["total_ceiling_usd"] = "1.00"
+    elif tamper == "duplicate_arm":
+        receipt["arms"][5]["id"] = receipt["arms"][4]["id"]
+    elif tamper == "config":
+        receipt["arms"][4]["configuration"]["seed"] += 1
+    elif tamper == "planned_run":
+        receipt["arms"][4]["run"] = "already-created"
+    elif tamper == "planned_cost":
+        receipt["arms"][4]["cost"] = {"total_usd": "0"}
+    elif tamper == "active_run":
+        receipt["arms"][3]["status"] = "running"
+    elif tamper == "duplicate_run":
+        receipt["arms"][3]["run"] = receipt["arms"][0]["run"]
+    elif tamper == "prior_cost":
+        receipt["arms"][3]["cost"]["accounted_usd"] = "0"
+    elif tamper == "spending_header":
+        receipt["accounting"]["total_accounted_usd"] = "0"
+    else:
+        receipt["continuations"] = [{"status": "claimed"}]
+    with pytest.raises(PermissionError):
+        benchmark.continuation_arms(
+            receipt,
+            marker,
+            benchmark.planned_arms(profile),
+            profile,
+            expected_budget,
+            output,
+        )
+
+
+def test_continuation_keeps_prior_spend_in_remaining_admission(
+    benchmark,
+    profile,
+    evidence,
+    route,
+    tmp_path,
+):
+    output = tmp_path / "receipt.json"
+    receipt, marker = stopped_receipt(benchmark, profile, evidence, route, output)
+    raw = receipt["arms"][0]["evidence"]
+    raw["calls"][0].update(usage_cost_usd=".50", reserved_usd=".50")
+    receipt["arms"][0].update(**benchmark.account_evidence(raw, raw["routing_decisions"]))
+    benchmark.update_report(receipt, final=True)
+    with pytest.raises(PermissionError, match="cumulative caps"):
+        benchmark.continuation_arms(
+            receipt,
+            marker,
+            benchmark.planned_arms(profile),
+            profile,
+            receipt["budget"],
+            output,
+        )
+
+
+def test_dispatch_rejects_existing_runs_before_any_database_work(benchmark, profile, tmp_path):
+    arm = benchmark.planned_arms(profile)[0]
+    arm.update(run="existing-run", status="failed")
+    with pytest.raises(PermissionError, match="untouched"):
+        benchmark.dispatch_arms({"arms": [arm]}, [arm], tmp_path / "receipt.json", profile)
+
+
+def test_launcher_requires_explicit_review_for_planned_continuation(benchmark):
+    launcher = importlib.import_module("run_adk_vertex")
+    args = Namespace(
+        routing_comparison=True,
+        continue_planned=True,
+        reviewed_failure=True,
+        resume=False,
+        after_review=False,
+    )
+    assert launcher.routing_continuation_flags(args) == ["--continue-planned", "--reviewed-failure"]
+    for field in ("reviewed_failure", "routing_comparison"):
+        with pytest.raises(launcher.DemoError):
+            launcher.routing_continuation_flags(Namespace(**{**vars(args), field: False}))
+
+
+def test_reviewed_continuation_preserves_failed_arm_and_permanent_claim(
+    benchmark,
+    profile,
+    evidence,
+    route,
+    tmp_path,
+    monkeypatch,
+):
+    experiment = tmp_path / "experiment"
+    experiment.mkdir()
+    output = tmp_path / "artifacts/adk-route-comparison.json"
+    output.parent.mkdir()
+    receipt, marker = stopped_receipt(benchmark, profile, evidence, route, output)
+    benchmark.save_receipt(output, receipt)
+    original = copy.deepcopy(receipt["arms"][:4])
+    marker_path = experiment / "route-comparison.execution.json"
+    marker_path.write_text(json.dumps(marker))
+    monkeypatch.setattr(benchmark, "__file__", str(tmp_path / "scripts/compare_agent_routing.py"))
+    monkeypatch.setattr(benchmark, "approved_profile", lambda: profile)
+    monkeypatch.setattr(benchmark, "source_fingerprint", lambda root: "b" * 64)
+    monkeypatch.setenv("DELIVERY_ADK_EXPERIMENT_DIRECTORY", str(experiment))
+    monkeypatch.setattr(
+        "sys.argv", ["comparison", "--paid", "--continue-planned", "--reviewed-failure"]
+    )
+    dispatched = []
+
+    def fake_dispatch(saved, selected, path, approved):
+        dispatched.extend(arm["id"] for arm in selected)
+        for arm in selected:
+            raw = copy.deepcopy(evidence)
+            raw["routing_decisions"] = [copy.deepcopy(route)] if arm["variant"] == "cascade" else []
+            arm.update(
+                status="completed",
+                run=f"new-{arm['id']}",
+                evidence=raw,
+                outcome_checks={"delivered": True},
+                supplier=arm["expected_supplier"],
+                actual_gemini_escalation=True,
+                reasoning_jev_requested_gemini=True,
+                **benchmark.account_evidence(raw, raw["routing_decisions"]),
+            )
+
+    monkeypatch.setattr(benchmark, "dispatch_arms", fake_dispatch)
+    with pytest.raises(RuntimeError, match="original failed arms"):
+        benchmark.main()
+    saved = json.loads(output.read_text())
+    assert dispatched == ["reasoning-baseline", "reasoning-cascade"]
+    assert saved["status"] == "failed" and saved["arms"][:4] == original
+    assert saved["source_fingerprint"] == "a" * 64
+    assert saved["execution_error"] == "PermissionError"
+    assert json.loads(marker_path.read_text()) == marker
+    claim = json.loads((experiment / "route-comparison.continuation.execution.json").read_text())
+    assert claim["status"] == "completed_planned_arms"
+    assert claim["preserved_arms_unchanged"] is True
+    assert claim["final_receipt_status"] == "failed"
+    with pytest.raises(PermissionError, match="only once"):
+        benchmark.main()
+    assert len(dispatched) == 2

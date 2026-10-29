@@ -1,23 +1,26 @@
-"""One explicit paid, six-run routing comparison; never resume or retry dispatch.
+"""One explicit paid six-run comparison; a reviewed continuation can start untouched plans.
 
 The permanent execution marker uses a dedicated operator-mounted experiment
-directory, independently of the retained UI receipt. An interrupted run requires
-operator inspection, not another invocation. Admission ceilings are $0.54 Vertex
+directory, independently of the retained UI receipt. Existing runs are never
+resumed or replaced. Admission ceilings remain $0.54 Vertex
 and <$0.01 Jev, within $0.60 total.
 """
 
 import argparse
+import copy
 import hashlib
 import json
 import math
 import os
 import statistics
 import time
+from contextlib import contextmanager
 from datetime import UTC, datetime
 from decimal import Decimal
 from pathlib import Path
 from typing import Any
 from urllib.parse import urlsplit
+from uuid import uuid4
 
 from demo_adk_restaurants import configuration
 from demo_adk_vertex import save_receipt
@@ -215,6 +218,139 @@ def admission_plan(arms: list[dict[str, Any]]) -> dict[str, Any]:
         "combined_conservative_admission_usd": str(vertex + jev_admission),
         "total_ceiling_usd": str(TOTAL_LIMIT),
     }
+
+
+def continuation_arms(
+    receipt: dict[str, Any],
+    marker: dict[str, Any],
+    expected: list[dict[str, Any]],
+    profile: VertexProfile,
+    budget: dict[str, Any],
+    output: Path,
+) -> list[dict[str, Any]]:
+    """Select only untouched original plans after an explicit review; never recover a run."""
+    source = receipt.get("source_fingerprint", "")
+    if (
+        receipt.get("status") not in {"failed", "partial"}
+        or not isinstance(source, str)
+        or len(source) != 64
+        or any(character not in "0123456789abcdef" for character in source)
+        or not receipt.get("created_at")
+        or receipt.get("continuations")
+    ):
+        raise PermissionError("The original stopped evidence header must be reviewed and intact")
+    if (
+        receipt.get("profile") != profile.model_dump(mode="json")
+        or receipt.get("jev_model") != "jev-1.14.0"
+        or receipt.get("budget") != budget
+        or marker.get("budget") != budget
+        or marker.get("created_at") != receipt["created_at"]
+        or marker.get("receipt") != str(output)
+    ):
+        raise PermissionError(
+            "The original marker, approved profile and cumulative caps must match"
+        )
+    arms = receipt.get("arms")
+    if (
+        not isinstance(arms, list)
+        or len(arms) != 6
+        or not all(isinstance(arm, dict) for arm in arms)
+        or [arm.get("id") for arm in arms] != [arm["id"] for arm in expected]
+    ):
+        raise PermissionError(
+            "Exactly the six unique original arms must remain in their original order"
+        )
+    selected, used_runs = [], set()
+    vertex_spent = jev_spent = total_spent = Decimal(0)
+    failed = False
+    for arm, planned in zip(arms, expected, strict=True):
+        identity = (
+            "id",
+            "scenario",
+            "soul",
+            "variant",
+            "expected_supplier",
+            "memory_mode",
+            "configuration_sha256",
+            "soul_sha256",
+        )
+        if (
+            any(arm.get(key) != planned[key] for key in identity)
+            or fingerprint(arm.get("configuration")) != planned["configuration_sha256"]
+        ):
+            raise PermissionError("An original arm identity or frozen configuration was changed")
+        if arm.get("status") == "planned":
+            if fingerprint(arm) != fingerprint(planned):
+                raise PermissionError("A planned arm already contains a run or execution evidence")
+            selected.append(arm)
+            continue
+        if arm.get("status") not in {"completed", "failed"}:
+            raise PermissionError("An existing active or uncertain run cannot be resumed")
+        run = arm.get("run")
+        if not isinstance(run, str) or not run or run in used_runs:
+            raise PermissionError("Every attempted arm must retain its unique original run")
+        used_runs.add(run)
+        failed = failed or arm["status"] == "failed"
+        evidence = arm.get("evidence", {})
+        routes = evidence.get("routing_decisions", [])
+        try:
+            accounted = account_evidence(evidence, routes)
+            cost = accounted["cost"]
+            if arm.get("cost") != cost or arm.get("provider_calls") != accounted["provider_calls"]:
+                raise PermissionError(
+                    "Prior usage accounting differs from its raw retained receipts"
+                )
+            known_vertex = money(cost["accounted_usd"]) - money(cost["jev_accounted_usd"])
+            if not all(
+                value.is_finite() and value >= 0
+                for value in (
+                    known_vertex,
+                    money(cost["jev_accounted_usd"]),
+                    money(cost["accounted_usd"]),
+                )
+            ):
+                raise PermissionError("Prior spending cannot be discarded or reset")
+            vertex_spent += known_vertex
+            jev_spent += money(cost["jev_accounted_usd"])
+            total_spent += money(cost["accounted_usd"])
+        except (KeyError, TypeError, ValueError, ArithmeticError) as exc:
+            raise PermissionError("Prior raw receipts and spending must be complete") from exc
+    if not selected or not failed:
+        raise PermissionError(
+            "Continuation needs a reviewed failure and at least one untouched plan"
+        )
+    original_accounting = {
+        "vertex_reserved_usd": str(
+            sum(
+                (money(arm.get("cost", {}).get("vertex_reserved_usd")) for arm in arms),
+                Decimal(0),
+            )
+        ),
+        "jev_accounted_usd": str(jev_spent),
+        "total_accounted_usd": str(total_spent),
+    }
+    if receipt.get("accounting") != original_accounting:
+        raise PermissionError("The cumulative original spending header differs from its receipts")
+    remaining_vertex = remaining_jev = Decimal(0)
+    for arm in selected:
+        agent = next(
+            entity["agent"]
+            for entity in arm["configuration"]["entities"]
+            if entity["kind"] == "restaurant"
+        )
+        remaining_vertex += money(agent["brain"]["usd_limit"])
+        remaining_jev += Decimal(agent["search"]["input_tokens_limit"]) * JEV_TARIFF / MILLION
+        if agent["brain"].get("routing"):
+            remaining_jev += money(agent["brain"]["routing"]["usd_limit"])
+    if (
+        vertex_spent + remaining_vertex > VERTEX_LIMIT
+        or jev_spent + remaining_jev >= JEV_LIMIT
+        or total_spent + remaining_vertex + remaining_jev > TOTAL_LIMIT
+    ):
+        raise PermissionError(
+            "Prior spending plus untouched plans exceeds the original cumulative caps"
+        )
+    return selected
 
 
 def operator_receipts(run: str) -> tuple[str, dict[str, int], list[dict[str, Any]]]:
@@ -568,27 +704,13 @@ def update_report(receipt: dict[str, Any], final: bool = False) -> None:
             receipt["status"] = "partial"
 
 
-def main() -> None:
-    parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--paid", action="store_true", required=True)
-    args = parser.parse_args()
-    if not args.paid:
-        raise PermissionError("Explicit --paid approval is required")
-    profile = approved_profile()
-    arms = planned_arms(profile)
-    budget = admission_plan(arms)
-    root = Path(__file__).resolve().parents[1]
-    output = root / "artifacts/adk-route-comparison.json"
-    directory = os.environ.get("DELIVERY_ADK_EXPERIMENT_DIRECTORY")
-    if not directory or not Path(directory).is_absolute() or not Path(directory).is_dir():
-        raise PermissionError("A dedicated absolute experiment-marker directory must be mounted")
-    marker = Path(directory) / "route-comparison.execution.json"
-    if output.exists() or marker.exists():
-        raise PermissionError(
-            "A routing comparison was already started; inspect retained evidence. "
-            "No rerun or resume is permitted."
-        )
-    receipt: dict[str, Any] = {
+def initial_receipt(
+    root: Path,
+    profile: VertexProfile,
+    arms: list[dict[str, Any]],
+    budget: dict[str, Any],
+) -> dict[str, Any]:
+    return {
         "status": "running",
         "created_at": utc_now(),
         "source_fingerprint": source_fingerprint(root),
@@ -621,19 +743,21 @@ def main() -> None:
             ),
         },
     }
-    output.parent.mkdir(parents=True, exist_ok=True)
-    with marker.open("x", encoding="utf-8") as lock:
-        json.dump(
-            {"created_at": receipt["created_at"], "receipt": str(output), "budget": budget}, lock
-        )
-    save_receipt(output, receipt)
-    print(
-        "Starting one retained six-arm comparison; Vertex <= $0.54, Jev < $0.01, total <= $0.60.",
-        flush=True,
-    )
-    try:
-        migrate()
-        for arm in arms:
+
+
+def dispatch_arms(
+    receipt: dict[str, Any],
+    arms: list[dict[str, Any]],
+    output: Path,
+    profile: VertexProfile,
+) -> None:
+    if not arms or any(arm["status"] != "planned" or arm["run"] is not None for arm in arms):
+        raise PermissionError("Only untouched original plans can be dispatched")
+    migrate()
+    for arm in arms:
+        if arm["status"] != "planned" or arm["run"] is not None:
+            raise PermissionError("Only an untouched plan can create a new run")
+        try:
             arm["status"] = "creating"
             save_receipt(output, receipt)
             started = time.monotonic()
@@ -684,16 +808,153 @@ def main() -> None:
                 )
             ):
                 raise RuntimeError("An admission gate failed; remaining arms were not dispatched")
-    except Exception as exc:
-        receipt["execution_error"] = type(exc).__name__
-        raise
+        except Exception:
+            raise
+
+
+@contextmanager
+def exclusive_operation(directory: Path):
+    """Killed workers leave the lock for inspection; normal exits release only this lock."""
+    path = directory / "route-comparison.operation.lock"
+    with path.open("x", encoding="utf-8") as lock:
+        json.dump({"created_at": utc_now()}, lock)
+    try:
+        yield
     finally:
-        update_report(receipt, final=True)
+        path.unlink()
+
+
+def main() -> None:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--paid", action="store_true", required=True)
+    parser.add_argument("--continue-planned", action="store_true")
+    parser.add_argument("--reviewed-failure", action="store_true")
+    args = parser.parse_args()
+    if not args.paid or args.continue_planned != args.reviewed_failure:
+        raise PermissionError(
+            "Paid continuation requires both --continue-planned and --reviewed-failure"
+        )
+    profile = approved_profile()
+    expected = planned_arms(profile)
+    budget = admission_plan(expected)
+    root = Path(__file__).resolve().parents[1]
+    output = root / "artifacts/adk-route-comparison.json"
+    directory_name = os.environ.get("DELIVERY_ADK_EXPERIMENT_DIRECTORY")
+    if (
+        not directory_name
+        or not Path(directory_name).is_absolute()
+        or not Path(directory_name).is_dir()
+    ):
+        raise PermissionError("A dedicated absolute experiment-marker directory must be mounted")
+    directory = Path(directory_name)
+    marker = directory / "route-comparison.execution.json"
+    claim = directory / "route-comparison.continuation.execution.json"
+    with exclusive_operation(directory):
+        audit = None
+        preserved = {}
+        if args.continue_planned:
+            if not output.is_file() or not marker.is_file() or claim.exists():
+                raise PermissionError(
+                    "Original evidence and marker are required; "
+                    "continuation can be claimed only once"
+                )
+            raw_receipt = output.read_bytes()
+            receipt = json.loads(raw_receipt)
+            selected = continuation_arms(
+                receipt,
+                json.loads(marker.read_text(encoding="utf-8")),
+                expected,
+                profile,
+                budget,
+                output,
+            )
+            selected_ids = {arm["id"] for arm in selected}
+            preserved = {
+                arm["id"]: copy.deepcopy(arm)
+                for arm in receipt["arms"]
+                if arm["id"] not in selected_ids
+            }
+            audit = {
+                "operation_id": str(uuid4()),
+                "status": "claimed",
+                "created_at": utc_now(),
+                "reviewed_failure": True,
+                "reviewed_receipt_status": receipt["status"],
+                "reviewed_receipt_sha256": hashlib.sha256(raw_receipt).hexdigest(),
+                "reviewed_source_fingerprint": receipt["source_fingerprint"],
+                "continuation_source_fingerprint": source_fingerprint(root),
+                "planned_arm_ids": [arm["id"] for arm in selected],
+                "preserved_arm_sha256": {key: fingerprint(arm) for key, arm in preserved.items()},
+                "original_budget": copy.deepcopy(receipt["budget"]),
+                "reviewed_accounting": copy.deepcopy(receipt["accounting"]),
+            }
+            with claim.open("x", encoding="utf-8") as lock:
+                json.dump(audit, lock)
+            receipt["continuations"] = [audit]
+            receipt["status"] = "running"
+        else:
+            if output.exists() or marker.exists() or claim.exists():
+                raise PermissionError(
+                    "A routing comparison already exists; "
+                    "no replacement or automatic resumption is permitted"
+                )
+            receipt = initial_receipt(root, profile, expected, budget)
+            selected = receipt["arms"]
+            output.parent.mkdir(parents=True, exist_ok=True)
+            with marker.open("x", encoding="utf-8") as lock:
+                json.dump(
+                    {"created_at": receipt["created_at"], "receipt": str(output), "budget": budget},
+                    lock,
+                )
         save_receipt(output, receipt)
-        # Deliberately retain marker after success, failure, interruption or missing receipt.
+        print(
+            f"Dispatching {len(selected)} untouched planned arm(s); original Vertex <= $0.54, "
+            "Jev < $0.01 and total <= $0.60 ceilings remain cumulative.",
+            flush=True,
+        )
+        operation_error = None
+        try:
+            dispatch_arms(receipt, selected, output, profile)
+        except BaseException as exc:
+            operation_error = type(exc).__name__
+            if audit is None:
+                receipt["execution_error"] = operation_error
+            else:
+                audit["execution_error"] = operation_error
+            raise
+        finally:
+            if audit is not None:
+                untouched = all(
+                    fingerprint(arm) == audit["preserved_arm_sha256"][arm["id"]]
+                    for arm in receipt["arms"]
+                    if arm["id"] in preserved
+                )
+                if not untouched:
+                    receipt["arms"] = [preserved.get(arm["id"], arm) for arm in receipt["arms"]]
+                    audit["integrity_error"] = "Preserved arm changed; original restored"
+                audit.update(
+                    status="completed_planned_arms"
+                    if operation_error is None and untouched
+                    else "stopped",
+                    completed_at=utc_now(),
+                    attempted_arm_ids=[arm["id"] for arm in selected if arm["status"] != "planned"],
+                    preserved_arms_unchanged=untouched,
+                )
+            update_report(receipt, final=True)
+            save_receipt(output, receipt)
+            if audit is not None:
+                save_receipt(
+                    claim,
+                    {
+                        **audit,
+                        "final_receipt_status": receipt["status"],
+                        "final_receipt_sha256": hashlib.sha256(output.read_bytes()).hexdigest(),
+                    },
+                )
+            # Original and continuation claims remain permanently, including after failure.
     if receipt["status"] != "completed":
         raise RuntimeError(
-            "Comparison gates failed; inspect the saved receipt before any further work"
+            "Comparison gates failed; original failed arms remain in the saved evidence"
         )
 
 

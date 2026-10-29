@@ -21,13 +21,28 @@ def docker_path(path: Path) -> str:
     return value
 
 
+def routing_continuation_flags(args: argparse.Namespace) -> list[str]:
+    if (args.continue_planned or args.reviewed_failure) and not args.routing_comparison:
+        raise DemoError("Planned-arm continuation is available only for the routing comparison")
+    if args.continue_planned != args.reviewed_failure:
+        raise DemoError(
+            "Use both --continue-planned and --reviewed-failure after reviewing evidence"
+        )
+    if args.routing_comparison and (args.resume or args.after_review):
+        raise DemoError("Routing comparisons cannot resume failed runs or replace the experiment")
+    return ["--continue-planned", "--reviewed-failure"] if args.continue_planned else []
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--paid", action="store_true", required=True)
     parser.add_argument("--after-review", action="store_true")
     parser.add_argument("--resume", action="store_true")
     parser.add_argument("--routing-comparison", action="store_true")
+    parser.add_argument("--continue-planned", action="store_true")
+    parser.add_argument("--reviewed-failure", action="store_true")
     args = parser.parse_args()
+    continuation_flags = routing_continuation_flags(args)
     demo = Demo()
     state = demo.state()
     account = state.get("google_service_account.restaurant", {}).get("email")
@@ -35,8 +50,6 @@ def main() -> None:
         raise DemoError("Dedicated Terraform restaurant identity is missing")
     if not demo.billing():
         raise DemoError("Run vertex-start before this explicit paid test")
-    if args.routing_comparison and (args.resume or args.after_review):
-        raise DemoError("Routing comparisons never resume or automatically replace an experiment")
     if (
         not args.routing_comparison
         and (demo.root / "artifacts/.adk-live-comparison.lock").exists()
@@ -46,7 +59,19 @@ def main() -> None:
     experiment_dir = demo.root / ".env.adk-experiments"
     if args.routing_comparison:
         experiment_dir.mkdir(exist_ok=True)
-        if (experiment_dir / "route-comparison.execution.json").exists():
+        original_claim = experiment_dir / "route-comparison.execution.json"
+        continuation_claim = experiment_dir / "route-comparison.continuation.execution.json"
+        if args.continue_planned:
+            if (
+                not original_claim.is_file()
+                or not (demo.root / "artifacts/adk-route-comparison.json").is_file()
+                or continuation_claim.exists()
+                or (experiment_dir / "route-comparison.operation.lock").exists()
+            ):
+                raise DemoError(
+                    "Original stopped evidence is required; continuation is claimed once"
+                )
+        elif original_claim.exists() or continuation_claim.exists():
             raise DemoError(
                 "Routing experiment already claimed; inspect receipts before any new spend"
             )
@@ -86,7 +111,9 @@ def main() -> None:
         )
         print(
             (
-                "Running six matched routing arms; shared ceiling $0.60 "
+                "Continuing reviewed unstarted arms; original cumulative caps unchanged."
+                if args.continue_planned
+                else "Running six matched routing arms; shared ceiling $0.60 "
                 "(Vertex ≤ $0.54, Jev ≤ $0.01)."
                 if args.routing_comparison
                 else "Running two synthetic restaurant SOULs; "
@@ -134,6 +161,7 @@ def main() -> None:
                 "--paid",
                 *(["--after-review"] if args.after_review else []),
                 *(["--resume"] if args.resume else []),
+                *continuation_flags,
                 env=env,
             )
         )
