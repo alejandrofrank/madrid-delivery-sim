@@ -18,6 +18,7 @@ COPY config ./config
 COPY tests ./tests
 COPY infra/gcp-ai/gateway.py ./infra/gcp-ai/gateway.py
 COPY infra/gcp-ai/*.tf infra/gcp-ai/Dockerfile infra/gcp-ai/requirements.lock infra/gcp-ai/requirements.txt ./infra/gcp-ai/
+COPY infra/gcp-ai/STATE-MIGRATION.md ./infra/gcp-ai/
 COPY infra/gcp-ai/sql ./infra/gcp-ai/sql
 COPY infra/gcp-ai/schemas ./infra/gcp-ai/schemas
 COPY infra/gcp-ai/tests ./infra/gcp-ai/tests
