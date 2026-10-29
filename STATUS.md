@@ -1,5 +1,19 @@
 # Status
 
+2026-10-29 (branch integration): Combined the completed Google-stack/local-app,
+Google-native eval, production observability and UI branches. The integration
+passed 738 tests, Ruff, mypy across 62 modules, 20 mocked Terraform checks, 60
+offline model attempts and all twelve SQL scenarios twice with matching outcomes.
+Six browser integration groups, nine layout checks and three map checks passed;
+the full seeded day delivered 247/247 orders with no stranded work. No cloud
+deployment or paid calls were made. Migration 027 supports both shipped telemetry
+histories; separate Terraform addresses preserve both analytics datasets. ADK CLI
+tests now use writable temporary apps, and CI quality verdicts reach the statistical
+gate while execution/integrity failures remain fatal. Existing uncommitted work
+and the active dispatch-optimization branch are preserved separately.
+See [integration evidence](docs/evidence/branch-integration.json) and
+[Terraform upgrade notes](infra/gcp-ai/STATE-MIGRATION.md).
+
 2026-10-29 (PR #1 local rollout): Fixed the fresh-database startup race by checking
 PostgreSQL TCP readiness, then merged PR #1 as 69135c9 after both current-head CI
 runs passed. Local main is fast-forwarded. Port 8010 serves the merged agent
