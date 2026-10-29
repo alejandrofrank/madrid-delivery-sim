@@ -4,7 +4,7 @@ Work is isolated in the sibling mds-ui worktree on feat/ui-redesign, based on ma
 
 ## Confirmed context
 
-Technical portfolio reviewers first; operators use the same console. The user chose comp-first. PRODUCT.md records the product constraints. Three composition references are retained in .impeccable/mocks with their exact prompts and image provenance. Selection is pending: map-led, agent-led, or evidence-led. These images are illustrative layout references, not measured product results.
+Technical portfolio reviewers first; operators use the same console. The user chose comp-first. PRODUCT.md records the product constraints. Three composition references are retained in .impeccable/mocks with their exact prompts and image provenance. The user selected a combination of A and B: an agent-led roster beside an always-visible, substantial map. The measured combined reference is .impeccable/mocks/comp-agents-map.png. Its illustrative data is replaced by actual runtime observations in the application. These images are illustrative layout references, not measured product results.
 
 ## Reproduce the isolated environment
 
@@ -45,5 +45,15 @@ Baseline regression suite: **565 passed**, one existing Starlette/httpx deprecat
 - IBM Plex Sans and Mono are an OFL font pairing: https://github.com/IBM/plex
 - CARTO currently requires a free key for its hosted basemaps: https://www.carto.com/basemaps/
 - The existing Madrid OSM street geometry and synthetic city geometry remain distinct; the implementation must not relabel a fictional grid as Madrid.
+
+## Design checkpoint
+
+The combined reference has 32 measured regions and no shipping raster assets. The map, metrics, agents and evidence are interactive data views. Impeccable's plan review is pending; no application source has been redesigned yet. Session: a4f9de4fbd5fad1d396ceb682c7866612a15ae56760e45945237694fea9934d5. Run the skill's component-review serve command with this session ID to reopen it.
+
+The baseline reviews found no verified P0. The technical audit found one P1: the architecture inspector's small source links fail target-size requirements. The design critique also prioritizes exposing agents, reducing the height above the map, linking trace navigation, and making empty inventory states explicit.
+
+## Targeted captures
+
+Use --only flow for one workspace, or --width 1536 --height 1024 for the exact composition size. --runs accepts a local JSON file mapping page keys to existing run IDs; this captures real selected runs without inventing fixtures or starting cloud calls. Example: {"flow":"existing-run-id"}. The report retains those IDs for reproducibility.
 
 After implementation this document will carry the per-page change summary, before/after pairs, demo GIF, final audit and verification evidence.
