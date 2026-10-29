@@ -8,6 +8,7 @@ from typing import Literal
 from pydantic import BaseModel, ConfigDict, Field, ValidationInfo, field_validator, model_validator
 
 from delivery.adk_contracts import RESTAURANT_TOOLS, RestaurantBrain
+from delivery.memory_profiles import MemoryProfile
 
 INVENTORY_ACCEPTS = frozenset(
     {"basket.requested", "shipment.delayed", "shipment.received", "reservation.expire"}
@@ -153,6 +154,7 @@ class _RoleConfig(BaseModel):
     version: str = Field(min_length=1, max_length=64)
     policy: Literal["deterministic", "gcp_ai", "adk"]
     brain: RestaurantBrain | None = None
+    memory: MemoryProfile | None = None
     soul_file: Literal["SOUL.md"]
     accepts: tuple[str, ...]
     emits: tuple[str, ...]
@@ -199,6 +201,8 @@ class RoleSpec(_RoleConfig):
         definition = self.model_dump(mode="json")
         if self.brain is None:
             definition.pop("brain")  # Preserve hashes of previously frozen definitions.
+        if self.memory is None:
+            definition.pop("memory")
         payload = json.dumps(definition, sort_keys=True, separators=(",", ":"))
         return hashlib.sha256(payload.encode("utf-8")).hexdigest()
 

@@ -301,6 +301,7 @@ def supply_access(run: str, name: str, url: str | None = None) -> dict[str, Agen
                     version="supply-v1",
                     policy="adk" if brain else "deterministic",
                     brain=brain,
+                    memory=settings_data.get("memory"),
                     soul_file="SOUL.md",
                     soul=settings_data["soul"],
                     accepts=tuple(sorted(AUTHORITY[name]["accepts"])),

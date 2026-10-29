@@ -15,8 +15,10 @@ from pydantic import (
     BaseModel,
     ConfigDict,
     Field,
+    SerializerFunctionWrapHandler,
     field_serializer,
     field_validator,
+    model_serializer,
     model_validator,
 )
 
@@ -24,6 +26,7 @@ from delivery.adk_contracts import RestaurantBrain
 from delivery.agent_specs import RoleLimits
 from delivery.city import fake_city
 from delivery.meal_snapshot import IngredientId, RecipeId, load_meal_snapshot
+from delivery.memory_profiles import MemoryProfile
 from delivery.urban_city import urban_city
 
 MAX_CALLS = 64
@@ -96,6 +99,7 @@ class AgentDefinition(FrozenDefinition):
     display_name: str = Field(min_length=1, max_length=80)
     soul: str = Field(min_length=1, max_length=8192)
     brain: RestaurantBrain | None = None
+    memory: MemoryProfile | None = None
     latency_seconds: int = Field(default=5, ge=0, le=120, strict=True)
     search: SearchSettings = Field(default_factory=SearchSettings)
     limits: RoleLimits = Field(
@@ -106,6 +110,13 @@ class AgentDefinition(FrozenDefinition):
             memory_entries=64,
         )
     )
+
+    @model_serializer(mode="wrap")
+    def omit_legacy_memory(self, handler: SerializerFunctionWrapHandler) -> dict[str, Any]:
+        definition = handler(self)
+        if self.memory is None:
+            definition.pop("memory", None)
+        return definition
 
     @model_validator(mode="after")
     def local_budgets(self) -> "AgentDefinition":
