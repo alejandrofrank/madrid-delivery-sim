@@ -30,6 +30,13 @@ def test_lease_cannot_survive_waiting_for_run_lock(db_url: str, run_id: UUID) ->
             conn.execute("SELECT pg_advisory_xact_lock(hashtextextended(%s,0))", (str(run_id),))
             task = pool.submit(queue.process, event, lambda c, e: called.append(e.id))
             time.sleep(0.25)
+            assert not task.done()
+            # Docker's clock can pause relative to the host under load. Expire using
+            # the database clock while the worker is still fenced by the run lock.
+            conn.execute(
+                "UPDATE events SET lease_until=clock_timestamp()-interval '1 second' WHERE id=%s",
+                (event.id,),
+            )
         assert not task.result()
     assert called == []
 
