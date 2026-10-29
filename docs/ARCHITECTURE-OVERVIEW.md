@@ -121,6 +121,23 @@ Ingredient transfer uses scheduled transitions rather than a separate moving
 supplier vehicle. The restaurant-to-courier handoff **is implemented**; it is
 covered by [delivery-fact regressions](../tests/test_supply_delivery_facts.py).
 
+## Observability trace flow
+
+Observability is disabled by default. One run-scoped order trace continues across
+durable queue handoffs and lease retries. Explicit agent, ADK model and tool spans
+record names, usage and estimated cost; FastAPI and Redis use OpenTelemetry
+instrumentors. Exporters remove payloads and exception text before sending data.
+
+The [Mermaid trace-flow diagram](ARCHITECTURE-OBSERVABILITY.md#trace-flow) follows
+the API, persisted queue context, agent/tool spans and both export paths.
+
+Trace and analytics flags are independent. Analytics outages do not change task
+outcomes; Postgres and local receipts remain authoritative. The four BigQuery
+tables have daily partitions, agent clustering and bounded retention. Saved SQL
+deduplicates streaming rows before calculating cost per successful task, p95 tool
+latency and eval pass^k trends. See [setup, privacy, reporting limits and
+retention](ARCHITECTURE-OBSERVABILITY.md).
+
 ## Distinct workspaces and reading paths
 
 The [restaurant workflow](RESTAURANT-SUPPLY.md) starts with household meal demand,

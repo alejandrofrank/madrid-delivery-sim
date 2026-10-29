@@ -176,6 +176,21 @@ docker compose exec -T app delivery demo --wall-seconds 600
 
 For Linux users running Compose directly, set `LOCAL_UID=$(id -u)` and `LOCAL_GID=$(id -g)` when those differ from 1000. Make does this automatically so exported artifacts belong to the host user. Set `APP_PORT` in `.env` to change 8010. API documentation is at `/docs`.
 
+## Observability
+
+Optional OpenTelemetry follows each order through queue workers, ADK agents and
+tools, with FastAPI and Redis spans. Set `MDS_TELEMETRY_ENABLED=1` for console/OTLP
+locally or Cloud Trace when `GOOGLE_CLOUD_PROJECT` is set. Separately,
+`MDS_BIGQUERY_ENABLED=1` batches sanitized spans, agent steps, terminal orders and
+eval results into the Terraform-managed `mds_analytics` dataset. Both flags default
+off; ordinary runs and tests need no GCP credentials.
+
+See [observability setup and limits](docs/ARCHITECTURE-OBSERVABILITY.md), the
+[trace-flow diagram](docs/ARCHITECTURE-OBSERVABILITY.md#trace-flow), and
+[saved analytics queries](sql/analytics) for cost per success, tool p95 and eval
+pass^k trends. Queued telemetry can be lost on crashes; business receipts stay in
+Postgres and local artifacts.
+
 ## LLM configuration
 
 Local Compose fixes `LLM_PROVIDER=disabled` and does not inject `.env` into the
