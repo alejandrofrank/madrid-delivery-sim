@@ -191,6 +191,50 @@ def test_probability_distribution_and_margin_must_be_valid():
 
 
 @pytest.mark.integration
+def test_invented_finish_tool_keeps_staged_supply_unapplied(adk_city):
+    """Replay the live malformed-tool failure without network or paid calls."""
+    from delivery.adk_offline import OfflineRestaurantModel
+
+    class InventedFinishModel(OfflineRestaurantModel):
+        async def generate_content_async(self, llm_request, stream=False):
+            async for response in super().generate_content_async(llm_request, stream):
+                for part in response.content.parts or []:
+                    if part.function_call and part.function_call.name == "finish_decision":
+                        part.function_call.name = "finish_finish_decision"
+                yield response
+
+    city = adk_city(brain_changes={"routing": JevRouting().model_dump()})
+    agent, event = first_call(city)
+    assert agent.reserve_budget(event)
+    with pytest.raises(PermissionError):
+        ensure_restaurant_result(
+            agent,
+            event,
+            model=InventedFinishModel(),
+            router_reviewer=lambda request: answered(request, executor="gemini"),
+        )
+    with connect(city.url) as conn:
+        assert (
+            conn.execute(
+                "SELECT count(*) n FROM supply_requests WHERE run_id=%s", (city.run,)
+            ).fetchone()["n"]
+            == 0
+        )
+        assert (
+            conn.execute(
+                "SELECT sum(reserved) n FROM supply_stock WHERE run_id=%s", (city.run,)
+            ).fetchone()["n"]
+            == 0
+        )
+        assert (
+            conn.execute(
+                "SELECT state FROM restaurant_turns WHERE event_id=%s", (event.id,)
+            ).fetchone()["state"]
+            == "failed"
+        )
+
+
+@pytest.mark.integration
 @pytest.mark.parametrize("soul,supplier", [("speed", "market-a"), ("cost", "market-b")])
 def test_full_queue_delivery_uses_one_jev_call_and_five_rule_events(
     adk_city, monkeypatch, soul, supplier
