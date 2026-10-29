@@ -7,8 +7,7 @@ tools. A model may advise, but only the existing deterministic refund policy act
 
 import asyncio
 import json
-from collections.abc import AsyncGenerator
-from typing import Any, Literal
+from typing import Any
 
 from google.adk.agents import LlmAgent
 from google.adk.agents.callback_context import CallbackContext
@@ -22,57 +21,15 @@ from google.adk.sessions import InMemorySessionService
 from google.genai import types
 from google.oauth2.credentials import Credentials
 
+from delivery.adk_offline import OfflineCustomerModel as OfflineCustomerModel
 from delivery.config import Settings
 from delivery.customer_service import (
     MAX_OUTPUT,
-    OFFLINE_MODEL,
     RESERVED_TOKENS,
     SYSTEM,
     Advice,
     complaint_prompt,
 )
-
-
-class OfflineCustomerModel(BaseLlm):
-    """Scripted classification fixture, not an LLM or a quality evaluation."""
-
-    model: str = OFFLINE_MODEL
-
-    async def generate_content_async(
-        self, llm_request: LlmRequest, stream: bool = False
-    ) -> AsyncGenerator[LlmResponse, None]:
-        if stream:
-            raise ValueError("Offline fixture uses nonstreaming turns")
-        if llm_request.tools_dict:
-            raise PermissionError("Customer classification cannot invoke tools")
-        prompt = next(
-            part.text
-            for content in llm_request.contents
-            if content.role == "user"
-            for part in content.parts or []
-            if part.text
-        )
-        body = json.loads(prompt)
-        text = body["untrusted_complaint"].lower()
-        category: Literal["status", "delay", "refund", "escalate"] = "escalate"
-        if not any(word in text for word in ("ignore", "instruction", "policy", "execute")):
-            if "refund" in text:
-                category = "refund"
-            elif any(word in text for word in ("late", "delay")):
-                category = "delay"
-            elif any(word in text for word in ("status", "where")):
-                category = "status"
-        advice = Advice(
-            category=category,
-            reply="Your delivery concern is recorded for review. No refund has been authorized.",
-        )
-        yield LlmResponse(
-            content=types.Content(role="model", parts=[types.Part(text=advice.model_dump_json())]),
-            usage_metadata=types.GenerateContentResponseUsageMetadata(
-                prompt_token_count=0, candidates_token_count=0
-            ),
-            model_version=OFFLINE_MODEL,
-        )
 
 
 def create_customer_model(config: Settings) -> BaseLlm:
