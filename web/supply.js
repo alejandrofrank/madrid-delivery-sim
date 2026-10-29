@@ -20,6 +20,11 @@ const adkBudgetLabels = {
   model_calls_per_run: ['Model calls / restaurant / run', 1, 100],
   reserved_tokens_per_run: ['Reserved tokens / restaurant / run', 1, 1048576],
 };
+const memoryDefaults = {max_facts: 8, max_bytes: 8192, ttl_seconds: 3600};
+const routingDefaults = {
+  strategy: 'jev_first', confidence_threshold: 0.85, margin_threshold: 0.20,
+  calls_per_run: 32, input_tokens_per_run: 64000, usd_limit: 0.01, model: 'jev-1.14.0',
+};
 let draft = null;
 let snapshot = null;
 let selectedId = null;
@@ -151,8 +156,19 @@ function captureEditor(report = true) {
       const agent = agentDefinition();
       agent.display_name = $('agent-name').value.trim();
       agent.soul = $('agent-soul').value;
+      agent.memory = $('agent-memory').value === 'default' ? null : {
+        mode: $('agent-memory').value,
+        max_facts: Number($('agent-memory-max-facts').value),
+        max_bytes: Number($('agent-memory-max-bytes').value),
+        ttl_seconds: Number($('agent-memory-ttl-seconds').value),
+      };
       if (agent.brain) {
         agent.brain.instructions = $('agent-prompt').value;
+        agent.brain.routing = $('adk-routing').value === 'jev_first' ? {
+          ...routingDefaults, ...agent.brain.routing, strategy: 'jev_first',
+          confidence_threshold: Number($('adk-routing-confidence').value),
+          margin_threshold: Number($('adk-routing-margin').value),
+        } : null;
         for (const key of Object.keys(adkBudgetLabels)) agent.brain[key] = Number($(`adk-budget-${key}`).value);
       }
       agent.latency_seconds = Number($('agent-latency').value);
@@ -210,15 +226,26 @@ function renderAgentEditor() {
   $('agent-name').value = agent.display_name || '';
   $('agent-soul').value = agent.soul || '';
   $('agent-latency').value = agent.latency_seconds ?? 0;
+  $('agent-memory').value = agent.memory?.mode || 'default';
+  $('agent-memory').disabled = disabled;
+  $('agent-memory-max-facts').value = agent.memory?.max_facts ?? memoryDefaults.max_facts;
+  $('agent-memory-max-bytes').value = agent.memory?.max_bytes ?? memoryDefaults.max_bytes;
+  $('agent-memory-ttl-seconds').value = agent.memory?.ttl_seconds ?? memoryDefaults.ttl_seconds;
+  syncMemoryFields();
   $('agent-engine').value = agent.brain?.provider === 'vertex' ? 'vertex' : agent.brain ? 'adk' : 'rules';
   $('agent-engine').disabled = disabled || entity.kind !== 'restaurant';
   $('adk-editor').hidden = !agent.brain;
   $('agent-prompt').value = agent.brain?.instructions || '';
   $('agent-prompt').disabled = disabled || !agent.brain;
   $('agent-prompt').required = !disabled && !!agent.brain;
+  $('adk-routing').value = agent.brain?.routing?.strategy === 'jev_first' ? 'jev_first' : 'tool_loop';
+  $('adk-routing').disabled = disabled || !agent.brain;
+  $('adk-routing-confidence').value = agent.brain?.routing?.confidence_threshold ?? routingDefaults.confidence_threshold;
+  $('adk-routing-margin').value = agent.brain?.routing?.margin_threshold ?? routingDefaults.margin_threshold;
+  syncRoutingFields();
   $('adk-provider-note').textContent = agent.brain?.provider === 'vertex'
     ? 'Vertex requires the matching approved deployment profile, explicit deployment opt-in and a positive monetary allowance. Live calls can cost money.'
-    : 'Google ADK runs a scripted offline model fixture. This tests wiring and safety; it does not evaluate LLM understanding. No paid calls.';
+    : 'The ADK model loop uses a scripted offline fixture. Jev routing, if selected, requires its separate provider opt-in and budget. The fixture tests wiring and safety, not LLM understanding.';
   $('load-adk-profile').disabled = disabled;
   $('adk-profile').disabled = disabled;
   $('adk-budget-fields').replaceChildren();
@@ -239,6 +266,24 @@ function renderAgentEditor() {
   $('agent-json').value = pretty(agent);
   $('agent-json').readOnly = disabled;
   $('agent-json').setAttribute('aria-label', disabled ? 'Inherited agent definition, read only. Choose override or shared template to edit.' : 'Editable agent definition JSON');
+}
+
+function syncMemoryFields() {
+  const explicit = $('agent-memory').value !== 'default';
+  $('agent-memory-fields').hidden = !explicit;
+  for (const id of ['agent-memory-max-facts', 'agent-memory-max-bytes', 'agent-memory-ttl-seconds']) {
+    $(id).disabled = !explicit || agentEditScope === 'inherit';
+    $(id).required = explicit && agentEditScope !== 'inherit';
+  }
+}
+
+function syncRoutingFields() {
+  const enabled = $('adk-routing').value === 'jev_first' && !!agentDefinition().brain;
+  $('adk-routing-fields').hidden = !enabled;
+  for (const id of ['adk-routing-confidence', 'adk-routing-margin']) {
+    $(id).disabled = !enabled || agentEditScope === 'inherit';
+    $(id).required = enabled && agentEditScope !== 'inherit';
+  }
 }
 
 function renderEntityHeading(entity) {
@@ -632,12 +677,16 @@ function renderInspection() {
   const detail = inspectionAgentId === agent?.agent_id ? inspection : null;
   const identity = detail?.agent || agent || {};
   const definition = identity.definition || identity;
+  const frozenSettings = entity.definition?.agent || snapshot.config?.agents?.[entity.kind] || {};
+  const frozenMemory = Object.hasOwn(definition, 'memory') ? definition.memory : frozenSettings.memory;
   if ($('inspection-tab').getAttribute('aria-selected') === 'true') renderEntityHeading(entity);
   const agentSection = element('section', null, 'inspector-section');
   agentSection.append(element('h3', 'Agent identity'), statList([
     ['Display name', identity.display_name || identity.definition?.display_name || entity.definition?.agent?.display_name || '—'],
     ['Role', identity.role || entity.kind],
     ['Engine', definition.policy === 'adk' ? `Google ADK · ${definition.brain?.provider || 'offline'}` : 'Local rules'],
+    ['Frozen routing', definition.policy !== 'adk' ? 'Local rules' : definition.brain?.routing?.strategy === 'jev_first' ? 'Jev first; escalate uncertainty' : 'Current model tool loop'],
+    ['Frozen memory mode', frozenMemory?.mode || 'Default / inherit'],
     ['Agent ID', identity.agent_id || 'Not provisioned'],
     ['Latency', `${identity.latency_seconds ?? identity.definition?.latency_seconds ?? entity.definition?.agent?.latency_seconds ?? snapshot.config?.agents?.[entity.kind]?.latency_seconds ?? '—'} seconds`],
   ]));
@@ -652,6 +701,11 @@ function renderInspection() {
   stockSection.append(ownStock.length ? table(['Ingredient', 'On hand', 'Reserved'], ownStock.map(row => [`${row.ingredient} · ${row.unit}`, row.on_hand, row.reserved ?? 0])) : element('p', entity.kind === 'household' ? 'Households place meal orders and do not share kitchen stock.' : 'No stock rows in this snapshot.'));
   const memorySection = element('section', null, 'inspector-section');
   memorySection.append(element('h3', 'Own memory & budgets'));
+  if (frozenMemory) memorySection.append(statList([
+    ['Memory mode', frozenMemory.mode],
+    ['Recall limits', `${frozenMemory.max_facts} facts · ${frozenMemory.max_bytes} bytes · ${frozenMemory.ttl_seconds} s lifetime`],
+  ]));
+  if (frozenMemory?.mode === 'none') memorySection.append(element('p', 'Recall is disabled for this run. Retained audit facts remain available to this operator view.', 'scope-note'));
   const memory = detail?.memory ?? agent?.memory ?? [];
   const budget = identity.budget || detail?.budget || agent?.budget || detail?.parameters?.limits || identity.limits || {};
   if (detail?.inspection_error) memorySection.append(element('p', `Agent inspection unavailable: ${detail.inspection_error}`));
@@ -1096,6 +1150,8 @@ $('agent-engine').addEventListener('change', () => {
   } else agent.brain = null;
   markDirty(); renderAgentEditor();
 });
+$('agent-memory').addEventListener('change', syncMemoryFields);
+$('adk-routing').addEventListener('change', syncRoutingFields);
 $('load-adk-profile').addEventListener('click', () => {
   if (!captureEditor()) return;
   const agent = agentDefinition(), template = agentTemplates['restaurant-v1'];

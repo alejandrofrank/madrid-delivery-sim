@@ -45,6 +45,13 @@ def model_comparison() -> FileResponse:
     return FileResponse("artifacts/adk-live-comparison.json", media_type="application/json")
 
 
+@router.get("/api/supply/route-comparison")
+def route_comparison() -> FileResponse:
+    if not os.path.isfile("artifacts/adk-route-comparison.json"):
+        raise HTTPException(404, "No routing comparison has been recorded")
+    return FileResponse("artifacts/adk-route-comparison.json", media_type="application/json")
+
+
 @router.get("/api/supply/agent-templates")
 def agent_templates() -> dict[str, Any]:
     """Trusted operator catalogue; no credentials, model calls or executable paths."""
