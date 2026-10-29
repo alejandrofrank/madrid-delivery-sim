@@ -12,6 +12,7 @@ from pydantic import BaseModel, ConfigDict, Field
 from delivery.config import Settings, settings
 from delivery.db import connect
 from delivery.queue import Event
+from delivery.telemetry import record_model_usage, trace_span, traced_event
 
 RESERVED_TOKENS = 3000
 MAX_OUTPUT = 384
@@ -54,6 +55,17 @@ class CustomerService:
         self.config = config or settings()
 
     def _generate(self, complaint: dict[str, Any]) -> tuple[Advice, int, float]:
+        with trace_span(
+            "agent.model",
+            attributes={
+                "delivery.agent": "customer_service",
+                "gen_ai.system": self.config.llm_provider,
+                "gen_ai.request.model": self.config.llm_model,
+            },
+        ):
+            return self._generate_traced(complaint)
+
+    def _generate_traced(self, complaint: dict[str, Any]) -> tuple[Advice, int, float]:
         config = self.config
         options = types.HttpOptions(timeout=15000, retry_options=types.HttpRetryOptions(attempts=1))
         if config.llm_provider == "vertex":
@@ -97,8 +109,17 @@ class CustomerService:
             input_tokens * config.llm_input_usd_per_million
             + (output_tokens + thoughts) * config.llm_output_usd_per_million
         ) / 1_000_000
+        from opentelemetry import trace
+
+        record_model_usage(
+            trace.get_current_span(),
+            usage,
+            config.llm_input_usd_per_million,
+            config.llm_output_usd_per_million,
+        )
         return advice, tokens, cost
 
+    @traced_event("agent.customer_service", agent="customer_service")
     def prepare(self, event: Event) -> tuple[Advice, str]:
         """Call outside handler transaction. A crash consumes its reservation permanently.
 
