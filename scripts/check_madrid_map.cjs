@@ -4,7 +4,7 @@ const fs=require('node:fs/promises');
 const assert=require('node:assert/strict');
 (async()=>{
  const browser=await chromium.launch({headless:true});
- const out='docs/media/correction/verified';await fs.mkdir(out,{recursive:true});
+ const out=process.argv.includes('--out')?process.argv[process.argv.indexOf('--out')+1]:'docs/media/correction/verified';await fs.mkdir(out,{recursive:true});
  const failures=[],external=[],checks=[];
  try{
  const page=await browser.newPage({viewport:{width:1536,height:1024}});
@@ -26,6 +26,7 @@ const assert=require('node:assert/strict');
  assert(await page.locator('#orders-empty').evaluate(el=>el.scrollWidth<=el.clientWidth));
  await page.locator('#order-search').fill('');
  await page.setViewportSize({width:1036,height:850});
+ await page.evaluate(()=>{document.activeElement?.blur();window.scrollTo(0,0);});await page.waitForTimeout(1000);
  await page.screenshot({path:out+'/supplied-image-width-1036.png',fullPage:true});
  await page.setViewportSize({width:1536,height:1024});
  await page.locator('#fit-map').click();

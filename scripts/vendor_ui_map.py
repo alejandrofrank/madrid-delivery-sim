@@ -58,9 +58,11 @@ root = ROOT / "web/map"
 source_url = "https://tiles.openfreemap.org/styles/dark"
 style = json.loads(fetch(source_url))
 tilejson = json.loads(fetch("https://tiles.openfreemap.org/planet"))
+if (root / "manifest.json").exists():
+    tilejson["tiles"] = [json.loads((root / "manifest.json").read_text())["tile_source"]]
 bounds = [-3.85, 40.30, -3.52, 40.54]
 items = []
-for z in range(11, 15):
+for z in range(10, 15):
     x = lambda lon: math.floor((lon + 180) / 360 * 2**z)
     y = lambda lat: math.floor((1 - math.asinh(math.tan(math.radians(lat))) / math.pi) / 2 * 2**z)
     for tx in range(x(bounds[0]), x(bounds[2]) + 1):
@@ -98,7 +100,7 @@ style["sources"] = {
     "openmaptiles": {
         "type": "vector",
         "tiles": ["/static/map/tiles/{z}/{x}/{y}.pbf"],
-        "minzoom": 11,
+        "minzoom": 10,
         "maxzoom": 14,
         "bounds": bounds,
         "attribution": tilejson["attribution"],
@@ -191,7 +193,7 @@ manifest = {
     "source_style": source_url,
     "tile_source": tilejson["tiles"][0],
     "bounds": bounds,
-    "zoom": [11, 14],
+    "zoom": [10, 14],
     "tiles": tiles,
     "total_bytes": sum(t["bytes"] for t in tiles),
     "attribution": tilejson["attribution"],

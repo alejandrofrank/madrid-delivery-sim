@@ -1136,3 +1136,7 @@ main{grid-template-columns:minmax(380px,.9fr) minmax(0,1.1fr);gap:16px;align-ite
 @media(max-width:900px){main{grid-template-columns:1fr;margin:0 16px 16px}#live-agents,.map-column,#context,.operations-board{grid-column:1;grid-row:auto}.live-agents .roster-list{height:300px}.workspace-heading{padding:18px 16px}.operation-metrics{margin:14px 16px}.delivery-toolbar{margin:12px 16px}#city{height:400px}.workspace-meta{display:none}.entity-tools{flex-wrap:wrap}}
 
 #main>*{min-width:0}.operations-board{max-width:100%}
+
+@media(max-width:900px){
+ .map-tools{position:static;order:-1;top:auto;left:auto;padding:8px 12px;margin:0;border-bottom:1px solid var(--ui-line)}
+}

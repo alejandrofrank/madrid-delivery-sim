@@ -8,10 +8,20 @@
     40.54
   ],
   "zoom": [
-    11,
+    10,
     14
   ],
   "tiles": [
+    {
+      "file": "tiles/10/501/385.pbf",
+      "bytes": 154152,
+      "sha256": "5dd6c8007056ba0ea79559d2aea79c17d960f6cafd4dfb330f10c01033719d52"
+    },
+    {
+      "file": "tiles/10/501/386.pbf",
+      "bytes": 189651,
+      "sha256": "15d955033ef50bf23e31d15b1c1d96086a62eada81b6ab278d177e76152e2964"
+    },
     {
       "file": "tiles/11/1002/771.pbf",
       "bytes": 63598,
@@ -1663,7 +1673,7 @@
       "sha256": "551a8354ed60211cc9f77449d4a05271f785154a88f101ba5f3d45765912c5ee"
     }
   ],
-  "total_bytes": 36168963,
+  "total_bytes": 36512766,
   "attribution": "<a href=\"https://openfreemap.org\" target=\"_blank\">OpenFreeMap</a> <a href=\"https://www.openmaptiles.org/\" target=\"_blank\">&copy; OpenMapTiles</a> Data from <a href=\"https://www.openstreetmap.org/copyright\" target=\"_blank\">OpenStreetMap</a>",
   "offline_policy": "https://openfreemap.org/quick_start/",
   "renderer": [

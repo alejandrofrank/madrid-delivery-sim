@@ -20,7 +20,22 @@ const narrowMap = matchMedia("(max-width:850px)");
 document.querySelector(".map-key").open = !narrowMap.matches;
 narrowMap.addEventListener("change",event=>{document.querySelector(".map-key").open=!event.matches;});
 let exploringMap = false, orderFilterTouched = false, orderViewRun = null;
-let basemapReady = false;
+let basemapReady = false, mapResizeFrame;
+const mapResizeObserver=new ResizeObserver(()=>{
+  if(!$("map").clientWidth||!$("map").clientHeight)return;
+  cancelAnimationFrame(mapResizeFrame);
+  mapResizeFrame=requestAnimationFrame(()=>{
+    map.invalidateSize({pan:false});
+    requestAnimationFrame(()=>{
+      const gl=window.madridBasemap;if(!gl)return;
+      gl.resize();
+      const center=map.getCenter();
+      gl.jumpTo({center:[center.lng,center.lat],zoom:map.getZoom()-1});
+      placeSelectedLabel();
+    });
+  });
+});
+mapResizeObserver.observe($("map"));
 try {
   const base = L.maplibreGL({style:"/static/map/style.json", attributionControl:false, transformRequest:url=>({url:new URL(url,location.href).href})}).addTo(map);
   window.madridBasemap = base.getMaplibreMap();
@@ -106,7 +121,6 @@ function setTab(next) {
 document.querySelectorAll("[data-tab]").forEach(button => button.onclick = () => setTab(button.dataset.tab));
 function updateMapMinZoom() {
   map.setMinZoom(11);
-  map.setMinZoom(Math.min(map.options.maxZoom, map.getBoundsZoom(serviceBounds, false, [24,24])));
 }
 function setMapExploration(active) {
   exploringMap = active;
@@ -133,7 +147,8 @@ map.on("resize", () => {
 });
 $("frame-selection").onclick = () => {
   const bounds = selectedMapBounds();
-  if (bounds) map.fitBounds(bounds, {padding:[28,28], maxZoom:16, animate:false});
+  if (bounds) map.fitBounds(bounds, {paddingTopLeft:[90,90], paddingBottomRight:[90,64], maxZoom:16, animate:false});
+  requestAnimationFrame(()=>placeSelectedLabel(true));
 };
 $("show-stores").onchange = (e) => e.target.checked ? stores.addTo(map) : map.removeLayer(stores);
 $("show-complete").onchange = () => state && renderOrders();
@@ -164,7 +179,7 @@ async function refreshRuns() {
 }
 async function choose(kind, id) {
   selected = {kind, id}; traceRows = []; setTab("decisions");
-  renderInspector(); renderCouriers(); renderRoute(); await refreshTrace();
+  renderInspector(); renderCouriers(); renderRoute(); placeSelectedLabel(true); await refreshTrace();
 }
 async function refreshTrace() {
   if (!selected || !state?.run || traceBusy) return;
@@ -257,7 +272,31 @@ function renderCouriers() {
     const icon=L.divIcon({className:"cluster-marker",html:String(group.length),iconSize:[30,30]});
     L.marker([lat,lon],{icon,title:group.length+" agents. Zoom to inspect.",keyboard:true}).on("click",()=>map.setView([lat,lon],Math.min(17,map.getZoom()+1),{animate:!reducedMotion.matches})).addTo(clusterLayer);
   }
+  placeSelectedLabel();
 }
+// Tooltip directions adapt to real control bounds; geographic coordinates stay untouched.
+function placeSelectedLabel(allowPan=false) {
+  if(selected?.kind!=="courier")return;
+  const marker=courierMarkers.get(selected.id),tooltip=marker?.getTooltip();
+  if(!marker?.getElement()||!tooltip)return;
+  const area=$("map").getBoundingClientRect();
+  const obstacles=[document.querySelector(".map-toolbar"),document.querySelector(".map-key"),document.querySelector(".leaflet-control-zoom")].map(el=>el.getBoundingClientRect());
+  const overlaps=(a,b)=>a.left<b.right+6&&a.right>b.left-6&&a.top<b.bottom+6&&a.bottom>b.top-6;
+  const safe=box=>box.left>=area.left+6&&box.right<=area.right-6&&box.top>=area.top+6&&box.bottom<=area.bottom-20&&!obstacles.some(obstacle=>overlaps(box,obstacle));
+  for(const direction of ["right","left","bottom","top"]){
+    tooltip.options.direction=direction;
+    tooltip.options.offset=direction==="right"?[14,0]:direction==="left"?[-14,0]:direction==="top"?[0,-14]:[0,14];
+    tooltip.update();
+    const box=tooltip.getElement()?.getBoundingClientRect();
+    if(box&&safe(box)&&safe(marker.getElement().getBoundingClientRect()))return;
+  }
+  if(allowPan){
+    const point=map.latLngToContainerPoint(marker.getLatLng()),size=map.getSize();
+    map.panBy([point.x-size.x/2,point.y-size.y/2],{animate:false});
+    placeSelectedLabel(false);
+  }
+}
+map.on("moveend zoomend",()=>placeSelectedLabel());
 function renderOrders() {
   ordersLayer.clearLayers();
   for (const o of state.orders) {

@@ -68,7 +68,13 @@ let browser;
     for (const [size, width, height] of sizes) {
       await page.setViewportSize({width,height});
       await page.waitForTimeout(250);
-      await page.evaluate(() => window.scrollTo(0,0));
+      await page.evaluate(() => {document.activeElement?.blur();window.scrollTo(0,0);});
+      await page.waitForTimeout(500);
+      if(name==="madrid")await page.waitForFunction(()=>{
+        const gl=window.madridBasemap,r=gl.getCanvas().getBoundingClientRect(),c=map.getContainer().getBoundingClientRect();
+        const p=map.latLngToContainerPoint([40.415,-3.685]),q=gl.project([-3.685,40.415]);
+        return Math.abs(q.x+r.left-c.left-p.x)<1&&Math.abs(q.y+r.top-c.top-p.y)<1&&gl.areTilesLoaded();
+      });
       await page.screenshot({path:path.join(out, name+'-'+size+'.png'),fullPage:true});
       if (size === 'desktop' || size === 'custom') await page.screenshot({path:path.join(out,name+'-viewport.png')});
       const audit = await page.evaluate(() => ({

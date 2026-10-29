@@ -2,7 +2,7 @@
 This is a bounded, local OpenFreeMap / OpenMapTiles / OpenStreetMap map pack.
 No API key, external runtime request, or paid service is required.
 
-- 330 vector tiles, 36.17 MB, zoom 11–14, covering [-3.85, 40.30, -3.52, 40.54].
+- 332 vector tiles, 36.51 MB, zoom 10–14, covering [-3.85, 40.30, -3.52, 40.54].
 - Source version, SHA-256 hashes and exact byte counts: manifest.json.
 - Acquisition stayed below the published 3,000-tile / 50 MB allowance, with
   four concurrent requests and an identifying User-Agent: https://openfreemap.org/tos/
