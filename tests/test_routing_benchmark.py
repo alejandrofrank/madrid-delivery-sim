@@ -110,6 +110,16 @@ def test_reviewed_followup_retains_prior_reservations_and_never_repeats_gemini(
     changed["arms"][0]["cost"]["accounted_usd"] = "0"
     with pytest.raises(PermissionError):
         contracts.followup_budget(changed, budget)
+    next_attempt = copy.deepcopy(previous)
+    next_attempt["previous_attempt"] = previous
+    next_attempt["carryover"] = carry
+    combined = contracts.followup_budget(next_attempt, budget)
+    assert Decimal(combined["prior_jev_accounted_usd"]) == 2 * Decimal(
+        carry["prior_jev_accounted_usd"]
+    )
+    next_attempt["carryover"] = {}
+    with pytest.raises(PermissionError, match="carryover"):
+        contracts.followup_budget(next_attempt, budget)
     previous["arms"][1].update(status="failed", run="attempted-gemini")
     with pytest.raises(PermissionError):
         contracts.followup_budget(previous, budget)

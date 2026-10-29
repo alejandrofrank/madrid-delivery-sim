@@ -83,9 +83,10 @@ def decision_request(turn: "RestaurantTurn", order: dict[str, Any]) -> dict[str,
                 "type": "choice",
                 "instructions": routing.instructions,
                 "criteria": {
-                    "direct": "A safe bounded decision is clear; no additional model needed",
+                    "direct": "A declared action and a short factual receipt are requested",
                     "gemini": (
-                        "Uncertain, conflicting, missing evidence, or a requested reasoned tradeoff"
+                        "An explicit reasoned tradeoff, complaint or unresolved "
+                        "policy interpretation"
                     ),
                 },
             },
