@@ -12,14 +12,15 @@
       rel="stylesheet"
       href="/static/vendor/leaflet/leaflet.css?v=337bfca5cabd"
     />
-    <link rel="stylesheet" href="/static/style.css?v=80566ea289d0" />
+    <link rel="stylesheet" href="/static/style.css?v=e491de993bdd" />
     <link rel="stylesheet" href="/static/workspace.css?v=6c6854d75885" />
     <script defer src="/static/workspace.js?v=887294277a47"></script>
     <script
       defer
       src="/static/vendor/leaflet/leaflet.js?v=db49d009c841"
     ></script>
-    <script defer src="/static/app.js?v=4e880dca86f4"></script>
+    <script defer src="/static/courier_motion.js?v=c8fa650ea959"></script>
+    <script defer src="/static/app.js?v=b029245b0a85"></script>
   </head>
   <body data-page="baseline">
     <div id="workspace-shell">
@@ -69,6 +70,20 @@
               <option value="60">1 minute · 720×</option>
             </select></label
           >
+          <label
+            >Dispatch
+            <select id="dispatch-strategy">
+              <option value="min_cost">Lowest estimated cost</option>
+              <option value="legacy">Earliest completion (legacy)</option>
+            </select></label
+          >
+          <label
+            >After delivery
+            <select id="reposition-policy">
+              <option value="stay">Stay at drop-off</option>
+              <option value="demand_aware">Move toward demand</option>
+            </select></label
+          >
           <button id="start" class="primary">
             Start day <span aria-hidden="true">↗</span>
           </button>
@@ -102,6 +117,15 @@
           <p id="kpi-dead">0 dead letters</p>
         </article>
       </section>
+      <div class="operating-summary" aria-label="Fleet operating evidence">
+        <span>Operating cost <strong id="operating-cost">—</strong></span>
+        <span>Empty travel <strong id="empty-distance">—</strong></span>
+        <span>Repositioning <strong id="reposition-distance">—</strong></span>
+        <details class="policy-evidence">
+          <summary id="dispatch-policy-summary">Run policy: waiting for a run</summary>
+          <pre id="dispatch-policy-evidence"></pre>
+        </details>
+      </div>
       <div class="workspace">
         <section class="map-panel panel" aria-label="Live Madrid delivery map">
           <div class="panel-title">
@@ -135,7 +159,7 @@
           ></div>
           <div class="map-options">
             <div class="legend">
-              <span><i class="legend-hub"></i>Hub</span
+              <span><i class="legend-hub"></i>Home base</span
               ><span><i class="legend-bike"></i>Bike</span
               ><span><i class="legend-moto"></i>Moto</span
               ><span><i class="legend-van"></i>Van</span
@@ -150,7 +174,7 @@
           </div>
           <div class="map-footer">
             <span id="graph-info">Loading local OSM graph…</span
-            ><span>Road geometry cached locally</span>
+            ><span>Marker: home initial · mode + courier number</span>
           </div>
         </section>
         <aside class="panel inspector" aria-label="Agent inspector">
@@ -161,9 +185,8 @@
             </button>
           </div>
           <div class="selection" id="selection">
-            <span class="eyebrow">FLEET OVERVIEW</span
-            ><strong>18 couriers / 3 hubs</strong>
-            <p>Select a courier or order to inspect its decisions.</p>
+            <strong>18 couriers / 3 home bases</strong>
+            <p>Select a courier to inspect its current position and work.</p>
           </div>
           <div class="tabs" role="tablist" aria-label="Inspector view">
             <button

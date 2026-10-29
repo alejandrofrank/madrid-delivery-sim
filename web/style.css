@@ -223,6 +223,38 @@ select {
   font-size: 12px;
   line-height: 1.5;
 }
+.operating-summary {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 8px 24px;
+  margin: -8px 0 16px;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.6;
+}
+.operating-summary strong {
+  margin-left: 4px;
+  color: var(--ui-ink, #18191b);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+.policy-evidence {
+  min-width: 0;
+  flex: 1 1 300px;
+}
+.policy-evidence summary {
+  cursor: pointer;
+}
+.policy-evidence pre {
+  max-width: 100%;
+  overflow: auto;
+  padding: 12px;
+  margin: 8px 0 0;
+  border: 1px solid var(--line);
+  background: var(--ui-surface, #fff);
+  font-size: 12px;
+}
 .workspace {
   display: grid;
   grid-template-columns: minmax(0, 1fr) 352px;
@@ -368,7 +400,7 @@ select {
   background: #168570;
 }
 .legend-moto {
-  background: #3881c4;
+  background: #315f8b;
 }
 .legend-van {
   background: #7a638e;
@@ -404,12 +436,16 @@ select {
 }
 .courier-icon {
   border: 2px solid white;
-  border-radius: 50%;
+  border-radius: 3px;
   color: #fff;
-  font-size: 10px;
+  font-size: 11px;
   font-weight: 700;
-  line-height: 18px;
+  line-height: 20px;
   text-align: center;
+}
+.courier-icon > span {
+  display: block;
+  border-radius: 1px;
 }
 .courier-icon.selected {
   outline: 3px solid var(--ui-accent, #c9322c);
@@ -441,6 +477,26 @@ select {
   font-size: 12px;
   line-height: 1.6;
 }
+.courier-facts {
+  display: grid;
+  gap: 6px;
+  margin: 12px 0 0;
+  font-size: 12px;
+  line-height: 1.5;
+}
+.courier-facts > div {
+  display: grid;
+  grid-template-columns: 112px minmax(0, 1fr);
+  gap: 8px;
+}
+.courier-facts dt {
+  color: var(--muted);
+}
+.courier-facts dd {
+  margin: 0;
+  font-variant-numeric: tabular-nums;
+  overflow-wrap: anywhere;
+}
 .tabs {
   display: flex;
   gap: 24px;
@@ -471,7 +527,7 @@ select {
 }
 .fleet-row {
   display: grid;
-  grid-template-columns: 24px minmax(0, 1fr) auto;
+  grid-template-columns: 36px minmax(0, 1fr) auto;
   gap: 12px;
   align-items: center;
   width: 100%;
@@ -485,9 +541,9 @@ select {
 .mode {
   display: grid;
   place-items: center;
-  width: 24px;
+  width: 36px;
   height: 24px;
-  border-radius: 50%;
+  border-radius: 2px;
   color: white;
   font-size: 10px;
 }
