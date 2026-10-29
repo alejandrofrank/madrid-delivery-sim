@@ -13,6 +13,7 @@ from psycopg.types.json import Jsonb
 from delivery.cloud_ai import CloudJudge, Judgment, sanitized_request
 from delivery.db import connect
 from delivery.queue import Event
+from delivery.telemetry import traced_event
 
 if TYPE_CHECKING:
     from delivery.agent_runtime import LocalAgent
@@ -76,6 +77,7 @@ def prepare(agent: "LocalAgent", event: Event) -> dict[str, Any]:
     return request
 
 
+@traced_event("agent.judge.inference")
 def ensure_result(agent: "LocalAgent", event: Event, *, fault: Fault = None) -> bool:
     """Prepare/dispatch/save, returning False only when another owner is busy/stale.
 

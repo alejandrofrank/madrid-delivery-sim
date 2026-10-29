@@ -15,6 +15,7 @@ from delivery.agent_specs import RoleSpec
 from delivery.db import Connection, connect
 from delivery.inventory import receive, release, reserve
 from delivery.queue import Event, Queue, publish
+from delivery.telemetry import trace_fields, trace_span, traced_event
 
 
 class BasketRequest(BaseModel):
@@ -121,7 +122,10 @@ class ScopedTools:
             if not consumed or not consumed["consumed"]:
                 raise BudgetExceeded("Reserved tool slots exhausted")
         self.calls.append(name)
-        return registry[name](**arguments)
+        with trace_span(
+            "agent.tool", attributes={"delivery.tool": name, "delivery.agent": self.role.name}
+        ):
+            return registry[name](**arguments)
 
     def _json_command(self, query: str, parameters: tuple[Any, ...]) -> dict[str, Any]:
         row = self.__conn.execute(query, parameters).fetchone()
@@ -503,6 +507,8 @@ class LocalAgent:
 
             detail = WorkflowPolicy().decide(event, tools)
         detail["reserved_tool_slots"] = ticket["slots"]
+        if telemetry := trace_fields():
+            detail["telemetry"] = telemetry
         # Persist actual writes with the decision/ACK transaction, so order
         # inspection survives TTL cleanup without changing agent recall access.
         detail["memory_writes"] = tools.memory_writes
@@ -547,6 +553,7 @@ class LocalAgent:
             ),
         )
 
+    @traced_event("agent.process")
     def process(self, event: Event, *, fault: Callable[[str], None] | None = None) -> bool:
         from delivery.durable_inference import checkpoint, ensure_result
 

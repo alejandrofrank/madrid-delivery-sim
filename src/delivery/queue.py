@@ -9,11 +9,13 @@ from dataclasses import dataclass
 from typing import Any
 from uuid import UUID, uuid4
 
+from opentelemetry.trace import SpanKind
 from psycopg.errors import ProgramLimitExceeded
 from psycopg.types.json import Jsonb
 
 from delivery.agent_specs import SUPPLY_ACCEPTS, SUPPLY_EMITS
 from delivery.db import Connection, connect
+from delivery.telemetry import bind_transaction, trace_span, traced_event, traced_publish
 
 PUBLISH: dict[str, set[str]] = {
     "lab_scenario": {"basket.requested", "shipment.delayed", "reservation.expire"},
@@ -89,8 +91,10 @@ class Event:
     attempts: int
     due_sim: int
     target_store: str | None = None
+    otel_traceparent: str | None = None
 
 
+@traced_publish
 def publish(
     conn: Connection,
     *,
@@ -245,11 +249,14 @@ class Queue:
             row["attempts"],
             row["due_sim"],
             row["target_store"],
+            row.get("otel_traceparent"),
         )
 
+    @traced_event("queue.process", kind=SpanKind.CONSUMER)
     def process(self, event: Event, handler: Callable[[Connection, Event], None]) -> bool:
         try:
             with connect(self.url) as conn:
+                bind_transaction(conn)
                 # Shared lock ordering for all writers avoids run/queue deadlocks.
                 conn.execute(
                     "SELECT pg_advisory_xact_lock(hashtextextended(%s, 0))", (str(event.run_id),)
@@ -277,8 +284,12 @@ class Queue:
                         source["attempts"],
                         source["due_sim"],
                         source["target_store"],
+                        source.get("otel_traceparent"),
                     )
-                    handler(conn, current)
+                    with trace_span(
+                        "agent.handle", attributes={"delivery.agent": scope["scope"]["agent_id"]}
+                    ):
+                        handler(conn, current)
                     acked = conn.execute(
                         "SELECT public.agent_queue_ack(%s,%s,%s) AS acked",
                         (event.id, event.token, event.attempts),
@@ -293,7 +304,15 @@ class Queue:
                     ).fetchone()
                     if not row:
                         raise StaleLease("Worker no longer owns event")
-                    handler(conn, event)
+                    with trace_span(
+                        "agent.handle",
+                        attributes={
+                            "delivery.agent": getattr(
+                                handler, "__qualname__", type(handler).__name__
+                            )
+                        },
+                    ):
+                        handler(conn, event)
                     ack = conn.execute(
                         """UPDATE events SET state='done', completed_at=now(),
                            lease_token=NULL, lease_until=NULL WHERE id=%s

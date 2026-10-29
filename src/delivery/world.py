@@ -15,6 +15,7 @@ import osmnx as ox
 from psycopg.types.json import Jsonb
 
 from delivery.db import Connection
+from delivery.telemetry import trace_fields
 
 DATA = Path("data")
 BBOX = (-3.730, 40.375, -3.640, 40.455)  # west, south, east, north
@@ -235,6 +236,8 @@ def trace(
     courier: str | None = None,
     event: int | None = None,
 ) -> None:
+    if telemetry := trace_fields():
+        detail = {**detail, "telemetry": telemetry}
     conn.execute(
         """INSERT INTO decisions(run_id,sim_time,agent,action,detail,order_id,courier_id,event_id)
            VALUES (%s,%s,%s,%s,%s,%s,%s,%s)""",

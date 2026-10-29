@@ -10,6 +10,7 @@ from pydantic import BaseModel, ConfigDict, Field
 from delivery.config import Settings, settings
 from delivery.db import connect
 from delivery.queue import Event
+from delivery.telemetry import traced_event
 
 RESERVED_TOKENS = 3000
 MAX_OUTPUT = 384
@@ -57,6 +58,7 @@ class CustomerService:
 
         return asyncio.run(run_customer_advice(self.config, complaint))
 
+    @traced_event("agent.customer_service.prepare")
     def prepare(self, event: Event) -> tuple[Advice, str]:
         """Call outside handler transaction. A crash consumes its reservation permanently.
 

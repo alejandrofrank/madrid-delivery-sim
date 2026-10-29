@@ -1,0 +1,14 @@
+# Free local tracing: docker compose -f compose.yaml -f compose.tracing.yaml up -d --build
+services:
+  jaeger:
+    image: cr.jaegertracing.io/jaegertracing/jaeger:2.22.0
+    ports:
+      - "127.0.0.1:16686:16686"
+    # OTLP stays on the private Compose network; transient in-memory storage.
+  app:
+    environment:
+      DELIVERY_OTEL_EXPORTER: jaeger
+      OTEL_EXPORTER_OTLP_TRACES_ENDPOINT: http://jaeger:4318/v1/traces
+      DELIVERY_OTEL_SAMPLE_RATIO: "1"
+    depends_on:
+      jaeger: {condition: service_started}
