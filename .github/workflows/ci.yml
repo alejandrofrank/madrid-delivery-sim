@@ -37,3 +37,125 @@ jobs:
       - name: Stop services
         if: always()
         run: docker compose down
+
+  evals:
+    if: github.event_name == 'pull_request' || github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: read
+      actions: read
+      pull-requests: write
+    env:
+      LLM_PROVIDER: disabled
+      DELIVERY_ADK_VERTEX_ENABLED: "0"
+      GOOGLE_API_KEY: ""
+      GEMINI_API_KEY: ""
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - name: Install pinned evaluation runtime
+        run: |
+          python3 -m pip install -r requirements.lock
+          python3 -m pip install --no-deps -e .
+      - name: Code checks before evaluation
+        run: |
+          python3 -m pytest -q tests/test_eval_schema.py tests/test_eval_length.py tests/test_eval_invented_tool.py tests/test_trajectory_evals.py tests/test_eval_statistics.py tests/test_eval_gate.py tests/test_vertex_eval.py
+      - name: Native ADK eval CLI and AgentEvaluator (network denied)
+        run: python3 -m pytest -q tests/test_adk_evalsets.py
+      - name: Collect fresh offline attempts
+        run: python3 scripts/eval_agents.py --suite adk --repeat 3
+      - name: Find stored artifact from the PR's exact main base
+        if: github.event_name == 'pull_request'
+        id: baseline
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const sha = context.payload.pull_request.base.sha;
+            if (context.payload.pull_request.base.ref !== 'main') {
+              core.setFailed('Eval comparisons require a main base.'); return;
+            }
+            const runs = await github.paginate(github.rest.actions.listWorkflowRuns, {
+              ...context.repo, workflow_id: 'ci.yml', branch: 'main',
+              event: 'push', status: 'success', head_sha: sha, per_page: 100
+            });
+            for (const run of runs) {
+              if (run.head_sha !== sha || run.head_repository.full_name !== context.repo.owner + '/' + context.repo.repo) continue;
+              const artifacts = await github.paginate(github.rest.actions.listWorkflowRunArtifacts, {
+                ...context.repo, run_id: run.id, per_page: 100
+              });
+              if (artifacts.some(a => a.name === 'eval-baseline-v1' && !a.expired)) {
+                core.setOutput('run_id', String(run.id));
+                core.setOutput('revision', sha);
+                return;
+              }
+            }
+            core.notice('No stored baseline for exact main base: bootstrap, no quality comparison.');
+      - uses: actions/download-artifact@v4
+        if: steps.baseline.outputs.run_id != ''
+        with:
+          name: eval-baseline-v1
+          path: artifacts/evals/main
+          run-id: ${{ steps.baseline.outputs.run_id }}
+          github-token: ${{ github.token }}
+      - name: Compare per-category evidence
+        id: gate
+        if: github.event_name == 'pull_request'
+        env:
+          BASELINE_RUN: ${{ steps.baseline.outputs.run_id }}
+          BASELINE_REVISION: ${{ steps.baseline.outputs.revision }}
+        run: |
+          args=()
+          if [[ -n "$BASELINE_RUN" ]]; then
+            args+=(--baseline artifacts/evals/main/candidate.json --baseline-revision "$BASELINE_REVISION")
+            args+=(--thresholds artifacts/evals/main/eval-gate.json)
+          fi
+          python3 scripts/eval_gate.py --candidate artifacts/evals/candidate.json "${args[@]}"
+      - name: Red or green PR evaluation comment
+        if: always() && github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        env:
+          EVAL_JOB_STATUS: ${{ job.status }}
+        with:
+          script: |
+            const fs = require('fs');
+            const path = 'artifacts/evals/gate.md';
+            let body = fs.existsSync(path) ? fs.readFileSync(path, 'utf8') :
+              '<!-- madrid-eval-gate -->\n🔴 Evals: validation or execution failed before comparison. See the job log.';
+            if (process.env.EVAL_JOB_STATUS === 'failure' && !body.includes('🔴')) {
+              body = '<!-- madrid-eval-gate -->\n🔴 Evals: execution failed; comparison is unavailable. See the job log.';
+            }
+            body = body.slice(0, 60000);
+            const comments = await github.paginate(github.rest.issues.listComments, {
+              ...context.repo, issue_number: context.issue.number, per_page: 100
+            });
+            const old = comments.find(c => c.user.type === 'Bot' && c.body.startsWith('<!-- madrid-eval-gate -->'));
+            try {
+              if (old) await github.rest.issues.updateComment({...context.repo, comment_id: old.id, body});
+              else await github.rest.issues.createComment({...context.repo, issue_number: context.issue.number, body});
+            } catch (error) {
+              if (error.status !== 403) throw error;
+              core.notice('Fork token cannot write comments; evaluation markdown remains an artifact.');
+              await core.summary.addRaw(body).write();
+            }
+      - name: Package main baseline
+        if: success() && github.ref == 'refs/heads/main' && github.event_name == 'push'
+        run: cp config/eval-gate.json artifacts/evals/eval-gate.json
+      - name: Store main baseline with its reviewed thresholds
+        if: success() && github.ref == 'refs/heads/main' && github.event_name == 'push'
+        uses: actions/upload-artifact@v4
+        with:
+          name: eval-baseline-v1
+          retention-days: 90
+          path: |
+            artifacts/evals/candidate.json
+            artifacts/evals/eval-gate.json
+      - name: Store comparison evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: eval-evidence
+          path: artifacts/evals/

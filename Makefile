@@ -49,3 +49,7 @@ gcp-stop:
 	$(PYTHON) scripts/gcp_demo.py stop
 gcp-status:
 	$(PYTHON) scripts/gcp_demo.py status
+
+.PHONY: eval-adk
+eval-adk:
+	$(DOCKER) compose run --rm --no-deps --build app python3 scripts/eval_agents.py --suite adk --repeat 3

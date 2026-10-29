@@ -30,3 +30,6 @@ codex_run.log
 *.tfvars
 *.tfvars.json
 .terraform/
+
+# ADK local evaluation histories are artifacts, not fixtures.
+.adk/

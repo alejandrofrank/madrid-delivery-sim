@@ -9,6 +9,7 @@ COPY pyproject.toml ./
 COPY src ./src
 RUN pip install --no-deps -e . && useradd -m -u 10001 sim
 COPY data ./data
+COPY evals ./evals
 COPY sql ./sql
 COPY web ./web
 COPY docs ./docs

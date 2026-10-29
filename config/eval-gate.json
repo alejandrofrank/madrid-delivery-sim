@@ -1,0 +1,12 @@
+{
+  "schema_version": 1,
+  "family_alpha": 0.05,
+  "min_cases": 8,
+  "categories": {
+    "schema": {"max_drop": 0.0},
+    "length": {"max_drop": 0.0},
+    "invented_tool": {"max_drop": 0.0},
+    "task": {"max_drop": 0.05},
+    "trajectory": {"max_drop": 0.05}
+  }
+}

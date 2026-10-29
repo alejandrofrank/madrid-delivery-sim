@@ -1,0 +1,931 @@
+{
+  "eval_set_id": "restaurant-v1",
+  "eval_cases": [
+    {
+      "eval_id": "cost-source",
+      "session_input": {
+        "app_name": "restaurant",
+        "user_id": "eval",
+        "state": {
+          "fixture": {
+            "order": {
+              "event": "household.call",
+              "quantity": 1
+            },
+            "recipe": {
+              "ingredients": [
+                {
+                  "id": "flour",
+                  "quantity": 1
+                }
+              ]
+            },
+            "pantry": [],
+            "suppliers": [
+              {
+                "id": "cheap",
+                "procurement_fee_cents": 10,
+                "estimated_seconds": 120
+              },
+              {
+                "id": "fast",
+                "procurement_fee_cents": 80,
+                "estimated_seconds": 20
+              }
+            ]
+          },
+          "soul": "cost"
+        }
+      },
+      "conversation": [
+        {
+          "user_content": {
+            "role": "user",
+            "parts": [
+              {
+                "text": "Handle this scoped restaurant event."
+              }
+            ]
+          },
+          "intermediate_data": {
+            "tool_uses": [
+              {
+                "name": "read_order",
+                "args": {}
+              },
+              {
+                "name": "read_recipe",
+                "args": {}
+              },
+              {
+                "name": "read_pantry",
+                "args": {}
+              },
+              {
+                "name": "find_suppliers",
+                "args": {}
+              },
+              {
+                "name": "recall_order_memory",
+                "args": {}
+              },
+              {
+                "name": "request_missing_ingredients",
+                "args": {
+                  "supplier": "cheap"
+                }
+              },
+              {
+                "name": "finish_decision",
+                "args": {
+                  "summary": "Compared scoped pantry and supplier quotes."
+                }
+              }
+            ]
+          },
+          "final_response": {
+            "role": "model",
+            "parts": [
+              {
+                "text": "The scoped decision is saved for validation and commit."
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "eval_id": "speed-source",
+      "session_input": {
+        "app_name": "restaurant",
+        "user_id": "eval",
+        "state": {
+          "fixture": {
+            "order": {
+              "event": "household.call",
+              "quantity": 1
+            },
+            "recipe": {
+              "ingredients": [
+                {
+                  "id": "flour",
+                  "quantity": 1
+                }
+              ]
+            },
+            "pantry": [],
+            "suppliers": [
+              {
+                "id": "cheap",
+                "procurement_fee_cents": 10,
+                "estimated_seconds": 120
+              },
+              {
+                "id": "fast",
+                "procurement_fee_cents": 80,
+                "estimated_seconds": 20
+              }
+            ]
+          },
+          "soul": "speed"
+        }
+      },
+      "conversation": [
+        {
+          "user_content": {
+            "role": "user",
+            "parts": [
+              {
+                "text": "Handle this scoped restaurant event."
+              }
+            ]
+          },
+          "intermediate_data": {
+            "tool_uses": [
+              {
+                "name": "read_order",
+                "args": {}
+              },
+              {
+                "name": "read_recipe",
+                "args": {}
+              },
+              {
+                "name": "read_pantry",
+                "args": {}
+              },
+              {
+                "name": "find_suppliers",
+                "args": {}
+              },
+              {
+                "name": "recall_order_memory",
+                "args": {}
+              },
+              {
+                "name": "request_missing_ingredients",
+                "args": {
+                  "supplier": "fast"
+                }
+              },
+              {
+                "name": "finish_decision",
+                "args": {
+                  "summary": "Compared scoped pantry and supplier quotes."
+                }
+              }
+            ]
+          },
+          "final_response": {
+            "role": "model",
+            "parts": [
+              {
+                "text": "The scoped decision is saved for validation and commit."
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "eval_id": "available-pantry",
+      "session_input": {
+        "app_name": "restaurant",
+        "user_id": "eval",
+        "state": {
+          "fixture": {
+            "order": {
+              "event": "household.call",
+              "quantity": 1
+            },
+            "recipe": {
+              "ingredients": [
+                {
+                  "id": "flour",
+                  "quantity": 1
+                }
+              ]
+            },
+            "pantry": [
+              {
+                "ingredient": "flour",
+                "on_hand": 1,
+                "reserved": 0
+              }
+            ],
+            "suppliers": [
+              {
+                "id": "cheap",
+                "procurement_fee_cents": 10,
+                "estimated_seconds": 120
+              },
+              {
+                "id": "fast",
+                "procurement_fee_cents": 80,
+                "estimated_seconds": 20
+              }
+            ]
+          },
+          "soul": "cost"
+        }
+      },
+      "conversation": [
+        {
+          "user_content": {
+            "role": "user",
+            "parts": [
+              {
+                "text": "Handle this scoped restaurant event."
+              }
+            ]
+          },
+          "intermediate_data": {
+            "tool_uses": [
+              {
+                "name": "read_order",
+                "args": {}
+              },
+              {
+                "name": "read_recipe",
+                "args": {}
+              },
+              {
+                "name": "read_pantry",
+                "args": {}
+              },
+              {
+                "name": "find_suppliers",
+                "args": {}
+              },
+              {
+                "name": "recall_order_memory",
+                "args": {}
+              },
+              {
+                "name": "confirm_order",
+                "args": {}
+              },
+              {
+                "name": "finish_decision",
+                "args": {
+                  "summary": "Compared scoped pantry and supplier quotes."
+                }
+              }
+            ]
+          },
+          "final_response": {
+            "role": "model",
+            "parts": [
+              {
+                "text": "The scoped decision is saved for validation and commit."
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "eval_id": "reserved-pantry",
+      "session_input": {
+        "app_name": "restaurant",
+        "user_id": "eval",
+        "state": {
+          "fixture": {
+            "order": {
+              "event": "household.call",
+              "quantity": 1
+            },
+            "recipe": {
+              "ingredients": [
+                {
+                  "id": "flour",
+                  "quantity": 1
+                }
+              ]
+            },
+            "pantry": [
+              {
+                "ingredient": "flour",
+                "on_hand": 1,
+                "reserved": 1
+              }
+            ],
+            "suppliers": [
+              {
+                "id": "cheap",
+                "procurement_fee_cents": 10,
+                "estimated_seconds": 120
+              },
+              {
+                "id": "fast",
+                "procurement_fee_cents": 80,
+                "estimated_seconds": 20
+              }
+            ]
+          },
+          "soul": "cost"
+        }
+      },
+      "conversation": [
+        {
+          "user_content": {
+            "role": "user",
+            "parts": [
+              {
+                "text": "Handle this scoped restaurant event."
+              }
+            ]
+          },
+          "intermediate_data": {
+            "tool_uses": [
+              {
+                "name": "read_order",
+                "args": {}
+              },
+              {
+                "name": "read_recipe",
+                "args": {}
+              },
+              {
+                "name": "read_pantry",
+                "args": {}
+              },
+              {
+                "name": "find_suppliers",
+                "args": {}
+              },
+              {
+                "name": "recall_order_memory",
+                "args": {}
+              },
+              {
+                "name": "request_missing_ingredients",
+                "args": {
+                  "supplier": "cheap"
+                }
+              },
+              {
+                "name": "finish_decision",
+                "args": {
+                  "summary": "Compared scoped pantry and supplier quotes."
+                }
+              }
+            ]
+          },
+          "final_response": {
+            "role": "model",
+            "parts": [
+              {
+                "text": "The scoped decision is saved for validation and commit."
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "eval_id": "no-supplier",
+      "session_input": {
+        "app_name": "restaurant",
+        "user_id": "eval",
+        "state": {
+          "fixture": {
+            "order": {
+              "event": "household.call",
+              "quantity": 1
+            },
+            "recipe": {
+              "ingredients": [
+                {
+                  "id": "flour",
+                  "quantity": 1
+                }
+              ]
+            },
+            "pantry": [],
+            "suppliers": []
+          },
+          "soul": "cost"
+        }
+      },
+      "conversation": [
+        {
+          "user_content": {
+            "role": "user",
+            "parts": [
+              {
+                "text": "Handle this scoped restaurant event."
+              }
+            ]
+          },
+          "intermediate_data": {
+            "tool_uses": [
+              {
+                "name": "read_order",
+                "args": {}
+              },
+              {
+                "name": "read_recipe",
+                "args": {}
+              },
+              {
+                "name": "read_pantry",
+                "args": {}
+              },
+              {
+                "name": "find_suppliers",
+                "args": {}
+              },
+              {
+                "name": "recall_order_memory",
+                "args": {}
+              },
+              {
+                "name": "decline_order",
+                "args": {
+                  "reason": "No open supplier is available."
+                }
+              },
+              {
+                "name": "finish_decision",
+                "args": {
+                  "summary": "Compared scoped pantry and supplier quotes."
+                }
+              }
+            ]
+          },
+          "final_response": {
+            "role": "model",
+            "parts": [
+              {
+                "text": "The scoped decision is saved for validation and commit."
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "eval_id": "replacement-consent",
+      "session_input": {
+        "app_name": "restaurant",
+        "user_id": "eval",
+        "state": {
+          "fixture": {
+            "order": {
+              "event": "restaurant.approval",
+              "quantity": 1
+            },
+            "recipe": {
+              "ingredients": [
+                {
+                  "id": "flour",
+                  "quantity": 1
+                }
+              ]
+            },
+            "pantry": [],
+            "suppliers": [
+              {
+                "id": "cheap",
+                "procurement_fee_cents": 10,
+                "estimated_seconds": 120
+              },
+              {
+                "id": "fast",
+                "procurement_fee_cents": 80,
+                "estimated_seconds": 20
+              }
+            ]
+          },
+          "soul": "cost"
+        }
+      },
+      "conversation": [
+        {
+          "user_content": {
+            "role": "user",
+            "parts": [
+              {
+                "text": "Handle this scoped restaurant event."
+              }
+            ]
+          },
+          "intermediate_data": {
+            "tool_uses": [
+              {
+                "name": "read_order",
+                "args": {}
+              },
+              {
+                "name": "read_recipe",
+                "args": {}
+              },
+              {
+                "name": "read_pantry",
+                "args": {}
+              },
+              {
+                "name": "find_suppliers",
+                "args": {}
+              },
+              {
+                "name": "recall_order_memory",
+                "args": {}
+              },
+              {
+                "name": "request_missing_ingredients",
+                "args": {
+                  "supplier": "cheap"
+                }
+              },
+              {
+                "name": "finish_decision",
+                "args": {
+                  "summary": "Compared scoped pantry and supplier quotes."
+                }
+              }
+            ]
+          },
+          "final_response": {
+            "role": "model",
+            "parts": [
+              {
+                "text": "The scoped decision is saved for validation and commit."
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "eval_id": "arrival",
+      "session_input": {
+        "app_name": "restaurant",
+        "user_id": "eval",
+        "state": {
+          "fixture": {
+            "order": {
+              "event": "ingredient.arrived",
+              "quantity": 1
+            },
+            "recipe": {
+              "ingredients": [
+                {
+                  "id": "flour",
+                  "quantity": 1
+                }
+              ]
+            },
+            "pantry": [],
+            "suppliers": [
+              {
+                "id": "cheap",
+                "procurement_fee_cents": 10,
+                "estimated_seconds": 120
+              },
+              {
+                "id": "fast",
+                "procurement_fee_cents": 80,
+                "estimated_seconds": 20
+              }
+            ]
+          },
+          "soul": "cost"
+        }
+      },
+      "conversation": [
+        {
+          "user_content": {
+            "role": "user",
+            "parts": [
+              {
+                "text": "Handle this scoped restaurant event."
+              }
+            ]
+          },
+          "intermediate_data": {
+            "tool_uses": [
+              {
+                "name": "read_order",
+                "args": {}
+              },
+              {
+                "name": "read_recipe",
+                "args": {}
+              },
+              {
+                "name": "read_pantry",
+                "args": {}
+              },
+              {
+                "name": "find_suppliers",
+                "args": {}
+              },
+              {
+                "name": "recall_order_memory",
+                "args": {}
+              },
+              {
+                "name": "receive_ingredient",
+                "args": {}
+              },
+              {
+                "name": "finish_decision",
+                "args": {
+                  "summary": "Compared scoped pantry and supplier quotes."
+                }
+              }
+            ]
+          },
+          "final_response": {
+            "role": "model",
+            "parts": [
+              {
+                "text": "The scoped decision is saved for validation and commit."
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "eval_id": "cook",
+      "session_input": {
+        "app_name": "restaurant",
+        "user_id": "eval",
+        "state": {
+          "fixture": {
+            "order": {
+              "event": "restaurant.cook",
+              "quantity": 1
+            },
+            "recipe": {
+              "ingredients": [
+                {
+                  "id": "flour",
+                  "quantity": 1
+                }
+              ]
+            },
+            "pantry": [],
+            "suppliers": [
+              {
+                "id": "cheap",
+                "procurement_fee_cents": 10,
+                "estimated_seconds": 120
+              },
+              {
+                "id": "fast",
+                "procurement_fee_cents": 80,
+                "estimated_seconds": 20
+              }
+            ]
+          },
+          "soul": "cost"
+        }
+      },
+      "conversation": [
+        {
+          "user_content": {
+            "role": "user",
+            "parts": [
+              {
+                "text": "Handle this scoped restaurant event."
+              }
+            ]
+          },
+          "intermediate_data": {
+            "tool_uses": [
+              {
+                "name": "read_order",
+                "args": {}
+              },
+              {
+                "name": "read_recipe",
+                "args": {}
+              },
+              {
+                "name": "read_pantry",
+                "args": {}
+              },
+              {
+                "name": "find_suppliers",
+                "args": {}
+              },
+              {
+                "name": "recall_order_memory",
+                "args": {}
+              },
+              {
+                "name": "prepare_meal",
+                "args": {}
+              },
+              {
+                "name": "finish_decision",
+                "args": {
+                  "summary": "Compared scoped pantry and supplier quotes."
+                }
+              }
+            ]
+          },
+          "final_response": {
+            "role": "model",
+            "parts": [
+              {
+                "text": "The scoped decision is saved for validation and commit."
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "eval_id": "safe-alternative",
+      "session_input": {
+        "app_name": "restaurant",
+        "user_id": "eval",
+        "state": {
+          "fixture": {
+            "order": {
+              "event": "ingredient.shortage",
+              "quantity": 1,
+              "safe_alternative": "rice"
+            },
+            "recipe": {
+              "ingredients": [
+                {
+                  "id": "flour",
+                  "quantity": 1
+                }
+              ]
+            },
+            "pantry": [],
+            "suppliers": [
+              {
+                "id": "cheap",
+                "procurement_fee_cents": 10,
+                "estimated_seconds": 120
+              },
+              {
+                "id": "fast",
+                "procurement_fee_cents": 80,
+                "estimated_seconds": 20
+              }
+            ]
+          },
+          "soul": "cost"
+        }
+      },
+      "conversation": [
+        {
+          "user_content": {
+            "role": "user",
+            "parts": [
+              {
+                "text": "Handle this scoped restaurant event."
+              }
+            ]
+          },
+          "intermediate_data": {
+            "tool_uses": [
+              {
+                "name": "read_order",
+                "args": {}
+              },
+              {
+                "name": "read_recipe",
+                "args": {}
+              },
+              {
+                "name": "read_pantry",
+                "args": {}
+              },
+              {
+                "name": "find_suppliers",
+                "args": {}
+              },
+              {
+                "name": "recall_order_memory",
+                "args": {}
+              },
+              {
+                "name": "offer_substitution",
+                "args": {
+                  "substitute": "rice"
+                }
+              },
+              {
+                "name": "finish_decision",
+                "args": {
+                  "summary": "Compared scoped pantry and supplier quotes."
+                }
+              }
+            ]
+          },
+          "final_response": {
+            "role": "model",
+            "parts": [
+              {
+                "text": "The scoped decision is saved for validation and commit."
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "eval_id": "no-alternative",
+      "session_input": {
+        "app_name": "restaurant",
+        "user_id": "eval",
+        "state": {
+          "fixture": {
+            "order": {
+              "event": "ingredient.shortage",
+              "quantity": 1
+            },
+            "recipe": {
+              "ingredients": [
+                {
+                  "id": "flour",
+                  "quantity": 1
+                }
+              ]
+            },
+            "pantry": [],
+            "suppliers": [
+              {
+                "id": "cheap",
+                "procurement_fee_cents": 10,
+                "estimated_seconds": 120
+              },
+              {
+                "id": "fast",
+                "procurement_fee_cents": 80,
+                "estimated_seconds": 20
+              }
+            ]
+          },
+          "soul": "cost"
+        }
+      },
+      "conversation": [
+        {
+          "user_content": {
+            "role": "user",
+            "parts": [
+              {
+                "text": "Handle this scoped restaurant event."
+              }
+            ]
+          },
+          "intermediate_data": {
+            "tool_uses": [
+              {
+                "name": "read_order",
+                "args": {}
+              },
+              {
+                "name": "read_recipe",
+                "args": {}
+              },
+              {
+                "name": "read_pantry",
+                "args": {}
+              },
+              {
+                "name": "find_suppliers",
+                "args": {}
+              },
+              {
+                "name": "recall_order_memory",
+                "args": {}
+              },
+              {
+                "name": "decline_order",
+                "args": {
+                  "reason": "No safe available ingredient alternative."
+                }
+              },
+              {
+                "name": "finish_decision",
+                "args": {
+                  "summary": "Compared scoped pantry and supplier quotes."
+                }
+              }
+            ]
+          },
+          "final_response": {
+            "role": "model",
+            "parts": [
+              {
+                "text": "The scoped decision is saved for validation and commit."
+              }
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}
