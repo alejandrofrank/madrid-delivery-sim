@@ -1,12 +1,12 @@
 main {max-width:1400px;margin:auto;padding:24px;}
-header {display:flex;justify-content:space-between;align-items:center;gap:16px;margin-bottom:18px;}
+#main > header {display:flex;justify-content:space-between;align-items:center;gap:16px;margin-bottom:18px;}
 h1 {font-size:22px;margin:0;} h2 {font-size:17px;margin:0;} h3 {font-size:14px;margin:18px 0 8px;}
 p {margin:6px 0;color:var(--ui-muted);} .note {font-size:12px;max-width:1000px;margin:16px 0 24px;}
 .table-wrap {overflow-x:auto;border:1px solid var(--ui-line);background:var(--ui-surface);}
 table {border-collapse:collapse;width:100%;white-space:nowrap;font-size:13px;}
 th,td {padding:12px;text-align:left;border-bottom:1px solid var(--ui-line);}
-th {font-size:11px;letter-spacing:.04em;text-transform:uppercase;color:var(--ui-muted);font-weight:normal;}
-.profile {margin:20px 0 32px;} .profile-header {display:flex;justify-content:space-between;gap:16px;align-items:center;margin-bottom:12px;}
+th {font-size:12px;letter-spacing:.04em;text-transform:uppercase;color:var(--ui-muted);font-weight:normal;}
+.profile {margin:20px 0 32px;} .profile-#main > header {display:flex;justify-content:space-between;gap:16px;align-items:center;margin-bottom:12px;}
 .turn {border:1px solid var(--ui-line);background:var(--ui-surface);margin:8px 0;}
 summary {padding:12px;cursor:pointer;} .turn-body {padding:0 16px 16px;border-top:1px solid var(--ui-line);}
 .pill {display:inline-block;border:1px solid var(--ui-line);padding:2px 6px;font:11px var(--ui-mono);margin-right:8px;}
@@ -14,16 +14,16 @@ summary {padding:12px;cursor:pointer;} .turn-body {padding:0 16px 16px;border-to
 .tool {display:grid;grid-template-columns:minmax(140px,230px) 1fr;gap:12px;border-bottom:1px solid var(--ui-line);padding:8px 0;font-size:12px;}
 pre {white-space:pre-wrap;overflow-wrap:anywhere;word-break:break-word;margin:8px 0;font:12px/1.6 var(--ui-mono);max-width:100%;}
 .call {border-top:1px solid var(--ui-line);margin:6px 0;} .call summary {padding:9px 0;font-size:12px;}
-.chat {border-left:2px solid var(--ui-line);padding:6px 12px;margin:8px 0;}
-.chat-label {font-size:11px;color:var(--ui-muted);} .memory {border:1px solid var(--ui-line);padding:10px;margin:6px 0;}
+.chat {border-left:1px solid var(--ui-line);padding:6px 12px;margin:8px 0;}
+.chat-label {font-size:12px;color:var(--ui-muted);} .memory {border:1px solid var(--ui-line);padding:10px;margin:6px 0;}
 #route-evidence {border-bottom:1px solid var(--ui-line);padding-bottom:24px;margin-bottom:24px;}
-#route-evidence > .profile-header {margin-bottom:8px;} #route-state {font-size:12px;}
-.cell-note {display:block;margin-top:4px;color:var(--ui-muted);font-size:11px;}
+#route-evidence > .profile-#main > header {margin-bottom:8px;} #route-state {font-size:12px;}
+.cell-note {display:block;margin-top:4px;color:var(--ui-muted);font-size:12px;}
 .routing-arms td {vertical-align:top;} .routing-arms th:first-child {min-width:170px;}
 .route-profile {margin:18px 0;} .route-profile h3 {margin:0;}
 .outcome-checks {display:flex;flex-wrap:wrap;gap:6px;margin:10px 0;}
 .check {padding:4px 8px;border:1px solid var(--ui-line);font-size:12px;background:var(--ui-surface);}
-.outcome-warning {border-left:2px solid var(--ui-negative);padding:8px 12px;margin-top:16px;font-size:13px;}
+.outcome-warning {border-left:1px solid var(--ui-negative);padding:8px 12px;margin-top:16px;font-size:13px;}
 .route-receipts {border:1px solid var(--ui-line);background:var(--ui-surface);}
 .route-receipts > details {margin:12px;} .route-receipts > .table-wrap {border-width:1px 0 0;}
 .route-decisions td {white-space:normal;vertical-align:top;min-width:90px;}
@@ -33,4 +33,4 @@ pre {white-space:pre-wrap;overflow-wrap:anywhere;word-break:break-word;margin:8p
 .agent-building-blocks {border:1px solid var(--ui-line);margin:12px 0;background:var(--ui-surface);}
 .route-turn > summary {font-size:12px;line-height:1.7;overflow-wrap:anywhere;}
 .route-turn .table-wrap {margin:10px 0;} .paired-differences {margin:12px 0 20px;}
-@media(max-width:700px) {main{padding:16px;}header,.profile-header{align-items:flex-start;flex-direction:column;}.tool{grid-template-columns:1fr;gap:2px;}}
+@media(max-width:700px) {main{padding:16px;}#main > header,.profile-header{align-items:flex-start;flex-direction:column;}.tool{grid-template-columns:1fr;gap:2px;}}

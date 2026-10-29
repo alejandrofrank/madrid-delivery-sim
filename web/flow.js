@@ -25,14 +25,16 @@ $('zoom-in').onclick=()=>zoom(.75);$('zoom-out').onclick=()=>zoom(1.3);$('reset-
 $('city').addEventListener('wheel',event=>{event.preventDefault();const r=$('city').getBoundingClientRect();zoom(event.deltaY>0?1.12:.89,(event.clientX-r.left)/r.width,(event.clientY-r.top)/r.height);},{passive:false});
 $('city').addEventListener('pointerdown',event=>{if(event.target.closest('[data-store],[data-courier],[data-customer]'))return;drag={x:event.clientX,y:event.clientY,view:{...view}};$('city').setPointerCapture(event.pointerId);$('city').classList.add('dragging');});
 $('city').addEventListener('pointermove',event=>{if(!drag)return;const r=$('city').getBoundingClientRect();view={...drag.view,x:drag.view.x-(event.clientX-drag.x)*drag.view.w/r.width,y:drag.view.y-(event.clientY-drag.y)*drag.view.h/r.height};applyView();});
-$('city').addEventListener('pointerup',()=>{drag=null;$('city').classList.remove('dragging');});
+const endMapDrag=()=>{drag=null;$('city').classList.remove('dragging');};
+for(const event of ['pointerup','pointercancel','lostpointercapture'])$('city').addEventListener(event,endMapDrag);
+window.addEventListener('blur',endMapDrag);
 function baseMap(nextCity){
  city=nextCity;const identity=JSON.stringify([city.nodes.length,city.edges.length,city.stores.map(s=>s.id),city.customers?.length||0,city.buildings?.length||0]);if(identity===mapCity)return;mapCity=identity;
  const svg=$('city');svg.replaceChildren();const nodes=new Map(city.nodes.map(n=>[String(n.id),n]));
  const xs=city.nodes.map(n=>n.x),ys=city.nodes.map(n=>n.y),minX=Math.min(...xs),minY=Math.min(...ys),width=Math.max(...xs)-minX,height=Math.max(...ys)-minY,pad=Math.max(width,height)*.065||1;
  fullView={x:minX-pad,y:minY-pad,w:width+pad*2,h:height+pad*2};view={...fullView};applyView();
  drawCityFabric(svg,nodes,width);
- const roads=svgNode('g',{'data-layer':'roads'});let path='';for(const e of city.edges){const a=nodes.get(String(e.from)),b=nodes.get(String(e.to));if(a&&b)path+=`M${a.x},${a.y}L${b.x},${b.y}`;}roads.append(svgNode('path',{d:path,stroke:'#b8bec4','stroke-width':Math.max(width/800,.5),fill:'none'}));svg.append(roads);drawRoadDirection(svg,nodes,width);
+ const roads=svgNode('g',{'data-layer':'roads'});let path='';for(const e of city.edges){const a=nodes.get(String(e.from)),b=nodes.get(String(e.to));if(a&&b)path+=`M${a.x},${a.y}L${b.x},${b.y}`;}roads.append(svgNode('path',{d:path,stroke:'#3a4d56','stroke-width':Math.max(width/800,.5),fill:'none'}));svg.append(roads);drawRoadDirection(svg,nodes,width);
  svg.setAttribute('data-node-count',city.nodes.length);svg.setAttribute('data-road-count',city.edges.length);
  svg.append(svgNode('g',{id:'route-layer'}),svgNode('g',{id:'customer-layer'}),svgNode('g',{id:'store-layer'}),svgNode('g',{id:'courier-layer'}));
  $('graph-info').textContent=`${city.nodes.length.toLocaleString()} junctions · ${city.stores.length} shops`;
@@ -41,8 +43,8 @@ function baseMap(nextCity){
 function storeData(store){return config?.stores?.find(s=>s.id===store.id)||store;}
 function drawStores(){const layer=$('store-layer');if(!layer)return;layer.replaceChildren();const nodes=new Map(city.nodes.map(n=>[String(n.id),n]));const unit=fullView.w/46;
  for(const raw of city.stores){const s=storeData(raw),n=nodes.get(String(raw.node));if(!n)continue;const pharmacy=JSON.stringify(raw).toLowerCase().includes('pharmac');const g=svgNode('g',{'data-store':s.id,class:'store-marker',tabindex:0,role:'button','aria-label':`Shop ${s.name||s.id}`});
- g.append(svgNode('circle',{cx:n.x,cy:n.y,r:unit*1.3,fill:'transparent'}));g.append(svgNode('rect',{x:n.x-unit*.6,y:n.y-unit*.6,width:unit*1.2,height:unit*1.2,rx:unit*.2,fill:s.enabled===false?'#9ca9a0':pharmacy?'#9470bc':'#3d596c',stroke:selectedStore===s.id?'#c9322c':'#fff','stroke-width':unit*.18}));
- g.append(svgNode('path',{d:`M${n.x-unit*.65},${n.y-unit*.25}h${unit*1.3}m-${unit*1.05},${unit*.15}v${unit*.45}m${unit*.55},-${unit*.45}v${unit*.45}`,stroke:'#fff','stroke-width':unit*.1,fill:'none','pointer-events':'none'}));
+ g.append(svgNode('circle',{cx:n.x,cy:n.y,r:unit*1.3,fill:'transparent'}));g.append(svgNode('rect',{x:n.x-unit*.6,y:n.y-unit*.6,width:unit*1.2,height:unit*1.2,rx:unit*.2,fill:s.enabled===false?'#9ca9a0':pharmacy?'#799e9a':'#3d596c',stroke:selectedStore===s.id?'#63d5c5':'#c3d5dc','stroke-width':unit*.18}));
+ g.append(svgNode('path',{d:`M${n.x-unit*.65},${n.y-unit*.25}h${unit*1.3}m-${unit*1.05},${unit*.15}v${unit*.45}m${unit*.55},-${unit*.45}v${unit*.45}`,stroke:'#c3d5dc','stroke-width':unit*.1,fill:'none','pointer-events':'none'}));
  const text=svgNode('text',{x:n.x+unit*.9,y:n.y+unit*.2,'font-size':unit*.65});text.textContent=s.name||s.id;g.append(text);g.onclick=()=>selectStore(s.id);g.onkeydown=e=>{if(['Enter',' '].includes(e.key)){e.preventDefault();selectStore(s.id);}};layer.append(g);}}
 // Preserve route order, including repeated junctions on pickup/delivery legs.
 function routeProgress(route,durations,elapsed){
@@ -54,7 +56,7 @@ function routeProgress(route,durations,elapsed){
  }
  return {position,travelled,remaining:[]};
 }
-function routeColor(id){let hash=0;for(const char of String(id))hash=(hash*31+char.charCodeAt(0))>>>0;return ['#28618a','#9d651e','#8e445e','#2d7357','#b34a39','#556878'][hash%6];}
+function routeColor(id){return '#63d5c5';}
 function drawMovement(data){
  const routes=$('route-layer'),couriers=$('courier-layer');if(!routes)return;routes.replaceChildren();couriers.replaceChildren();
  const nodes=new Map(city.nodes.map(n=>[String(n.id),n])),edges=new Map(city.edges.map(e=>[`${e.from}:${e.to}`,e]));const unit=fullView.w/110,drawn=new Set();
@@ -69,13 +71,13 @@ function drawMovement(data){
   const durations=job.route_durations?.length?job.route_durations:attempt?.edge_durations||ids.slice(1).map((id,i)=>edges.get(`${ids[i]}:${id}`).travel_seconds);
   const elapsed=job.status==='delivered'?Infinity:accepted&&!failed?Math.max(0,Number(data.run.sim_time)-Number(job.depart_sim??data.run.sim_time)):0;
   const progress=routeProgress(route,durations,elapsed);if(!progress)continue;
-  const color=failed?'#a94e43':routeColor(job.courier||job.basket);
+  const color=failed?'#f28e8e':routeColor(job.courier||job.basket);
   if(active||selected){
    const group=svgNode('g',{'data-route-basket':job.basket,'data-route-courier':job.courier||'', 'data-route-status':job.status});
    const title=svgNode('title');title.textContent=`${job.courier?agentLabel(`courier:${job.courier}`):'Awaiting courier'} · ${job.basket} · solid: travelled, dashed: remaining`;group.append(title);
    const line=(points,kind)=>{if(points.length<2)return;group.append(svgNode('polyline',{points:points.map(n=>`${n.x},${n.y}`).join(' '),'data-route-part':kind,fill:'none',stroke:color,'stroke-width':unit*(selected ? .32 : .22),'stroke-opacity':kind==='travelled'?'.4':'.9','stroke-dasharray':kind==='remaining'?`${unit*.65} ${unit*.4}`:'none','stroke-linejoin':'round','stroke-linecap':'round'}));};
    line(progress.travelled,'travelled');line(progress.remaining,'remaining');
-   const end=route.at(-1);group.append(svgNode('path',{'data-route-end':job.basket,d:`M${end.x},${end.y-unit*.55}l${unit*.55},${unit*.55}l-${unit*.55},${unit*.55}l-${unit*.55},-${unit*.55}Z`,fill:'#fff',stroke:color,'stroke-width':unit*.15}));routes.append(group);
+   const end=route.at(-1);group.append(svgNode('path',{'data-route-end':job.basket,d:`M${end.x},${end.y-unit*.55}l${unit*.55},${unit*.55}l-${unit*.55},${unit*.55}l-${unit*.55},-${unit*.55}Z`,fill:'#c3d5dc',stroke:color,'stroke-width':unit*.15}));routes.append(group);
   }
   if(failed){const n=nodes.get(String(job.parcel_node))||route[0];routes.append(svgNode('path',{d:`M${n.x-unit/2},${n.y-unit/2}l${unit},${unit}m0,-${unit}l-${unit},${unit}`,stroke:'#b25b48','stroke-width':unit*.3}));}
   if(!active||!accepted||!job.courier||drawn.has(job.courier)||['failed','dropped','dropout','abandoned','rejected'].includes(attempt?.status))continue;
@@ -83,7 +85,7 @@ function drawMovement(data){
  }
  for(const courier of data.fleet||[]){if(drawn.has(courier.id))continue;const n=nodes.get(String(courier.node));if(n)courierMarker(courier.id,n,unit,couriers,courier.status,routeColor(courier.id));}
 }
-function courierMarker(id,n,unit,layer,status='active',color='#d48628'){unit*=1.8;const g=svgNode('g',{'data-courier':id,class:'courier-marker',role:'button',tabindex:0,'aria-label':`${agentLabel(`courier:${id}`)} · ${status}`,'data-anchor-x':n.x,'data-anchor-y':n.y});g.append(svgNode('circle',{cx:n.x,cy:n.y,r:unit*.75,fill:'transparent'}),svgNode('circle',{cx:n.x,cy:n.y,r:unit*.4,fill:['offline','dropped','dropout','unavailable'].includes(status)?'#8b9490':color,stroke:'#fff','stroke-width':unit*.12}));g.append(svgNode('path',{d:`M${n.x-unit*.25},${n.y}h${unit*.5}m-${unit*.15},0l-${unit*.12},-${unit*.2}`,stroke:'#fff','stroke-width':unit*.1,fill:'none','pointer-events':'none'}));const label=svgNode('title');label.textContent=agentLabel(`courier:${id}`);g.append(label);g.onclick=()=>inspectAgent(`courier:${id}`);g.onkeydown=e=>{if(e.key==='Enter')inspectAgent(`courier:${id}`);};layer.append(g);}
+function courierMarker(id,n,unit,layer,status='active',color='#d48628'){unit*=1.8;const g=svgNode('g',{'data-courier':id,class:'courier-marker',role:'button',tabindex:0,'aria-label':`${agentLabel(`courier:${id}`)} · ${status}`,'data-anchor-x':n.x,'data-anchor-y':n.y});g.append(svgNode('circle',{cx:n.x,cy:n.y,r:unit*.75,fill:'transparent'}),svgNode('circle',{cx:n.x,cy:n.y,r:unit*.4,fill:['offline','dropped','dropout','unavailable'].includes(status)?'#8b9490':color,stroke:'#c3d5dc','stroke-width':unit*.12}));g.append(svgNode('path',{d:`M${n.x-unit*.25},${n.y}h${unit*.5}m-${unit*.15},0l-${unit*.12},-${unit*.2}`,stroke:'#c3d5dc','stroke-width':unit*.1,fill:'none','pointer-events':'none'}));const label=svgNode('title');label.textContent=agentLabel(`courier:${id}`);g.append(label);g.onclick=()=>inspectAgent(`courier:${id}`);g.onkeydown=e=>{if(e.key==='Enter')inspectAgent(`courier:${id}`);};layer.append(g);}
 function selectStore(id){selectedCustomer=null;selectedBasket=null;selectedStore=id;selectedAgent=null;storeDirty=false;show('store-view');selectedTab='overview';for(const button of document.querySelectorAll('[data-tab]'))button.setAttribute('aria-selected',button.dataset.tab===selectedTab);renderStore();drawStores();if(snapshot)drawMovement(snapshot);}
 function renderStore(preserveEdits=false){if(!selectedStore||!city)return;const raw=city.stores.find(s=>s.id===selectedStore);if(!raw)return;const store=storeData(raw),editable=Boolean(config)&&!legacyReadOnly;$('context-title').textContent=store.name||store.id;
  $('store-overview').hidden=selectedTab!=='overview';$('store-stock').hidden=selectedTab!=='stock';$('store-team').hidden=selectedTab!=='team';
@@ -140,8 +142,8 @@ $('start').onclick=async()=>{if(!config)return;clearTimeout(pollTimer);$('error'
 function productName(sku,fallback){if(fallback)return fallback;const p=products.find(p=>p.listing_id===sku||p.sku===sku||`${p.source}:${p.listing_id}`===sku);return p?.name||sku;}
 function drawCityFabric(svg,nodes,width){
  const layer=svgNode('g',{'data-layer':'buildings','pointer-events':'none'});
- for(const area of city.neighborhoods||[]){layer.append(svgNode('rect',{x:area.x,y:area.y,width:area.width,height:area.height,fill:'#f1f2f3',stroke:'#161d2b','stroke-width':width/1500,rx:width/300}));const text=svgNode('text',{x:Number(area.x)+Number(area.width)/2,y:Number(area.y)+Number(area.height)*.15,'text-anchor':'middle','font-size':width/85,class:'neighborhood-label'});text.textContent=area.name;layer.append(text);}
- for(const b of city.buildings||[]){const colors={home:'#d2d7dc',apartment:'#d7dce0',park:'#e1e9e3',office:'#e2e6e9'};layer.append(svgNode('rect',{x:b.x,y:b.y,width:b.width,height:b.height,rx:Math.min(b.width,b.height)*.14,fill:colors[b.kind]||'#d8ddd5',stroke:'#b4bac0','stroke-width':width/2200,'data-building':b.id,'data-kind':b.kind}));if(b.kind==='park'){layer.append(svgNode('circle',{cx:Number(b.x)+Number(b.width)/2,cy:Number(b.y)+Number(b.height)/2,r:Math.min(b.width,b.height)*.25,fill:'#315a44'}));}}
+ for(const area of city.neighborhoods||[]){layer.append(svgNode('rect',{x:area.x,y:area.y,width:area.width,height:area.height,fill:'#19252a',stroke:'#161d2b','stroke-width':width/1500,rx:width/300}));const text=svgNode('text',{x:Number(area.x)+Number(area.width)/2,y:Number(area.y)+Number(area.height)*.15,'text-anchor':'middle','font-size':width/85,class:'neighborhood-label'});text.textContent=area.name;layer.append(text);}
+ for(const b of city.buildings||[]){const colors={home:'#25343a',apartment:'#25343a',park:'#223831',office:'#26363d'};layer.append(svgNode('rect',{x:b.x,y:b.y,width:b.width,height:b.height,rx:Math.min(b.width,b.height)*.14,fill:colors[b.kind]||'#26363d',stroke:'#354750','stroke-width':width/2200,'data-building':b.id,'data-kind':b.kind}));if(b.kind==='park'){layer.append(svgNode('circle',{cx:Number(b.x)+Number(b.width)/2,cy:Number(b.y)+Number(b.height)/2,r:Math.min(b.width,b.height)*.25,fill:'#315a44'}));}}
  svg.append(layer);
 }
 function drawRoadDirection(svg,nodes,width){
@@ -151,7 +153,7 @@ function drawRoadDirection(svg,nodes,width){
  svg.append(layer);
 }
 function drawCustomers(){const layer=$('customer-layer');if(!layer)return;layer.replaceChildren();const nodes=new Map(city.nodes.map(n=>[String(n.id),n])),homes=new Map((city.buildings||[]).map(b=>[b.id,b])),unit=fullView.w/108;
- for(const customer of city.customers||[]){const home=homes.get(customer.home_id),node=nodes.get(String(customer.home_node));if(!home&&!node)continue;const x=home?Number(home.x)+Number(home.width)/2:node.x,y=home?Number(home.y)+Number(home.height)/2:node.y;const selected=selectedCustomer===customer.id;const g=svgNode('g',{'data-customer':customer.id,class:'customer-marker',role:'button',tabindex:0,'aria-label':`${customer.name} · ${customer.id}`});g.append(svgNode('circle',{cx:x,cy:y,r:unit*1.5,fill:'transparent'}),svgNode('path',{d:`M${x-unit*.8},${y}L${x},${y-unit*.7}L${x+unit*.8},${y}V${y+unit*.65}H${x-unit*.8}Z`,fill:selected?'#c9322c':'#aab4bd',stroke:selected?'#a02e2e':'#5c6771','stroke-width':unit*.16}),svgNode('path',{d:`M${x-unit*.16},${y+unit*.65}V${y+unit*.16}h${unit*.32}v${unit*.49}`,stroke:'#5c6771','stroke-width':unit*.15,fill:'none'}));if(selected){const text=svgNode('text',{x:x+unit,y:y-unit,'font-size':unit*.9});text.textContent=customer.name;g.append(text);}g.onclick=()=>selectCustomer(customer.id);g.onkeydown=e=>{if(e.key==='Enter')selectCustomer(customer.id);};layer.append(g);}
+ for(const customer of city.customers||[]){const home=homes.get(customer.home_id),node=nodes.get(String(customer.home_node));if(!home&&!node)continue;const x=home?Number(home.x)+Number(home.width)/2:node.x,y=home?Number(home.y)+Number(home.height)/2:node.y;const selected=selectedCustomer===customer.id;const g=svgNode('g',{'data-customer':customer.id,class:'customer-marker',role:'button',tabindex:0,'aria-label':`${customer.name} · ${customer.id}`});g.append(svgNode('circle',{cx:x,cy:y,r:unit*1.5,fill:'transparent'}),svgNode('path',{d:`M${x-unit*.8},${y}L${x},${y-unit*.7}L${x+unit*.8},${y}V${y+unit*.65}H${x-unit*.8}Z`,fill:selected?'#63d5c5':'#aab4bd',stroke:selected?'#a02e2e':'#5c6771','stroke-width':unit*.16}),svgNode('path',{d:`M${x-unit*.16},${y+unit*.65}V${y+unit*.16}h${unit*.32}v${unit*.49}`,stroke:'#5c6771','stroke-width':unit*.15,fill:'none'}));if(selected){const text=svgNode('text',{x:x+unit,y:y-unit,'font-size':unit*.9});text.textContent=customer.name;g.append(text);}g.onclick=()=>selectCustomer(customer.id);g.onkeydown=e=>{if(e.key==='Enter')selectCustomer(customer.id);};layer.append(g);}
  $('customer-options').innerHTML=(city.customers||[]).map(c=>`<option value="${esc(c.name)} · ${esc(c.id)}"></option>`).join('');
 }
 function selectCustomer(id,basket=null){selectedCustomer=id;selectedBasket=basket;selectedStore=null;selectedAgent=null;show('customer-view');renderCustomer();drawCustomers();if(snapshot)drawMovement(snapshot);applyEntityFilter();}
@@ -225,6 +227,7 @@ function announceArrivals(data){
 }
 let lastDriverPaint=0;
 function animateCouriers(now){
+ if(document.hidden||matchMedia('(prefers-reduced-motion: reduce)').matches){requestAnimationFrame(animateCouriers);return;}
  const sim=visualSimTime(now);
  for(const track of animationRoutes){const marker=document.querySelector(`[data-courier="${CSS.escape(track.courier)}"]`);if(!marker)continue;const p=routeProgress(track.route,track.durations,Math.max(0,sim-track.depart));if(p)marker.setAttribute('transform',`translate(${p.position.x-Number(marker.dataset.anchorX)},${p.position.y-Number(marker.dataset.anchorY)})`);}
  if(now-lastDriverPaint>200){const eta=$('driver-eta-value');if(eta&&selectedAgent){const job=snapshot?.jobs?.find(j=>j.courier===selectedAgent.slice(8)&&['assigned','in_transit','arrived'].includes(j.status));if(job){const seconds=Math.max(0,Math.ceil(job.arrive_sim-sim));eta.textContent=job.accepted?`${Math.floor(seconds/60)}m ${String(seconds%60).padStart(2,'0')}s`:'Awaiting acceptance';}}lastDriverPaint=now;}

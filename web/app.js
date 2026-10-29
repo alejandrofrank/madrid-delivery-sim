@@ -1,7 +1,7 @@
 /* All dynamic strings enter the DOM as text. LLM replies are untrusted content. */
 "use strict";
 const $ = (id) => document.getElementById(id);
-const colors = {bike: "#168570", moto: "#3881c4", van: "#7a638e"};
+const colors = {bike: "#63d5c5", moto: "#63d5c5", van: "#63d5c5"};
 const serviceBounds = L.latLngBounds([[40.375,-3.73],[40.455,-3.64]]);
 const navigationBounds = serviceBounds.pad(.12);
 const map = L.map("map", {
@@ -15,8 +15,41 @@ const roads = L.layerGroup().addTo(map), hubs = L.layerGroup().addTo(map);
 const stores = L.layerGroup().addTo(map), ordersLayer = L.layerGroup().addTo(map);
 const courierMarkers = new Map();
 let routeLine = null, state = null, selected = null, runId = "", lastPacket = 0, traceRows = [];
-let tab = "fleet", busy = false, pollCount = 0, traceBusy = false;
+let tab = "decisions", busy = false, pollCount = 0, traceBusy = false;
 let exploringMap = false;
+
+const reducedMotion = matchMedia("(prefers-reduced-motion: reduce)");
+const clusterLayer = L.layerGroup().addTo(map);
+const routeLayer = L.layerGroup().addTo(map);
+let observations = [], observationRun = null, lastObservationTime = -1;
+function setConsoleView(view) {
+  $("simulation-panel").hidden=view!=="simulation";
+  $("operations-panel").hidden=view!=="operations";
+  document.querySelectorAll("[data-console-view]").forEach(b=>b.setAttribute("aria-pressed",String(b.dataset.consoleView===view)));
+  if(view==="operations") requestAnimationFrame(()=>{map.invalidateSize(); $("fit-map").click();});
+}
+document.querySelectorAll("[data-console-view]").forEach(b=>b.onclick=()=>setConsoleView(b.dataset.consoleView));
+document.addEventListener("click",event=>{if(event.target.closest("[data-open-simulation]"))setConsoleView("simulation");});
+["agent-role","agent-status","agent-search"].forEach(id=>$(id).addEventListener("input",()=>state&&renderInspector()));
+$("fleet").addEventListener("click",event=>{const row=event.target.closest("[data-courier]");if(row)choose("courier",row.dataset.courier);});
+$("open-agent-details").onclick=()=>{
+  const open=$("agent-details").hidden;$("agent-details").hidden=!open;$("open-agent-details").setAttribute("aria-expanded",String(open));
+  if(open)$("agent-details").scrollIntoView({behavior:reducedMotion.matches?"instant":"smooth",block:"nearest"});
+};
+map.on("zoomend",()=>{if(state?.run)renderCouriers();});
+function agentStatus(c){return ["to_pickup","delivering","returning"].includes(c.status)?"working":c.status==="off_shift"?"off_shift":"idle";}
+function deliveryCount(id){return state.orders.filter(o=>o.courier===id&&o.status==="delivered").length;}
+function observeMetrics(){
+ const run=state.run;
+ if(observationRun!==run.id){observations=[];lastObservationTime=-1;observationRun=run.id;}
+ if(run.sim_time===lastObservationTime)return;
+ lastObservationTime=run.sim_time;
+ observations.push({time:run.sim_time,orders:state.metrics.delivered,ontime:state.metrics.on_time_pct,cost:state.metrics.cost_per_delivery_eur,rate:run.sim_time>0?state.metrics.orders/(run.sim_time/60):null,agents:Object.fromEntries(state.couriers.map(c=>[c.id,deliveryCount(c.id)]))});
+ if(observations.length>40)observations.shift();
+ for(const key of ["orders","ontime","cost","rate"])$("chart-"+key).innerHTML=Ops.sparkline(observations.map(s=>s[key]),"Observed "+key+" during this visit");
+}
+function agentTraceLink(id){return "/agent-traces?source=madrid&run="+encodeURIComponent(state.run.id)+"&agent="+encodeURIComponent(id);}
+
 const escape = (s) => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const clock = (seconds) => `${String(10 + Math.floor(seconds / 3600)).padStart(2,"0")}:${String(Math.floor(seconds % 3600 / 60)).padStart(2,"0")}`;
 const human = (s) => String(s).replaceAll("_", " ");
@@ -60,6 +93,7 @@ $("fit-map").onclick = () => {
   map.fitBounds(serviceBounds, {padding:[12,12], animate:false});
 };
 map.on("resize", () => {
+  if (!$("map").clientWidth || !$("map").clientHeight) return;
   updateMapMinZoom();
   map.panInsideBounds(navigationBounds, {animate:false});
 });
@@ -70,7 +104,7 @@ $("frame-selection").onclick = () => {
 $("show-stores").onchange = (e) => e.target.checked ? stores.addTo(map) : map.removeLayer(stores);
 $("show-complete").onchange = () => state && renderOrders();
 $("order-filter").onchange = () => state && renderLedger();
-$("clear-selection").onclick = () => { selected = null; traceRows = []; renderInspector(); renderRoute(); };
+$("clear-selection").onclick = () => { selected = null; traceRows = []; renderInspector(); renderCouriers(); renderRoute(); $("agent-details").hidden=true; $("open-agent-details").setAttribute("aria-expanded","false"); };
 $("run-select").onchange = () => {
   runId = $("run-select").value; selected = null; traceRows = [];
   renderRoute();
@@ -83,7 +117,7 @@ $("start").onclick = async () => {
     const result = await api("/api/runs", {method:"POST", headers:{"Content-Type":"application/json"},
       body:JSON.stringify({seed:Number($("seed").value), wall_seconds:Number($("duration").value)})});
     runId = result.id; selected = null; traceRows = []; renderRoute();
-    await refreshRuns(); await poll(); error("");
+    await refreshRuns(); await poll(); setConsoleView("operations"); error("");
   } catch (e) { error(e.message); }
   finally { $("start").disabled = state?.run?.status === "running"; }
 };
@@ -95,7 +129,7 @@ async function refreshRuns() {
 }
 async function choose(kind, id) {
   selected = {kind, id}; traceRows = []; setTab("decisions");
-  renderInspector(); renderRoute(); await refreshTrace();
+  renderInspector(); renderCouriers(); renderRoute(); await refreshTrace();
 }
 async function refreshTrace() {
   if (!selected || !state?.run || traceBusy) return;
@@ -121,16 +155,23 @@ function selectedMapBounds() {
   return points.length ? L.latLngBounds(points) : null;
 }
 function renderRoute() {
-  if (routeLine) { routeLine.remove(); routeLine = null; }
-  $("frame-selection").disabled = !selectedMapBounds();
-  if (!state?.run || !selected) return;
-  const courier = selected.kind === "courier" ? state.couriers.find(c => c.id === selected.id)
-    : state.couriers.find(c => c.order_id === selected.id);
-  if (courier?.route) routeLine = L.polyline(courier.route.points.map(p => [p[1],p[0]]),
-    {color:"#d08a25",weight:4,opacity:.8}).addTo(map);
+  routeLayer.clearLayers();
+  $("frame-selection").disabled=!selectedMapBounds();
+  if(!state?.run)return;
+  for(const courier of state.couriers){
+    const points=courier.route?.points;if(!points?.length)continue;
+    const chosen=selected?.kind==="courier"&&selected.id===courier.id||selected?.kind==="order"&&selected.id===courier.order_id;
+    if(!chosen&&!["to_pickup","delivering"].includes(courier.status))continue;
+    const traveled=points.filter(p=>p[2]<=state.run.sim_time),planned=points.filter(p=>p[2]>state.run.sim_time);
+    if(traveled.length&&planned.length)planned.unshift(traveled.at(-1));
+    if(planned.length>1)L.polyline(planned.map(p=>[p[1],p[0]]),{color:"#63d5c5",weight:chosen?3:1.5,opacity:chosen?.65:.22,dashArray:"4 6",interactive:false}).addTo(routeLayer);
+    for(let i=1;i<traveled.length;i++)L.polyline([[traveled[i-1][1],traveled[i-1][0]],[traveled[i][1],traveled[i][0]]],{color:"#63d5c5",weight:chosen?3:1.5,opacity:(chosen?.8:.25)*(i/traveled.length),interactive:false}).addTo(routeLayer);
+  }
 }
 function renderMetrics() {
+  observeMetrics();
   const {run,metrics:m,queue:q,complaints} = state;
+  $("kpi-rate").textContent=run.sim_time>0?(m.orders/(run.sim_time/60)).toFixed(2):"—";
   $("clock").textContent = clock(run.sim_time);
   $("run-status").textContent = run.status.toUpperCase(); $("run-status").className = `badge ${run.status}`;
   $("kpi-delivered").innerHTML = `${m.delivered} <small>/ ${m.orders}</small>`;
@@ -148,16 +189,31 @@ function renderMetrics() {
   if (run.status === "failed") error(`Run stopped: ${run.error}. The state is preserved; resume from the CLI.`);
 }
 function renderCouriers() {
+  clusterLayer.clearLayers();
+  const groups=new Map();
   for (const c of state.couriers) {
-    const selectedClass = selected?.kind === "courier" && selected.id === c.id ? " selected" : "";
-    const icon = L.divIcon({className: `courier-icon${selectedClass}`,iconSize:[22,22],iconAnchor:[11,11],
-      html:`<span style="display:block;border-radius:100%;background:${colors[c.mode]}">${c.mode[0].toUpperCase()}</span>`});
-    let marker = courierMarkers.get(c.id);
-    if (!marker) {
-      marker = L.marker([c.lat,c.lon],{icon,title:c.id,keyboard:true}).addTo(map);
-      marker.on("click",()=>choose("courier",c.id)); courierMarkers.set(c.id,marker);
-    } else marker.setIcon(icon).setLatLng([c.lat,c.lon]);
-    marker.bindTooltip(`${escape(c.id)} · ${escape(human(c.status))}`);
+    const isSelected=selected?.kind==="courier"&&selected.id===c.id;
+    const status=agentStatus(c), color=status==="working"?"#63d5c5":status==="off_shift"?"#81949f":"#b7c7cf";
+    const shape=Ops.icon(c.mode,"marker-symbol").replace('viewBox="0 0 24 24"','viewBox="-5 -5 34 34"').replace('fill="none"','style="color:'+color+'" fill="none"').replace('stroke-width="1.5"','stroke-width="1.6"');
+    const svg=shape.replace(">",'><circle cx="12" cy="12" r="16" fill="#172429" stroke="'+(isSelected?"#e7edf0":color)+'" stroke-width="'+(isSelected?2:1)+'"/>');
+    const icon=L.divIcon({className:"courier-icon"+(isSelected?" selected":""),iconSize:[30,30],iconAnchor:[15,15],html:svg});
+    let marker=courierMarkers.get(c.id);
+    if(!marker){marker=L.marker([c.lat,c.lon],{icon,title:c.id,keyboard:true});marker.on("click",()=>choose("courier",c.id));courierMarkers.set(c.id,marker);}
+    else marker.setIcon(icon).setLatLng([c.lat,c.lon]);
+    const last=state.decisions.find(d=>d.courier_id===c.id);
+    marker.bindTooltip(escape(c.id)+" · "+escape(human(c.status)));
+    const content='<div class="map-agent-card"><strong>'+escape(c.id)+'</strong><p>'+escape(human(c.status))+' · '+escape(c.mode)+'</p><p>Task: '+escape(c.order_id||"Available for assignment")+'</p><p>Last decision: '+escape(last?human(last.action):"None recorded")+'</p><a href="'+agentTraceLink(c.id)+'">Open agent trace</a></div>';
+    if(marker.getPopup())marker.setPopupContent(content);else marker.bindPopup(content,{minWidth:220,autoPan:false});
+    const point=map.project([c.lat,c.lon],map.getZoom());
+    const key=map.getZoom()<13.5&&!isSelected?Math.floor(point.x/38)+":"+Math.floor(point.y/38):c.id;
+    if(!groups.has(key))groups.set(key,[]);groups.get(key).push({c,marker});
+  }
+  for(const group of groups.values()){
+    if(group.length===1){if(!map.hasLayer(group[0].marker))group[0].marker.addTo(map);continue;}
+    group.forEach(({marker})=>map.removeLayer(marker));
+    const lat=group.reduce((n,{c})=>n+c.lat,0)/group.length,lon=group.reduce((n,{c})=>n+c.lon,0)/group.length;
+    const icon=L.divIcon({className:"cluster-marker",html:String(group.length),iconSize:[30,30]});
+    L.marker([lat,lon],{icon,title:group.length+" agents. Zoom to inspect.",keyboard:true}).on("click",()=>map.setView([lat,lon],Math.min(17,map.getZoom()+1),{animate:!reducedMotion.matches})).addTo(clusterLayer);
   }
 }
 function renderOrders() {
@@ -187,18 +243,22 @@ function renderLedger() {
   document.querySelectorAll("[data-order]").forEach(b=>b.onclick=()=>choose("order",b.dataset.order));
 }
 function renderInspector() {
-  if (!state?.run) return;
-  if (selected?.kind === "courier") {
-    const c = state.couriers.find(c => c.id === selected.id);
-    if (c) $("selection").innerHTML = `<span class="eyebrow">COURIER · ${escape(c.mode.toUpperCase())}</span><strong>${escape(c.id)}</strong><p>${escape(human(c.status))} · ${c.energy.toFixed(1)}% energy · ${(c.distance_m/1000).toFixed(1)} km<br>${escape(c.order_id || "Available for the next assignment")}</p>`;
-  } else if (selected?.kind === "order") {
-    const o = state.orders.find(o=>o.id===selected.id);
-    $("selection").innerHTML = `<span class="eyebrow">ORDER TRACE</span><strong>${escape(selected.id)}</strong><p>${escape(o?.store || "Delivery order")}<br>${escape(human(o?.status || "Recorded"))} · events correlate by order ID</p>`;
-  } else $("selection").innerHTML = `<span class="eyebrow">FLEET OVERVIEW</span><strong>${state.couriers.length} couriers / 3 hubs</strong><p>Select a courier or order to inspect its decisions.</p>`;
-  $("fleet").innerHTML = state.couriers.map(c => `<button class="fleet-row ${selected?.id===c.id?"active":""}" data-courier="${escape(c.id)}"><span class="mode" style="background:${colors[c.mode]}">${c.mode[0].toUpperCase()}</span><span><strong>${escape(c.id)}</strong><small>${escape(human(c.status))}${c.order_id?` · ${escape(c.order_id)}`:""}</small></span><span class="energy">${c.energy.toFixed(0)}%</span></button>`).join("");
-  document.querySelectorAll("[data-courier]").forEach(b=>b.onclick=()=>choose("courier",b.dataset.courier));
+  if(!state?.run)return;
+  $("agent-count").textContent=state.couriers.length;
+  $("fleet-activity").textContent=state.couriers.filter(c=>agentStatus(c)==="working").length+" working";
+  $("open-agent-details").disabled=!selected;
+  if(selected?.kind==="courier"){
+    const c=state.couriers.find(c=>c.id===selected.id);
+    if(c)$("selection").innerHTML='<strong>'+escape(c.id)+'</strong><span class="status-pill '+agentStatus(c)+'">'+escape(human(c.status))+'</span><p>'+escape(c.order_id||"Available for the next assignment")+'</p>';
+  }else if(selected?.kind==="order"){
+    const o=state.orders.find(o=>o.id===selected.id);
+    $("selection").innerHTML='<strong>'+escape(selected.id)+'</strong><p>'+escape(o?.store||"Delivery order")+' · '+escape(human(o?.status||"Recorded"))+'</p>';
+  }else $("selection").innerHTML='<strong>Choose an agent</strong><p>Select a roster row or map marker to see its current task.</p>';
+  const role=$("agent-role").value,status=$("agent-status").value,query=$("agent-search").value.trim().toLowerCase();
+  const rows=state.couriers.filter(c=>(role==="all"||c.mode===role)&&(status==="all"||(status==="active"?agentStatus(c)==="working":agentStatus(c)===status))&&c.id.toLowerCase().includes(query));
+  Ops.liveHTML($("fleet"),rows.map(c=>'<button class="fleet-row '+(selected?.id===c.id?"active":"")+'" data-courier="'+escape(c.id)+'" aria-pressed="'+(selected?.id===c.id)+'"><span class="fleet-person">'+Ops.icon(c.mode)+'<span><strong>'+escape(c.id)+'</strong><small>'+escape(c.order_id||human(c.mode)+" courier")+'</small></span></span><span class="status-pill '+agentStatus(c)+'">'+escape(human(c.status))+'</span><span class="fleet-throughput">'+deliveryCount(c.id)+Ops.sparkline(observations.map(s=>s.agents[c.id]),"Delivered orders observed this visit")+'</span></button>').join("")||'<p class="empty">No agents match these filters.</p>');
   renderDecisions();
-  $("service").innerHTML = state.complaints.map(c=>`<article class="complaint"><span class="badge">${escape(human(c.status))}</span><p>${escape(c.text)}</p>${c.response?`<blockquote>${escape(c.response)}</blockquote>`:""}<small>${escape(c.source || "pending")} · approved refund €${c.approved_refund_eur.toFixed(2)}<br>${escape(c.order_id)}</small></article>`).join("") || '<p class="empty">Complaint events arrive during the simulated day.<br>Replies use the configured LLM; policy checks control refunds.</p>';
+  $("service").innerHTML=state.complaints.map(c=>'<article class="complaint"><span class="badge">'+escape(human(c.status))+'</span><p>'+escape(c.text)+'</p>'+(c.response?'<blockquote>'+escape(c.response)+'</blockquote>':'')+'<small>'+escape(c.source||"pending")+' · approved refund €'+c.approved_refund_eur.toFixed(2)+'<br>'+escape(c.order_id)+'</small></article>').join("")||'<p class="empty">No service cases recorded.</p>';
 }
 function renderDecisions() {
   const rows = selected ? traceRows : state?.decisions || [];
@@ -214,7 +274,7 @@ function pointAt(route, sim) {
   return [ps.at(-1)[1],ps.at(-1)[0]];
 }
 function animate() {
-  if(state?.run?.status==="running" && state.run.wall_seconds>0) {
+  if(!document.hidden && !reducedMotion.matches && state?.run?.status==="running" && state.run.wall_seconds>0) {
     const advance=Math.min(60,(performance.now()-lastPacket)/1000*state.run.duration/state.run.wall_seconds);
     for(const c of state.couriers) if(c.route && ["to_pickup","delivering"].includes(c.status))
       courierMarkers.get(c.id)?.setLatLng(pointAt(c.route,state.run.sim_time+advance));
@@ -230,7 +290,7 @@ async function poll() {
     state=next; lastPacket=performance.now();
     $("connection").className="dot online"; $("connection-text").textContent="Local services connected";
     if(state.run) { renderMetrics();renderCouriers();renderOrders();renderLedger();renderInspector();renderRoute();await refreshTrace(); }
-    else $("fleet").innerHTML='<p class="empty">Ready to simulate.<br>Start a day to activate the fleet.</p>';
+    else $("fleet").innerHTML='<div class="empty"><strong>No session loaded</strong><p>Start a session to see the fleet, routes and orders.</p><button data-open-simulation>Set up simulation</button></div>';
     if(++pollCount%10===0) await refreshRuns();
   } catch(e) { $("connection").className="dot offline";$("connection-text").textContent="Connection interrupted";error(e.message); }
   finally { busy=false; }
@@ -238,10 +298,10 @@ async function poll() {
 async function initialize() {
   try {
     const [city,network]=await Promise.all([api("/api/world"),api("/api/roads")]);
-    L.geoJSON(network,{style:{color:"#c5d0d6",weight:1.2,opacity:.8},interactive:false}).addTo(roads);
+    L.geoJSON(network,{style:{color:"#40535d",weight:1.1,opacity:.65},interactive:false}).addTo(roads);
     for(const loc of city.locations) {
       if(loc.kind==="hub") L.marker([loc.lat,loc.lon],{icon:L.divIcon({className:"hub-marker",html:escape(loc.district),iconSize:null,iconAnchor:[25,25]})}).addTo(hubs);
-      else if(loc.kind==="store") L.circleMarker([loc.lat,loc.lon],{radius:3,color:"#aa9369",weight:1,fillColor:"#fff",fillOpacity:1}).bindTooltip(escape(loc.name)).addTo(stores);
+      else if(loc.kind==="store") L.circleMarker([loc.lat,loc.lon],{radius:3,color:"#92a7ad",weight:1,fillColor:"#1c2d33",fillOpacity:1}).bindTooltip(escape(loc.name)).addTo(stores);
     }
     $("graph-info").textContent=`${city.manifest.nodes.toLocaleString()} road nodes · ${city.manifest.edges.toLocaleString()} directed edges · OSM`;
     $("fit-map").click(); await refreshRuns(); await poll();
