@@ -1,35 +1,41 @@
 {
-  "reviewed_at": "2026-10-29T19:18:13.527510+00:00",
-  "source_revision": "03a13009d58989018b855abc688e6968b1930fb1",
+  "reviewed_at": "2026-10-29T19:52:42.798190+00:00",
+  "source_revision": "4d21dc9e7bd391e32fbac7d5cfaefcb1a1d2e191",
   "integrated_branch_heads": {
     "main": "69135c98baafdee9f25346833e42a8433720d90b",
     "codex/pr1-local-app": "615812dbdf69940276281350e6fd7436ae5e573b",
     "feat/google-stack": "ea9350708a77de69ad29b7015aeaa0442f229d79",
     "feat/evals": "21e7b7548b60b857fa4883b0cb84708bea76477f",
     "feat/otel-bigquery": "99a5b70c9aff7e8c64e4cee2a8d515390598be9d",
-    "feat/ui-redesign": "8b02580578eb92045065a064d933c0def32d9b45"
+    "feat/ui-redesign": "8b02580578eb92045065a064d933c0def32d9b45",
+    "codex/dispatch-optimization": "63457560c8aa49fcd12ca6289ed5c2243eb59005"
   },
   "tests": {
-    "tests": 738,
+    "tests": 811,
     "failures": 0,
     "errors": 0,
-    "skipped": 0
+    "skipped": 0,
+    "duration_seconds": 417.043904
   },
   "static_checks": {
     "ruff": "passed",
-    "mypy_source_files": 62,
+    "mypy_source_files": 65,
     "dependency_consistency": "passed",
     "actionlint": "passed",
-    "documentation_chapters": 24,
+    "documentation_chapters": 25,
     "generated_diagrams": 8,
     "web_asset_versions": "passed",
-    "javascript_syntax": "passed"
+    "javascript_syntax": "passed on host; Node is unavailable in the application image",
+    "documentation_sources": 121,
+    "motion_regressions_passed": 6
   },
   "terraform": {
     "mock_tests_passed": 20,
     "format": "passed",
     "validate": "passed",
-    "cloud_applied": false
+    "cloud_applied": false,
+    "last_verified_source_revision": "03a13009d58989018b855abc688e6968b1930fb1",
+    "unchanged_since_verification": true
   },
   "evaluations": {
     "offline_model_attempts": 60,
@@ -38,14 +44,18 @@
     "criteria": 49,
     "reproductions": 2,
     "outcomes_match": true,
-    "cloud_calls": 0
+    "cloud_calls": 0,
+    "offline_model_ci_run": 40942538307,
+    "offline_judge_cases_passed": 6
   },
   "browser": {
     "integration_groups_passed": 6,
     "layout_checks_passed": 9,
     "map_groups_passed": 3,
     "external_map_requests": 0,
-    "javascript_errors": 0
+    "javascript_errors": 0,
+    "dispatch_checks_passed": 4,
+    "http_failures": 0
   },
   "seeded_day": {
     "orders": 247,
@@ -54,14 +64,23 @@
     "pending": 0,
     "active": 0,
     "unserved": 0,
-    "dead_letters": 0
+    "dead_letters": 0,
+    "on_time": 247,
+    "operating_cost_eur": 391.5202,
+    "cost_per_successful_task_eur": 1.5851,
+    "empty_km": 253.93,
+    "reposition_km": 0.0,
+    "dispatch_policy": "min_cost/stay"
   },
   "integration_fixes": [
     "Preserve both released migration026 histories with exact checksum compatibility and migration027",
     "Keep receipt and streaming analytics datasets under separate Terraform addresses",
     "Use writable temporary ADK CLI apps for non-root CI",
     "Defer model-quality verdicts to the statistical gate while retaining hard integrity and execution failures",
-    "Preserve the new UI with telemetry links and content-versioned assets"
+    "Preserve the new UI with telemetry links and content-versioned assets",
+    "Package the catalogued Terraform migration guide in the application image",
+    "Preserve economic dispatch and both released027 migrations with the approved dark UI and monotonic courier motion"
   ],
-  "excluded_work": "Uncommitted edits in other worktrees; active unpublished dispatch-optimization branch"
+  "excluded_work": "Uncommitted edits in other worktrees only; all completed published branch heads included",
+  "source_fingerprint": "408fcd759e5f1b364dd834bba1e4af58cad6ab10d2ed0f431a945a0e1cc96e8f"
 }

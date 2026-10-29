@@ -33,7 +33,7 @@ flowchart LR
 
 | Headline result | Evidence and scope |
 | --- | --- |
-| Tests | **738 passed**; Ruff and mypy (62 modules) passed. [Integration verification](docs/evidence/branch-integration.json). |
+| Tests | **811 passed**; Ruff and mypy (65 modules) passed. [Integration verification](docs/evidence/branch-integration.json). |
 | Scenarios | 12 deterministic role scenarios, run twice with matching outcomes. |
 | Cost per local run | **$0 in cloud/model charges**; local compute excluded. |
 | Evaluation pass rate | **12/12 scenarios; 49/49 assertions (100%)**, repeated with matching outcomes in the [Google stack receipt](docs/evidence/google-stack-local.json). This measures contracts, not LLM quality. |

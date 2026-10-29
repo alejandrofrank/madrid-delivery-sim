@@ -1,5 +1,18 @@
 # Status
 
+2026-10-29 (complete branch integration): Added the completed economic-dispatch
+branch to the Google stack, evaluation, observability and UI integration. The
+approved dark operations layout now includes dispatch policies, operating costs
+and the shared monotonic courier clock. Both published 027 migrations retain
+their filenames and upgrade safely in either installation history. The combined
+image passed 811 Python tests, Ruff, mypy across 65 modules, six motion regressions,
+six browser groups, nine layout checks, three map/touch groups and four dispatch
+checks. All 247 orders in the seeded day arrived on time with no stranded work.
+The standard health receipts identify source commit `4d21dc9`; the documentation
+reader includes all 25 chapters and 121 reviewed sources. No paid calls or cloud
+deployment were needed. Uncommitted changes in other checkouts remain separate.
+See [integration evidence](docs/evidence/branch-integration.json).
+
 2026-10-29 (first branch integration): Combined the completed Google-stack/local-app,
 Google-native eval, production observability and UI branches. The integration
 passed 738 tests, Ruff, mypy across 62 modules, 20 mocked Terraform checks, 60
