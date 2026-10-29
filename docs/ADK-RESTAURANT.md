@@ -4,8 +4,8 @@ This slice uses **Google ADK 2.13.0** and its real `LlmAgent`, `Runner`, functio
 tools, model callbacks and session service. The default model is explicitly a
 scripted offline `BaseLlm` double. A native Vertex/Gemini adapter is implemented
 behind an explicit deployment gate and monetary budget; it is disabled by default
-and has not been invoked against GCP in this verification. There is no automatic
-paid-provider fallback or new cloud deployment. Offline results demonstrate integration
+and was exercised explicitly with both SOULs on Vertex on 2026-10-29. There is no automatic
+paid-provider fallback. Offline results demonstrate integration
 and enforcement; they do not measure a language model's understanding of SOUL.
 
 ## Reusable building blocks
@@ -56,6 +56,7 @@ Postgres recall functions; broad session history is not shared between agents.
 | `read_recipe` | `restaurant.recipe` | This meal's frozen recipe and units |
 | `find_suppliers` | `restaurant.suppliers` | Open markets' public fees and estimated lead times; no private stock |
 | `recall_order_memory` | `memory.read` | Current-order, restaurant-owned, unexpired typed observations |
+| `search_ingredients` | `supply.search` (optional) | Scoped ingredient relevance; separate local/Jev provider and budget |
 | `request_missing_ingredients` | `restaurant.request_supply` | Stage a supplier choice; SQL calculates shortages and queues requests |
 | `confirm_order` | `restaurant.confirm` | Stage pantry-only acceptance; a shortage invalidates the proposal |
 | `receive_ingredient` | `restaurant.receive` | Stage receipt of the ingredient addressed by this event |
@@ -145,7 +146,8 @@ No credentials are discovered until an approved native model is actually invoked
 The local Compose defaults contain no ADC mount. In a GCP workload, ADC should
 come from its least-privilege runtime identity. Test profile prices and project IDs
 are fictional inputs, not recommended Google prices. Model availability, region,
-current tariffs, IAM and live decision quality require a separate opt-in verification.
+current tariffs and IAM are operator deployment choices. The explicit live comparison
+below exercises this adapter without enabling paid execution in the normal city UI.
 
 ## Verification and GCP direction
 
@@ -170,12 +172,109 @@ The health dashboard lists these cases under **ADK restaurant agents**.
 
 Google-native components implemented here are ADK, Google Gen AI types and a gated
 keyless Vertex model adapter. The
-existing isolated Terraform Cloud Run/Vertex recovery judge is unchanged. The
+existing isolated Terraform Cloud Run/Vertex recovery judge is separate. The
 local city and Postgres remain free local infrastructure. Production work still
-includes live model/IAM validation, billing reconciliation and a supervised worker.
+includes billing reconciliation, broader model-quality evaluation and a supervised worker.
 Cloud Run or managed-runtime hosting must be Terraform-owned before deployment;
 ADK names or sessions do not create IAM identities. No new GCP resource is required
-or provisioned by this offline slice.
+or provisioned by the offline checks.
+
+## Real Vertex and Jev comparison
+
+The native restaurant worker stays local and impersonates a dedicated, keyless
+`restaurant-adk` service account in the isolated simulation project. Terraform
+owns the identity, its `aiplatform.endpoints.predict` grant and the permitted
+operator impersonation binding. This mode enables the project's billing link
+without creating Cloud Run, Artifact Registry, Cloud SQL or a managed agent runtime.
+The existing judge gateway is not deployed for these tests. Project, APIs and IAM
+remain when billing is parked.
+
+```bash
+make gcp-vertex-start
+make demo-adk-vertex
+make gcp-stop
+make gcp-status
+```
+
+Each SOUL gets one synthetic pizza order, an empty pantry and three public
+supplier quotes. Elena should prioritize lead time; Mateo should prioritize
+procurement fee. Both use the same ADK tool implementation. Gemini decides the
+tool sequence and supplier from the prompt and SOUL; the SQL layer validates
+authority, quantities, consent and event effects. No paid model selects the stock
+quantities or bypasses the queue.
+
+The reviewed model is `gemini-3.5-flash-lite`, global, standard text PayGo:
+$0.30 / million input tokens, $2.50 / million output tokens including thinking,
+and $0.03 / million cached input tokens, checked 2026-10-29. Gemini 3 uses minimal
+thinking for this bounded trial. Global is deliberate for synthetic data and
+does not assert EU processing residency. The retired 2.5 model is not used.
+
+Jev `jev-1.14.0` is an optional `supply.search` capability, not a general planner.
+The model may call `search_ingredients` with a canonical ingredient ID from the
+current recipe. The server selects the already scoped restaurant index and
+frozen review provider. Jev receives ingredient labels, units and a relevance
+question; it receives no inventory counts, household conversations or typed memory.
+Its result is an observation. Availability is read again locally; reservation
+and supplier communication still require the transactional tools and event queue.
+Its input-only tariff is $0.042 / million tokens, output free. An API key is held
+in ignored `.env.jev` and passed only to the one-shot worker.
+
+The comparison admits at most $0.20 Vertex work per SOUL ($0.40 together),
+60 calls per agent, eight per event, 1,024 output tokens per call, and a 30-second
+event deadline. Each agent also gets three Jev calls and 24,000 reserved input
+tokens: together $0.002016 maximum at the reviewed Jev tariff. No automatic
+provider retries, provider fallback or fresh paid experiments follow a failure.
+An exclusive execution lock prevents concurrent launches. Explicit receipt recovery
+can re-read finished runs without repeating calls; reviewed follow-up experiments
+account for previous known costs, reserving the full allowance for unknown calls,
+against a cumulative $0.50 Vertex limit. Operator-controlled local files and
+SQL admission are not a billing-account spending cap.
+
+The retained live comparison delivered both meals, with 25 Gemini calls and three
+Jev calls per SOUL. Elena selected `market-a` (90-second quoted lead time); Mateo
+selected `market-b` (50-cent fee). Both runs acknowledged 24 events, had zero
+retries/dead letters, conserved stock and replayed correctly. Median Gemini call
+latency was 800 ms for Elena and 769 ms for Mateo. Their Vertex costs calculated
+from actual usage were $0.01214980 and $0.01269700; Jev was $0.000136962 each.
+Including the initial trial, total usage-derived cost was $0.039755624. Billing
+was then disabled, retaining 15 foundation resources. A live impersonated IAM
+probe received HTTP 403 / PERMISSION_DENIED for `resourcemanager.projects.get`.
+
+These two synthetic orders prove integration and the intended SOUL distinction;
+they are not a general model-quality benchmark or proof of cost/latency savings
+from a Jev cascade. Both agents still invoke Gemini on routine arrival and cooking
+events. Routing those bounded, high-confidence cases through rules or Jev before
+escalating ambiguity to Gemini is a separate optimization that needs an A/B eval.
+One recovered receipt has no whole-run wall time; per-call latency and token
+metadata were durably retained and remain available.
+
+[AI evidence](/agent-traces) shows the retained comparison, system prompts and
+SOULs, tool declarations, model-visible messages, function calls, tool results,
+selected memory with provenance/expiry/version, provider model version, latency,
+tokens and usage-derived costs. Full private rows are not granted to agents.
+The page never starts inference. Costs calculated from actual token metadata are
+separate from invoice totals, credits, tax and project-wide charges; missing
+metadata remains unknown. Previous attempts remain in the local JSON receipt.
+
+Source links: [operator evidence reader](../src/delivery/adk_evidence.py),
+[paid comparison](../scripts/demo_adk_vertex.py),
+[temporary impersonated ADC launcher](../scripts/run_adk_vertex.py),
+[model trace schema](../sql/migrations/019_adk_model_traces.sql),
+[scoped search grants](../sql/migrations/020_adk_scoped_search.sql),
+[canonical business snapshots](../sql/migrations/021_canonical_supply_context.sql),
+and [usage-cost and operator-boundary tests](../tests/test_adk_evidence.py).
+
+An initial real run exposed unordered JSON inventory arrays: equal stock facts
+could fail stale-state validation after a different query plan. Canonical ordering
+fixes that comparison while preserving version/quantity checks. A regression test
+rewrites physical stock rows without changing their business values; existing
+stale-stock tests continue to reject actual changes.
+
+Official deployment references: [Gemini model lifecycle](https://docs.cloud.google.com/gemini-enterprise-agent-platform/models/model-versions),
+[3.5 Flash-Lite capabilities](https://docs.cloud.google.com/gemini-enterprise-agent-platform/models/gemini/3-5-flash-lite),
+[Vertex pricing](https://cloud.google.com/model-garden/pricing),
+[Jev models and pricing](https://docs.typesafe.ai/models), and
+[Jev typed questions](https://docs.typesafe.ai/primitives).
 
 References: [ADK instructions and tools](https://adk.dev/agents/llm-agents/),
 [identity and tool enforcement](https://adk.dev/safety/),

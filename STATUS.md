@@ -1,5 +1,26 @@
 # Status
 
+2026-10-29 (live ADK follow-up): Tested both editable restaurant SOULs with real
+Gemini 3.5 Flash-Lite on Vertex and Jev 1.14.0 ingredient relevance. Each profile
+delivered one synthetic pizza through 24 queue events with 25 Gemini calls,
+three Jev calls, no retries/dead letters, conserved stock and matching replay.
+Elena chose the nearest supplier; Mateo chose the cheapest. Total usage-derived
+cost, including the initial trial, was $0.039755624; invoice reconciliation is
+explicitly pending. The local /agent-traces page shows prompts, responses, tools,
+selected typed memory, request hashes, token usage and per-call latency. Added
+durable model traces, optional granular search, an inference-only GCP start mode
+and a retained least-privilege restaurant identity. Fixed unordered business
+snapshots exposed by a live run. Explicit receipt recovery reused finished runs
+without repeating model calls. Billing is parked; project, six APIs and IAM are
+retained (15 resources), with no Cloud Run or image repository deployed for this
+comparison. A live impersonated identity probe denied unrelated project access
+(403). See docs/evidence/adk-restaurants-vertex.json for the measured receipts.
+Verified 475 tests, Ruff, mypy over 47 modules, seven mocked Terraform lifecycle
+checks, 12 role scenarios with repeatable outcomes, six offline judge cases,
+documentation links, host JavaScript syntax, and desktop/narrow-screen evidence
+inspection. The Python-only health container still reports Node as unavailable;
+host JavaScript syntax passed separately.
+
 2026-10-29: Added Google ADK 2.13.0 restaurant agents with reusable templates,
 editable role prompts/SOUL, granular scoped functions and staged decisions. A
 separate restricted SQL executor denies legacy broad tools and raw stock/history

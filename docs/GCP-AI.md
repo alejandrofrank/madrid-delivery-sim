@@ -3,7 +3,8 @@
 Architecture reading order: [exact agent implementation](AGENT-IMPLEMENTATION.md),
 [Terraform/GCP component inventory](GCP-COMPONENTS.md), then
 [enterprise decisions and gaps](ENTERPRISE-GCP.md). This document is the operations
-runbook. Parked status below is the last live verification on 2026-10-25, not a
+runbook. The gateway evidence below retains its 2026-10-25 verification; native
+ADK inference was additionally verified and parked on 2026-10-29. This is not a
 fresh status query on each documentation update. "Private" means IAM-authenticated
 invocation here; the current service has network-reachable ingress.
 
@@ -17,6 +18,13 @@ Project deletion is blocked by both `deletion_policy = "PREVENT"` and
 `lifecycle.prevent_destroy`. Keep private variables, plans and state out of Git.
 
 ## Daily commands
+
+For native ADK restaurant inference, use `make gcp-vertex-start` followed by
+`make demo-adk-vertex`, then `make gcp-stop`. This inference-only path retains a
+dedicated `restaurant-adk` service account and enables billing without creating
+the gateway or image repository. Only the one-shot local worker receives temporary
+impersonated ADC and the ignored Jev credential; the city UI remains offline.
+See [restaurant comparison and exact spending limits](ADK-RESTAURANT.md).
 
 From the repository root (Python 3.12+ with only its standard library):
 

@@ -36,3 +36,21 @@ def test_missing_or_invalid_usage_never_becomes_zero_cost():
         {"known": True, "prompt_token_count": 10, "cached_content_token_count": 20},
     ):
         assert usage_cost(usage, profile()) is None
+
+
+def test_comparison_is_a_fixed_local_operator_artifact(tmp_path, monkeypatch):
+    import json
+
+    from fastapi.testclient import TestClient
+
+    from delivery.api import app
+
+    monkeypatch.chdir(tmp_path)
+    client = TestClient(app)
+    assert client.get("/api/supply/model-comparison").status_code == 404
+    folder = tmp_path / "artifacts"
+    folder.mkdir()
+    (folder / "adk-live-comparison.json").write_text(json.dumps({"synthetic": True}))
+    assert client.get("/api/supply/model-comparison").json() == {"synthetic": True}
+    external = TestClient(app, base_url="http://outside.example")
+    assert external.get("/api/supply/model-comparison").status_code == 403

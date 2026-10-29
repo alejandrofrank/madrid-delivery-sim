@@ -32,6 +32,19 @@ router = APIRouter()
 _LEASES: dict[tuple[str, str, int], Event] = CHANNEL_LEASES
 
 
+@router.get("/agent-traces")
+def model_evidence_page() -> FileResponse:
+    return FileResponse("web/agent-traces.html")
+
+
+@router.get("/api/supply/model-comparison")
+def model_comparison() -> FileResponse:
+    """Fixed local operator artifact; no caller-selected paths or agent credentials."""
+    if not os.path.isfile("artifacts/adk-live-comparison.json"):
+        raise HTTPException(404, "No live comparison has been recorded")
+    return FileResponse("artifacts/adk-live-comparison.json", media_type="application/json")
+
+
 @router.get("/api/supply/agent-templates")
 def agent_templates() -> dict[str, Any]:
     """Trusted operator catalogue; no credentials, model calls or executable paths."""

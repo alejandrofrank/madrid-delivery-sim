@@ -39,8 +39,8 @@
       "title": "Google ADK restaurant",
       "group": "Agent engineering",
       "file": "docs/ADK-RESTAURANT.md",
-      "summary": "Reusable prompts, granular scoped tools, offline SOUL fixtures and durable decisions.",
-      "status": "Local ADK · offline model"
+      "summary": "Reusable prompts, scoped Jev retrieval, keyless Vertex decisions and inspectable usage receipts.",
+      "status": "Local tools · opt-in Vertex + Jev"
     },
     {
       "id": "memory",
@@ -175,6 +175,13 @@
     "src/delivery/adk_models.py",
     "src/delivery/adk_restaurant.py",
     "src/delivery/adk_offline.py",
+    "src/delivery/adk_evidence.py",
+    "scripts/demo_adk_vertex.py",
+    "scripts/run_adk_vertex.py",
+    "sql/migrations/019_adk_model_traces.sql",
+    "sql/migrations/020_adk_scoped_search.sql",
+    "sql/migrations/021_canonical_supply_context.sql",
+    "tests/test_adk_evidence.py",
     "sql/migrations/017_adk_restaurant.sql",
     "sql/migrations/018_adk_vertex_admission.sql",
     "tests/test_adk_restaurant.py",
