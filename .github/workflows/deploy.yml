@@ -1,0 +1,135 @@
+name: Qualify and deploy ephemeral replay
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: production-replay
+  cancel-in-progress: false
+jobs:
+  release:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    environment: production
+    permissions:
+      contents: read
+      actions: read
+      id-token: write
+    services:
+      postgres:
+        image: postgis/postgis:17-3.5
+        env:
+          POSTGRES_USER: delivery
+          POSTGRES_PASSWORD: delivery_local_only
+          POSTGRES_DB: delivery_test
+        ports: ["55432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U delivery -d delivery_test"
+          --health-interval 2s --health-timeout 3s --health-retries 30
+    env:
+      PROJECT_ID: ${{ vars.GCP_PROJECT_ID }}
+      BILLING_ACCOUNT: ${{ vars.GCP_BILLING_ACCOUNT }}
+      REGION: europe-west1
+      TEST_DATABASE_URL: postgresql://delivery:delivery_local_only@localhost:55432/delivery_test
+      DELIVERY_SOURCE_REVISION: ${{ github.sha }}
+      LLM_PROVIDER: disabled
+      DELIVERY_ADK_VERTEX_ENABLED: "0"
+      MDS_TELEMETRY_ENABLED: "0"
+      MDS_BIGQUERY_ENABLED: "0"
+      DELIVERY_OTEL_EXPORTER: disabled
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - name: Require full CI on this exact main revision and locate trusted release baseline
+        id: evidence
+        uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b # v7
+        with:
+          script: |
+            const repo = context.repo.owner + '/' + context.repo.repo;
+            const ci = await github.paginate(github.rest.actions.listWorkflowRuns, {
+              ...context.repo, workflow_id: 'ci.yml', branch: 'main', event: 'push',
+              head_sha: context.sha, status: 'success', per_page: 100
+            });
+            if (!ci.some(r => r.head_sha === context.sha && r.head_repository.full_name === repo)) {
+              core.setFailed('Run the full main CI and eval gate successfully before release.'); return;
+            }
+            const releases = await github.paginate(github.rest.actions.listWorkflowRuns, {
+              ...context.repo, workflow_id: 'deploy.yml', branch: 'main',
+              event: 'workflow_dispatch', status: 'success', per_page: 100
+            });
+            for (const run of releases) {
+              if (run.head_repository.full_name !== repo) continue;
+              const artifacts = await github.paginate(github.rest.actions.listWorkflowRunArtifacts, {
+                ...context.repo, run_id: run.id, per_page: 100
+              });
+              if (artifacts.some(a => a.name === 'heldout-release-v1' && !a.expired)) {
+                core.setOutput('run_id', String(run.id));
+                core.setOutput('revision', run.head_sha); return;
+              }
+            }
+            core.notice('First release: establish a baseline; no regression comparison claimed.');
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
+        if: steps.evidence.outputs.run_id != ''
+        with:
+          name: heldout-release-v1
+          path: artifacts/release/baseline
+          run-id: ${{ steps.evidence.outputs.run_id }}
+          github-token: ${{ github.token }}
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - name: Install pinned eval runtime
+        run: |
+          python3 -m pip install -r requirements.lock
+          python3 -m pip install --no-deps -e .
+      - name: Reserved cohort, five fresh attempts per case
+        env:
+          BASELINE_RUN: ${{ steps.evidence.outputs.run_id }}
+          BASELINE_REVISION: ${{ steps.evidence.outputs.revision }}
+        run: |
+          args=()
+          if [[ -n "$BASELINE_RUN" ]]; then
+            args+=(--baseline artifacts/release/baseline/candidate.json --baseline-revision "$BASELINE_REVISION")
+          fi
+          python3 scripts/release_gate.py --k 5 "${args[@]}"
+          cat artifacts/release/results.md >> "$GITHUB_STEP_SUMMARY"
+      - uses: google-github-actions/auth@7c6bc770dae815cd3e89ee6cdf493a5fab2cc093 # v3
+        with:
+          workload_identity_provider: ${{ vars.GCP_WORKLOAD_IDENTITY_PROVIDER }}
+          service_account: ${{ vars.GCP_CI_SERVICE_ACCOUNT }}
+      - uses: google-github-actions/setup-gcloud@aa5489c8933f4cc7a4f7d45035b3b1440c9c10db # v3
+      - name: Require an active operator-created environment
+        run: |
+          test -n "$PROJECT_ID"
+          gcloud run services describe mds-replay --project "$PROJECT_ID" --region "$REGION" >/dev/null
+          # CI cannot create infrastructure, lift caps, or wake a stopped environment.
+          python3 scripts/cloud_run_cap.py --project "$PROJECT_ID" --billing-account "$BILLING_ACCOUNT" --verify-only
+      - name: Build and publish verified replay image
+        run: |
+          gcloud auth configure-docker "$REGION-docker.pkg.dev" --quiet
+          image="$REGION-docker.pkg.dev/$PROJECT_ID/madrid-delivery-sim/replay:$GITHUB_SHA"
+          docker build -f infra/production/Dockerfile.replay -t "$image" .
+          docker run --rm --network none --entrypoint python "$image" -c 'from delivery.production import create_app; create_app()'
+          docker push "$image"
+          digest=$(gcloud artifacts docker images describe "$image" --project "$PROJECT_ID" --format='value(image_summary.digest)')
+          echo "REPLAY_IMAGE=$REGION-docker.pkg.dev/$PROJECT_ID/madrid-delivery-sim/replay@$digest" >> "$GITHUB_ENV"
+      - name: Promote the immutable image
+        run: |
+          gcloud run services update mds-replay --image "$REPLAY_IMAGE" --project "$PROJECT_ID" --region "$REGION" --quiet
+          url=$(gcloud run services describe mds-replay --project "$PROJECT_ID" --region "$REGION" --format='value(status.url)')
+          python3 scripts/verify_replay.py "$url"
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        if: success()
+        with:
+          name: heldout-release-v1
+          retention-days: 90
+          path: |
+            artifacts/release/candidate.json
+            artifacts/release/gate.json
+            artifacts/release/results.md
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        if: always()
+        with:
+          name: release-diagnostics
+          path: artifacts/release/
