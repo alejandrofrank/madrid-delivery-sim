@@ -16,6 +16,7 @@ def main() -> int:
     parser.add_argument("--candidate", type=Path, required=True)
     parser.add_argument("--baseline", type=Path)
     parser.add_argument("--baseline-revision")
+    parser.add_argument("--chaos-candidate", type=Path)
     parser.add_argument("--thresholds", type=Path, default=ROOT / "config/eval-gate.json")
     parser.add_argument("--output", type=Path, default=ROOT / "artifacts/evals/gate.json")
     args = parser.parse_args()
@@ -23,8 +24,31 @@ def main() -> int:
         baseline = json.loads(args.baseline.read_text()) if args.baseline else None
         if baseline and baseline.get("source_revision") != args.baseline_revision:
             raise ValueError("Baseline artifact revision does not match its trusted main run")
-        result = compare_reports(baseline, json.loads(args.candidate.read_text()),
-                                 load_thresholds(args.thresholds))
+        candidate = json.loads(args.candidate.read_text())
+        result = compare_reports(baseline, candidate, load_thresholds(args.thresholds))
+        if args.chaos_candidate:
+            from delivery.chaos_evals import MANIFEST, validate_chaos_report
+
+            report = json.loads(args.chaos_candidate.read_text())
+            valid = validate_chaos_report(report, json.loads(MANIFEST.read_text()))
+            required = {
+                "adk-customer-policy",
+                "adk-chaos-dispatcher",
+                "adk-chaos-restaurant",
+                "adk-chaos-customer",
+            }
+            rows = [r for r in candidate["rows"] if r["arm"] in required]
+            valid = (
+                valid
+                and {r["arm"] for r in rows} == required
+                and all(r["error"] is None and all(r["categories"].values()) for r in rows)
+            )
+            result["chaos_passed"] = valid
+            result["note"] += " Chaos recovery, policy and deterministic replay: " + (
+                "passed." if valid else "FAILED."
+            )
+            if not valid:
+                result["status"] = "regression"
     except (ValueError, KeyError, TypeError, OSError) as exc:
         result = {"status": "invalid_artifact", "note": str(exc), "regressions": []}
     atomic_write_json(args.output, result)

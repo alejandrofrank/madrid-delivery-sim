@@ -110,6 +110,7 @@ class OfflineRecoveryModel(BaseLlm):
 class RecoveryTurn:
     def __init__(self, role: str, facts: dict[str, Any] | None = None) -> None:
         self.role, self.facts = role, facts
+        self.session_facts = facts is None
         self.read = False
         self.plan: dict[str, Any] | None = None
         self.calls: list[dict[str, Any]] = []
@@ -207,6 +208,13 @@ class RecoveryTurn:
         if self.request_bytes + 3 * 512 > 12000:
             raise ValueError("Recovery prompt exceeds its reserved token envelope")
 
+    def before_agent(self, callback_context: CallbackContext) -> None:
+        del callback_context
+        self.read, self.plan, self.calls = False, None, []
+        self.input_tokens = self.output_tokens = self.request_bytes = 0
+        if self.session_facts:
+            self.facts = None
+
     def build(self, model: BaseLlm) -> LlmAgent:
         actions = (
             [self.reassign_order, self.keep_assignment]
@@ -221,6 +229,7 @@ class RecoveryTurn:
             instruction=INSTRUCTION,
             tools=[self.read_context, *actions],
             before_model_callback=self.before_model,
+            before_agent_callback=self.before_agent,
             disallow_transfer_to_parent=True,
             disallow_transfer_to_peers=True,
             generate_content_config=types.GenerateContentConfig(

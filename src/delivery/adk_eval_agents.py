@@ -1,9 +1,12 @@
 """In-memory tool fixtures for Google's evaluator; production SQL tests remain separate."""
 
+from collections.abc import AsyncGenerator
 from typing import Any
 
-from google.adk.agents import LlmAgent
+from google.adk.agents import BaseAgent, LlmAgent
 from google.adk.agents.callback_context import CallbackContext
+from google.adk.agents.invocation_context import InvocationContext
+from google.adk.events import Event
 from google.adk.models.llm_response import LlmResponse
 from google.adk.tools import ToolContext
 
@@ -91,11 +94,25 @@ def restaurant_agent() -> LlmAgent:
         return effective_instructions(brain, soul)
 
     return LlmAgent(
-        name="restaurant", model=OfflineRestaurantModel(), instruction=instruction,
-        tools=[read_order, read_recipe, read_pantry, find_suppliers, recall_order_memory,
-               request_missing_ingredients, confirm_order, receive_ingredient, prepare_meal,
-               offer_substitution, decline_order, finish_decision],
-        disallow_transfer_to_parent=True, disallow_transfer_to_peers=True,
+        name="restaurant",
+        model=OfflineRestaurantModel(),
+        instruction=instruction,
+        tools=[
+            read_order,
+            read_recipe,
+            read_pantry,
+            find_suppliers,
+            recall_order_memory,
+            request_missing_ingredients,
+            confirm_order,
+            receive_ingredient,
+            prepare_meal,
+            offer_substitution,
+            decline_order,
+            finish_decision,
+        ],
+        disallow_transfer_to_parent=True,
+        disallow_transfer_to_peers=True,
     )
 
 
@@ -109,7 +126,42 @@ def customer_agent() -> LlmAgent:
             raise ValueError("Customer response failed deterministic checks")
 
     return LlmAgent(
-        name="customer_service", model=OfflineCustomerModel(), instruction=SYSTEM,
-        output_schema=Advice, after_model_callback=check,
-        disallow_transfer_to_parent=True, disallow_transfer_to_peers=True,
+        name="customer_service",
+        model=OfflineCustomerModel(),
+        instruction=SYSTEM,
+        output_schema=Advice,
+        after_model_callback=check,
+        disallow_transfer_to_parent=True,
+        disallow_transfer_to_peers=True,
     )
+
+
+def chaos_dispatcher() -> LlmAgent:
+    from delivery.chaos_agents import OfflineRecoveryModel, RecoveryTurn
+
+    return RecoveryTurn("dispatcher").build(OfflineRecoveryModel())
+
+
+def chaos_restaurant() -> LlmAgent:
+    from delivery.chaos_agents import OfflineRecoveryModel, RecoveryTurn
+
+    return RecoveryTurn("restaurant-kitchen").build(OfflineRecoveryModel())
+
+
+def chaos_customer() -> LlmAgent:
+    from delivery.chaos_agents import OfflineRecoveryModel, RecoveryTurn
+
+    return RecoveryTurn("customer_service").build(OfflineRecoveryModel())
+
+
+class NativeRecoveryEvalAgent(BaseAgent):
+    """ADK evaluates cases concurrently; each invocation owns its scoped tool state."""
+
+    role: str
+
+    async def _run_async_impl(self, ctx: InvocationContext) -> AsyncGenerator[Event, None]:
+        from delivery.chaos_agents import OfflineRecoveryModel, RecoveryTurn
+
+        agent = RecoveryTurn(self.role).build(OfflineRecoveryModel())
+        async for event in agent.run_async(ctx):
+            yield event
