@@ -1,0 +1,298 @@
+{
+  "verified_at": "2026-10-30T04:40:01.733001+00:00",
+  "source_revision": "3c61889335268b4fc2af5a270929ad0df2db06a2",
+  "branch": "feat/a2a-chaos",
+  "base_main_revision": "70523a7",
+  "consolidation": {
+    "canonical_url": "http://localhost:8010/",
+    "retired_port": 8021,
+    "prior_ui_head": "8b02580578eb92045065a064d933c0def32d9b45",
+    "prior_ui_merged_into_main": true,
+    "old_database_volumes_preserved": true,
+    "other_sessions_checkout_preserved": true
+  },
+  "tests": {
+    "passed": 842,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "warnings": 53,
+    "duration_seconds": 534.43,
+    "source_revision": "50d5f988bf654bc4f840250f3ea2e9ed6f34e042",
+    "final_agent_card_checks": {
+      "passed": 15,
+      "source_revision": "3c61889335268b4fc2af5a270929ad0df2db06a2"
+    }
+  },
+  "static_checks": {
+    "ruff": "passed",
+    "mypy_source_files": 72,
+    "dependency_consistency": "passed",
+    "javascript_syntax": "passed",
+    "courier_motion_tests": 6,
+    "web_asset_versions": "passed"
+  },
+  "protocols": {
+    "a2a_version": "1.0",
+    "sdk": "a2a-sdk==1.3.0",
+    "agent_cards_discovered": 33,
+    "agent_card_sdk_contracts": "passed for every discovered identity",
+    "separate_process_supply_delivery": "passed; frozen restaurant identity discovered; scoped logins retired",
+    "mcp_sdk": "mcp==2.3.0",
+    "mcp_official_client": "initialized and queried live HTTP endpoint",
+    "read_only_tools": [
+      "order_status",
+      "courier_positions",
+      "menus",
+      "active_disruptions"
+    ],
+    "mcp_repeated_app_lifespan": "passed"
+  },
+  "evaluations": {
+    "mode": "scripted-offline",
+    "source_revision": "50d5f988bf654bc4f840250f3ea2e9ed6f34e042",
+    "attempts": 144,
+    "failed_attempts": 0,
+    "attempts_by_arm": {
+      "adk-offline-restaurant": 30,
+      "adk-offline-customer": 30,
+      "adk-customer-policy": 12,
+      "adk-chaos-dispatcher": 24,
+      "adk-chaos-restaurant": 24,
+      "adk-chaos-customer": 24
+    },
+    "a2a_recovery_attempts": 8,
+    "cases": [
+      "courier_offline",
+      "heavy_rain",
+      "metro_strike",
+      "restaurant_outage"
+    ],
+    "seed": 42,
+    "fixture_hash": "01b1a852f775b30d78d44acd7ebb27d6c3e94764a97b34a268a3804300d87728",
+    "seeded_run_hashes": [
+      "537ac47d35f8375016e61214a92c5e92f770f40b5aa24b38817631674526b605",
+      "537ac47d35f8375016e61214a92c5e92f770f40b5aa24b38817631674526b605"
+    ],
+    "gate": {
+      "status": "baseline_missing",
+      "regressions": [],
+      "comparisons": [],
+      "note": "Bootstrap only: main has no matching stored artifact; no quality claim. Chaos recovery, policy and deterministic replay: passed.",
+      "chaos_passed": true
+    }
+  },
+  "live_demo": {
+    "run": {
+      "id": "fab1ab57-c788-4304-8555-cf7f84dccab1",
+      "seed": 42,
+      "status": "complete",
+      "sim_time": 7200,
+      "duration": 7200
+    },
+    "metrics": {
+      "orders": 71,
+      "delivered": 71,
+      "pending": 0,
+      "active": 0,
+      "unserved": 0,
+      "on_time": 70,
+      "delivery_cost_eur": 121.417949340224,
+      "overdue": 0,
+      "on_time_pct": 98.6,
+      "cost_per_delivery_eur": 1.7215,
+      "empty_km": 83.754,
+      "reposition_km": 0.0,
+      "operating_cost_eur": 122.2257,
+      "cost_basis": "realized_fleet_ledger"
+    },
+    "chaos": {
+      "events": [
+        {
+          "id": "rain",
+          "kind": "heavy_rain",
+          "district": null,
+          "target": null,
+          "severity": 2.0,
+          "start_sim": 600,
+          "end_sim": 1500,
+          "state": "ended"
+        },
+        {
+          "id": "metro",
+          "kind": "metro_strike",
+          "district": "retiro",
+          "target": null,
+          "severity": 2.0,
+          "start_sim": 1500,
+          "end_sim": 2400,
+          "state": "ended"
+        },
+        {
+          "id": "kitchen",
+          "kind": "restaurant_outage",
+          "district": null,
+          "target": "store-node/1944623452",
+          "severity": 2.0,
+          "start_sim": 2400,
+          "end_sim": 3600,
+          "state": "ended"
+        },
+        {
+          "id": "offline",
+          "kind": "courier_offline",
+          "district": null,
+          "target": "chamberi-05",
+          "severity": 2.0,
+          "start_sim": 3300,
+          "end_sim": 4500,
+          "state": "ended"
+        },
+        {
+          "id": "surge",
+          "kind": "demand_surge",
+          "district": "chamberi",
+          "target": null,
+          "severity": 3.0,
+          "start_sim": 4200,
+          "end_sim": 4800,
+          "state": "ended"
+        }
+      ],
+      "metrics": [
+        {
+          "id": "rain",
+          "affected_orders": 21,
+          "unresolved_orders": 0,
+          "time_to_recover_seconds": 1489,
+          "orders_saved": 21,
+          "orders_lost": 0,
+          "late_deliveries": 0,
+          "refund_cost_eur": 0.0,
+          "extra_tokens": 0,
+          "extra_token_cost_usd": 0.0,
+          "failed_replans": 0
+        },
+        {
+          "id": "metro",
+          "affected_orders": 8,
+          "unresolved_orders": 0,
+          "time_to_recover_seconds": 1298,
+          "orders_saved": 8,
+          "orders_lost": 0,
+          "late_deliveries": 0,
+          "refund_cost_eur": 0.0,
+          "extra_tokens": 0,
+          "extra_token_cost_usd": 0.0,
+          "failed_replans": 0
+        },
+        {
+          "id": "kitchen",
+          "affected_orders": 2,
+          "unresolved_orders": 0,
+          "time_to_recover_seconds": 1765,
+          "orders_saved": 2,
+          "orders_lost": 0,
+          "late_deliveries": 1,
+          "refund_cost_eur": 0.0,
+          "extra_tokens": 0,
+          "extra_token_cost_usd": 0.0,
+          "failed_replans": 0
+        },
+        {
+          "id": "offline",
+          "affected_orders": 1,
+          "unresolved_orders": 0,
+          "time_to_recover_seconds": 1200,
+          "orders_saved": 1,
+          "orders_lost": 0,
+          "late_deliveries": 0,
+          "refund_cost_eur": 0.0,
+          "extra_tokens": 0,
+          "extra_token_cost_usd": 0.0,
+          "failed_replans": 0
+        },
+        {
+          "id": "surge",
+          "affected_orders": 5,
+          "unresolved_orders": 0,
+          "time_to_recover_seconds": 1148,
+          "orders_saved": 5,
+          "orders_lost": 0,
+          "late_deliveries": 0,
+          "refund_cost_eur": 0.0,
+          "extra_tokens": 0,
+          "extra_token_cost_usd": 0.0,
+          "failed_replans": 0
+        }
+      ]
+    }
+  },
+  "ui": {
+    "desktop": "1440 x 1000",
+    "mobile": "390 x 844",
+    "manual_event_trigger": "scheduled then active over HTTP",
+    "review": "ship; offline and completed-run state fixes verified",
+    "planned_trail_pixels": {
+      "selected": 5,
+      "others": 3
+    },
+    "traveled_trail_pixels": {
+      "selected": 5,
+      "others": 3
+    },
+    "screenshots": [
+      ".impeccable/review/chaos-desktop.png",
+      ".impeccable/review/chaos-mobile.png",
+      ".impeccable/review/chaos-trails.png"
+    ]
+  },
+  "limitations": [
+    "Configured live-model recovery is implemented but not exercised in this offline verification.",
+    "Statistical comparison needs a matching immutable v2 baseline from main; absolute policy and recovery gates passed.",
+    "Per-disruption cohorts can overlap; saved orders describe outcomes, not a causal counterfactual."
+  ],
+  "source_sha256": {
+    "config/scenarios/chaos-demo.json": "34dd25f99095e01062434ac8a23e2402b17d841188cbc8b0185b8a33d08be257",
+    "evals/adk/chaos_customer.evalset.json": "3036c50f2a7f5c104b6d63b005c153648496a35deb98877d23789a357a8e5331",
+    "evals/adk/chaos_customer/__init__.py": "918b3fe048cfe5933ae1378e8273ad7df8f2621dfcb37c7bbf35fb8fc5ec1a0a",
+    "evals/adk/chaos_customer/agent.py": "45e8b4e0fb1d6d99d3a13018c958ab69e7bf40a295c98eaf149bb7930f48a178",
+    "evals/adk/chaos_dispatcher.evalset.json": "e728590a76962d9c4090b7763959ff3c2f88a1a27825772c5da029bed2d0ddc1",
+    "evals/adk/chaos_dispatcher/__init__.py": "918b3fe048cfe5933ae1378e8273ad7df8f2621dfcb37c7bbf35fb8fc5ec1a0a",
+    "evals/adk/chaos_dispatcher/agent.py": "4376024942eead71fbe8cccead85b1009c6760e3b794b2a3dd4aaaabd870ddbd",
+    "evals/adk/chaos_restaurant.evalset.json": "b103af2641e91e8dd682188c583b35053c55d953466764493431a44414daed47",
+    "evals/adk/chaos_restaurant/__init__.py": "918b3fe048cfe5933ae1378e8273ad7df8f2621dfcb37c7bbf35fb8fc5ec1a0a",
+    "evals/adk/chaos_restaurant/agent.py": "a962a1265617baee8056548eaa9602eb0adf8a3740ac64b5209894584c40e4d6",
+    "evals/adk/customer_policy.evalset.json": "562e164eded425cfbd4540c577e5eda53ac8533c9087e54d186039b3f891951e",
+    "evals/chaos/scenarios.json": "edeef1c9ce9b0aee40b364f5ccb19edeadb0d497d9a3d463394a188afb53aef7",
+    "scripts/eval_chaos.py": "ed08cac5d7f0d624f448ccfaca5d2fed79f31e9d030838d95a80b8185b6f7508",
+    "scripts/eval_gate.py": "0fe10cf66500bb8069dd11befb1dbb269ae0ebac2dfe2d809b9e8310b9839306",
+    "sql/migrations/028_agent_chaos.sql": "c4d71f231200b34fc74eff44f9360d13ee923e75643e3b0941481261f84e28ab",
+    "sql/migrations/029_chaos_request_identity.sql": "b65ebccd50f070d894e0822e05064b445e68030a59fbe9f9dc47047c77827084",
+    "src/delivery/a2a_server.py": "7510df98507b729d8607910801ff6534195eb7a4ea78fcd4900601ca58aeaac7",
+    "src/delivery/adk_eval_agents.py": "07f967f3e9960fc128b0c85897d9ab8ce1be761a9a32faea6dbe5d6283dcebf7",
+    "src/delivery/agent_transport.py": "af973a704df6b17ef0bd2ef3d138c1132cecf7c772b9cd7c7f13c457bf436afc",
+    "src/delivery/agents.py": "b51e46968b40a175f760eef774eccae51331fe8f4fa4f02d095b1eb34d876a78",
+    "src/delivery/api.py": "e9c338151bb96d89290be605fe9980ceafca4c01576e66b1b4d5ad5500c69060",
+    "src/delivery/chaos.py": "734ec30e53071c8433fcb76e39d4495f443d34151c127ab681aa00f3ee01e05a",
+    "src/delivery/chaos_agents.py": "f23c3ed33006b335880259c85dcc2dac4ec525a2aa041ce98b310a7547d1c41b",
+    "src/delivery/chaos_api.py": "1b4fab68ccd12db9548ddeab4a5cb4d3e7abf8327c9fec373827498c5a249474",
+    "src/delivery/chaos_evals.py": "77d6de813ba4ac0af9e9e3a733ad9ebc1ef0873fcd8eac53af1c7471246c23e9",
+    "src/delivery/mcp_server.py": "451c5705a5ea834a65506900dc5468f8f98bec253f309b2eec64adcb4faa5eae",
+    "src/delivery/model_evals.py": "dace7f1ac7b49f5e7e24c2eae85d7241fe041c941b7a048ad1c98eda894b0718",
+    "src/delivery/protocol_api.py": "ac25696000623e521464f4b34ace813e2fc036a6bee6c5987e54848350a92927",
+    "src/delivery/simulation.py": "eb7681c017b3ff2628f6b4b6201b60bae9837639bfd8aee7b5b5df0ed3ff841f",
+    "src/delivery/supply.py": "0bab7b14482632cd57d44d803d7b71f50cac2b192d1370f46d03c04ebcc59f58",
+    "tests/test_a2a_server.py": "f33b84f886676e345e9a0820e5817bd8c3df57d91eb281bf63550f82c3d1e010",
+    "tests/test_adk_evalsets.py": "7a6b69163d80647cf320c1fba5723ae30f92ac0040a04f0c1d85df1c50f94013",
+    "tests/test_agent_protocols.py": "1d2d861343a72e1e89b8f8e080599df2b7f2c0d2fc46a1ac87c73475750f7e4c",
+    "tests/test_chaos.py": "33818f5c95ff41735b3714d8a6db5282316d53826046014553aad9b8654b1a29",
+    "tests/test_chaos_evals.py": "1cffd1652ad79ca0573ed61c659ce1c3172ef78bf0e85975bfa9ffe61572fb3e",
+    "tests/test_supply_a2a.py": "2e81e4b06d884bbcf3b2f4ab2e2312827d65e863ea477d4f6ee38b4fa8deab5a",
+    "web/app.js": "0898e712c2ba2571051f513e40b1e69070b5e069d064e3330fd1431dc573cc4b",
+    "web/chaos.css": "cc516b8d592daf420231163aa95bfb67cafdc9bd0f00d93c21a4f6702ff196d8",
+    "web/chaos.js": "9bfb74e4e3415ac13d54bf96d76bc1b95a95b4f5565576c3d1844b3fb464bff9",
+    "web/index.html": "f1d8f28a3d684d13974a5da05d10adfd5a18bf829dfb4110405e6095a5abf90c",
+    "web/style.css": "285c5879c40d48beb12028b5a8fb564fd20f41bc91ca5c7c65f0f197725248c9"
+  }
+}

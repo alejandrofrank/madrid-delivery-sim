@@ -5,9 +5,10 @@ Queue-driven delivery agents on Madrid streets, with Google ADK, real A2A endpoi
 ![Live agent operations](docs/media/ui-demo.gif)
 
 The redesigned console spans seven workspaces. Run `make setup` and open
-**[localhost:8010](http://localhost:8010/)**. For an isolated second instance, use
-`docker compose -p mds-ui -f compose.yaml -f compose.ui.yaml up -d --build` on
-port 8021. [Before/after, verification and limits](docs/UI-REDESIGN.md).
+**[localhost:8010](http://localhost:8010/)**. This is the single development instance;
+run it from the active feature worktree using the existing Compose project name.
+The older 8021 UI preview has been stopped. Its UI changes were already merged
+into `main`; its files and data were preserved. [Before/after, verification and limits](docs/UI-REDESIGN.md).
 
 The GIF records actual local simulation activity. All default runs are free of
 cloud and model charges.
@@ -33,16 +34,186 @@ flowchart LR
 
 | Headline result | Evidence and scope |
 | --- | --- |
-| Tests | **811 passed**; Ruff and mypy (65 modules) passed. [Integration verification](docs/evidence/branch-integration.json). |
+| Tests | **842 passed**; Ruff and mypy (72 modules) passed. [A2A and Chaos verification](docs/evidence/a2a-chaos-local.json). |
 | Scenarios | 12 deterministic role scenarios, run twice with matching outcomes. |
 | Cost per local run | **$0 in cloud/model charges**; local compute excluded. |
-| Evaluation pass rate | **12/12 scenarios; 49/49 assertions (100%)**, repeated with matching outcomes in the [Google stack receipt](docs/evidence/google-stack-local.json). This measures contracts, not LLM quality. |
-| Interoperability | Two A2A 1.0 servers called through the official SDK; replay reuses durable work. |
+| Evaluation pass rate | **144/144 ADK attempts**, four A2A recovery scenarios repeated twice, and two matching seeded Chaos runs. These scripted checks measure contracts, recovery and policy, not live-model quality. [Verification](docs/evidence/a2a-chaos-local.json). |
+| Interoperability | Dispatcher, customer service and individually scoped restaurants expose A2A 1.0 Agent Cards. The normal scheduler uses the official SDK; isolated tests can use the same services in process. |
 
 Start at the [Google stack demonstration guide](docs/GOOGLE-STACK.md), inspect
 [agent traces](http://localhost:8010/agent-traces), or browse the
 [architecture site](http://localhost:8010/architecture). Every default demo and
 CI check runs without paid model calls. [Public-readiness review](docs/PUBLIC-READINESS.md).
+
+## Agent protocols
+
+`AgentTransport` is the call boundary for the simulation and inventory scheduler.
+Compose selects `A2ATransport`: it discovers each Agent Card and sends an A2A 1.0
+JSON-RPC `SendMessage` using `a2a-sdk==1.3.0`. `InProcessTransport` implements the
+same validated commands and durable queue semantics for isolated tests. Commands
+carry a run and work reference, not a database connection or arbitrary tool name.
+Agent Cards advertise immediate message receipts, without streaming or push support.
+
+```mermaid
+flowchart LR
+    UI[Operations UI] --> S[Simulation and inventory scheduler]
+    S --> T[AgentTransport]
+    T --> A[A2A SDK client]
+    T -. isolated tests .-> I[In-process transport]
+    A --> D[Dispatcher A2A server]
+    A --> R[Restaurant A2A servers: one card per identity]
+    A --> C[Customer service A2A server]
+    I --> D
+    I --> R
+    I --> C
+    D --> Q[(Scoped durable work and simulation state)]
+    R --> ADK[Google ADK Runner and role tools]
+    C --> ADK
+    D --> ADK
+    ADK --> Q
+    X[External agent] --> M[Read-only MCP server]
+    M --> Q
+```
+
+Discover all cards at `GET /api/agents`. Each card lives at
+`/a2a/{agent}/.well-known/agent-card.json`; the JSON-RPC endpoint is `/a2a/{agent}/`.
+Restaurant names are derived from their persisted identities (OSM slashes become
+hyphens). Unknown identities and mismatched work scopes are rejected. Replaying
+recovery work returns its recorded result; an ambiguous paid attempt is never
+automatically charged again.
+
+Supply restaurants and the supply dispatcher are provisioned by their serving process
+before the first intent is released. Their SQL identities and tool permissions stay
+scoped to the run; no credentials cross A2A. Cards for active frozen runs remain
+discoverable after the editable blueprint changes.
+
+Customer service already uses the same Google ADK `LlmAgent` / `Runner` pattern
+as restaurants on the merged main branch. This feature preserves its classification,
+refund policy, durable budget reservations and escalation behavior, and adds scoped
+ADK tools for proactive disruption recovery. A2A submission and scheduler ticks
+both preserve the configured customer-service provider and its budget. Existing
+restaurant sourcing tools remain intact. Recovery tools can read order context, revise preparation, reject an
+uncollected meal, request normal dispatcher matching, contact a simulated customer,
+request a policy refund, or escalate. Each role sees only its own capabilities.
+
+The read-only MCP endpoint is `http://localhost:8010/mcp/` (Streamable HTTP), or
+run `python3 -m delivery.mcp_server` for stdio. Its four tools are `order_status`,
+`courier_positions`, `menus`, and `active_disruptions`. There are no mutation tools,
+arbitrary SQL, private agent memories or credentials in these responses. This local
+deployment binds to loopback; publishing these endpoints requires a separate
+authenticated deployment design.
+
+References: [A2A specification](https://a2a-protocol.org/latest/specification/),
+[Google ADK agents](https://adk.dev/agents/custom-agents/),
+[MCP tools](https://modelcontextprotocol.io/specification/2026-07-28/server/tools).
+
+## Chaos mode
+
+Open **Chaos → Start 60 second demo** in Operations. The scenario in
+[`config/scenarios/chaos-demo.json`](config/scenarios/chaos-demo.json) schedules rain,
+a Metro strike, a kitchen outage, a courier failure and a district demand surge over
+two simulated hours. The clock targets 60 wall seconds; a slower machine may take
+longer to process all agent turns. Use seed 42 for a repeatable recording. Keep the
+Chaos panel open for event markers and open **Agent replanning and customer messages**
+to inspect decisions. The existing map adds amber affected-service-area overlays;
+planned trails are dashed and traveled trails are solid, both with bolder strokes.
+
+Simulation controls also offer manual events and seeded random events. Supply a
+`chaos` object when starting a run, or send an event to an existing Chaos run:
+
+```bash
+curl -fsS http://localhost:8010/api/runs \
+  -H 'Content-Type: application/json' \
+  --data '{"seed":42,"wall_seconds":60,"duration":7200,"chaos":{"random_events":5}}'
+
+# Use the run ID returned above. Omitting "at" schedules the next simulation minute.
+curl -fsS "http://localhost:8010/api/runs/$RUN_ID/chaos" \
+  -H 'Content-Type: application/json' \
+  --data '{"id":"manual-strike","kind":"metro_strike","district":"retiro","duration":600,"severity":2}'
+
+# Start a scheduled scenario from a file using the same API.
+python3 - <<'PY' | curl -fsS http://localhost:8010/api/runs \
+  -H 'Content-Type: application/json' --data-binary @-
+import json
+from pathlib import Path
+print(json.dumps({"seed": 42, "duration": 7200, "wall_seconds": 60,
+                  "chaos": json.loads(Path("config/scenarios/chaos-demo.json").read_text())}))
+PY
+```
+
+Event kinds: `heavy_rain`, `metro_strike`, `restaurant_outage`, `courier_offline`,
+`demand_surge`. District codes are `chamberi`, `retiro`, `vallecas`. Strike and surge
+require a district; outages and offline events require `target` (an existing identity
+or `auto`). Each event has a stable `id`, simulation-second `at` and `duration`, and
+severity 1–4. Outage severity below 2 slows preparation; 2 or above closes the kitchen
+until the event ends. Rain slows travel and increases demand. Congestion applies to
+deliveries serving the affected district. Events must fit the run; identical trigger
+retries are idempotent, conflicting IDs fail. Random schedules use the run seed.
+
+The engine changes physical conditions and queues observations. It does not choose
+reassignment, rejection, refunds or customer wording. ADK agents choose recovery
+tools; tools then validate current state, physical custody and refund policy. A
+courier failure after pickup makes the stranded position the new pickup location.
+The normal economic dispatcher selects the replacement courier.
+
+```mermaid
+sequenceDiagram
+    participant O as Operator or scenario
+    participant E as Disruption engine
+    participant R as Restaurant A2A + ADK
+    participant D as Dispatcher A2A + ADK
+    participant C as Customer service A2A + ADK
+    participant Q as Simulation state
+    participant U as Operations UI
+    O->>E: Courier goes offline after pickup
+    E->>Q: Freeze availability; record affected orders
+    E->>R: A2A replan with scoped work reference
+    R->>Q: Read context; choose to keep collected meal
+    E->>D: A2A replan
+    D->>Q: Read context; choose reassignment
+    Q->>D: Normal dispatch queue event
+    D->>Q: Match replacement to stranded pickup
+    E->>C: A2A replan after dispatch settles
+    C->>Q: Read new ETA; choose apology and ETA update
+    Q-->>U: Event marker, decisions, customer message
+    Q-->>U: Delivery settles; recovery metrics update
+```
+
+Default demos/CI use `DELIVERY_CHAOS_PROVIDER=offline`, a deterministic **scripted
+ADK model fixture**, with no paid calls. This verifies protocols and tool execution,
+not live-model intelligence. For model-selected recovery set
+`DELIVERY_CHAOS_PROVIDER=configured` alongside an explicitly configured existing
+`LLM_PROVIDER=gemini` or `vertex` environment and its credentials/budgets. No model
+fallback enables paid inference. Recovery reserves at most three calls and 12,000
+tokens per turn, times out after 30 seconds, and keeps failed attempts inspectable.
+Customer messages stay in the simulation. Scripted refunds require operator review;
+model refunds retain the existing €5 late-order limit and approval rules, with an
+additional per-order cumulative cap across recovery contacts and existing complaints.
+
+`GET /api/runs/{id}/chaos`, `/api/state?run={id}` and `artifacts/run-{id}.json` expose
+each disruption's recovery time, saved/lost orders, late deliveries, refunds, extra
+tokens and extra model cost. Recovery time ends only after the event ends, affected
+orders settle, and all recovery turns succeed; pending/failed recovery remains null.
+“Saved” means an affected order was delivered, not a causal counterfactual estimate.
+Overlapping event cohorts are not additive. Extra cost counts recovery calls only;
+missing provider usage is conservatively costed at its reserved envelope.
+
+Native ADK evalsets cover refund, late order, wrong item, escalation, and the four
+recovery scenarios. The eval gate also measures full A2A deliveries against
+[`evals/chaos/scenarios.json`](evals/chaos/scenarios.json), repeats each twice, and
+compares two full runs with seeded random disruptions and generated demand:
+
+```bash
+docker compose exec -T app python3 scripts/eval_agents.py --suite adk --repeat 3 --record-only
+docker compose exec -T app python3 scripts/eval_chaos.py
+docker compose exec -T app python3 scripts/eval_gate.py \
+  --candidate artifacts/evals/candidate.json --chaos-candidate artifacts/evals/chaos.json
+```
+
+Recovery and policy criteria are absolute gates, including during baseline bootstrap.
+The expanded model cohort uses `eval-baseline-v2` so it cannot silently compare with
+the older two-arm cohort. Until main stores a matching v2 artifact, statistical
+regression comparisons report `baseline_missing`; that is not a quality pass.
 
 ## Agent architecture and GCP client documentation
 
