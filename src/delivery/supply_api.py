@@ -52,6 +52,15 @@ def route_comparison() -> FileResponse:
     return FileResponse("artifacts/adk-route-comparison.json", media_type="application/json")
 
 
+@router.get("/api/supply/contract-verification")
+def contract_verification() -> FileResponse:
+    if os.path.isfile("artifacts/adk-contract-followup.json"):
+        return FileResponse("artifacts/adk-contract-followup.json", media_type="application/json")
+    if not os.path.isfile("artifacts/adk-contract-verification.json"):
+        raise HTTPException(404, "No contract verification has been recorded")
+    return FileResponse("artifacts/adk-contract-verification.json", media_type="application/json")
+
+
 @router.get("/api/supply/agent-templates")
 def agent_templates() -> dict[str, Any]:
     """Trusted operator catalogue; no credentials, model calls or executable paths."""
