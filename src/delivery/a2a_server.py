@@ -267,8 +267,15 @@ def create_a2a_app(
                 id=role,
                 name=role.replace("_", " ").title(),
                 description=description,
-                tags=["delivery", "durable-queue", "offline"],
-                examples=['{"run_id":"00000000-0000-0000-0000-000000000000","entity_id":"O-1"}'],
+                tags=["delivery", "durable-queue", "adk"],
+                examples=[json.dumps({
+                    "run_id": "00000000-0000-0000-0000-000000000000",
+                    "operation": "replan" if role.startswith("restaurant-") else "submit",
+                    "entity_id": (
+                        "00000000000000000000000000000000" if role.startswith("restaurant-")
+                        else "C-1" if role == "customer_service" else "O-1"
+                    ),
+                })],
             )
         ],
     )

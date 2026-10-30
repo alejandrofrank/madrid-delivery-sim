@@ -4,11 +4,12 @@ from uuid import uuid4
 import httpx
 import httpx2
 import pytest
+from a2a.client import A2ACardResolver
 from fastapi import FastAPI
 from mcp import ClientSession
 from mcp.client.streamable_http import streamable_http_client
 
-from delivery.a2a_server import QueuedAgentService, create_a2a_app
+from delivery.a2a_server import AgentCommand, QueuedAgentService, create_a2a_app
 from delivery.agent_transport import A2ATransport, InProcessTransport
 from delivery.mcp_server import create_mcp_server
 
@@ -96,6 +97,13 @@ def test_every_restaurant_has_an_individual_sdk_agent_card(db_url):
                 card = response.json()
                 assert card["skills"][0]["id"] == name
                 assert card["supportedInterfaces"][0]["protocolVersion"] == "1.0"
+                parsed = await A2ACardResolver(http, f"http://localhost:8010/a2a/{name}").get_agent_card()
+                assert parsed.capabilities.streaming is False
+                assert parsed.capabilities.push_notifications is False
+                for example in parsed.skills[0].examples:
+                    command = AgentCommand.model_validate_json(example)
+                    expected = "replan" if name.startswith("restaurant-") else "submit"
+                    assert command.operation == expected
             assert (
                 await http.get("/a2a/restaurant-unknown/.well-known/agent-card.json")
             ).status_code == 404
