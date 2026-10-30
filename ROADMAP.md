@@ -1,6 +1,31 @@
 # madrid-delivery-sim roadmap
 
-Updated 2026-10-29. Implemented slices are identified below; remaining milestones are planned.
+Updated 2026-10-31. Implemented slices are identified below; remaining milestones are planned.
+
+## Production slice: on-demand cloud sessions
+
+- [x] Immutable public replay, read-only HTTP, seeded recordings and no live model calls.
+- [x] Terraform deployment/teardown, scale-to-zero, native Cloud Run spend cap and project alert.
+  A real replay deployment, browser/HTTP checks and removal were completed; the project is off.
+- [x] Separate role identities, repository/main/environment-bound WIF, Google ID-token A2A
+  transport and API authorization tests. CI updates only an existing replay service.
+- [x] Development/held-out split, k attempts, pass^k bootstrap intervals, paired regression
+  testing, cost/success and p95 reporting, plus a manually dispatched release workflow.
+- [x] Selectable semantic recall with real local pgvector/embeddings and a Vertex adapter;
+  SQL scope, TTL, leases, ADK turn nonce and audit receipts remain authoritative.
+- [x] BigQuery operational export/views, dashboard setup guide and Cloud Monitoring SLOs.
+- [x] Deployed architecture, trust model, stop/runbook and measured release table in README.
+- [ ] Implement and qualify least-privilege SQL controller bootstrap for private live mode.
+  Broad runtime role administration/RLS bypass was rejected and is not shipped.
+- [ ] Qualify real private Cloud SQL/Vertex, BigQuery execution and interactive browser login
+  in a separately funded session; validate durable capability recovery across worker restarts.
+- [ ] Run the main-only federated deployment workflow after review/merge. Local release
+  evidence does not establish live-model quality or production latency.
+
+See [on-demand deployment](docs/production/DEPLOYMENT.md),
+[memory boundaries](docs/production/SEMANTIC-MEMORY.md), and
+[cost/SLO dashboards](docs/production/DASHBOARDS.md). These completed slices do not
+mark the broader simulation milestones below complete.
 
 Contract repair slice: validated Gemini function declarations and a two-correction
 receipt budget handle invented finish names and oversized explanations while
@@ -26,7 +51,7 @@ Selectable memory slice: role templates and entity overrides can recall no prior
 facts, short text, compact JSON or canonical typed facts, with bounded fact count,
 bytes and TTL. All modes retain source events, revisions and audit history and
 enforce the same current-order/request/attempt scope. These are recall projections;
-semantic search and unrestricted model-written memories remain planned. See
+semantic recall is now implemented, while unrestricted model-written memories remain planned. See
 [memory profiles and isolation](docs/AGENT-MEMORY.md).
 
 Shared UI slice: restaurants, delivery, inventory, health, architecture and the
@@ -237,10 +262,10 @@ grant access or raise budgets. Add scripted adapter tests and durable controller
 recovery locally. This prerequisite refines M3/M6; the current M2 worker remains
 local/deterministic.
 
-The 2026-10-23 ADK/GCP source links are retained as research, not a deployment choice.
-Defer any GCP adapter, infrastructure preparation, deployment or provider smoke test
-until local workflows, sample provenance, controls and repeatable evidence are polished.
-Optional later portability must reuse the shared factory rather than fork behavior.
+The original 2026-10-23 deferral of GCP preparation was superseded by the explicit
+on-demand production work above. Cloud adapters reuse the shared contracts and
+tools. Private live deployment remains blocked on the documented permission and
+restart boundaries, independently of the working public replay.
 
 ### M2: Bakiano adapter, fictional city and inventory foundation
 

@@ -14,6 +14,53 @@ into `main`; its files and data were preserved. [Before/after, verification and 
 The GIF records actual local simulation activity. All default runs are free of
 cloud and model charges.
 
+## On-demand Google Cloud
+
+Public demo link: **available only during a demo session** (`replay_url` from
+Terraform). The replay was deployed to Cloud Run, checked over HTTP and in a
+browser, then removed. The dedicated project is currently off; the verified URL
+and restart/stop commands are in the [deployment runbook](docs/production/DEPLOYMENT.md).
+The public service plays sealed seeded shifts, accepts only reads, and needs no
+database or model calls. The existing UI and local instance remain unchanged.
+
+```mermaid
+flowchart LR
+    Public[Public viewer] --> Replay[Cloud Run replay: recorded frames]
+    GitHub[GitHub main / production environment] --> Gate[Held-out release gate]
+    Gate --> WIF[Workload Identity Federation]
+    WIF --> Image[Artifact Registry: immutable digest]
+    Image --> Replay
+    Operator[Terraform operator] --> Lifecycle[Deploy / verify / destroy]
+    Lifecycle --> Replay
+    Replay --> Monitor[Cloud Monitoring SLOs + spend cap]
+    subgraph Private[Optional private tier: disabled pending SQL permission work]
+      Client[Authorized operator ID token] --> API[Private Cloud Run API]
+      API --> Job[Cloud Run shift job]
+      Job --> A2A[A2A with audience-bound ID tokens]
+      A2A --> Agents[Dispatcher / restaurant / customer service]
+      Agents --> SQL[(Cloud SQL: scoped state + pgvector)]
+      Agents -. optional semantic index .-> Vector[Vertex Vector Search]
+      Job --> BQ[(BigQuery metrics + views)]
+      Agents --> BQ
+      BQ --> Dashboard[Looker Studio]
+    end
+```
+
+Each role has a separate service account. CI uses short-lived federation and can
+update only an existing replay service. Private API writes and A2A calls require
+verified Google identities and explicit role authorization; SQL scopes remain the
+authority for individual actions. [Security model](docs/production/TRUST-MODEL.md).
+The private tier is **not production-qualified**: safe SQL controller provisioning
+is still unfinished, and Cloud SQL/Vertex were not activated under the demo allowance.
+
+Cloud Run scales to zero during sessions. `active=false` removes its services/jobs,
+images and opted-in SQL, vector and analytics resources after the session. State,
+identities, budgets and provider logs remain. A EUR 3 native Cloud Run cap and EUR 4
+project alert reflect the EUR billing account and requested small allowance;
+delayed enforcement and retained storage prevent a strict total-dollar guarantee.
+[Dashboard/SLO setup](docs/production/DASHBOARDS.md) ·
+[Scoped semantic recall](docs/production/SEMANTIC-MEMORY.md).
+
 ```mermaid
 flowchart LR
     UI[Operator UI / A2A client] --> A2A[Dispatcher + customer service A2A servers]
@@ -35,10 +82,10 @@ flowchart LR
 
 | Headline result | Evidence and scope |
 | --- | --- |
-| Tests | **852 passed**; six courier-motion checks, Ruff and mypy (73 modules) passed. [Combined verification](docs/evidence/public-integration.json). |
+| Tests | **963 Python checks passed** (957 in the full run plus six new lifecycle tests); six courier-motion checks, seven Terraform checks, Ruff and mypy (80 modules). [Production verification](docs/evidence/production-verification.json). |
 | Scenarios | 12 deterministic role scenarios, run twice with matching outcomes. |
 | Cost per local run | **$0 in cloud/model charges**; local compute excluded. |
-| Evaluation pass rate | **144/144 ADK attempts**, four A2A recovery scenarios repeated twice, and two matching seeded Chaos runs. These scripted checks measure contracts, recovery and policy, not live-model quality. [Verification](docs/evidence/a2a-chaos-local.json). |
+| Evaluation pass rate | **360/360 held-out ADK attempts** across 72 cases; [release results](#held-out-release-results). Four A2A recovery scenarios and matching seeded Chaos runs remain covered by [Chaos verification](docs/evidence/a2a-chaos-local.json). These scripted checks measure contracts, recovery and policy, not live-model quality. |
 | Interoperability | Dispatcher, customer service and individually scoped restaurants expose A2A 1.0 Agent Cards. The normal scheduler uses the official SDK; isolated tests can use the same services in process. |
 
 Start at the [Google stack demonstration guide](docs/GOOGLE-STACK.md), inspect
@@ -561,3 +608,32 @@ See [docs/VALIDATION.md](docs/VALIDATION.md) for measured results. Module bounda
 Graph and store data derive from OpenStreetMap under [ODbL 1.0](https://www.openstreetmap.org/copyright). Attribution is visible in the map. `data/manifest.json` records source, retrieval time, bounds, and graph SHA-256. The included [Leaflet license](web/vendor/leaflet/LICENSE) covers vendored Leaflet 1.9.4.
 
 References: [OSMnx API](https://osmnx.readthedocs.io/en/stable/user-reference.html), [Postgres locking clauses](https://www.postgresql.org/docs/18/sql-select.html), and [Google Gen AI SDK](https://github.com/googleapis/python-genai). Local services and cached map data have no recurring service charge; provider calls may be billed to the existing project.
+
+## Held-out release results
+
+`evals/splits.json` freezes disjoint development and reserved release cohorts with
+fixture hashes. Ordinary eval CI uses development cases; the manual release job
+runs five fresh attempts per reserved case only after full CI passes. Case-level
+bootstrap intervals and a paired exact test with family-wise correction distinguish
+regressions from sampling noise. Missing/incomparable evidence fails validation;
+the first release establishes a baseline without claiming a quality comparison.
+Model cost per success includes failed attempts; p95 is reported separately.
+These public fixtures are reserved by workflow, not a secret benchmark.
+
+<!-- release-results:start -->
+| Held-out arm | Cases × k | pass^k | Bootstrap 95% CI | Cost / success | p95 |
+| --- | ---: | ---: | --- | ---: | ---: |
+| adk-chaos-customer | 12 × 5 | 1.000 | [1.000, 1.000] | $0.0000 | 10.3 ms |
+| adk-chaos-dispatcher | 12 × 5 | 1.000 | [1.000, 1.000] | $0.0000 | 10.8 ms |
+| adk-chaos-restaurant | 12 × 5 | 1.000 | [1.000, 1.000] | $0.0000 | 11.3 ms |
+| adk-customer-policy | 12 × 5 | 1.000 | [1.000, 1.000] | $0.0000 | 1.9 ms |
+| adk-offline-customer | 12 × 5 | 1.000 | [1.000, 1.000] | $0.0000 | 1.9 ms |
+| adk-offline-restaurant | 12 × 5 | 1.000 | [1.000, 1.000] | $0.0000 | 42.0 ms |
+
+Measured with fresh ADK sessions and scripted offline models. This is contract
+evidence, not live-model quality, inference cost or production latency.
+pass^k is the fraction of cases passing every attempt; bootstrap intervals
+resample cases. An all-pass cohort has a degenerate [1, 1] interval and does
+not establish certainty on unseen workloads. Costs include failed attempts.
+Source revision: `b3075f3bd2250d147e2a050afdd369ff951405c6`.
+<!-- release-results:end -->

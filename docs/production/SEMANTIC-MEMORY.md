@@ -25,6 +25,9 @@ current authorized facts. Foreign IDs, obsolete versions, expired facts and lost
 leases cannot become context. Query hashes and returned fact IDs join the existing
 memory audit. Semantic recall consumes two read slots; existing fact/byte limits
 remain unchanged. An unavailable backend fails closed rather than changing scope.
+The ADK restaurant path uses its existing turn nonce for both reads; the final
+SQL function updates the actual turn context and records a `memory.semantic`
+tool receipt. The test exercises this path with a real pgvector query.
 
 The eval cohort in `evals/memory/recall.json` measures repeated questions within
 one order, comparing retained facts against the `none` profile. Tests use the real
