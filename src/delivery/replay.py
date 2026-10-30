@@ -125,6 +125,6 @@ def create_replay_app(
 
     app.mount("/static", StaticFiles(directory=web), name="static")
     for route in app.routes:
-        if isinstance(route, APIRoute) and "GET" in route.methods:
+        if isinstance(route, APIRoute) and route.methods and "GET" in route.methods:
             route.methods.add("HEAD")
     return app

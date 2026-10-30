@@ -415,7 +415,7 @@ function renderInspector() {
   $("agent-count").textContent=state.couriers.length;
   $("fleet-activity").textContent=fleetCouriers().filter(c=>agentStatus(c)==="working").length+" working · "+fleetCouriers().length+" / "+state.couriers.length+" agents";
   $("open-agent-details").disabled=!selected;
-  $("selected-trace").hidden=selected?.kind!=="courier";
+  $("selected-trace").hidden=runtime.mode==="replay" || selected?.kind!=="courier";
   if(selected?.kind==="courier"){
     const c=state.couriers.find(c=>c.id===selected.id);
     if(c){
