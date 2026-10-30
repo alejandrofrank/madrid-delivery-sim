@@ -2,6 +2,9 @@ name: Verify simulation
 on: [push, pull_request]
 permissions:
   contents: read
+concurrency:
+  group: verify-${{ github.head_ref || github.ref_name }}
+  cancel-in-progress: true
 jobs:
   infrastructure:
     runs-on: ubuntu-latest
