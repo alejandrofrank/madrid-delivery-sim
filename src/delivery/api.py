@@ -14,6 +14,7 @@ from fastapi.responses import FileResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
 from starlette.responses import Response
+from starlette.types import Receive, Scope, Send
 
 from delivery.chaos import ChaosConfig
 from delivery.chaos_api import router as chaos_router
@@ -33,18 +34,22 @@ from delivery.telemetry_api import router as telemetry_router
 from delivery.world import DATA, World
 
 world: World
-mcp_server = create_mcp_server()
-mcp_app = mcp_server.streamable_http_app(
-    streamable_http_path="/",
-    stateless_http=True,
-    json_response=True,
-)
+
+
+async def mcp_app(scope: Scope, receive: Receive, send: Send) -> None:
+    await scope["app"].state.mcp_app(scope, receive, send)
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     global world
     world = initialize()
+    mcp_server = create_mcp_server()
+    app.state.mcp_app = mcp_server.streamable_http_app(
+        streamable_http_path="/",
+        stateless_http=True,
+        json_response=True,
+    )
     try:
         async with mcp_server.session_manager.run():
             yield

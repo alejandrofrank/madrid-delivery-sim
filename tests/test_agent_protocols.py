@@ -101,3 +101,31 @@ def test_every_restaurant_has_an_individual_sdk_agent_card(db_url):
             ).status_code == 404
 
     asyncio.run(discover())
+
+
+@pytest.mark.integration
+def test_app_lifespan_can_restart_mcp_server(db_url, monkeypatch):
+    from fastapi.testclient import TestClient
+
+    from delivery import api
+    from delivery.simulation import initialize
+
+    monkeypatch.setattr(api, "initialize", lambda: initialize(db_url))
+    for _ in range(2):
+        with TestClient(api.app, base_url="http://localhost:8010") as client:
+            response = client.post(
+                "/mcp/",
+                headers={"Accept": "application/json, text/event-stream"},
+                json={
+                    "jsonrpc": "2.0",
+                    "id": 1,
+                    "method": "initialize",
+                    "params": {
+                        "protocolVersion": "2025-11-25",
+                        "capabilities": {},
+                        "clientInfo": {"name": "restart-test", "version": "1"},
+                    },
+                },
+            )
+            assert response.status_code == 200, response.text
+            assert response.json()["result"]["serverInfo"]["name"] == "Madrid simulation data"

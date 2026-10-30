@@ -3,6 +3,7 @@
 import hashlib
 import math
 import random
+from functools import lru_cache
 from pathlib import Path
 from typing import Any, Literal
 
@@ -12,11 +13,16 @@ from pydantic import BaseModel, ConfigDict, Field, model_validator
 from delivery.agent_transport import restaurant_name
 from delivery.db import Connection, connect
 from delivery.telemetry import trace_span
-from delivery.world import position
+from delivery.world import World, position
 
 KINDS = ("heavy_rain", "metro_strike", "restaurant_outage", "courier_offline", "demand_surge")
 District = Literal["chamberi", "retiro", "vallecas"]
 DISTRICT_NAMES = {"chamberi": "Chamberí", "retiro": "Retiro", "vallecas": "Puente de Vallecas"}
+
+
+@lru_cache(maxsize=1)
+def recovery_world() -> World:
+    return World()
 
 
 class Disruption(BaseModel):
@@ -268,8 +274,14 @@ def physical_tick(conn: Connection, run: str, sim: int) -> None:
             (target, run, event["id"]),
         )
         if event["kind"] == "courier_offline" and target:
+            courier = conn.execute(
+                "SELECT ST_X(point) lon,ST_Y(point) lat FROM couriers WHERE run_id=%s AND id=%s",
+                (run, target),
+            ).fetchone()
+            assert courier
             conn.execute(
-                "UPDATE couriers SET status='offline' WHERE run_id=%s AND id=%s", (run, target)
+                "UPDATE couriers SET status='offline',node=%s WHERE run_id=%s AND id=%s",
+                (recovery_world().nearest(courier["lon"], courier["lat"]), run, target),
             )
         with trace_span(
             "chaos.started", attributes={"chaos.kind": event["kind"], "chaos.id": event["id"]}

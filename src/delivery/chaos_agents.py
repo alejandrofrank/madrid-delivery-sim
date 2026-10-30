@@ -25,13 +25,13 @@ from google.genai import types
 from psycopg.types.json import Jsonb
 
 from delivery.adk_offline import OfflineRestaurantModel
-from delivery.chaos import active_events, affected
+from delivery.chaos import active_events, affected, recovery_world
 from delivery.config import settings
 from delivery.customer_service import refund_policy
 from delivery.db import Connection, connect
 from delivery.queue import publish
 from delivery.telemetry import trace_span
-from delivery.world import World, trace
+from delivery.world import trace
 
 if TYPE_CHECKING:
     from delivery.a2a_server import AgentCommand
@@ -339,11 +339,12 @@ def apply_plan(
     if action == "reassign_order" and row["status"] in {"pending", "assigned", "picked_up"}:
         pickup = row["recovery_node"]
         if row["status"] == "picked_up":
-            pickup = World().nearest(row["lon"], row["lat"])
+            pickup = recovery_world().nearest(row["lon"], row["lat"])
         if row["courier"]:
             conn.execute(
-                "UPDATE couriers SET status='idle' WHERE run_id=%s AND id=%s AND status!='offline'",
-                (run, row["courier"]),
+                "UPDATE couriers SET status='idle',node=%s WHERE run_id=%s "
+                "AND id=%s AND status!='offline'",
+                (recovery_world().nearest(row["lon"], row["lat"]), run, row["courier"]),
             )
         conn.execute(
             "UPDATE orders SET status='pending',courier=NULL,route=NULL,recovery_node=%s,"
@@ -380,8 +381,9 @@ def apply_plan(
         )
         if row["courier"]:
             conn.execute(
-                "UPDATE couriers SET status='idle' WHERE run_id=%s AND id=%s AND status!='offline'",
-                (run, row["courier"]),
+                "UPDATE couriers SET status='idle',node=%s WHERE run_id=%s "
+                "AND id=%s AND status!='offline'",
+                (recovery_world().nearest(row["lon"], row["lat"]), run, row["courier"]),
             )
             publish(
                 conn,

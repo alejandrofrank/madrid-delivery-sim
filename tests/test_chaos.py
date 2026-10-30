@@ -184,6 +184,12 @@ def test_end_to_end_disruption_over_a2a(db_url, run_id, kind):
                 ).fetchone()["recovery_node"]
                 is not None
             )
+            courier = conn.execute(
+                "SELECT node,ST_X(point) lon,ST_Y(point) lat FROM couriers "
+                "WHERE run_id=%s AND id=%s",
+                (run_id, event.target),
+            ).fetchone()
+            assert courier["node"] == world.nearest(courier["lon"], courier["lat"])
 
 
 def test_recovery_tools_enforce_scope_and_evidenced_eta():
