@@ -79,7 +79,7 @@ $("open-agent-details").onclick=()=>{
   if(open)$("agent-details").scrollIntoView({behavior:reducedMotion.matches?"instant":"smooth",block:"nearest"});
 };
 map.on("zoomend",()=>{if(state?.run)renderCouriers();});
-function agentStatus(c){return ["to_pickup","delivering","returning","repositioning"].includes(c.status)?"working":c.status==="off_shift"?"off_shift":"idle";}
+function agentStatus(c){return ["to_pickup","delivering","returning","repositioning"].includes(c.status)?"working":["off_shift","offline"].includes(c.status)?c.status:"idle";}
 function deliveryCount(id){return state.orders.filter(o=>o.courier===id&&o.status==="delivered").length;}
 function observeMetrics(){
  const run=state.run;
@@ -90,7 +90,7 @@ function observeMetrics(){
  if(observations.length>40)observations.shift();
  for(const key of ["orders","ontime","cost","rate"])$("chart-"+key).innerHTML=Ops.sparkline(observations.map(s=>s[key]),"Observed "+key+" during this visit");
 }
-function courierTask(c){return c.order_id || (c.status==="off_shift"?"Off shift":c.status==="repositioning"?"Moving toward expected demand":c.status==="returning"?"Returning to hub":"Available for assignment");}
+function courierTask(c){return c.status==="offline"?"Offline · unavailable":c.order_id || (c.status==="off_shift"?"Off shift":c.status==="repositioning"?"Moving toward expected demand":c.status==="returning"?"Returning to hub":"Available for assignment");}
 $("map-symbols").innerHTML='<span class="legend-working">'+Ops.icon("bike")+'Courier · working</span><span class="legend-idle">'+Ops.icon("van")+'Courier · available</span><span class="legend-pickup">'+Ops.icon("store")+'Pickup</span><span class="legend-destination">'+Ops.icon("household")+'Destination</span><span><i class="planned-route"></i>Planned route</span><span><i class="observed-route"></i>Traveled · fading</span>';
 function courierName(c){return c.id.replace(/^chamberi/,"Chamberí").replace(/^retiro/,"Retiro").replace(/^vallecas/,"Vallecas").replaceAll("-"," ");}
 function lastDecision(kind,id){
@@ -98,6 +98,7 @@ function lastDecision(kind,id){
 }
 function taskDetails(c){
   const order=state.orders.find(o=>o.id===c.order_id);
+  if(c.status==="offline")return {title:"Offline · unavailable",note:"Not accepting assignments"};
   return {title:c.order_id|| (c.status==="off_shift"?"Off shift":c.status==="repositioning"?"Moving toward demand":c.status==="returning"?"Return to hub":"Awaiting order"),
     note:order?.store || (c.status==="off_shift"?"Not accepting work":c.status==="repositioning"?"No active order":c.status==="returning"?human(c.hub):"Ready for dispatch")};
 }
@@ -171,6 +172,7 @@ $("start").onclick = async () => {
   try {
     const result = await api("/api/runs", {method:"POST", headers:{"Content-Type":"application/json"},
       body:JSON.stringify({seed:Number($("seed").value), wall_seconds:Number($("duration").value),
+        ...await ChaosUI.runOptions(),
         dispatch:{strategy:$("dispatch-strategy").value, reposition:$("reposition-policy").value}})});
     runId = result.id; selected = null; traceRows = []; renderRoute();
     await refreshRuns(); await poll(); setConsoleView("operations"); error("");
@@ -223,8 +225,8 @@ function renderRoute() {
     if(!chosen&&!["to_pickup","delivering","repositioning"].includes(courier.status))continue;
     const traveled=points.filter(p=>p[2]<=state.run.sim_time),planned=points.filter(p=>p[2]>state.run.sim_time);
     if(traveled.length&&planned.length)planned.unshift(traveled.at(-1));
-    if(planned.length>1)L.polyline(planned.map(p=>[p[1],p[0]]),{color:"#23d8ce",weight:chosen?3:1.5,opacity:chosen?.65:.22,dashArray:"4 6",interactive:false}).addTo(routeLayer);
-    for(let i=1;i<traveled.length;i++)L.polyline([[traveled[i-1][1],traveled[i-1][0]],[traveled[i][1],traveled[i][0]]],{color:"#23d8ce",weight:chosen?3:1.5,opacity:(chosen?.8:.25)*(i/traveled.length),interactive:false}).addTo(routeLayer);
+    if(planned.length>1)L.polyline(planned.map(p=>[p[1],p[0]]),{color:"#23d8ce",weight:chosen?5:3,opacity:chosen?.95:.72,dashArray:"8 6",interactive:false}).addTo(routeLayer);
+    for(let i=1;i<traveled.length;i++)L.polyline([[traveled[i-1][1],traveled[i-1][0]],[traveled[i][1],traveled[i][0]]],{color:"#23d8ce",weight:chosen?5:3,opacity:(chosen?.55:.4)+.4*(i/traveled.length),interactive:false}).addTo(routeLayer);
   }
 }
 function renderDispatchEvidence() {
@@ -424,6 +426,7 @@ async function poll() {
       selected=courier?{kind:"courier",id:courier.id}:null;
     }
     state=next; displayClock.accept(state.run, performance.now());
+    ChaosUI.update(state);
     $("connection").className="dot online"; $("connection-text").textContent="Local services connected";
     if(state.run) { renderMetrics();renderCouriers();renderOrders();renderLedger();renderInspector();renderRoute();await refreshTrace(); }
     else $("fleet").innerHTML='<div class="empty"><strong>No session loaded</strong><p>Start a session to see the fleet, routes and orders.</p><button data-open-simulation>Set up simulation</button></div>';
@@ -434,6 +437,7 @@ async function poll() {
 async function initialize() {
   try {
     const [city,network]=await Promise.all([api("/api/world"),api("/api/roads")]);
+    ChaosUI.setWorld(city, map);
     L.geoJSON(network,{style:{color:"#426078",weight:.65,opacity:.42},interactive:false}).addTo(roads);
     for(const loc of city.locations) {
       if(loc.kind==="hub") L.marker([loc.lat,loc.lon],{icon:L.divIcon({className:"hub-marker",html:escape(loc.district),iconSize:null,iconAnchor:[25,25]})}).addTo(hubs);

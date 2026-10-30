@@ -66,7 +66,7 @@ label{display:flex;flex-direction:column;gap:6px;font-size:12px;color:var(--ui-m
 .map-key summary{min-height:28px;color:var(--ui-muted);font-size:10px;line-height:28px}
 .map-symbols{display:grid;gap:3px;padding:0 0 7px}.map-symbols span{display:flex;align-items:center;gap:8px;min-height:18px;color:#b4cada}
 .map-symbols .role-symbol{width:17px;height:17px;color:var(--ui-accent)}.map-symbols .legend-idle .role-symbol{color:#829fb4}.map-symbols .legend-pickup .role-symbol{color:#efad3f}.map-symbols .legend-destination .role-symbol{color:#63aff2}
-.map-symbols i{width:17px;border-top:2px solid var(--ui-accent)}.map-symbols .planned-route{border-top-style:dashed}
+.map-symbols i{width:20px;border-top:3px solid var(--ui-accent)}.map-symbols .planned-route{border-top-style:dashed}
 .map-options{display:flex;flex-wrap:wrap;gap:5px 10px;padding:6px 0 7px;border-top:1px solid var(--ui-line)}
 .map-options label{display:flex;flex-direction:row;align-items:center;gap:4px;font-size:10px;min-height:24px}.map-options input{margin:0}
 .leaflet-container{font:12px var(--ui-font)}.leaflet-control-attribution{background:#0c1822e6!important;color:#a8bdcd!important;font-size:9px!important}
