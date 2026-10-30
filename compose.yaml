@@ -1,7 +1,8 @@
 name: madrid-delivery-sim
 services:
   postgres:
-    image: postgis/postgis:17-3.5
+    build: infra/local-postgres
+    image: madrid-delivery-sim-postgres:17-vector
     environment:
       POSTGRES_USER: delivery
       POSTGRES_PASSWORD: delivery_local_only

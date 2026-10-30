@@ -110,11 +110,12 @@ class RestaurantTurn:
         """Find open markets' public fee and estimated lead-time quotes, without private stock."""
         return list(self.invoke("restaurant.suppliers"))
 
-    def recall_order_memory(self) -> Any:
-        """Recall only current, unexpired typed restaurant facts for this order."""
+    def recall_order_memory(self, query: str = "") -> Any:
+        """Recall current facts for this order; an optional query ranks semantic profiles."""
         from delivery.memory_profiles import project_memory
 
-        return project_memory(self.agent.role.memory, list(self.invoke("memory.read")))
+        arguments = {"query": query} if query else {}
+        return project_memory(self.agent.role.memory, list(self.invoke("memory.read", **arguments)))
 
     def search_ingredients(self, query: str) -> dict[str, Any]:
         """Classify ingredient matches in this restaurant's index; never reserve stock.
