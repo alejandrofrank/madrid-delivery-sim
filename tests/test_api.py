@@ -12,8 +12,8 @@ def test_local_api_contract(db_url: str, monkeypatch) -> None:
             assert client.get("/api/health").json()["graph_nodes"] > 1000
             city = client.get("/api/world").json()
             assert len([x for x in city["locations"] if x["kind"] == "hub"]) == 3
-            assert len([x for x in city["locations"] if x["kind"] == "store"]) == 24
-            assert len([x for x in city["locations"] if x["kind"] == "customer"]) == 180
+            assert len([x for x in city["locations"] if x["kind"] == "store"]) == 48
+            assert len([x for x in city["locations"] if x["kind"] == "customer"]) == 270
             assert client.get("/").status_code == 200
             assert client.get("/api/state?run=not-a-uuid").status_code == 422
             assert client.post("/api/runs", json={"seed": -1}).status_code == 422

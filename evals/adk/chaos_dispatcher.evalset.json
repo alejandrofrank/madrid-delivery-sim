@@ -1,0 +1,437 @@
+{
+  "eval_set_id": "chaos_dispatcher-v1",
+  "eval_cases": [
+    {
+      "eval_id": "rain-active",
+      "session_input": {
+        "app_name": "dispatcher",
+        "user_id": "eval",
+        "state": {
+          "facts": {
+            "order_id": "order",
+            "status": "assigned",
+            "courier_status": "delivering",
+            "sim": 120,
+            "duration": 3600,
+            "due_sim": 900,
+            "ready_sim": 300,
+            "earliest_ready": 300,
+            "eta_sim": 780
+          }
+        }
+      },
+      "conversation": [
+        {
+          "user_content": {
+            "role": "user",
+            "parts": [
+              {
+                "text": "Reconsider this order using the available scoped tools."
+              }
+            ]
+          },
+          "intermediate_data": {
+            "tool_uses": [
+              {
+                "name": "read_context",
+                "args": {}
+              },
+              {
+                "name": "keep_assignment",
+                "args": {
+                  "reason": "Current courier can still fulfill the order."
+                }
+              }
+            ]
+          },
+          "final_response": {
+            "role": "model",
+            "parts": [
+              {
+                "text": "Recovery decision recorded."
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "eval_id": "rain-recovered",
+      "session_input": {
+        "app_name": "dispatcher",
+        "user_id": "eval",
+        "state": {
+          "facts": {
+            "order_id": "order",
+            "status": "assigned",
+            "courier_status": "delivering",
+            "sim": 120,
+            "duration": 3600,
+            "due_sim": 900,
+            "ready_sim": 300,
+            "earliest_ready": 300,
+            "eta_sim": 780
+          }
+        }
+      },
+      "conversation": [
+        {
+          "user_content": {
+            "role": "user",
+            "parts": [
+              {
+                "text": "Reconsider this order using the available scoped tools."
+              }
+            ]
+          },
+          "intermediate_data": {
+            "tool_uses": [
+              {
+                "name": "read_context",
+                "args": {}
+              },
+              {
+                "name": "keep_assignment",
+                "args": {
+                  "reason": "Current courier can still fulfill the order."
+                }
+              }
+            ]
+          },
+          "final_response": {
+            "role": "model",
+            "parts": [
+              {
+                "text": "Recovery decision recorded."
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "eval_id": "strike-active",
+      "session_input": {
+        "app_name": "dispatcher",
+        "user_id": "eval",
+        "state": {
+          "facts": {
+            "order_id": "order",
+            "status": "assigned",
+            "courier_status": "delivering",
+            "sim": 120,
+            "duration": 3600,
+            "due_sim": 900,
+            "ready_sim": 300,
+            "earliest_ready": 300,
+            "eta_sim": 780
+          }
+        }
+      },
+      "conversation": [
+        {
+          "user_content": {
+            "role": "user",
+            "parts": [
+              {
+                "text": "Reconsider this order using the available scoped tools."
+              }
+            ]
+          },
+          "intermediate_data": {
+            "tool_uses": [
+              {
+                "name": "read_context",
+                "args": {}
+              },
+              {
+                "name": "keep_assignment",
+                "args": {
+                  "reason": "Current courier can still fulfill the order."
+                }
+              }
+            ]
+          },
+          "final_response": {
+            "role": "model",
+            "parts": [
+              {
+                "text": "Recovery decision recorded."
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "eval_id": "strike-recovered",
+      "session_input": {
+        "app_name": "dispatcher",
+        "user_id": "eval",
+        "state": {
+          "facts": {
+            "order_id": "order",
+            "status": "assigned",
+            "courier_status": "delivering",
+            "sim": 120,
+            "duration": 3600,
+            "due_sim": 900,
+            "ready_sim": 300,
+            "earliest_ready": 300,
+            "eta_sim": 780
+          }
+        }
+      },
+      "conversation": [
+        {
+          "user_content": {
+            "role": "user",
+            "parts": [
+              {
+                "text": "Reconsider this order using the available scoped tools."
+              }
+            ]
+          },
+          "intermediate_data": {
+            "tool_uses": [
+              {
+                "name": "read_context",
+                "args": {}
+              },
+              {
+                "name": "keep_assignment",
+                "args": {
+                  "reason": "Current courier can still fulfill the order."
+                }
+              }
+            ]
+          },
+          "final_response": {
+            "role": "model",
+            "parts": [
+              {
+                "text": "Recovery decision recorded."
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "eval_id": "outage-active",
+      "session_input": {
+        "app_name": "dispatcher",
+        "user_id": "eval",
+        "state": {
+          "facts": {
+            "order_id": "order",
+            "status": "assigned",
+            "courier_status": "delivering",
+            "sim": 120,
+            "duration": 3600,
+            "due_sim": 900,
+            "ready_sim": 300,
+            "earliest_ready": 1200,
+            "eta_sim": 780
+          }
+        }
+      },
+      "conversation": [
+        {
+          "user_content": {
+            "role": "user",
+            "parts": [
+              {
+                "text": "Reconsider this order using the available scoped tools."
+              }
+            ]
+          },
+          "intermediate_data": {
+            "tool_uses": [
+              {
+                "name": "read_context",
+                "args": {}
+              },
+              {
+                "name": "keep_assignment",
+                "args": {
+                  "reason": "Current courier can still fulfill the order."
+                }
+              }
+            ]
+          },
+          "final_response": {
+            "role": "model",
+            "parts": [
+              {
+                "text": "Recovery decision recorded."
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "eval_id": "outage-recovered",
+      "session_input": {
+        "app_name": "dispatcher",
+        "user_id": "eval",
+        "state": {
+          "facts": {
+            "order_id": "order",
+            "status": "assigned",
+            "courier_status": "delivering",
+            "sim": 120,
+            "duration": 3600,
+            "due_sim": 900,
+            "ready_sim": 300,
+            "earliest_ready": 300,
+            "eta_sim": 780
+          }
+        }
+      },
+      "conversation": [
+        {
+          "user_content": {
+            "role": "user",
+            "parts": [
+              {
+                "text": "Reconsider this order using the available scoped tools."
+              }
+            ]
+          },
+          "intermediate_data": {
+            "tool_uses": [
+              {
+                "name": "read_context",
+                "args": {}
+              },
+              {
+                "name": "keep_assignment",
+                "args": {
+                  "reason": "Current courier can still fulfill the order."
+                }
+              }
+            ]
+          },
+          "final_response": {
+            "role": "model",
+            "parts": [
+              {
+                "text": "Recovery decision recorded."
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "eval_id": "courier-offline-active",
+      "session_input": {
+        "app_name": "dispatcher",
+        "user_id": "eval",
+        "state": {
+          "facts": {
+            "order_id": "order",
+            "status": "assigned",
+            "courier_status": "offline",
+            "sim": 120,
+            "duration": 3600,
+            "due_sim": 900,
+            "ready_sim": 300,
+            "earliest_ready": 300,
+            "eta_sim": null
+          }
+        }
+      },
+      "conversation": [
+        {
+          "user_content": {
+            "role": "user",
+            "parts": [
+              {
+                "text": "Reconsider this order using the available scoped tools."
+              }
+            ]
+          },
+          "intermediate_data": {
+            "tool_uses": [
+              {
+                "name": "read_context",
+                "args": {}
+              },
+              {
+                "name": "reassign_order",
+                "args": {
+                  "reason": "Courier unavailable; request a new matching decision."
+                }
+              }
+            ]
+          },
+          "final_response": {
+            "role": "model",
+            "parts": [
+              {
+                "text": "Recovery decision recorded."
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "eval_id": "courier-offline-recovered",
+      "session_input": {
+        "app_name": "dispatcher",
+        "user_id": "eval",
+        "state": {
+          "facts": {
+            "order_id": "order",
+            "status": "assigned",
+            "courier_status": "delivering",
+            "sim": 120,
+            "duration": 3600,
+            "due_sim": 900,
+            "ready_sim": 300,
+            "earliest_ready": 300,
+            "eta_sim": 780
+          }
+        }
+      },
+      "conversation": [
+        {
+          "user_content": {
+            "role": "user",
+            "parts": [
+              {
+                "text": "Reconsider this order using the available scoped tools."
+              }
+            ]
+          },
+          "intermediate_data": {
+            "tool_uses": [
+              {
+                "name": "read_context",
+                "args": {}
+              },
+              {
+                "name": "keep_assignment",
+                "args": {
+                  "reason": "Current courier can still fulfill the order."
+                }
+              }
+            ]
+          },
+          "final_response": {
+            "role": "model",
+            "parts": [
+              {
+                "text": "Recovery decision recorded."
+              }
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

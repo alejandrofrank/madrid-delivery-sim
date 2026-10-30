@@ -1,10 +1,16 @@
 .git
-.env
-.env.*
+.env*
 .venv
 node_modules
 artifacts
 *.log
+*.log.*
+logs/
+.cursor/
+.github/agents/
+.github/hooks/
+.github/skills/
+ChatGPT Image*.png
 __pycache__
 .pytest_cache
 .mypy_cache

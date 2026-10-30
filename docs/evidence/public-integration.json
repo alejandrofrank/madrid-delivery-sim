@@ -1,0 +1,45 @@
+{
+  "verified_at": "2026-10-30",
+  "source_revision": "f337aea8a3ca55926eea6224afade3657af1e810",
+  "source_fingerprint": "b2d006d8267e011433db51c4ade8743ef06ce3cbffa2038da7ad772fea9b73fa",
+  "mode": "offline; isolated local delivery_test database",
+  "tests": {
+    "passed": 852,
+    "failed": 0,
+    "warnings": 53,
+    "duration_seconds": 494.09,
+    "courier_motion_passed": 6,
+    "ruff": "passed",
+    "mypy_modules_passed": 73,
+    "native_adk_evalsets": "included in full suite",
+    "adk_attempts_passed": 144,
+    "adk_attempts_total": 144,
+    "local_eval_gate": "bootstrap without comparison baseline; Chaos checks passed",
+    "chaos_recovery_policy_and_seeded_replay": "passed"
+  },
+  "integration": {
+    "preserved_commits": ["e89af94", "f03899c", "848b92c"],
+    "stashed_work": [],
+    "newer_behavior_retained": [
+      "main's cumulative reviewed ADK verification and live trace timeline",
+      "A2A transport and scoped servers, read-only MCP and Chaos recovery",
+      "48 pickup sites, 270 customer locations, 42 couriers and contractor fleets",
+      "bold planned and traveled routes"
+    ],
+    "pull_requests": [4, 3]
+  },
+  "history_audit": {
+    "commits_scanned": 177,
+    "raw_candidates": 3,
+    "verified_source_fingerprint_false_positives": 3,
+    "confirmed_credentials": 0,
+    "history_rewritten": false,
+    "visibility_changed": false
+  },
+  "limits": [
+    "An older-branch run against a reused 48-site test database produced 813 passes and one expected 24-site fixture mismatch. That API check passed on a fresh database; the combined suite passed all 852 checks in isolation.",
+    "Offline scripted checks do not establish live-model quality. No paid model calls were made.",
+    "The expanded v2 eval suite needs its first matching main artifact before statistical comparison is available; the existing v1 PR gate compares unchanged arms and passes.",
+    "PR and main CI statuses are retained by GitHub rather than predicted in this local receipt."
+  ]
+}

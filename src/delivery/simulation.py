@@ -4,7 +4,6 @@ import json
 import logging
 import math
 import time
-from functools import partial
 from pathlib import Path
 from typing import Any
 from uuid import uuid4
@@ -13,8 +12,21 @@ import numpy as np
 import redis
 from psycopg.types.json import Jsonb
 
-from delivery.agents import Courier, Dispatcher, resolve_complaint
+from delivery.agent_transport import AgentTransport, InProcessTransport, default_transport
+from delivery.agents import Courier, Dispatcher
+from delivery.chaos import (
+    ChaosConfig,
+    demand_factors,
+    insert_event,
+    observe,
+    physical_tick,
+    schedule,
+)
+from delivery.chaos import (
+    evidence as chaos_evidence,
+)
 from delivery.config import settings
+from delivery.contractors import fleet_contract, fleet_plan
 from delivery.customer_service import CustomerService
 from delivery.db import Connection, connect, migrate
 from delivery.dispatch_policy import DispatchPolicy, load_policy
@@ -41,6 +53,12 @@ def finish_run(run: str, url: str | None = None) -> None:
         )
         unserved = result.fetchall() if observe else []
         conn.execute("UPDATE runs SET status='complete' WHERE id=%s", (run,))
+        conn.execute(
+            "UPDATE orders SET status='unserved' WHERE run_id=%s "
+            "AND status IN ('assigned','picked_up') AND EXISTS "
+            "(SELECT 1 FROM runs WHERE id=%s AND chaos_config IS NOT NULL)",
+            (run, run),
+        )
     try:
         for order in unserved:
             attributes: dict[str, Any] = {
@@ -73,15 +91,27 @@ def create_run(
     duration: int = 43200,
     url: str | None = None,
     dispatch: DispatchPolicy | None = None,
+    chaos: ChaosConfig | None = None,
 ) -> str:
     run = str(uuid4())
     policy = dispatch or DispatchPolicy()
+    fleets = fleet_plan()
+    disruptions = schedule(chaos, seed, duration) if chaos is not None else []
     with connect(url) as conn:
         seed_locations(conn, world)
         conn.execute(
-            "INSERT INTO runs(id,seed,wall_seconds,duration,dispatch_config) "
-            "VALUES (%s,%s,%s,%s,%s)",
-            (run, seed, wall_seconds, duration, Jsonb(policy.model_dump())),
+            "INSERT INTO runs(id,seed,wall_seconds,duration,dispatch_config,"
+            "chaos_config,fleet_config) "
+            "VALUES (%s,%s,%s,%s,%s,%s,%s)",
+            (
+                run,
+                seed,
+                wall_seconds,
+                duration,
+                Jsonb(policy.model_dump()),
+                Jsonb(chaos.model_dump()) if chaos is not None else None,
+                Jsonb(fleets),
+            ),
         )
         hubs = conn.execute("SELECT * FROM locations WHERE kind='hub' ORDER BY id").fetchall()
         for hub in hubs:
@@ -92,21 +122,30 @@ def create_run(
                     "WHERE kind='store' AND district=%s ORDER BY node,id",
                     (hub["district"],),
                 ).fetchall() or [hub]
-            for index, mode in enumerate(("bike", "bike", "moto", "moto", "van", "van")):
-                start = starts[index % len(starts)]
+            roster = [
+                (fleet["id"], index, mode)
+                for fleet in fleets["fleets"]
+                for index, mode in enumerate(fleet["modes_per_hub"])
+            ]
+            for offset, (fleet_id, index, mode) in enumerate(roster):
+                start = starts[offset % len(starts)]
+                prefix = "" if fleet_id == "regular" else f"{fleet_id}-"
                 conn.execute(
-                    """INSERT INTO couriers(run_id,id,hub,mode,node,point,shift_end)
-                       VALUES (%s,%s,%s,%s,%s,%s,%s)""",
+                    """INSERT INTO couriers(run_id,id,hub,mode,node,point,shift_end,fleet_id)
+                       VALUES (%s,%s,%s,%s,%s,%s,%s,%s)""",
                     (
                         run,
-                        f"{hub['id']}-{index + 1:02d}",
+                        f"{prefix}{hub['id']}-{index + 1:02d}",
                         hub["id"],
                         mode,
                         start["node"],
                         start["point"],
                         duration,
+                        fleet_id,
                     ),
                 )
+        for event in disruptions:
+            insert_event(conn, run, event)
     return run
 
 
@@ -115,11 +154,17 @@ def generate(conn: Connection, run: str, sim: int, seed: int, duration: int) -> 
     if sim > duration - 1800:  # last half hour drains existing deliveries
         return
     rng = np.random.default_rng(np.random.SeedSequence([seed, sim]))
-    count = int(rng.poisson(demand_rate(10 + sim / 3600)))
+    multiplier, districts = demand_factors(conn, run)
+    regional_multiplier = sum(districts.values()) / len(districts) if districts else 1.0
+    count = int(rng.poisson(demand_rate(10 + sim / 3600) * multiplier * regional_multiplier))
     stores = conn.execute("SELECT * FROM locations WHERE kind='store' ORDER BY id").fetchall()
     customers = conn.execute("SELECT * FROM locations WHERE kind='customer' ORDER BY id").fetchall()
     for i in range(count):
-        store = stores[int(rng.integers(len(stores)))]
+        if districts:
+            weights = np.array([districts.get(s["district"], 1.0) for s in stores])
+            store = stores[int(rng.choice(len(stores), p=weights / weights.sum()))]
+        else:
+            store = stores[int(rng.integers(len(stores)))]
         local = [c for c in customers if c["district"] == store["district"]]
         customer = local[int(rng.integers(len(local)))]
         order = f"O-{sim // 60:04d}-{i:02d}"
@@ -207,7 +252,7 @@ def snapshot(run: str | None = None, url: str | None = None) -> dict[str, Any]:
             else None
         )
         couriers = conn.execute(
-            """SELECT c.id,c.hub,c.node,c.mode,c.status,c.energy,c.distance_m,
+            """SELECT c.id,c.hub,c.node,c.mode,c.status,c.energy,c.distance_m,c.fleet_id,
                c.completed_jobs,c.empty_distance_m,c.reposition_distance_m,c.operating_cost_eur,
                ST_X(c.point) AS lon,ST_Y(c.point) AS lat,o.id AS order_id,
                coalesce(o.route,c.reposition_route) AS route FROM couriers c LEFT JOIN orders o
@@ -215,6 +260,25 @@ def snapshot(run: str | None = None, url: str | None = None) -> dict[str, Any]:
                WHERE c.run_id=%s ORDER BY c.id""",
             (run,),
         ).fetchall()
+        for courier in couriers:
+            contract = fleet_contract(state["fleet_config"], courier["fleet_id"])
+            courier["fleet_name"] = contract["name"]
+            courier["operator"] = contract["operator"]
+            courier["communication_style"] = contract["style"]
+            courier["coverage"] = contract["coverage"]
+        fleets_state = []
+        for fleet_id in sorted({c["fleet_id"] for c in couriers}):
+            members = [c for c in couriers if c["fleet_id"] == fleet_id]
+            contract = fleet_contract(state["fleet_config"], fleet_id)
+            fleets_state.append(
+                {
+                    **contract,
+                    "couriers": len(members),
+                    "available": sum(c["status"] == "idle" for c in members),
+                    "completed_jobs": sum(c["completed_jobs"] for c in members),
+                    "operating_cost_eur": round(sum(c["operating_cost_eur"] for c in members), 4),
+                }
+            )
         metrics["empty_km"] = round(sum(c["empty_distance_m"] for c in couriers) / 1000, 3)
         metrics["reposition_km"] = round(
             sum(c["reposition_distance_m"] for c in couriers) / 1000, 3
@@ -226,6 +290,8 @@ def snapshot(run: str | None = None, url: str | None = None) -> dict[str, Any]:
             metrics["cost_basis"] = "legacy_completed_task_estimate"
             metrics["empty_km"] = metrics["reposition_km"] = None
             metrics["operating_cost_eur"] = metrics["delivery_cost_eur"]
+            for fleet in fleets_state:
+                fleet["completed_jobs"] = fleet["operating_cost_eur"] = None
             for courier in couriers:
                 for field in (
                     "empty_distance_m",
@@ -262,6 +328,7 @@ def snapshot(run: str | None = None, url: str | None = None) -> dict[str, Any]:
             "SELECT id,topic,attempts,error,trace_id FROM dead_letters WHERE run_id=%s ORDER BY id",
             (run,),
         ).fetchall()
+        chaos_state = chaos_evidence(conn, run) if state["chaos_config"] is not None else None
     state["id"] = run
     state["dispatch_policy"] = load_policy(state["dispatch_config"]).model_dump()
     state["created_at"] = state["created_at"].isoformat()
@@ -274,17 +341,23 @@ def snapshot(run: str | None = None, url: str | None = None) -> dict[str, Any]:
         "run": state,
         "metrics": metrics,
         "couriers": couriers,
+        "fleets": fleets_state,
         "orders": orders,
         "queue": {r["state"]: r["count"] for r in queue},
         "decisions": decisions,
         "complaints": complaints,
         "dead_letters": dead,
+        "chaos": chaos_state,
     }
 
 
 class Simulation:
     def __init__(
-        self, world: World, url: str | None = None, service: CustomerService | None = None
+        self,
+        world: World,
+        url: str | None = None,
+        service: CustomerService | None = None,
+        transport: AgentTransport | None = None,
     ) -> None:
         self.world = world
         self.url = url
@@ -292,24 +365,37 @@ class Simulation:
         self.dispatcher = Dispatcher(world)
         self.courier = Courier()
         self.service = service or CustomerService(url)
+        self.transport = transport or default_transport(url)
+        if isinstance(self.transport, InProcessTransport):
+            from delivery.a2a_server import QueuedAgentService
+
+            for role in ("dispatcher", "customer_service"):
+                worker = QueuedAgentService(role, url)
+                worker.world = world
+                worker.customer = self.service
+                self.transport.services[role] = worker
 
     def drain(self, run: str, sim: int) -> None:
         for _ in range(500):  # hard loop bound; cycles cannot monopolize a tick
             progress = False
             for role in ("dispatcher", "courier", "customer_service", "audit"):
+                if role in {"dispatcher", "customer_service"}:
+                    receipt = self.transport.invoke(
+                        role,
+                        {
+                            "run_id": run,
+                            "entity_id": "clock",
+                            "operation": "tick",
+                        },
+                    )
+                    progress = progress or receipt["progressed"]
+                    continue
                 event = self.queue.claim(role, run, sim)
                 if not event:
                     continue
                 progress = True
-                if role == "dispatcher":
-                    self.queue.process(event, self.dispatcher.handle)
-                elif role == "courier":
+                if role == "courier":
                     self.queue.process(event, self.courier.handle)
-                elif role == "customer_service":
-                    advice, source = self.service.prepare(event)
-                    self.queue.process(
-                        event, partial(resolve_complaint, advice=advice, source=source)
-                    )
                 else:
                     self.queue.process(event, lambda c, e: None)
             if not progress:
@@ -321,8 +407,38 @@ class Simulation:
             conn.execute("SELECT pg_advisory_xact_lock(hashtextextended(%s, 0))", (run,))
             conn.execute("UPDATE runs SET sim_time=%s WHERE id=%s", (sim, run))
             self.courier.advance(conn, run, sim)
+            row = conn.execute("SELECT chaos_config FROM runs WHERE id=%s", (run,)).fetchone()
+            chaos = row is not None and row["chaos_config"] is not None
+            if chaos:
+                physical_tick(conn, run, sim)
             generate(conn, run, sim, seed, duration)
+            if chaos:
+                observe(conn, run, sim)
+        if chaos:
+            self.recover(run, sim)
         self.drain(run, sim)
+
+    def recover(self, run: str, sim: int) -> None:
+        with connect(self.url) as conn:
+            work = conn.execute(
+                "SELECT id,agent FROM chaos_work WHERE run_id=%s AND state='pending' "
+                "ORDER BY CASE WHEN agent LIKE 'restaurant-%%' THEN 0 "
+                "WHEN agent='dispatcher' THEN 1 ELSE 2 END,disruption,order_id,id",
+                (run,),
+            ).fetchall()
+        dispatched = False
+        for item in work:
+            if item["agent"] == "customer_service" and not dispatched:
+                self.drain(run, sim)
+                dispatched = True
+            self.transport.invoke(
+                item["agent"],
+                {
+                    "run_id": run,
+                    "entity_id": item["id"],
+                    "operation": "replan",
+                },
+            )
 
     def run(self, run: str, *, export: bool = True) -> dict[str, Any]:
         # Session lock rejects a second clock driver, including from a different process.

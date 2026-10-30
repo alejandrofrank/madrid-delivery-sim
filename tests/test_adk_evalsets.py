@@ -18,6 +18,10 @@ ROOT = Path(__file__).resolve().parents[1]
 @pytest.mark.parametrize("agent,file", [
     ("restaurant", "restaurant.evalset.json"),
     ("customer_service", "customer_service.test.json"),
+    ("customer_service", "customer_policy.evalset.json"),
+    ("chaos_dispatcher", "chaos_dispatcher.evalset.json"),
+    ("chaos_restaurant", "chaos_restaurant.evalset.json"),
+    ("chaos_customer", "chaos_customer.evalset.json"),
 ])
 def test_agent_evaluator_offline(agent, file, monkeypatch, tmp_path):
     import httpx
@@ -44,6 +48,10 @@ def test_agent_evaluator_offline(agent, file, monkeypatch, tmp_path):
 @pytest.mark.parametrize("agent,file", [
     ("restaurant", "restaurant.evalset.json"),
     ("customer_service", "customer_service.test.json"),
+    ("customer_service", "customer_policy.evalset.json"),
+    ("chaos_dispatcher", "chaos_dispatcher.evalset.json"),
+    ("chaos_restaurant", "chaos_restaurant.evalset.json"),
+    ("chaos_customer", "chaos_customer.evalset.json"),
 ])
 def test_adk_eval_cli_offline(agent, file, tmp_path):
     # ADK persists .adk below its application directory. Image sources are owned
@@ -67,7 +75,8 @@ def test_adk_eval_cli_offline(agent, file, tmp_path):
         cwd=ROOT, env=env, capture_output=True, text=True, timeout=120,
     )
     assert result.returncode == 0, result.stdout + result.stderr
-    assert "Tests passed: 10" in result.stdout, result.stdout
+    count = len(EvalSet.model_validate_json((applications / file).read_text()).eval_cases)
+    assert f"Tests passed: {count}" in result.stdout, result.stdout
 
 
 def test_evalset_schema_and_personas_are_separate():

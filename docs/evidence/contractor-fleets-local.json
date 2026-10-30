@@ -1,0 +1,256 @@
+{
+  "feature": "Expanded Madrid and contractor fleets",
+  "source_revision": "c72036d4a82f49c429503e1588c86e48ca6a53f7",
+  "mode": "offline; real A2A HTTP dispatcher in live demos",
+  "sites": {
+    "pickup_sites": 48,
+    "synthetic_customers": 270,
+    "hubs": 3
+  },
+  "tests": {
+    "focused": 53,
+    "full": 849,
+    "warnings": 53,
+    "courier_motion": 6,
+    "ruff": "passed",
+    "mypy": "73 source files passed",
+    "native_adk_evalsets": "included in full pytest suite"
+  },
+  "full_day": {
+    "run_id": "1ad94894-1ce1-4cea-9490-76909c400e7f",
+    "metrics": {
+      "orders": 247,
+      "delivered": 247,
+      "pending": 0,
+      "active": 0,
+      "unserved": 0,
+      "on_time": 247,
+      "delivery_cost_eur": 399.53005303277666,
+      "overdue": 0,
+      "on_time_pct": 100.0,
+      "cost_per_delivery_eur": 1.6175,
+      "empty_km": 233.764,
+      "reposition_km": 0.0,
+      "operating_cost_eur": 399.5301,
+      "cost_basis": "realized_fleet_ledger"
+    },
+    "queue": {
+      "done": 1243
+    },
+    "fleets": [
+      {
+        "id": "castellana",
+        "name": "Castellana Logistics",
+        "style": "radio",
+        "coverage": "network",
+        "operator": "contractor",
+        "modes_per_hub": [
+          "moto",
+          "moto",
+          "van"
+        ],
+        "couriers": 9,
+        "available": 0,
+        "completed_jobs": 71,
+        "operating_cost_eur": 126.4291
+      },
+      {
+        "id": "regular",
+        "name": "Bakiano",
+        "style": "direct",
+        "coverage": "network",
+        "operator": "regular",
+        "modes_per_hub": [
+          "bike",
+          "bike",
+          "moto",
+          "moto",
+          "van",
+          "van",
+          "bike",
+          "moto"
+        ],
+        "couriers": 24,
+        "available": 0,
+        "completed_jobs": 144,
+        "operating_cost_eur": 233.4995
+      },
+      {
+        "id": "sol",
+        "name": "Sol Riders",
+        "style": "conversational",
+        "coverage": "home_district",
+        "operator": "contractor",
+        "modes_per_hub": [
+          "bike",
+          "bike",
+          "bike"
+        ],
+        "couriers": 9,
+        "available": 0,
+        "completed_jobs": 32,
+        "operating_cost_eur": 39.6014
+      }
+    ]
+  },
+  "chaos_demo": {
+    "run_id": "dd0c17ed-564f-4ab2-9f19-e81fcad5e70b",
+    "metrics": {
+      "orders": 71,
+      "delivered": 71,
+      "pending": 0,
+      "active": 0,
+      "unserved": 0,
+      "on_time": 71,
+      "delivery_cost_eur": 105.71583980252103,
+      "overdue": 0,
+      "on_time_pct": 100.0,
+      "cost_per_delivery_eur": 1.4903,
+      "empty_km": 43.491,
+      "reposition_km": 0.0,
+      "operating_cost_eur": 105.813,
+      "cost_basis": "realized_fleet_ledger"
+    },
+    "fleets": [
+      {
+        "id": "castellana",
+        "name": "Castellana Logistics",
+        "style": "radio",
+        "coverage": "network",
+        "operator": "contractor",
+        "modes_per_hub": [
+          "moto",
+          "moto",
+          "van"
+        ],
+        "couriers": 9,
+        "available": 0,
+        "completed_jobs": 16,
+        "operating_cost_eur": 27.69
+      },
+      {
+        "id": "regular",
+        "name": "Bakiano",
+        "style": "direct",
+        "coverage": "network",
+        "operator": "regular",
+        "modes_per_hub": [
+          "bike",
+          "bike",
+          "moto",
+          "moto",
+          "van",
+          "van",
+          "bike",
+          "moto"
+        ],
+        "couriers": 24,
+        "available": 0,
+        "completed_jobs": 38,
+        "operating_cost_eur": 57.1345
+      },
+      {
+        "id": "sol",
+        "name": "Sol Riders",
+        "style": "conversational",
+        "coverage": "home_district",
+        "operator": "contractor",
+        "modes_per_hub": [
+          "bike",
+          "bike",
+          "bike"
+        ],
+        "couriers": 9,
+        "available": 0,
+        "completed_jobs": 17,
+        "operating_cost_eur": 20.9886
+      }
+    ],
+    "disruptions": [
+      {
+        "id": "rain",
+        "affected_orders": 21,
+        "unresolved_orders": 0,
+        "time_to_recover_seconds": 1866,
+        "orders_saved": 21,
+        "orders_lost": 0,
+        "late_deliveries": 0,
+        "refund_cost_eur": 0.0,
+        "extra_tokens": 0,
+        "extra_token_cost_usd": 0.0,
+        "failed_replans": 0
+      },
+      {
+        "id": "metro",
+        "affected_orders": 12,
+        "unresolved_orders": 0,
+        "time_to_recover_seconds": 1464,
+        "orders_saved": 12,
+        "orders_lost": 0,
+        "late_deliveries": 0,
+        "refund_cost_eur": 0.0,
+        "extra_tokens": 0,
+        "extra_token_cost_usd": 0.0,
+        "failed_replans": 0
+      },
+      {
+        "id": "kitchen",
+        "affected_orders": 2,
+        "unresolved_orders": 0,
+        "time_to_recover_seconds": 1699,
+        "orders_saved": 2,
+        "orders_lost": 0,
+        "late_deliveries": 0,
+        "refund_cost_eur": 0.0,
+        "extra_tokens": 0,
+        "extra_token_cost_usd": 0.0,
+        "failed_replans": 0
+      },
+      {
+        "id": "offline",
+        "affected_orders": 1,
+        "unresolved_orders": 0,
+        "time_to_recover_seconds": 1200,
+        "orders_saved": 1,
+        "orders_lost": 0,
+        "late_deliveries": 0,
+        "refund_cost_eur": 0.0,
+        "extra_tokens": 0,
+        "extra_token_cost_usd": 0.0,
+        "failed_replans": 0
+      },
+      {
+        "id": "surge",
+        "affected_orders": 7,
+        "unresolved_orders": 0,
+        "time_to_recover_seconds": 1260,
+        "orders_saved": 7,
+        "orders_lost": 0,
+        "late_deliveries": 0,
+        "refund_cost_eur": 0.0,
+        "extra_tokens": 0,
+        "extra_token_cost_usd": 0.0,
+        "failed_replans": 0
+      }
+    ]
+  },
+  "chaos_evals": {
+    "validation_exit_code": 0,
+    "scenario_attempts": 8,
+    "seeded_runs": 2,
+    "sha256": "a810205ba959bcac7dd6ff5cf91bc69f908d277610c1d496dc0d642f1cda6f9b"
+  },
+  "ui_review": {
+    "disposition": "ship",
+    "bounded_fix": "Run changes reset Fleet to All before choosing a courier",
+    "run_switch_checked": "Sol filter on 42-courier run to historical 18-courier run: All fleets and chamberi-01 selected consistently",
+    "documentation": "Existing design system preserved",
+    "browser_errors": []
+  },
+  "runtime": {
+    "port": 8010,
+    "health": "healthy",
+    "image": "mds-a2a-chaos:preview"
+  },
+  "validation_file_sha256": "daaf275862cf3fdaac1cb4612582ffc199fe662f0babc094e8a72ab82473d516"
+}

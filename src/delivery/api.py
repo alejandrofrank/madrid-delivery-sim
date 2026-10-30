@@ -14,8 +14,10 @@ from fastapi.responses import FileResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
 from starlette.responses import Response
+from starlette.types import Receive, Scope, Send
 
-from delivery.a2a_server import create_a2a_app
+from delivery.chaos import ChaosConfig
+from delivery.chaos_api import router as chaos_router
 from delivery.city_config import CitySettings
 from delivery.db import connect
 from delivery.dispatch_policy import DispatchPolicy
@@ -23,6 +25,8 @@ from delivery.documentation import router as documentation_router
 from delivery.health import router as health_router
 from delivery.history import history_catalogue, history_manifest
 from delivery.lab import create_lab, export_slice, lab_snapshot
+from delivery.mcp_server import create_mcp_server
+from delivery.protocol_api import agent_directory, agent_names
 from delivery.simulation import Simulation, create_run, initialize, snapshot
 from delivery.supply_api import router as supply_router
 from delivery.telemetry import instrument_fastapi, shutdown_telemetry
@@ -32,12 +36,23 @@ from delivery.world import DATA, World
 world: World
 
 
+async def mcp_app(scope: Scope, receive: Receive, send: Send) -> None:
+    await scope["app"].state.mcp_app(scope, receive, send)
+
+
 @asynccontextmanager
 async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     global world
     world = initialize()
+    mcp_server = create_mcp_server()
+    app.state.mcp_app = mcp_server.streamable_http_app(
+        streamable_http_path="/",
+        stateless_http=True,
+        json_response=True,
+    )
     try:
-        yield
+        async with mcp_server.session_manager.run():
+            yield
     finally:
         shutdown_telemetry()
 
@@ -253,6 +268,8 @@ class StartRun(BaseModel):
     seed: int = Field(default=42, ge=0, le=2**31 - 1)
     wall_seconds: int = Field(default=600, ge=0, le=3600)
     dispatch: DispatchPolicy = Field(default_factory=DispatchPolicy)
+    duration: int = Field(default=43200, ge=1800, le=43200, multiple_of=60)
+    chaos: ChaosConfig | None = None
 
 
 def run_background(run: str) -> None:
@@ -296,7 +313,17 @@ def runs() -> list[dict[str, Any]]:
 
 @app.post("/api/runs", status_code=202)
 def start(body: StartRun, tasks: BackgroundTasks) -> dict[str, str]:
-    run = create_run(world, body.seed, body.wall_seconds, dispatch=body.dispatch)
+    try:
+        run = create_run(
+            world,
+            body.seed,
+            body.wall_seconds,
+            duration=body.duration,
+            dispatch=body.dispatch,
+            chaos=body.chaos,
+        )
+    except ValueError as exc:
+        raise HTTPException(422, str(exc)) from None
     tasks.add_task(run_background, run)
     return {"id": run}
 
@@ -336,9 +363,23 @@ def favicon() -> None:
 
 
 app.include_router(supply_router)
+app.include_router(chaos_router)
 app.include_router(health_router)
 app.include_router(documentation_router)
 app.include_router(telemetry_router)
-app.mount("/a2a/dispatcher", create_a2a_app("dispatcher"))
-app.mount("/a2a/customer_service", create_a2a_app("customer_service"))
+
+
+@app.get("/api/agents")
+def protocol_agents() -> dict[str, Any]:
+    return {
+        "protocol": "A2A 1.0",
+        "agents": [
+            {"id": name, "card": f"/a2a/{name}/.well-known/agent-card.json"}
+            for name in agent_names()
+        ],
+    }
+
+
+app.mount("/a2a", agent_directory())
+app.mount("/mcp", mcp_app)
 app.mount("/static", StaticFiles(directory="web"), name="static")

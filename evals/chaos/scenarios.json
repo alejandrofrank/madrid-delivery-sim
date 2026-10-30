@@ -1,0 +1,15 @@
+{
+  "version": 1,
+  "seed": 42,
+  "cases": ["heavy_rain", "metro_strike", "restaurant_outage", "courier_offline"],
+  "criteria": {
+    "min_affected_orders": 1,
+    "min_orders_saved": 1,
+    "max_orders_lost": 0,
+    "max_late_deliveries": 1,
+    "max_recovery_seconds": 2400,
+    "max_refund_per_order_eur": 5,
+    "max_extra_token_cost_usd": 0,
+    "max_failed_replans": 0
+  }
+}
