@@ -29,6 +29,7 @@ _AGENTS: dict[tuple[str, str], LocalAgent] = {}
 _TOKENS: dict[str, tuple[str, str, float]] = {}
 CHANNEL_LEASES: dict[tuple[str, str, int], Event] = {}
 _LOCK = Lock()
+_PROVISION_LOCK = Lock()
 SUPPLY_ROLES = ("household", "restaurant", "market")
 
 
@@ -183,9 +184,11 @@ def _initialize_supply(run: str, config: SupplyConfig, url: str | None = None) -
     return run
 
 
-def provision(run: str, url: str | None = None) -> dict[str, LocalAgent]:
+def provision(
+    run: str, url: str | None = None, *, roles: tuple[str, ...] | None = None
+) -> dict[str, LocalAgent]:
     agents = {}
-    for role in (*SUPPLY_ROLES, "dispatcher", "courier", "judge"):
+    for role in roles or (*SUPPLY_ROLES, "dispatcher", "courier", "judge"):
         for access in role_access(run, role, url).values():
             agent = create_agent(access.dsn)
             agents[access.store] = agent
@@ -214,6 +217,20 @@ def authenticated_agent(run: str, agent_id: str, token: str) -> LocalAgent:
     if not grant or grant[:2] != (run, agent_id) or grant[2] <= time.monotonic() or not agent:
         raise PermissionError("Invalid, expired or wrong-scope channel")
     return agent
+
+
+def forget_agents(run: str) -> None:
+    """Discard ephemeral capabilities; durable decisions remain in the database."""
+    with _LOCK:
+        for key in list(_AGENTS):
+            if key[0] == run:
+                del _AGENTS[key]
+        for token, grant in list(_TOKENS.items()):
+            if grant[0] == run:
+                del _TOKENS[token]
+        for lease_key in list(CHANNEL_LEASES):
+            if lease_key[0] == run:
+                del CHANNEL_LEASES[lease_key]
 
 
 def release_calls(
@@ -265,7 +282,20 @@ def run_supply(run: str, url: str | None = None) -> dict[str, Any]:
 
     transport = default_transport(url)
     try:
-        agents = provision(run, url)
+        # Remote roles own their scoped SQL credentials in the serving process.
+        # This also works in process: the same service provisions on first use.
+        agents = provision(run, url, roles=("household", "market", "courier", "judge"))
+        routed = {
+            entity["id"]: "restaurant-" + entity["id"]
+            for entity in config["entities"] if entity["kind"] == "restaurant"
+        }
+        routed["dispatcher:fleet"] = "dispatcher"
+        # Queue publication requires the receiving identity to exist, so admit
+        # every remote capability before releasing the first household intent.
+        for namespace, name in routed.items():
+            transport.invoke(name, {
+                "run_id": run, "entity_id": namespace, "operation": "supply_tick",
+            })
         for _ in range(20000):
             release_calls(run, schedule, sim, url)
             with connect(url) as conn:
@@ -279,13 +309,10 @@ def run_supply(run: str, url: str | None = None) -> dict[str, Any]:
             handled = False
             for item in due:
                 agent = agents.get(item["target_store"])
-                if agent and agent.role.name in {"restaurant", "dispatcher"}:
-                    name = (
-                        "restaurant-" + agent.scope.store
-                        if agent.role.name == "restaurant" else "dispatcher"
-                    )
-                    receipt = transport.invoke(name, {
-                        "run_id": run, "entity_id": agent.scope.store, "operation": "supply_tick",
+                if item["target_store"] in routed:
+                    receipt = transport.invoke(routed[item["target_store"]], {
+                        "run_id": run, "entity_id": item["target_store"],
+                        "operation": "supply_tick",
                     })
                     if receipt["progressed"]:
                         handled = True
@@ -365,16 +392,7 @@ def run_supply(run: str, url: str | None = None) -> dict[str, Any]:
             )
         raise
     finally:
-        with _LOCK:
-            for key in list(_AGENTS):
-                if key[0] == run:
-                    del _AGENTS[key]
-            for token, grant in list(_TOKENS.items()):
-                if grant[0] == run:
-                    del _TOKENS[token]
-            for lease_key in list(CHANNEL_LEASES):
-                if lease_key[0] == run:
-                    del CHANNEL_LEASES[lease_key]
+        forget_agents(run)
         retire_inventory_access(run, url)
 
 
@@ -386,14 +404,40 @@ def process_agent_message(
     if role not in {"dispatcher", "restaurant-" + namespace}:
         raise ValueError("Agent identity mismatch")
     with connect(url) as conn:
-        row = conn.execute("SELECT status FROM runs WHERE id=%s", (run,)).fetchone()
-    if not row or row["status"] != "running":
+        row = conn.execute(
+            "SELECT r.status FROM runs r JOIN supply_sessions s ON s.run_id=r.id "
+            "WHERE r.id=%s", (run,),
+        ).fetchone()
+        valid = namespace == "dispatcher:fleet" if expected == "dispatcher" else bool(
+            conn.execute(
+                "SELECT 1 FROM supply_entities WHERE run_id=%s AND id=%s AND kind='restaurant'",
+                (run, namespace),
+            ).fetchone()
+        )
+    if not row or row["status"] != "running" or not valid:
         raise ValueError("Unknown or closed supply run")
-    with _LOCK:
-        agent = next((a for (r, _), a in _AGENTS.items() if r == run
-                      and a.scope.store == namespace and a.role.name == expected), None)
-    if agent is None:
-        raise ValueError("Unknown provisioned agent")
+    with _PROVISION_LOCK:
+        # A scheduler in another process retires SQL logins when it finishes.
+        # Prune the server's matching ephemeral objects before admitting a new run.
+        with _LOCK:
+            cached = {r for r, _ in _AGENTS if r != run}
+        if cached:
+            with connect(url) as conn:
+                closed = conn.execute(
+                    "SELECT id FROM runs WHERE id=ANY(%s::uuid[]) "
+                    "AND status IN ('complete','failed')", (list(cached),),
+                ).fetchall()
+            for old in closed:
+                forget_agents(str(old["id"]))
+                retire_inventory_access(str(old["id"]), url)
+        with _LOCK:
+            agent = next((a for (r, _), a in _AGENTS.items() if r == run
+                          and a.scope.store == namespace and a.role.name == expected), None)
+        if agent is None:
+            provision(run, url, roles=(expected,))
+            with _LOCK:
+                agent = next(a for (r, _), a in _AGENTS.items() if r == run
+                             and a.scope.store == namespace and a.role.name == expected)
     event = agent.claim()
     if event is None:
         return {"progressed": False}

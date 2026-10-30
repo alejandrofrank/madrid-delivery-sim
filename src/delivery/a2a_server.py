@@ -1,7 +1,7 @@
 """A2A 1.0 JSON-RPC servers backed by the existing durable agent queue.
 
 Local, bounded adapters accept references to existing simulation entities, never
-model tool calls. Customer service uses ADK's free fixture (or disabled fallback).
+model tool calls. Customer service retains the configured ADK provider and budgets.
 """
 
 import asyncio
@@ -51,9 +51,7 @@ class QueuedAgentService:
     def __init__(self, role: AgentRole, url: str | None = None) -> None:
         self.role = role
         self.url = url
-        # Explicit fixture selection cannot inherit an ambient paid-provider setting.
-        self.customer = CustomerService(url, Settings(llm_provider="offline"))
-        self.tick_customer = CustomerService(url)
+        self.customer = CustomerService(url)
         self.world: World | None = None
 
     def invoke(self, command: AgentCommand) -> dict[str, Any]:
@@ -144,7 +142,7 @@ class QueuedAgentService:
                 self.world = World()
             ok = queue.process(event, Dispatcher(self.world).handle)
         else:
-            advice, source = self.tick_customer.prepare(event)
+            advice, source = self.customer.prepare(event)
             ok = queue.process(event, partial(resolve_complaint, advice=advice, source=source))
         return {"progressed": True, "processed": ok, "event_id": event.id}
 
@@ -172,7 +170,6 @@ class QueuedAgentService:
             "queue_state": event["state"],
             "attempts": event["attempts"],
             "outcome": entity,
-            "paid_calls_this_request": 0,
         }
 
 

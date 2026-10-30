@@ -339,7 +339,7 @@ class Simulation:
             for role in ("dispatcher", "customer_service"):
                 worker = QueuedAgentService(role, url)
                 worker.world = world
-                worker.tick_customer = self.service
+                worker.customer = self.service
                 self.transport.services[role] = worker
 
     def drain(self, run: str, sim: int) -> None:

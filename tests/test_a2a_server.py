@@ -151,10 +151,17 @@ def test_invalid_command_is_a_protocol_error_without_invoking_agent(monkeypatch)
 
 
 @pytest.mark.integration
-def test_a2a_client_runs_both_real_agents_and_replay_is_idempotent(db_url, run_id):
+@pytest.mark.parametrize("provider", ["offline", "disabled"])
+def test_a2a_client_runs_both_real_agents_and_replay_is_idempotent(
+    db_url, run_id, monkeypatch, provider
+):
+    from delivery.config import Settings
     from delivery.simulation import generate
     from delivery.world import World, seed_locations
 
+    monkeypatch.setattr(
+        "delivery.customer_service.settings", lambda: Settings(llm_provider=provider)
+    )
     world = World()
     with connect(db_url) as conn:
         seed_locations(conn, world)
@@ -194,7 +201,7 @@ def test_a2a_client_runs_both_real_agents_and_replay_is_idempotent(db_url, run_i
     replay = asyncio.run(call_agent(app, "customer_service", command))
     assert replay == customer
     assert customer["queue_state"] == "done"
-    assert customer["outcome"]["source"] == "adk_offline"
+    assert customer["outcome"]["source"] == ("adk_offline" if provider == "offline" else "disabled")
     assert customer["outcome"]["status"] == "awaiting_approval"
     assert float(customer["outcome"]["approved_refund_eur"]) == 0
     with connect(db_url) as conn:
@@ -202,4 +209,6 @@ def test_a2a_client_runs_both_real_agents_and_replay_is_idempotent(db_url, run_i
             "SELECT llm_calls,llm_cost_usd,llm_reserved_usd FROM runs WHERE id=%s",
             (run_id,),
         ).fetchone()
-        assert budget == {"llm_calls": 1, "llm_cost_usd": 0, "llm_reserved_usd": 0}
+        assert budget == {
+            "llm_calls": int(provider == "offline"), "llm_cost_usd": 0, "llm_reserved_usd": 0,
+        }

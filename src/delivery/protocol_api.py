@@ -21,6 +21,13 @@ def agent_names(url: str | None = None) -> list[str]:
             restaurant_name(r["id"])
             for r in conn.execute("SELECT id FROM locations WHERE kind='store'").fetchall()
         )
+        names.update(
+            restaurant_name(r["id"])
+            for r in conn.execute(
+                "SELECT DISTINCT e.id FROM supply_entities e JOIN runs r ON r.id=e.run_id "
+                "WHERE e.kind='restaurant' AND r.status IN ('ready','running')"
+            ).fetchall()
+        )
     return ["dispatcher", "customer_service", *sorted(names)]
 
 
