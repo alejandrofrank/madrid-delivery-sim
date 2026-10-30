@@ -15,7 +15,6 @@ from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
 from starlette.responses import Response
 
-from delivery.a2a_server import create_a2a_app
 from delivery.city_config import CitySettings
 from delivery.db import connect
 from delivery.dispatch_policy import DispatchPolicy
@@ -23,6 +22,8 @@ from delivery.documentation import router as documentation_router
 from delivery.health import router as health_router
 from delivery.history import history_catalogue, history_manifest
 from delivery.lab import create_lab, export_slice, lab_snapshot
+from delivery.mcp_server import create_mcp_server
+from delivery.protocol_api import agent_directory, agent_names
 from delivery.simulation import Simulation, create_run, initialize, snapshot
 from delivery.supply_api import router as supply_router
 from delivery.telemetry import instrument_fastapi, shutdown_telemetry
@@ -30,6 +31,10 @@ from delivery.telemetry_api import router as telemetry_router
 from delivery.world import DATA, World
 
 world: World
+mcp_server = create_mcp_server()
+mcp_app = mcp_server.streamable_http_app(
+    streamable_http_path="/", stateless_http=True, json_response=True,
+)
 
 
 @asynccontextmanager
@@ -37,7 +42,8 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     global world
     world = initialize()
     try:
-        yield
+        async with mcp_server.session_manager.run():
+            yield
     finally:
         shutdown_telemetry()
 
@@ -339,6 +345,14 @@ app.include_router(supply_router)
 app.include_router(health_router)
 app.include_router(documentation_router)
 app.include_router(telemetry_router)
-app.mount("/a2a/dispatcher", create_a2a_app("dispatcher"))
-app.mount("/a2a/customer_service", create_a2a_app("customer_service"))
+@app.get("/api/agents")
+def protocol_agents() -> dict[str, Any]:
+    return {"protocol": "A2A 1.0", "agents": [
+        {"id": name, "card": f"/a2a/{name}/.well-known/agent-card.json"}
+        for name in agent_names()
+    ]}
+
+
+app.mount("/a2a", agent_directory())
+app.mount("/mcp", mcp_app)
 app.mount("/static", StaticFiles(directory="web"), name="static")

@@ -4,7 +4,6 @@ import json
 import logging
 import math
 import time
-from functools import partial
 from pathlib import Path
 from typing import Any
 from uuid import uuid4
@@ -13,7 +12,8 @@ import numpy as np
 import redis
 from psycopg.types.json import Jsonb
 
-from delivery.agents import Courier, Dispatcher, resolve_complaint
+from delivery.agent_transport import AgentTransport, InProcessTransport, default_transport
+from delivery.agents import Courier, Dispatcher
 from delivery.config import settings
 from delivery.customer_service import CustomerService
 from delivery.db import Connection, connect, migrate
@@ -284,7 +284,8 @@ def snapshot(run: str | None = None, url: str | None = None) -> dict[str, Any]:
 
 class Simulation:
     def __init__(
-        self, world: World, url: str | None = None, service: CustomerService | None = None
+        self, world: World, url: str | None = None, service: CustomerService | None = None,
+        transport: AgentTransport | None = None,
     ) -> None:
         self.world = world
         self.url = url
@@ -292,24 +293,32 @@ class Simulation:
         self.dispatcher = Dispatcher(world)
         self.courier = Courier()
         self.service = service or CustomerService(url)
+        self.transport = transport or default_transport(url)
+        if isinstance(self.transport, InProcessTransport):
+            from delivery.a2a_server import QueuedAgentService
+
+            for role in ("dispatcher", "customer_service"):
+                worker = QueuedAgentService(role, url)
+                worker.world = world
+                worker.tick_customer = self.service
+                self.transport.services[role] = worker
 
     def drain(self, run: str, sim: int) -> None:
         for _ in range(500):  # hard loop bound; cycles cannot monopolize a tick
             progress = False
             for role in ("dispatcher", "courier", "customer_service", "audit"):
+                if role in {"dispatcher", "customer_service"}:
+                    receipt = self.transport.invoke(role, {
+                        "run_id": run, "entity_id": "clock", "operation": "tick",
+                    })
+                    progress = progress or receipt["progressed"]
+                    continue
                 event = self.queue.claim(role, run, sim)
                 if not event:
                     continue
                 progress = True
-                if role == "dispatcher":
-                    self.queue.process(event, self.dispatcher.handle)
-                elif role == "courier":
+                if role == "courier":
                     self.queue.process(event, self.courier.handle)
-                elif role == "customer_service":
-                    advice, source = self.service.prepare(event)
-                    self.queue.process(
-                        event, partial(resolve_complaint, advice=advice, source=source)
-                    )
                 else:
                     self.queue.process(event, lambda c, e: None)
             if not progress:

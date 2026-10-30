@@ -261,6 +261,9 @@ def run_supply(run: str, url: str | None = None) -> dict[str, Any]:
     end = config["duration_minutes"] * 60 + 7200
     clock = time.monotonic()
     sim = 0
+    from delivery.agent_transport import default_transport
+
+    transport = default_transport(url)
     try:
         agents = provision(run, url)
         for _ in range(20000):
@@ -276,6 +279,18 @@ def run_supply(run: str, url: str | None = None) -> dict[str, Any]:
             handled = False
             for item in due:
                 agent = agents.get(item["target_store"])
+                if agent and agent.role.name in {"restaurant", "dispatcher"}:
+                    name = (
+                        "restaurant-" + agent.scope.store
+                        if agent.role.name == "restaurant" else "dispatcher"
+                    )
+                    receipt = transport.invoke(name, {
+                        "run_id": run, "entity_id": agent.scope.store, "operation": "supply_tick",
+                    })
+                    if receipt["progressed"]:
+                        handled = True
+                        break
+                    continue
                 if agent and (event := agent.claim()):
                     if not agent.process(event):
                         with connect(url) as conn:
@@ -361,6 +376,34 @@ def run_supply(run: str, url: str | None = None) -> dict[str, Any]:
                 if lease_key[0] == run:
                     del CHANNEL_LEASES[lease_key]
         retire_inventory_access(run, url)
+
+
+def process_agent_message(
+    run: str, role: str, namespace: str, url: str | None = None
+) -> dict[str, Any]:
+    """Resolve server-owned identity; the sender cannot supply a lease or tools."""
+    expected = "restaurant" if role.startswith("restaurant-") else "dispatcher"
+    if role not in {"dispatcher", "restaurant-" + namespace}:
+        raise ValueError("Agent identity mismatch")
+    with connect(url) as conn:
+        row = conn.execute("SELECT status FROM runs WHERE id=%s", (run,)).fetchone()
+    if not row or row["status"] != "running":
+        raise ValueError("Unknown or closed supply run")
+    with _LOCK:
+        agent = next((a for (r, _), a in _AGENTS.items() if r == run
+                      and a.scope.store == namespace and a.role.name == expected), None)
+    if agent is None:
+        raise ValueError("Unknown provisioned agent")
+    event = agent.claim()
+    if event is None:
+        return {"progressed": False}
+    ok = agent.process(event)
+    if not ok:
+        with connect(url) as conn:
+            failed = conn.execute("SELECT state FROM events WHERE id=%s", (event.id,)).fetchone()
+        if failed and failed["state"] == "dead":
+            raise RuntimeError("SupplyDeadLetter")
+    return {"progressed": True, "processed": ok, "event_id": event.id}
 
 
 def supply_snapshot(run: str, url: str | None = None) -> dict[str, Any]:

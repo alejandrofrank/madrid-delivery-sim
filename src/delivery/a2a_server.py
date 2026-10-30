@@ -7,6 +7,7 @@ model tool calls. Customer service uses ADK's free fixture (or disabled fallback
 import asyncio
 import json
 import os
+import re
 from functools import partial
 from typing import Any, Literal
 from urllib.parse import urlsplit
@@ -34,7 +35,7 @@ from delivery.queue import Queue, publish
 from delivery.telemetry import trace_span
 from delivery.world import World
 
-AgentRole = Literal["dispatcher", "customer_service"]
+AgentRole = str
 MAX_REQUEST_BYTES = 8192
 MAX_EVENTS_PER_REQUEST = 32
 
@@ -42,6 +43,7 @@ MAX_EVENTS_PER_REQUEST = 32
 class AgentCommand(BaseModel):
     model_config = ConfigDict(extra="forbid")
     run_id: UUID
+    operation: Literal["submit", "tick", "supply_tick"] = "submit"
     entity_id: str = Field(min_length=1, max_length=80, pattern=r"^[A-Za-z0-9_.:-]+$")
 
 
@@ -51,9 +53,20 @@ class QueuedAgentService:
         self.url = url
         # Explicit fixture selection cannot inherit an ambient paid-provider setting.
         self.customer = CustomerService(url, Settings(llm_provider="offline"))
+        self.tick_customer = CustomerService(url)
         self.world: World | None = None
 
     def invoke(self, command: AgentCommand) -> dict[str, Any]:
+        if command.operation == "supply_tick":
+            from delivery.supply import process_agent_message
+
+            return process_agent_message(
+                str(command.run_id), self.role, command.entity_id, self.url
+            )
+        if command.operation == "tick":
+            return self.tick(command)
+        if self.role not in {"dispatcher", "customer_service"}:
+            raise ValueError("Restaurants require a scoped supply or replanning message")
         topic = "order.created" if self.role == "dispatcher" else "complaint.created"
         table = "orders" if self.role == "dispatcher" else "complaints"
         field = "order_id" if self.role == "dispatcher" else "complaint_id"
@@ -108,6 +121,28 @@ class QueuedAgentService:
                     queue.process(event, partial(resolve_complaint, advice=advice, source=source))
             # A concurrent worker or backoff may still own the event. Never claim completion.
             return self.receipt(command, event_id, table)
+
+    def tick(self, command: AgentCommand) -> dict[str, Any]:
+        if self.role not in {"dispatcher", "customer_service"}:
+            raise ValueError("Unknown scheduler role")
+        with connect(self.url) as conn:
+            run = conn.execute(
+                "SELECT status,sim_time FROM runs WHERE id=%s", (command.run_id,)
+            ).fetchone()
+        if not run or run["status"] in {"complete", "failed"}:
+            raise ValueError("Unknown or closed run")
+        queue = Queue(self.url)
+        event = queue.claim(self.role, command.run_id, run["sim_time"])
+        if event is None:
+            return {"progressed": False}
+        if self.role == "dispatcher":
+            if self.world is None:
+                self.world = World()
+            ok = queue.process(event, Dispatcher(self.world).handle)
+        else:
+            advice, source = self.tick_customer.prepare(event)
+            ok = queue.process(event, partial(resolve_complaint, advice=advice, source=source))
+        return {"progressed": True, "processed": ok, "event_id": event.id}
 
     def receipt(self, command: AgentCommand, event_id: int, table: str) -> dict[str, Any]:
         with connect(self.url) as conn:
@@ -192,7 +227,9 @@ def create_a2a_app(
     base_url: str | None = None,
     url: str | None = None,
 ) -> Starlette:
-    if role not in {"dispatcher", "customer_service"}:
+    if role not in {"dispatcher", "customer_service"} and not re.fullmatch(
+        r"restaurant-[a-z0-9_-]{1,80}", role
+    ):
         raise ValueError("Unknown A2A role")
     origin = (
         base_url
@@ -206,7 +243,9 @@ def create_a2a_app(
     description = (
         "Dispatch existing pending Madrid orders through the durable queue."
         if role == "dispatcher"
-        else "Classify an existing complaint with offline Google ADK; approval gates apply."
+        else "Scoped restaurant preparation, sourcing and recovery through ADK tools."
+        if role.startswith("restaurant-")
+        else "ADK customer service; policy-checked advice and proactive recovery tools."
     )
     card = AgentCard(
         name=f"Madrid {role.replace('_', ' ')}",
