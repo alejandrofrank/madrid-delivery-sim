@@ -6,6 +6,8 @@ from unittest.mock import Mock
 import psycopg
 import pytest
 from psycopg.types.json import Jsonb
+from test_adk_restaurant import adk_city as adk_city
+from test_adk_restaurant import first_call
 from test_agent_runtime import claim, request
 from test_agent_runtime import fleet as fleet
 from test_memory_profiles import record, set_profile
@@ -192,3 +194,44 @@ def test_nonsemantic_role_cannot_write_embedding_cache(db_url, fleet):
                 Jsonb([{"fact_id": written["fact_id"],
                         "embedding": FixtureEmbedder().embed(["x"])[0]}]),
             ))
+
+
+@pytest.mark.integration
+def test_adk_semantic_tool_uses_nonce_fence_and_records_actual_returned_facts(
+    adk_city, monkeypatch,
+):
+    from delivery.adk_restaurant import RestaurantTurn
+
+    city = adk_city()
+    profile = MemoryProfile(mode="semantic", ttl_seconds=60)
+    with connect(city.url) as conn:
+        conn.execute(
+            "UPDATE supply_entities SET definition=jsonb_set(definition,'{agent,memory}',%s) "
+            "WHERE run_id=%s AND kind='restaurant'", (Jsonb(profile.model_dump()), city.run),
+        )
+    agent, event = first_call(city)
+    assert agent.role.memory == profile and agent.reserve_budget(event)
+    monkeypatch.setattr("delivery.semantic_memory.LocalEmbedder", FixtureEmbedder)
+    with connect(agent.dsn) as conn:
+        receipt = conn.execute("SELECT restaurant_turn_begin(%s,%s,%s) d",
+                               (event.id, event.token, event.attempts)).fetchone()["d"]
+        written = conn.execute(
+            "SELECT agent_memory_record(%s,%s,%s,'restaurant.order',%s,60) d",
+            (event.id, event.token, event.attempts,
+             Jsonb({"status": "calling", "action": "restaurant_intake"})),
+        ).fetchone()["d"]
+    turn = RestaurantTurn(agent, event, receipt["nonce"])
+    found = turn.recall_order_memory("Did this order already contact our kitchen?")
+    assert [f["fact_id"] for f in found] == [written["fact_id"]]
+    with connect(city.url) as conn:
+        saved = conn.execute("SELECT memory FROM restaurant_turns WHERE event_id=%s",
+                             (event.id,)).fetchone()["memory"]
+        audit = conn.execute(
+            "SELECT result FROM restaurant_tool_receipts WHERE event_id=%s "
+            "AND tool='memory.semantic'", (event.id,),
+        ).fetchone()["result"]
+    assert saved == found == audit["facts"]
+    assert "contact our kitchen" not in str(audit)
+    turn.nonce = "00000000-0000-0000-0000-000000000000"
+    with pytest.raises(psycopg.errors.InsufficientPrivilege):
+        turn.recall_order_memory("old nonce")
