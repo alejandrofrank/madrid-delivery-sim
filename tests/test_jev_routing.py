@@ -41,6 +41,38 @@ def routed_city(factory, **routing):
 
 
 @pytest.mark.integration
+def test_stocked_pantry_confirms_without_supplier_or_secondary_model(adk_city, monkeypatch):
+    city = adk_city(pantry=2, brain_changes={"routing": JevRouting().model_dump()})
+    agent, event = first_call(city)
+    assert agent.reserve_budget(event)
+
+    def unexpected_supplier_lookup(self):
+        raise AssertionError("A stocked pantry must not ask for a supplier")
+
+    monkeypatch.setattr(RestaurantTurn, "find_suppliers", unexpected_supplier_lookup)
+
+    def review(request):
+        assert request["state"]["observations"]["pantry_covers_recipe"]
+        assert "supplier" not in request["questions"]
+        return answered(request, action="confirm")
+
+    assert ensure_restaurant_result(agent, event, router_reviewer=review)
+    with connect(agent.dsn) as conn:
+        agent.handle(conn, event)
+    with connect(city.url) as conn:
+        route = conn.execute(
+            "SELECT * FROM restaurant_routes WHERE event_id=%s", (event.id,)
+        ).fetchone()
+        assert route["executor"] == "jev" and route["decision"]["action"] == "confirm"
+        assert conn.execute(
+            "SELECT count(*) n FROM restaurant_model_calls WHERE event_id=%s", (event.id,)
+        ).fetchone()["n"] == 0
+        assert conn.execute(
+            "SELECT count(*) n FROM supply_requests WHERE run_id=%s", (city.run,)
+        ).fetchone()["n"] == 0
+
+
+@pytest.mark.integration
 def test_confident_jev_uses_soul_and_no_gemini(adk_city):
     city = routed_city(adk_city)
     agent, event = first_call(city)
