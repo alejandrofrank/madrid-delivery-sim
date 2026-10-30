@@ -4,6 +4,11 @@ OpenTelemetry follows a message from publication through the worker, fixed tools
 inference preparation, database effects and downstream publications. Tracing is
 disabled by default. It does not enable model calls or alter model budgets.
 
+The [observability architecture](ARCHITECTURE-OBSERVABILITY.md) describes the
+order lifecycle, native Cloud Trace exporter and optional streaming analytics.
+The Jaeger and Google collector profiles below remain supported. Use one export
+configuration per process; the legacy collector selector takes precedence when set.
+
 ## Free local Jaeger
 
 ```bash
@@ -62,18 +67,20 @@ Compose cloud override is a local opt-in demonstration, not a deployed service.
 
 ## Evidence and boundaries
 
-- `events.trace_id` remains the business correlation ID. Migration 026 adds the
-  separate `otel_traceparent` W3C envelope. The transactional insert trigger also
-  covers events emitted by fixed database tools, without modifying event payloads.
+- `events.trace_id` remains the business correlation ID. Migration 026 introduced
+  the separate W3C envelope; migration 027 reconciles both branch histories and
+  adds lease-fenced context updates. Each run and canonical order key has one
+  trace ID. SQL-produced descendants inherit the parent without payload changes.
 - Retries retain the incoming trace context and record a new attempt span. Queue
   failures produce error status without persisting exception messages to traces.
 - Decision receipts include `detail.telemetry.trace_id` and `span_id` while a
   valid span exists. `/api/telemetry/traces` returns up to 30 recent event traces.
 - Spans contain run/event IDs, topic, tool or agent name, attempt and error type.
-  They exclude prompts, model responses, event bodies, SQL, tokens and exception
+  Model spans also include measured token counts and estimated cost when known.
+  They exclude prompts, model responses, event bodies, SQL, secrets and exception
   strings. A dedicated provider avoids automatically exporting third-party ADK
   spans that may contain model input or output.
-- Export uses a bounded 512-span queue, batches of 64, a three-second timeout,
+- Export uses a bounded 2,048-span queue, batches of 256, a five-second timeout,
   and limited attributes. Collector outages can drop spans; PostgreSQL remains
   the authoritative transaction and audit record. Graceful process exit flushes
   the provider; abrupt crash injection can lose its final spans.
@@ -81,7 +88,8 @@ Compose cloud override is a local opt-in demonstration, not a deployed service.
 ## Verification
 
 Inspect the [tracer and privacy limits](../src/delivery/telemetry.py),
-[durable context migration](../sql/migrations/026_telemetry_context.sql),
+[original context migration](../sql/migrations/026_telemetry_context.sql),
+[unified context migration](../sql/migrations/027_unified_order_telemetry.sql),
 [trace API](../src/delivery/telemetry_api.py),
 [Jaeger override](../compose.tracing.yaml),
 [cloud override](../compose.tracing-gcp.yaml),

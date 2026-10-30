@@ -2,6 +2,17 @@
 
 Updated 2026-10-29. Implemented slices are identified below; remaining milestones are planned.
 
+Contract repair slice: validated Gemini function declarations and a two-correction
+receipt budget handle invented finish names and oversized explanations while
+preserving SQL authority and staged effects. Both captured failures pass offline
+ADK regression tests. Three new live cases delivered with stock/replay/isolation
+checks, including a real Jev direct confirmation with zero secondary model calls.
+Both earlier stopped probes and their costs remain retained under the same
+0.15 USD allowance. The requested-work classifier and conditional supplier recall
+keep the existing confidence/margin gates. Broader held-out routing calibration
+and invoice reconciliation remain planned; the original six-arm failures remain
+visible. See the repair verification in `docs/ADK-RESTAURANT.md`.
+
 Jev-first restaurant slice: a frozen routing policy now chooses a bounded direct
 decision or the approved Gemini executor from scoped facts, the role prompt and
 SOUL. Routine physical protocol events use no model. Durable request/result

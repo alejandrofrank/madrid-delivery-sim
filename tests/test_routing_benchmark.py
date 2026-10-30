@@ -81,6 +81,50 @@ def test_direct_proof_cannot_hide_an_offline_or_gemini_call(contracts, route):
     assert not contracts.verification_checks(case)["real_jev_direct_confirmation"]
 
 
+def test_reviewed_followup_retains_prior_reservations_and_never_repeats_gemini(
+    contracts, benchmark, profile, evidence, route
+):
+    evidence["calls"] = []
+    evidence["jev_calls"] = []
+    cost = benchmark.account_evidence(evidence, [route])["cost"]
+    previous = {
+        "status": "failed",
+        "arms": [
+            {
+                "id": "pantry-direct",
+                "status": "failed",
+                "run": "old-probe",
+                "evidence": evidence,
+                "route_decisions": [route],
+                "cost": cost,
+                "provider_calls": {"gemini": 0},
+            },
+            {"status": "planned", "run": None},
+            {"status": "planned", "run": None},
+        ],
+    }
+    budget = contracts.admission(contracts.planned_cases(profile))
+    carry = contracts.followup_budget(previous, budget)
+    assert Decimal(carry["prior_total_accounted_usd"]) >= Decimal(route["reserved_usd"])
+    changed = copy.deepcopy(previous)
+    changed["arms"][0]["cost"]["accounted_usd"] = "0"
+    with pytest.raises(PermissionError):
+        contracts.followup_budget(changed, budget)
+    next_attempt = copy.deepcopy(previous)
+    next_attempt["previous_attempt"] = previous
+    next_attempt["carryover"] = carry
+    combined = contracts.followup_budget(next_attempt, budget)
+    assert Decimal(combined["prior_jev_accounted_usd"]) == 2 * Decimal(
+        carry["prior_jev_accounted_usd"]
+    )
+    next_attempt["carryover"] = {}
+    with pytest.raises(PermissionError, match="carryover"):
+        contracts.followup_budget(next_attempt, budget)
+    previous["arms"][1].update(status="failed", run="attempted-gemini")
+    with pytest.raises(PermissionError):
+        contracts.followup_budget(previous, budget)
+
+
 @pytest.fixture
 def benchmark(monkeypatch):
     def forbidden(*args, **kwargs):

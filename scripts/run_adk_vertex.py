@@ -40,7 +40,7 @@ def main() -> None:
     parser.add_argument("--resume", action="store_true")
     parser.add_argument("--routing-comparison", action="store_true")
     parser.add_argument("--contract-verification", action="store_true")
-    parser.add_argument("--reviewed-followup", action="store_true")
+    parser.add_argument("--reviewed-followup", type=int, choices=(1, 2), nargs="?", const=1)
     parser.add_argument("--continue-planned", action="store_true")
     parser.add_argument("--reviewed-failure", action="store_true")
     args = parser.parse_args()
@@ -73,10 +73,19 @@ def main() -> None:
     if args.contract_verification:
         experiment_dir.mkdir(exist_ok=True)
         if args.reviewed_followup:
+            previous_name = (
+                "contract-followup" if args.reviewed_followup == 2 else "contract-verification"
+            )
+            next_name = "contract-final" if args.reviewed_followup == 2 else "contract-followup"
+            previous_artifact = (
+                "adk-contract-followup.json"
+                if args.reviewed_followup == 2
+                else "adk-contract-verification.json"
+            )
             if (
-                not (experiment_dir / "contract-verification.execution.json").is_file()
-                or not (demo.root / "artifacts/adk-contract-verification.json").is_file()
-                or (experiment_dir / "contract-followup.execution.json").exists()
+                not (experiment_dir / (previous_name + ".execution.json")).is_file()
+                or not (demo.root / "artifacts" / previous_artifact).is_file()
+                or (experiment_dir / (next_name + ".execution.json")).exists()
             ):
                 raise DemoError("Prior stopped evidence required; reviewed follow-up claimed once")
         elif (experiment_dir / "contract-verification.execution.json").exists() or (
@@ -192,7 +201,11 @@ def main() -> None:
                 *(["--after-review"] if args.after_review else []),
                 *(["--resume"] if args.resume else []),
                 *continuation_flags,
-                *(["--reviewed-followup"] if args.reviewed_followup else []),
+                *(
+                    ["--reviewed-followup", str(args.reviewed_followup)]
+                    if args.reviewed_followup
+                    else []
+                ),
                 env=env,
             )
         )

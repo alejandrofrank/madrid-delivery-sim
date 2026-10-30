@@ -1,14 +1,17 @@
 <!doctype html>
 <html lang="en">
   <head>
+    <link rel="stylesheet" href="/static/tokens.css?v=657eeda273de">
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Restaurant supply lab · Bakiano</title>
     <link rel="icon" href="data:," />
-    <link rel="stylesheet" href="/static/supply.css?v=26eb31fcc8c1" />
-    <link rel="stylesheet" href="/static/workspace.css?v=6c6854d75885" />
-    <script defer src="/static/workspace.js?v=887294277a47"></script>
-    <script defer src="/static/supply.js?v=4efb411fc4cc"></script>
+    <link rel="stylesheet" href="/static/supply.css?v=2a81fee96c56" />
+    <link rel="stylesheet" href="/static/workspace.css?v=ae6b1f54d770" />
+    <script defer src="/static/workspace.js?v=4163be67ea66"></script>
+    <link rel="stylesheet" href="/static/agents.css?v=641951871aa8">
+    <script defer src="/static/console.js?v=6976b690ad39"></script>
+    <script defer src="/static/supply.js?v=b0be49acdc6e"></script>
   </head>
   <body data-page="restaurants">
     <div id="workspace-shell">
@@ -31,7 +34,8 @@
         </div>
         <span class="page-context">32 × 32 city · local execution</span>
       </div>
-      <section class="toolbar" aria-label="Simulation controls">
+      <nav class="console-views" aria-label="Restaurant views"><button id="supply-operations" aria-pressed="true">Operations</button><button id="supply-simulation" aria-pressed="false">Simulation &amp; definitions</button></nav>
+      <section id="supply-controls" hidden class="toolbar" aria-label="Simulation controls">
         <button id="start-run" class="primary" disabled>
           Start simulation
         </button>
@@ -56,7 +60,7 @@
       </section>
       <p id="error" class="notice error" role="alert" hidden></p>
       <p id="notice" class="notice" role="status" hidden></p>
-      <details class="settings-panel">
+      <details id="supply-settings" hidden class="settings-panel">
         <summary>
           Next-run settings <span id="settings-summary" class="subtle"></span>
         </summary>
@@ -156,6 +160,7 @@
         aria-label="Supply network metrics"
       ></section>
       <div class="workspace">
+        <section id="supply-agents" class="live-agents" aria-label="Restaurant agents"></section>
         <section class="map-panel panel" aria-labelledby="map-title">
           <div class="panel-heading">
             <div>
@@ -176,7 +181,7 @@
               id="city-map"
               viewBox="-1.3 -1.3 33.6 33.6"
               role="group"
-              aria-label="32 by 32 city. Select a household, restaurant, or supermarket to inspect it."
+              aria-label="32 by 32 city. Arrow keys move between markers; Enter selects a household, restaurant, or supermarket."
             ></svg>
             <div class="map-key" aria-label="Map legend">
               <span><i class="key household"></i>Household</span
@@ -191,7 +196,7 @@
             ><span id="map-source">Next-run blueprint</span>
           </div>
         </section>
-        <aside class="inspector panel" aria-labelledby="inspector-title">
+        <aside id="supply-inspector" hidden class="inspector panel" aria-labelledby="inspector-title">
           <div class="panel-heading">
             <div>
               <h2 id="inspector-title">Entity inspector</h2>
@@ -205,6 +210,7 @@
               aria-label="Select an entity"
             ></select
           ></label>
+          <div class="inspector-actions"><a id="supply-trace-link" hidden>Open decision timeline ↗</a><button id="close-inspector" aria-label="Close entity inspector">Close</button></div>
           <div class="tab-row" role="tablist" aria-label="Entity views">
             <button
               id="definition-tab"

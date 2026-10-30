@@ -54,6 +54,8 @@ def route_comparison() -> FileResponse:
 
 @router.get("/api/supply/contract-verification")
 def contract_verification() -> FileResponse:
+    if os.path.isfile("artifacts/adk-contract-final.json"):
+        return FileResponse("artifacts/adk-contract-final.json", media_type="application/json")
     if os.path.isfile("artifacts/adk-contract-followup.json"):
         return FileResponse("artifacts/adk-contract-followup.json", media_type="application/json")
     if not os.path.isfile("artifacts/adk-contract-verification.json"):

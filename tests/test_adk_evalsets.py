@@ -3,6 +3,7 @@
 import asyncio
 import csv
 import os
+import shutil
 import subprocess
 import sys
 from pathlib import Path
@@ -45,6 +46,10 @@ def test_agent_evaluator_offline(agent, file, monkeypatch, tmp_path):
     ("customer_service", "customer_service.test.json"),
 ])
 def test_adk_eval_cli_offline(agent, file, tmp_path):
+    # ADK persists .adk below its application directory. Image sources are owned
+    # by root, while CI runs as an unprivileged user; never write into the repo.
+    applications = tmp_path / "applications"
+    shutil.copytree(ROOT / "evals/adk", applications, ignore=shutil.ignore_patterns(".adk"))
     # Deny sockets in the child too; SDK package installation happens before this test.
     (tmp_path / "sitecustomize.py").write_text(
         "import socket\n"
@@ -56,9 +61,9 @@ def test_adk_eval_cli_offline(agent, file, tmp_path):
                                                       str(ROOT / "src")]),
            "GOOGLE_API_KEY": "", "GEMINI_API_KEY": "", "LLM_PROVIDER": "disabled"}
     result = subprocess.run(
-        [str(Path(sys.executable).with_name("adk")), "eval", str(ROOT / "evals/adk" / agent),
-         str(ROOT / "evals/adk" / file), "--config_file_path",
-         str(ROOT / "evals/adk/test_config.json")],
+        [str(Path(sys.executable).with_name("adk")), "eval", str(applications / agent),
+         str(applications / file), "--config_file_path",
+         str(applications / "test_config.json")],
         cwd=ROOT, env=env, capture_output=True, text=True, timeout=120,
     )
     assert result.returncode == 0, result.stdout + result.stderr

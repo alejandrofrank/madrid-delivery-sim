@@ -1,42 +1,76 @@
 """Rules-only fulfillment and dispatch policies using the shared scoped tool runtime."""
 
-from typing import Any
+from __future__ import annotations
+
+from hashlib import sha256
+from typing import TYPE_CHECKING, Any, cast
 
 import networkx as nx
 
-from delivery.agent_runtime import BasketRef, ScopedTools
-from delivery.queue import Event
-from delivery.typed_memory import outcome_fact
+from delivery.dispatch_optimizer import Candidate, optimize_dispatch
+
+if TYPE_CHECKING:
+    from delivery.agent_runtime import ScopedTools
+    from delivery.queue import Event
 
 
 def route_plan(context: dict[str, Any]) -> tuple[str, list[int]]:
+    """Choose one scoped basket's quickest live-node route, with a stable fair tie.
+
+    The projection contains one job, so this is a single-job use of the shared
+    matcher. Per-basket hashes avoid permanently favoring a courier ID when
+    travel times tie; they do not claim historical workload balancing.
+    """
     graph: nx.DiGraph[int] = nx.DiGraph()
     for edge in context["roads"]["edges"]:
         if "bike" in edge["modes"]:
             graph.add_edge(edge["from"], edge["to"], weight=edge["travel_seconds"])
     job = context["job"]
-    candidates = []
+    try:
+        last = nx.shortest_path(graph, job["pickup_node"], job["customer_node"], weight="weight")
+        delivery_seconds = nx.path_weight(graph, last, weight="weight")
+        pickup_seconds, pickup_paths = cast(
+            tuple[dict[int, float], dict[int, list[int]]],
+            nx.single_source_dijkstra(
+                graph.reverse(copy=False), job["pickup_node"], weight="weight"
+            ),
+        )
+    except (nx.NetworkXNoPath, nx.NodeNotFound) as error:
+        raise ValueError("No available courier") from error
+
+    # Real scoped jobs include basket; retain support for older minimal contexts.
+    basket = str(job.get("basket", "scoped-basket"))
+    candidates: list[Candidate] = []
+    routes: dict[str, list[int]] = {}
     for courier in context["fleet"]:
         if courier["busy_basket"] is not None or courier.get("status", "active") != "active":
             continue
-        try:
-            first = nx.shortest_path(graph, courier["node"], job["pickup_node"], weight="weight")
-            last = nx.shortest_path(
-                graph, job["pickup_node"], job["customer_node"], weight="weight"
-            )
-        except (nx.NetworkXNoPath, nx.NodeNotFound):
+        if courier["node"] not in pickup_paths:
             continue
-        route = first + last[1:]
-        seconds = sum(graph[a][b]["weight"] for a, b in zip(route, route[1:], strict=False))
-        candidates.append((seconds, courier["id"], route))
-    if not candidates:
+        courier_id = str(courier["id"])
+        first = list(reversed(pickup_paths[courier["node"]]))
+        routes[courier_id] = first + last[1:]
+        rank = int.from_bytes(sha256(f"{basket}\0{courier_id}".encode()).digest()[:8], "big")
+        candidates.append(
+            Candidate(
+                basket,
+                courier_id,
+                round((pickup_seconds[courier["node"]] + delivery_seconds) * 1000),
+                rank,
+            )
+        )
+    assignments = optimize_dispatch(candidates, max_orders=1)
+    if not assignments:
         raise ValueError("No available courier")
-    _, courier_id, route = min(candidates)
-    return str(courier_id), list(route)
+    courier_id = assignments[0].courier_id
+    return courier_id, routes[courier_id]
 
 
 class WorkflowPolicy:
     def decide(self, event: Event, tools: ScopedTools) -> dict[str, Any]:
+        from delivery.agent_runtime import BasketRef
+        from delivery.typed_memory import outcome_fact
+
         if (
             (event.topic == "delivery.arrived" and "attempt" in event.payload)
             or tools.role.name in {"courier", "judge"}

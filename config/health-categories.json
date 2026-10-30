@@ -99,6 +99,9 @@
         "tests/test_fleet_recovery.py",
         "tests/test_running_city.py",
         "tests/test_simulation.py",
+        "tests/test_dispatch_optimizer.py",
+        "tests/test_economic_dispatch.py",
+        "tests/test_workflow_dispatch.py",
         "tests/test_city_expanded.py",
         "tests/test_urban_city.py"
       ]

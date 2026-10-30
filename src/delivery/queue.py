@@ -9,13 +9,12 @@ from dataclasses import dataclass
 from typing import Any
 from uuid import UUID, uuid4
 
-from opentelemetry.trace import SpanKind
 from psycopg.errors import ProgramLimitExceeded
 from psycopg.types.json import Jsonb
 
 from delivery.agent_specs import SUPPLY_ACCEPTS, SUPPLY_EMITS
 from delivery.db import Connection, connect
-from delivery.telemetry import bind_transaction, trace_span, traced_event, traced_publish
+from delivery.telemetry import active, current_traceparent, order_span, traced_event
 
 PUBLISH: dict[str, set[str]] = {
     "lab_scenario": {"basket.requested", "shipment.delayed", "reservation.expire"},
@@ -23,6 +22,7 @@ PUBLISH: dict[str, set[str]] = {
     "generator": {"order.created", "complaint.created"},
     "dispatcher": {
         "courier.assigned",
+        "courier.reposition",
         "delivery.assigned",
         "delivery.completed",
         "courier.briefed",
@@ -61,7 +61,7 @@ SUBSCRIBE: dict[str, set[str]] = {
         "recovery.requested",
     },
     "judge": {"delivery.failed"},
-    "courier": {"courier.assigned", "courier.briefed"},
+    "courier": {"courier.assigned", "courier.briefed", "courier.reposition"},
     "customer_service": {"complaint.created"},
     "audit": {"order.delivered", "complaint.resolved", "approval.requested"},
 }
@@ -91,10 +91,34 @@ class Event:
     attempts: int
     due_sim: int
     target_store: str | None = None
-    otel_traceparent: str | None = None
+    traceparent: str | None = None
+    consumer: str | None = None
+
+    @property
+    def otel_traceparent(self) -> str | None:
+        """Compatibility for the Google-stack trace inspection surface."""
+        return self.traceparent
 
 
-@traced_publish
+def persist_trace_context(conn: Connection, event: Event) -> None:
+    """Metadata only; the database enforces the same lease and identity boundary."""
+    parent = current_traceparent()
+    if parent is None:
+        return
+    scope = conn.execute("SELECT public.agent_scope() AS scope").fetchone()
+    if scope and scope["scope"]:
+        conn.execute(
+            "SELECT public.agent_trace_context(%s,%s,%s,%s)",
+            (event.id, event.token, event.attempts, parent),
+        )
+    else:
+        conn.execute(
+            "UPDATE events SET traceparent=%s WHERE id=%s AND run_id=%s AND state='leased' "
+            "AND lease_token=%s AND attempts=%s AND lease_until>clock_timestamp()",
+            (parent, event.id, event.run_id, event.token, event.attempts),
+        )
+
+
 def publish(
     conn: Connection,
     *,
@@ -111,6 +135,55 @@ def publish(
     target_store: str | None = None,
     lease_token: UUID | None = None,
     event_attempt: int | None = None,
+) -> int:
+    parent_context = None
+    if active() and parent_id is not None:
+        parent = conn.execute(
+            "SELECT traceparent FROM events WHERE id=%s AND run_id=%s AND trace_id=%s",
+            (parent_id, run_id, trace_id),
+        ).fetchone()
+        parent_context = parent["traceparent"] if parent else None
+    with order_span(
+        "queue.publish",
+        run_id=run_id,
+        order_id=trace_id,
+        traceparent=parent_context,
+        attributes={"delivery.agent": producer, "delivery.topic": topic},
+    ):
+        return _publish(
+            conn,
+            run_id=run_id,
+            producer=producer,
+            topic=topic,
+            payload=payload,
+            key=key,
+            trace_id=trace_id,
+            due_sim=due_sim,
+            priority=priority,
+            parent_id=parent_id,
+            capacity=capacity,
+            target_store=target_store,
+            lease_token=lease_token,
+            event_attempt=event_attempt,
+        )
+
+
+def _publish(
+    conn: Connection,
+    *,
+    run_id: UUID | str,
+    producer: str,
+    topic: str,
+    payload: dict[str, Any],
+    key: str,
+    trace_id: str,
+    due_sim: int,
+    priority: int,
+    parent_id: int | None,
+    capacity: int,
+    target_store: str | None,
+    lease_token: UUID | None,
+    event_attempt: int | None,
 ) -> int:
     if topic not in PUBLISH.get(producer, set()):
         raise PermissionError(f"{producer} cannot publish {topic}")
@@ -170,8 +243,8 @@ def publish(
         raise Backpressure("Queue capacity reached; retry producer after consumers drain")
     row = conn.execute(
         """INSERT INTO events(run_id,producer,topic,payload,dedupe_key,trace_id,
-           due_sim,priority,parent_id,target_store,available_at)
-           VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,'1970-01-01 UTC'::timestamptz) RETURNING id""",
+           due_sim,priority,parent_id,target_store,traceparent,available_at)
+           VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,'1970-01-01 UTC'::timestamptz) RETURNING id""",
         (
             run_id,
             producer,
@@ -183,6 +256,7 @@ def publish(
             priority,
             parent_id,
             target_store,
+            current_traceparent(),
         ),
     ).fetchone()
     assert row
@@ -249,18 +323,19 @@ class Queue:
             row["attempts"],
             row["due_sim"],
             row["target_store"],
-            row.get("otel_traceparent"),
+            row.get("traceparent"),
+            role,
         )
 
-    @traced_event("queue.process", kind=SpanKind.CONSUMER)
+    @traced_event("queue.process")
     def process(self, event: Event, handler: Callable[[Connection, Event], None]) -> bool:
         try:
             with connect(self.url) as conn:
-                bind_transaction(conn)
                 # Shared lock ordering for all writers avoids run/queue deadlocks.
                 conn.execute(
                     "SELECT pg_advisory_xact_lock(hashtextextended(%s, 0))", (str(event.run_id),)
                 )
+                persist_trace_context(conn, event)
                 scope = conn.execute("SELECT public.agent_scope() AS scope").fetchone()
                 if scope and scope["scope"]:
                     locked = conn.execute(
@@ -284,12 +359,10 @@ class Queue:
                         source["attempts"],
                         source["due_sim"],
                         source["target_store"],
-                        source.get("otel_traceparent"),
+                        source.get("traceparent"),
+                        event.consumer,
                     )
-                    with trace_span(
-                        "agent.handle", attributes={"delivery.agent": scope["scope"]["agent_id"]}
-                    ):
-                        handler(conn, current)
+                    handler(conn, current)
                     acked = conn.execute(
                         "SELECT public.agent_queue_ack(%s,%s,%s) AS acked",
                         (event.id, event.token, event.attempts),
@@ -304,15 +377,7 @@ class Queue:
                     ).fetchone()
                     if not row:
                         raise StaleLease("Worker no longer owns event")
-                    with trace_span(
-                        "agent.handle",
-                        attributes={
-                            "delivery.agent": getattr(
-                                handler, "__qualname__", type(handler).__name__
-                            )
-                        },
-                    ):
-                        handler(conn, event)
+                    handler(conn, event)
                     ack = conn.execute(
                         """UPDATE events SET state='done', completed_at=now(),
                            lease_token=NULL, lease_until=NULL WHERE id=%s
@@ -321,6 +386,8 @@ class Queue:
                     )
                     if ack.rowcount != 1:
                         raise StaleLease("Lease expired before commit")
+            if active():
+                self._record_terminal(event)
             return True
         except StaleLease:
             return False
@@ -328,6 +395,44 @@ class Queue:
             # Do not persist exception strings: provider errors may contain credentials.
             self.fail(event, type(exc).__name__)
             return False
+
+    def _record_terminal(self, event: Event) -> None:
+        # The ACK above has committed. Reporting must never reverse that outcome.
+        try:
+            with connect(self.url) as conn:
+                scope = conn.execute("SELECT public.agent_scope() AS scope").fetchone()
+                if scope and scope["scope"]:
+                    result = conn.execute(
+                        "SELECT public.agent_order_telemetry(%s) AS data", (event.id,)
+                    ).fetchone()
+                    row = result["data"] if result else None
+                else:
+                    row = conn.execute(
+                        "SELECT status, extract(epoch FROM (clock_timestamp()-(SELECT "
+                        "min(created_at) FROM events WHERE run_id=%s AND trace_id=%s)))*1000 "
+                        "AS latency FROM (SELECT status FROM supply_orders WHERE run_id=%s "
+                        "AND id=%s UNION ALL SELECT status FROM orders WHERE run_id=%s "
+                        "AND id=%s UNION ALL SELECT status FROM lab_delivery_jobs WHERE "
+                        "run_id=%s AND basket=%s) statuses "
+                        "WHERE status IN ('delivered','failed','unserved','abandoned') LIMIT 1",
+                        (event.run_id, event.trace_id) * 4,
+                    ).fetchone()
+            if not row:
+                return
+            with order_span(
+                "order.complete",
+                run_id=event.run_id,
+                order_id=event.trace_id,
+                attributes={
+                    "delivery.order.terminal": True,
+                    "delivery.order.success": row["status"] == "delivered",
+                    "delivery.order.latency_ms": float(row["latency"] or 0),
+                },
+            ):
+                pass
+        except Exception:
+            # Analytics is best-effort and independent of the durable business ACK.
+            pass
 
     def fail(self, event: Event, code: str) -> None:
         with connect(self.url) as conn:

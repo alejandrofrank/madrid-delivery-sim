@@ -1,19 +1,18 @@
 :where(body[data-page="restaurants"]) {
-  color-scheme: light;
-  --bg: var(--ui-bg, #f5f5f5);
-  --panel: var(--ui-surface, #ffffff);
-  --raised: var(--ui-surface, #ffffff);
-  --line: var(--ui-line, #d9dbde);
-  --muted: var(--ui-muted, #53565a);
-  --text: var(--ui-ink, #18191b);
-  --blue: var(--ui-accent, #c9322c);
-  --green: var(--ui-positive, #25634b);
-  --red: var(--ui-negative, #a02e2e);
-  --orange: var(--ui-warning, #855819);
-  --amber: var(--ui-warning, #855819);
+  color-scheme: dark;
+  --bg: var(--ui-bg);
+  --panel: var(--ui-surface);
+  --raised: var(--ui-surface);
+  --line: var(--ui-line);
+  --muted: var(--ui-muted);
+  --text: var(--ui-ink);
+  --blue: var(--ui-accent);
+  --green: var(--ui-positive);
+  --red: var(--ui-negative);
+  --orange: var(--ui-warning);
+  --amber: var(--ui-warning);
   font:
-    14px/1.5 Arial,
-    sans-serif;
+    14px/1.5 var(--ui-font);
   color: var(--text);
   background: var(--bg);
   margin: 0;
@@ -26,8 +25,7 @@
 :where(body[data-page="restaurants"]) textarea,
 :where(body[data-page="restaurants"]) select {
   font:
-    14px/1.5 Arial,
-    sans-serif;
+    14px/1.5 var(--ui-font);
   color: inherit;
 }
 :where(body[data-page="restaurants"]) button,
@@ -35,7 +33,7 @@
 :where(body[data-page="restaurants"]) textarea,
 :where(body[data-page="restaurants"]) select {
   border: 1px solid var(--line);
-  border-radius: 2px;
+  border-radius: var(--ui-radius);
   background: var(--raised);
 }
 :where(body[data-page="restaurants"]) button {
@@ -46,20 +44,20 @@
   font-weight: 600;
 }
 :where(body[data-page="restaurants"]) button:hover {
-  border-color: var(--ui-strong-line, #9b9fa4);
-  background: #f5f5f5;
+  border-color: var(--ui-strong-line);
+  background: var(--ui-bg);
 }
 :where(body[data-page="restaurants"]) button:disabled {
   opacity: 1;
   cursor: not-allowed;
   color: var(--muted);
-  background: #f0f0f1;
+  background: var(--ui-raised);
   border-color: var(--line);
 }
 :where(body[data-page="restaurants"]) button.primary {
   background: var(--blue);
   border-color: var(--blue);
-  color: #fff;
+  color: var(--ui-surface);
   font-weight: 600;
 }
 :where(body[data-page="restaurants"]) input,
@@ -179,19 +177,19 @@
   background: var(--panel);
   color: var(--text);
   margin: 0 0 12px;
-  border-radius: 2px;
+  border-radius: var(--ui-radius);
   white-space: pre-wrap;
   overflow-wrap: anywhere;
 }
 :where(body[data-page="restaurants"]) .notice.error {
-  background: #fbf1f0;
+  background: #352428;
   color: var(--red);
-  border-color: #ddb4b2;
+  border-color: #784c4c;
 }
 :where(body[data-page="restaurants"]) .settings-panel {
   border: 1px solid var(--line);
   background: var(--panel);
-  border-radius: 2px;
+  border-radius: var(--ui-radius);
   margin-bottom: 12px;
 }
 :where(body[data-page="restaurants"]) .settings-panel summary {
@@ -229,7 +227,7 @@
   grid-template-columns: repeat(6, minmax(0, 1fr));
   border: 1px solid var(--line);
   background: var(--panel);
-  border-radius: 2px;
+  border-radius: var(--ui-radius);
   margin: 0 0 12px;
 }
 :where(body[data-page="restaurants"]) .metric {
@@ -275,7 +273,7 @@
 :where(body[data-page="restaurants"]) .panel {
   border: 1px solid var(--line);
   background: var(--panel);
-  border-radius: 2px;
+  border-radius: var(--ui-radius);
   min-width: 0;
   overflow: hidden;
 }
@@ -319,7 +317,7 @@
   background: var(--panel);
   padding: 8px 12px;
   border: 1px solid var(--line);
-  border-radius: 2px;
+  border-radius: var(--ui-radius);
   width: fit-content;
   max-width: calc(100% - 24px);
 }
@@ -332,7 +330,7 @@
   display: inline-block;
   width: 8px;
   height: 8px;
-  border-radius: 2px;
+  border-radius: var(--ui-radius);
 }
 :where(body[data-page="restaurants"]) .key.household {
   background: var(--muted);
@@ -345,7 +343,7 @@
 }
 :where(body[data-page="restaurants"]) .key.activity {
   background: var(--blue);
-  border-radius: 2px;
+  border-radius: var(--ui-radius);
 }
 :where(body[data-page="restaurants"]) .map-empty {
   position: absolute;
@@ -370,7 +368,7 @@
   max-height: calc(100dvh - 96px);
   min-height: 0;
   overflow-y: auto;
-  scrollbar-color: var(--ui-strong-line, #9b9fa4) transparent;
+  scrollbar-color: var(--ui-strong-line) transparent;
 }
 :where(body[data-page="restaurants"]) .entity-picker {
   display: flex;
@@ -388,8 +386,8 @@
   display: inline-block;
   font-size: 12px;
   border: 1px solid var(--line);
-  background: #ffffff;
-  border-radius: 2px;
+  background: var(--ui-surface);
+  border-radius: var(--ui-radius);
   padding: 4px 8px;
   white-space: nowrap;
   color: var(--muted);
@@ -508,7 +506,7 @@
   max-height: 440px;
   overflow: auto;
   padding: 0 16px 16px;
-  scrollbar-color: var(--ui-strong-line, #9b9fa4) transparent;
+  scrollbar-color: var(--ui-strong-line) transparent;
 }
 :where(body[data-page="restaurants"]) .evidence-content:has(table) {
   padding-top: 8px;
@@ -521,8 +519,8 @@
 :where(body[data-page="restaurants"]) .count {
   font-size: 12px;
   margin-left: 4px;
-  border-radius: 2px;
-  background: #ececed;
+  border-radius: var(--ui-radius);
+  background: var(--ui-hover);
   padding: 2px 4px;
   color: var(--muted);
   font-family: var(
@@ -579,9 +577,9 @@
   display: inline-block;
   border: 1px solid var(--line);
   color: var(--muted);
-  background: #ffffff;
+  background: var(--ui-surface);
   padding: 4px 8px;
-  border-radius: 2px;
+  border-radius: var(--ui-radius);
   font-size: 12px;
   white-space: nowrap;
   font-family: var(
@@ -593,18 +591,18 @@
   );
 }
 :where(body[data-page="restaurants"]) .state.good {
-  border-color: #b8cec2;
-  background: #f0f6f2;
+  border-color: #3a6961;
+  background: var(--ui-accent-soft);
   color: var(--green);
 }
 :where(body[data-page="restaurants"]) .state.bad {
-  border-color: #ddb4b2;
-  background: #fbf1f0;
+  border-color: #784c4c;
+  background: #352428;
   color: var(--red);
 }
 :where(body[data-page="restaurants"]) .state.pending {
-  border-color: #d8c5a6;
-  background: #fbf6ed;
+  border-color: #75613e;
+  background: #302a20;
   color: var(--orange);
 }
 :where(body[data-page="restaurants"]) .empty {
@@ -654,9 +652,9 @@
 :where(body[data-page="restaurants"]) pre {
   white-space: pre-wrap;
   overflow-wrap: anywhere;
-  background: #f5f5f5;
+  background: var(--ui-bg);
   border: 1px solid var(--line);
-  border-radius: 2px;
+  border-radius: var(--ui-radius);
   padding: 8px;
   font: 12px/1.6
     var(--ui-mono, ui-monospace, SFMono-Regular, Consolas, monospace);
@@ -688,11 +686,11 @@
   gap: 1px;
   background: var(--line);
   border: 1px solid var(--line);
-  border-radius: 2px;
+  border-radius: var(--ui-radius);
   overflow: hidden;
 }
 :where(body[data-page="restaurants"]) .stat-list div {
-  background: #f5f5f5;
+  background: var(--ui-bg);
   padding: 8px;
 }
 :where(body[data-page="restaurants"]) .stat-list dt {
@@ -758,7 +756,7 @@
   font-size: 0.58px;
   font-weight: 600;
   letter-spacing: 0.09px;
-  fill: #6a6e73;
+  fill: var(--ui-muted);
   pointer-events: none;
 }
 :where(body[data-page="restaurants"]) svg .activity-route {
@@ -957,8 +955,8 @@
   margin: 0 16px 16px;
   padding: 12px 12px 12px;
   border: 1px solid var(--line);
-  border-radius: 2px;
-  background: #ffffff;
+  border-radius: var(--ui-radius);
+  background: var(--ui-surface);
 }
 :where(body[data-page="restaurants"]) .search-heading {
   display: flex;
@@ -1038,7 +1036,7 @@
   color: var(--text);
 }
 :where(body[data-page="restaurants"]) .metric.metric-action:hover {
-  background: #f5f5f5;
+  background: var(--ui-bg);
 }
 :where(body[data-page="restaurants"]) .metric.metric-action:focus-visible {
   outline-offset: -3px;
@@ -1060,9 +1058,9 @@
 }
 :where(body[data-page="restaurants"]) .order-record {
   border: 1px solid var(--line);
-  border-radius: 2px;
+  border-radius: var(--ui-radius);
   margin-bottom: 8px;
-  background: #ffffff;
+  background: var(--ui-surface);
 }
 :where(body[data-page="restaurants"]) .order-summary {
   display: grid;
@@ -1079,7 +1077,7 @@
   display: none;
 }
 :where(body[data-page="restaurants"]) .order-summary:hover {
-  background: #f5f5f5;
+  background: var(--ui-bg);
 }
 :where(body[data-page="restaurants"]) .order-disclosure {
   font-size: 22px;
@@ -1118,7 +1116,7 @@
 :where(body[data-page="restaurants"]) .order-history {
   border-top: 1px solid var(--line);
   padding: 16px;
-  background: #ffffff;
+  background: var(--ui-surface);
   overflow-wrap: anywhere;
 }
 :where(body[data-page="restaurants"]) .order-history-heading {
@@ -1165,9 +1163,9 @@
 :where(body[data-page="restaurants"]) .order-outcome,
 :where(body[data-page="restaurants"]) .order-memory-note {
   padding: 8px 12px;
-  background: #fbf6ed;
-  border: 1px solid #d8c5a6;
-  border-radius: 2px;
+  background: #302a20;
+  border: 1px solid #75613e;
+  border-radius: var(--ui-radius);
   margin-top: 12px;
   font-size: 12px;
   color: var(--orange);
@@ -1227,7 +1225,7 @@
   top: 0;
   z-index: 2;
   flex-wrap: wrap;
-  background: #ffffff;
+  background: var(--ui-surface);
   padding: 8px 0;
   border-bottom: 1px solid var(--line);
 }
@@ -1272,8 +1270,8 @@
   place-items: center;
   width: 34px;
   height: 34px;
-  border-radius: 2px;
-  background: #f5f5f5;
+  border-radius: var(--ui-radius);
+  background: var(--ui-bg);
   color: var(--muted);
   border: 1px solid var(--line);
   font-size: 12px;
@@ -1281,8 +1279,8 @@
 }
 :where(body[data-page="restaurants"]) .chat-bubble {
   border: 1px solid var(--line);
-  background: #ffffff;
-  border-radius: 2px;
+  background: var(--ui-surface);
+  border-radius: var(--ui-radius);
   padding: 12px 16px;
   min-width: 0;
 }
@@ -1290,29 +1288,29 @@
   margin-left: 32px;
 }
 :where(body[data-page="restaurants"]) .chat-household .chat-avatar {
-  background: #f5f5f5;
+  background: var(--ui-bg);
   border-color: var(--line);
 }
 :where(body[data-page="restaurants"]) .chat-household .chat-bubble {
-  background: #f5f5f5;
+  background: var(--ui-bg);
   border-color: var(--line);
 }
 :where(body[data-page="restaurants"]) .chat-market .chat-avatar {
-  background: #f0f6f2;
-  border-color: #b8cec2;
+  background: var(--ui-accent-soft);
+  border-color: #3a6961;
   color: var(--green);
 }
 :where(body[data-page="restaurants"]) .chat-restaurant .chat-avatar {
-  background: #fbf6ed;
-  border-color: #d8c5a6;
+  background: #302a20;
+  border-color: #75613e;
   color: var(--orange);
 }
 :where(body[data-page="restaurants"]) .chat-system .chat-bubble {
-  background: #ffffff;
+  background: var(--ui-surface);
   border-style: dashed;
 }
 :where(body[data-page="restaurants"]) .chat-system .chat-avatar {
-  border-radius: 2px;
+  border-radius: var(--ui-radius);
   color: var(--muted);
 }
 :where(body[data-page="restaurants"]) .chat-system-event {
@@ -1405,10 +1403,10 @@
   margin: 8px 0 0;
 }
 :where(body[data-page="restaurants"]) .chat-memory {
-  border: 1px solid #b8cec2;
-  border-left: 2px solid var(--green);
-  border-radius: 2px;
-  background: #f0f6f2;
+  border: 1px solid #3a6961;
+  border-left: 1px solid var(--green);
+  border-radius: var(--ui-radius);
+  background: var(--ui-accent-soft);
   padding: 12px 12px;
   margin-top: 12px;
   font-size: 12px;
@@ -1422,9 +1420,9 @@
   font-weight: 600;
 }
 :where(body[data-page="restaurants"]) .chat-memory.memory-unknown {
-  border-color: #d8c5a6;
+  border-color: #75613e;
   border-left-color: var(--orange);
-  background: #fbf6ed;
+  background: #302a20;
   border-left-width: 2px;
 }
 :where(body[data-page="restaurants"]) .chat-memory.memory-unknown > strong {
@@ -1432,7 +1430,7 @@
 }
 :where(body[data-page="restaurants"]) .chat-memory.memory-unchanged {
   border-color: var(--line);
-  border-left-color: var(--ui-strong-line, #9b9fa4);
+  border-left-color: var(--ui-strong-line);
   background: var(--bg);
   border-left-width: 2px;
 }
@@ -1575,3 +1573,28 @@
     flex: 1;
   }
 }
+
+/* The network and its agents stay together; definitions open on request. */
+.console-views {display:flex;gap:6px;border-bottom:1px solid var(--line);padding:0 0 10px;margin-bottom:16px}
+.console-views button {background:transparent;border-color:transparent}
+.console-views button[aria-pressed="true"] {background:var(--ui-raised);border-color:var(--ui-strong-line);color:var(--ui-ink)}
+[hidden] {display:none!important}
+.metrics {grid-template-columns:repeat(4,minmax(0,1fr));margin:16px 0}
+.workspace {display:grid;grid-template-columns:minmax(340px,.9fr) minmax(0,1.1fr);gap:16px;align-items:start}
+#supply-agents {grid-column:1;grid-row:1}
+#supply-agents .roster-list {height:452px}
+.map-panel {grid-column:2;grid-row:1}
+.map-wrap {height:530px;min-height:0;background:var(--bg)}
+#city-map {height:100%;width:100%}
+#supply-inspector {grid-column:1/-1;max-height:none}
+.inspector-actions {display:flex;justify-content:space-between;align-items:center;padding:12px 16px;border-bottom:1px solid var(--line)}
+.editor-form {max-width:900px}
+.entity-label {fill:var(--ui-ink);stroke:var(--bg)}
+.district-label {fill:var(--muted)}
+.activity-route {stroke:var(--ui-accent)}
+.activity-dot {fill:var(--ui-accent)}
+.selected-ring {stroke:var(--ui-accent);fill:none}
+.key.household,.key.restaurant,.key.market {background:var(--muted)}
+.key.activity {background:var(--ui-accent)}
+@media(max-width:900px) {.workspace{grid-template-columns:minmax(0,1fr)}#supply-agents,.map-panel,#supply-inspector{grid-column:1;grid-row:auto}.map-wrap{height:430px}#supply-agents .roster-list{height:320px}}
+@media(max-width:520px) {.metrics{grid-template-columns:repeat(2,minmax(0,1fr))}.console-views{flex-wrap:wrap}}

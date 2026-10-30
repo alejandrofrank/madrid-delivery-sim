@@ -227,8 +227,16 @@ def followup_budget(previous: dict, budget: dict) -> dict:
     accounting = account_evidence(first["evidence"], first["route_decisions"])["cost"]
     if first["cost"] != accounting or first["provider_calls"]["gemini"] != 0:
         raise PermissionError("Prior raw receipts and accounting must remain intact")
-    prior_jev = Decimal(accounting["jev_accounted_usd"])
-    prior_total = Decimal(accounting["accounted_usd"])
+    historical = previous.get("previous_attempt")
+    carry = followup_budget(historical, budget) if historical else {}
+    if historical and previous.get("carryover") != carry:
+        raise PermissionError("The earlier attempt's carryover cannot be dropped")
+    prior_jev = Decimal(accounting["jev_accounted_usd"]) + Decimal(
+        carry.get("prior_jev_accounted_usd", "0")
+    )
+    prior_total = Decimal(accounting["accounted_usd"]) + Decimal(
+        carry.get("prior_total_accounted_usd", "0")
+    )
     if (
         prior_jev + Decimal(budget["jev_conservative_admission_usd"]) > JEV_CAP
         or prior_total + Decimal(budget["combined_conservative_admission_usd"]) > TOTAL_CAP
@@ -281,19 +289,27 @@ def update(receipt: dict, final: bool = False) -> None:
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--paid", action="store_true", required=True)
-    parser.add_argument("--reviewed-followup", action="store_true")
+    parser.add_argument("--reviewed-followup", type=int, choices=(1, 2), nargs="?", const=1)
     args = parser.parse_args()
     profile = approved_profile()
     cases = planned_cases(profile)
     budget = admission(cases)
     root = Path(__file__).resolve().parents[1]
     original = root / "artifacts/adk-contract-verification.json"
-    output = root / "artifacts/adk-contract-followup.json" if args.reviewed_followup else original
+    if args.reviewed_followup == 2:
+        original = root / "artifacts/adk-contract-followup.json"
+        output = root / "artifacts/adk-contract-final.json"
+    else:
+        output = (
+            root / "artifacts/adk-contract-followup.json" if args.reviewed_followup else original
+        )
     directory = Path(os.environ.get("DELIVERY_ADK_EXPERIMENT_DIRECTORY", ""))
     if not directory.is_absolute() or not directory.is_dir():
         raise PermissionError("Dedicated operator experiment-marker mount required")
     marker = directory / (
-        "contract-followup.execution.json"
+        "contract-final.execution.json"
+        if args.reviewed_followup == 2
+        else "contract-followup.execution.json"
         if args.reviewed_followup
         else "contract-verification.execution.json"
     )
@@ -315,7 +331,7 @@ def main() -> None:
         receipt["carryover"] = followup_budget(previous, budget)
         receipt["previous_attempt"] = previous
         receipt["previous_attempt_sha256"] = hashlib.sha256(previous_bytes).hexdigest()
-        receipt["reviewed_followup"] = True
+        receipt["reviewed_followup"] = args.reviewed_followup
     with marker.open("x", encoding="utf-8") as lock:
         json.dump(
             {"created_at": receipt["created_at"], "budget": budget, "receipt": str(output)}, lock

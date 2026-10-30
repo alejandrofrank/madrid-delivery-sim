@@ -13,6 +13,8 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "src"))
 
+from delivery.eval_analytics import export_model_report, export_scenarios  # noqa: E402
+from delivery.eval_gate import collection_failed  # noqa: E402
 from delivery.health_report import atomic_write_json, source_fingerprint, utc_now  # noqa: E402
 from delivery.scenario_evals import evaluate, require_local_test_database  # noqa: E402
 from delivery.scenario_report import (  # noqa: E402
@@ -31,9 +33,15 @@ def main() -> int:
     parser.add_argument("--suite", choices=("scenarios", "adk", "all"), default="scenarios")
     parser.add_argument("--output", type=Path, default=ROOT / "artifacts/evals/candidate.json")
     parser.add_argument("--baseline", type=Path)
+    parser.add_argument(
+        "--record-only", action="store_true",
+        help="Defer model quality failures to the statistical gate; execution/golden errors fail",
+    )
     options = parser.parse_args()
     if not 1 <= options.repeat <= 100:
         parser.error("--repeat must be between 1 and 100")
+    if options.record_only and options.suite == "scenarios":
+        parser.error("--record-only requires --suite adk or --suite all")
     model_failed = False
     if options.suite in {"adk", "all"}:
         from delivery.model_evals import evaluate_model_arms
@@ -53,6 +61,7 @@ def main() -> int:
             except (OSError, subprocess.CalledProcessError):
                 revision = "unversioned-local-run"
         report["source_revision"] = revision
+        report["created_at"] = utc_now()
         if options.baseline:
             from delivery.eval_gate import compare_reports, load_thresholds
 
@@ -60,7 +69,8 @@ def main() -> int:
                 json.loads(options.baseline.read_text()), report, load_thresholds()
             )
         atomic_write_json(options.output, report)
-        model_failed = any(not r["passed"] for r in report["rows"] + report["golden"])
+        export_model_report(report)
+        model_failed = collection_failed(report, record_only=options.record_only)
         print(json.dumps(report["arms"], indent=2))
         if options.suite == "adk":
             return int(model_failed)
@@ -111,6 +121,7 @@ def main() -> int:
         receipt = validate_receipt(report, manifest)
         result = summarize(manifest, receipt)
         atomic_write_json(ROOT / "artifacts/health/latest-scenarios.json", report)
+    export_scenarios(manifest, receipt)
     for role in result["roles"]:
         print(
             f"{role['name']}: {role['score']}% · "

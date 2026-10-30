@@ -452,3 +452,28 @@ def test_contract_rejection_requires_own_completed_live_model_turn(adk_city):
                 "SELECT restaurant_contract_reject(%s,%s,%s,%s,'finish_decision','summary_length')",
                 (event.id, event.token, event.attempts, nonce),
             )
+
+
+@pytest.mark.integration
+def test_stocked_pantry_router_omits_irrelevant_supplier_tool_and_question(adk_city):
+    city = adk_city(pantry=2, brain_changes={"routing": JevRouting().model_dump()})
+    agent, event = first_call(city)
+    assert agent.reserve_budget(event)
+    with connect(agent.dsn) as conn:
+        nonce = conn.execute(
+            "SELECT restaurant_turn_begin(%s,%s,%s) d", (event.id, event.token, event.attempts)
+        ).fetchone()["d"]["nonce"]
+    turn = RestaurantTurn(agent, event, nonce)
+    request = decision_request(turn, turn.read_order())
+    assert set(request["questions"]) == {"executor", "action"}
+    assert request["state"]["observations"]["pantry_covers_recipe"] is True
+    assert request["state"]["observations"]["suppliers"] == []
+    with connect(city.url) as conn:
+        assert (
+            conn.execute(
+                "SELECT count(*) n FROM restaurant_tool_receipts "
+                "WHERE event_id=%s AND tool='restaurant.suppliers'",
+                (event.id,),
+            ).fetchone()["n"]
+            == 0
+        )

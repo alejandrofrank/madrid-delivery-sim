@@ -1,6 +1,7 @@
 <!doctype html>
 <html lang="en">
   <head>
+    <link rel="stylesheet" href="/static/tokens.css?v=657eeda273de">
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
     <meta
@@ -10,9 +11,9 @@
     <meta name="referrer" content="no-referrer" />
     <title>Architecture · Bakiano engineering</title>
     <link rel="icon" href="data:," />
-    <link rel="stylesheet" href="/static/documentation.css?v=e4ac101a667c" />
-    <link rel="stylesheet" href="/static/workspace.css?v=6c6854d75885" />
-    <script defer src="/static/workspace.js?v=887294277a47"></script>
+    <link rel="stylesheet" href="/static/documentation.css?v=be7d05a4d77a" />
+    <link rel="stylesheet" href="/static/workspace.css?v=ae6b1f54d770" />
+    <script defer src="/static/workspace.js?v=4163be67ea66"></script>
     <script
       defer
       src="/static/vendor/documentation/marked.umd.js?v=9eb730d2362a"
@@ -21,7 +22,7 @@
       defer
       src="/static/vendor/documentation/purify.min.js?v=cd37898f9782"
     ></script>
-    <script defer src="/static/documentation.js?v=5271b06f2d6c"></script>
+    <script defer src="/static/documentation.js?v=f32fdc883d9d"></script>
   </head>
   <body data-page="architecture">
     <div id="workspace-shell">
@@ -41,7 +42,7 @@
     <div class="layout">
       <aside class="sidebar" aria-label="Documentation navigation">
         <div class="sidebar-heading">
-          <span>TECHNICAL REFERENCE</span
+          <span>Topics</span
           ><button
             id="toggle-topics"
             aria-expanded="false"
@@ -69,7 +70,6 @@
           </div>
           <header class="chapter-header">
             <div>
-              <div class="eyebrow" id="chapter-number"></div>
               <h1 id="chapter-title"></h1>
               <p id="chapter-summary"></p>
             </div>
@@ -89,6 +89,16 @@
             receipts retain their dates.
             <a href="/health">Inspect local health evidence ↗</a>
           </div>
+          <section id="request-flow" class="request-flow is-playing" aria-labelledby="request-flow-title">
+            <div class="flow-heading"><h2 id="request-flow-title">From demand to a recorded decision</h2><button id="replay-flow" aria-label="Replay the request lifecycle animation">Replay flow</button></div>
+            <p>Illustrated lifecycle · every handoff goes through the durable queue.</p>
+            <div class="flow-stages">
+              <button data-component="city"><span class="flow-stage-icon">1</span><strong>Request</strong><small>World event</small></button>
+              <button data-component="postgres"><span class="flow-stage-icon">2</span><strong>Queue</strong><small>Claim and lease</small></button>
+              <button data-component="agents"><span class="flow-stage-icon">3</span><strong>Agent</strong><small>Scoped tools</small></button>
+              <button data-component="postgres"><span class="flow-stage-icon">4</span><strong>Commit</strong><small>Facts and receipt</small></button>
+            </div>
+          </section>
           <section
             id="system-explorer"
             class="explorer"
@@ -97,7 +107,6 @@
           >
             <div class="explorer-heading">
               <div>
-                <span class="eyebrow">SYSTEM INDEX</span>
                 <h2 id="explorer-title">Inspect a component</h2>
               </div>
               <span class="legend"
@@ -159,7 +168,7 @@
         </div>
       </main>
       <aside class="on-this-page">
-        <span class="eyebrow">ON THIS PAGE</span>
+        <span class="contents-title">On this page</span>
         <nav id="table-of-contents" aria-label="On this page"></nav>
         <div class="evidence-link">
           <strong>Read the evidence</strong>

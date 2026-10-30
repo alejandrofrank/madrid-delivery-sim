@@ -68,19 +68,21 @@
     parent.append(box);
   }
   function modelCall(parent, call, name) {
-    const box = node("details", undefined, "call");
-    box.append(node("summary", `Call ${call.step ?? "—"} · ${time(call.started_at)} · ${call.latency_ms ?? "?"} ms · ${usd(call.usage_cost_usd)} · ${call.usage?.prompt_token_count ?? "?"} input tokens`));
+    const box = node("article", undefined, "call timeline-step");
+    box.append(node("h4", `Call ${call.step ?? "—"} · ${time(call.started_at)} · ${call.latency_ms ?? "?"} ms · ${usd(call.usage_cost_usd)} · ${call.usage?.prompt_token_count ?? "?"} input tokens`));
+    const details = node("details", undefined, "step-detail");
+    details.append(node("summary", "Inspect model request and response"));
+    box.append(details); parent.append(box);
     const request = call.request_body;
     if (request) {
-      disclosure(box, "System prompt + SOUL", request.config?.system_instruction);
-      for (const content of list(request.contents)) chat(box, content, `${content.role || "Message"} · before call ${call.step ?? "—"}`);
-      disclosure(box, "Declared tools and generation settings", request.config);
-    } else box.append(node("p", "No saved model request body."));
-    if (call.response_body) chat(box, call.response_body, `${name} · ${time(call.completed_at)} · model response`);
-    else box.append(node("p", "No saved model response body."));
-    disclosure(box, "Provider usage / request fingerprint", {state: call.state, usage: call.usage, request_hash: call.request_hash, reserved_usd: call.reserved_usd});
-    disclosure(box, "Complete model call receipt", call);
-    parent.append(box);
+      disclosure(details, "System prompt + SOUL", request.config?.system_instruction);
+      for (const content of list(request.contents)) chat(details, content, `${content.role || "Message"} · before call ${call.step ?? "—"}`);
+      disclosure(details, "Declared tools and generation settings", request.config);
+    } else details.append(node("p", "No saved model request body."));
+    if (call.response_body) chat(details, call.response_body, `${name} · ${time(call.completed_at)} · model response`);
+    else details.append(node("p", "No saved model response body."));
+    disclosure(details, "Provider usage / request fingerprint", {state: call.state, usage: call.usage, request_hash: call.request_hash, reserved_usd: call.reserved_usd});
+    disclosure(details, "Complete model call receipt", call);
   }
   function selectedMemory(parent, memory, mode) {
     if (mode === "none") parent.append(node("p", "Recall is disabled. Retained audit facts remain inspectable."));
@@ -243,6 +245,14 @@
     }
     comparisonDeltas(outcomes, data);
     if (data.budget) disclosure(outcomes, "Frozen comparison admission ceilings and accounted usage", {budget: data.budget, accounting: data.accounting});
+    if (prefix === "contract" && data.previous_attempt) {
+      let known = 0, attempts = 0, cursor = data;
+      while (cursor) {
+        known += list(cursor.arms).reduce((sum, arm) => sum + Number(arm.cost?.total_usd || 0), 0);
+        attempts += 1; cursor = cursor.previous_attempt;
+      }
+      outcomes.append(node("p", `${attempts} retained attempts · cumulative known token cost ${usd(known)} · conservative accounting ${usd(data.accounting?.total_accounted_usd)} · shared cap ${usd(data.budget?.total_ceiling_usd)}. Includes stopped probes; invoice reconciliation pending.`, "note"));
+    }
     for (const arm of arms) {
       const section = node("section", undefined, "profile route-profile"), header = node("div", undefined, "profile-header");
       header.append(node("h3", `${arm.label || arm.id || "Unnamed arm"}${arm.soul ? ` · ${arm.soul} SOUL` : ""}`));
@@ -263,6 +273,73 @@
     if (data.previous_attempt) disclosure(traces, "Earlier verification attempt · retained failure and accounted cost", data.previous_attempt);
     outcomes.append(node("p", "Costs use retained provider usage and the recorded tariff. Missing usage is unknown. Provider medians use measured Gemini and Jev router calls; older aggregate search timings are shown separately. Baseline and cascade provider mixes may differ. This page makes no model calls.", "note"));
   }
+
+  let liveSteps = [];
+  const traceParams = new URLSearchParams(location.search);
+  const source = traceParams.get('source'), run = traceParams.get('run'), agent = traceParams.get('agent');
+  const stepTime = value => Number.isFinite(Number(value)) && value != null ? 'T+' + Number(value).toFixed(0) + 's' : 'Time not recorded';
+  function stepTitle(record) { return label(record.action || record.tool || record.name || record.topic || record.kind || 'Recorded step'); }
+  function stepSummary(record) {
+    const value = record.detail?.rule || record.detail?.reason || record.detail?.summary || record.reason || record.summary || record.result?.summary || record.state;
+    return typeof value === 'string' ? value : 'Inspect the retained inputs and result below.';
+  }
+  function stepElement(step, index) {
+    const item = node('li', undefined, 'timeline-step');
+    item.dataset.kind = step.kind;
+    const head = node('div', undefined, 'step-heading');
+    head.append(node('span', String(index + 1).padStart(2,'0'), 'step-number'), node('span', label(step.kind), 'step-kind'), node('h3', step.title));
+    const meta = node('div', undefined, 'step-meta');
+    meta.append(node('span', stepTime(step.sim)), node('span', 'Latency · ' + milliseconds(step.latency)), node('span', 'Cost · ' + usd(step.cost)));
+    item.append(head, meta, node('p', step.summary, 'step-summary'));
+    disclosure(item, 'Inspect inputs and result', step.record);
+    return item;
+  }
+  function renderLiveSteps() {
+    const kind = document.getElementById('trace-kind').value;
+    const shown = liveSteps.filter(step => kind === 'all' || step.kind === kind);
+    const listNode = document.getElementById('live-timeline');
+    listNode.replaceChildren(...shown.map(stepElement));
+    if (liveSteps.length && !shown.length) listNode.append(node('li','No recorded steps match this filter.','trace-empty'));
+    document.getElementById('trace-empty').hidden = liveSteps.length > 0;
+  }
+  async function readTrace(path) {
+    const response = await fetch(path, {cache:'no-store'});
+    if (!response.ok) throw new Error(response.status === 404 ? 'This run or agent is no longer available.' : 'Trace could not be loaded (' + response.status + '). Refresh to retry.');
+    return response.json();
+  }
+  async function loadLiveTrace() {
+    if (!run || !agent || !['madrid','delivery','supply'].includes(source)) return;
+    const context = document.getElementById('live-trace-context');
+    context.textContent = 'Loading ' + agent + '…';
+    try {
+      const prefix = source === 'madrid' ? '/api/runs/' : source === 'delivery' ? '/api/lab/delivery-runs/' : '/api/supply/runs/';
+      const data = await readTrace(prefix + encodeURIComponent(run) + (source === 'madrid' ? '/trace?courier=' + encodeURIComponent(agent) : source === 'supply' ? '/evidence' : ''));
+      const belongs = item => source === 'madrid' || item.agent === agent || item.agent_id === agent || item.actor === agent;
+      const decisions = list(data.decisions).filter(belongs);
+      liveSteps = [];
+      for (const decision of decisions) {
+        liveSteps.push({kind:'decision',title:stepTitle(decision),summary:stepSummary(decision),sim:decision.sim_time,latency:decision.latency_ms,cost:decision.usage_cost_usd,record:decision});
+        for (const tool of list(decision.detail?.tool_receipts ?? decision.detail?.tool_calls ?? decision.detail?.tools)) {
+          if (typeof tool === 'string') {
+            liveSteps.push({kind:'tool',title:tool,summary:'Committed tool recorded in ' + stepTitle(decision) + '. Individual input/output was not retained.',sim:decision.sim_time,latency:null,cost:null,record:{tool,event_id:decision.event_id,decision_id:decision.id,observed_state:decision.detail?.observed_state}});
+            continue;
+          }
+          if (!tool || typeof tool !== 'object') continue;
+          liveSteps.push({kind:'tool',title:stepTitle(tool),summary:stepSummary(tool),sim:decision.sim_time,latency:tool.latency_ms ?? tool.duration_ms,cost:tool.usage_cost_usd,record:tool});
+        }
+      }
+      for (const call of list(data.model_calls).filter(belongs)) liveSteps.push({kind:'model',title:call.model || 'Model call',summary:call.state || 'Recorded model response',sim:call.sim_time,latency:call.latency_ms,cost:call.usage_cost_usd,record:call});
+      liveSteps.sort((a,b) => Number(a.sim || 0) - Number(b.sim || 0));
+      context.textContent = agent + ' · ' + source + ' · run ' + run.slice(0,8);
+      const measured = liveSteps.filter(s => Number.isFinite(s.latency));
+      const costs = liveSteps.filter(s => Number.isFinite(s.cost));
+      const summary = document.getElementById('trace-summary');
+      summary.replaceChildren(node('span',liveSteps.length + ' recorded steps'),node('span',measured.length ? 'p95 step latency · ' + percentile(measured.map(s=>({latency_ms:s.latency})),.95) : 'Step latency not recorded'),node('span',costs.length === liveSteps.length && costs.length ? 'Recorded cost · ' + usd(costs.reduce((sum,s)=>sum+s.cost,0)) : 'Step cost not recorded'));
+      renderLiveSteps();
+      if (!liveSteps.length) document.getElementById('trace-empty').querySelector('h3').textContent = 'No decisions recorded for this agent yet';
+    } catch (error) { context.textContent = error.message; }
+  }
+  document.getElementById('trace-kind').addEventListener('change', renderLiveSteps);
   async function loadModelComparison() {
     try {
       const response = await fetch("/api/supply/model-comparison", {cache:"no-store"});
@@ -289,7 +366,7 @@
   }
   async function load() {
     const refresh = document.getElementById("refresh"); refresh.disabled = true;
-    try { await Promise.allSettled([loadModelComparison(), loadRoutingComparison(), loadContractVerification()]); }
+    try { await Promise.allSettled([loadLiveTrace(), loadModelComparison(), loadRoutingComparison(), loadContractVerification()]); }
     finally { refresh.disabled = false; }
   }
   document.getElementById("refresh").addEventListener("click",load);load();

@@ -16,9 +16,11 @@ def recent_traces() -> dict[str, Any]:
         conn.execute("SET TRANSACTION READ ONLY")
         rows = conn.execute(
             """SELECT run_id::text AS run_id, trace_id AS correlation_id,
-            split_part(otel_traceparent,'-',2) AS trace_id, count(*) AS events,
-            max(id) AS last_event_id FROM events WHERE otel_traceparent IS NOT NULL
-            GROUP BY run_id,trace_id,split_part(otel_traceparent,'-',2)
+            split_part(coalesce(traceparent,otel_traceparent),'-',2) AS trace_id,
+            count(*) AS events,
+            max(id) AS last_event_id FROM events
+            WHERE coalesce(traceparent,otel_traceparent) IS NOT NULL
+            GROUP BY run_id,trace_id,split_part(coalesce(traceparent,otel_traceparent),'-',2)
             ORDER BY max(id) DESC LIMIT 30"""
         ).fetchall()
     return {

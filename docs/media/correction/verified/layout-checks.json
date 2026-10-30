@@ -1,0 +1,94 @@
+{
+  "capturedAt": "2026-10-29T18:26:39.256Z",
+  "checks": [
+    {
+      "check": "projection after two frames and visible cartography",
+      "width": 1536,
+      "errorX": 1.446096575818956e-10,
+      "errorY": 0.05409055269126384
+    },
+    {
+      "check": "projection after two frames and visible cartography",
+      "width": 1280,
+      "errorX": -9.242739906767383e-11,
+      "errorY": 0.038247796638984255
+    },
+    {
+      "check": "projection after two frames and visible cartography",
+      "width": 390,
+      "errorX": 0,
+      "errorY": 0.04548455187023137
+    },
+    {
+      "check": "projection after two frames and visible cartography",
+      "width": 1536,
+      "errorX": 1.446096575818956e-10,
+      "errorY": 0.05409055269126384
+    },
+    {
+      "check": "projection after two frames and visible cartography",
+      "width": 1036,
+      "errorX": 0,
+      "errorY": 0.5454845518895581
+    },
+    {
+      "check": "simulation / operations projection",
+      "pass": true
+    },
+    {
+      "check": "native ledger density",
+      "sixthRowBottom": 1007.09375,
+      "mapHeight": 458
+    },
+    {
+      "check": "Delivery map toolbar",
+      "width": 390,
+      "tools": {
+        "x": 17,
+        "y": 1284.015625,
+        "width": 356,
+        "height": 49,
+        "top": 1284.015625,
+        "right": 373,
+        "bottom": 1333.015625,
+        "left": 17
+      },
+      "filters": {
+        "x": 17,
+        "y": 1169.015625,
+        "width": 356,
+        "height": 115,
+        "top": 1169.015625,
+        "right": 373,
+        "bottom": 1284.015625,
+        "left": 17
+      },
+      "overflow": false
+    },
+    {
+      "check": "Delivery map toolbar",
+      "width": 320,
+      "tools": {
+        "x": 17,
+        "y": 1388.75,
+        "width": 286,
+        "height": 49,
+        "top": 1388.75,
+        "right": 303,
+        "bottom": 1437.75,
+        "left": 17
+      },
+      "filters": {
+        "x": 17,
+        "y": 1273.75,
+        "width": 286,
+        "height": 115,
+        "top": 1273.75,
+        "right": 303,
+        "bottom": 1388.75,
+        "left": 17
+      },
+      "overflow": false
+    }
+  ]
+}

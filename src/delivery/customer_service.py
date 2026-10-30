@@ -58,7 +58,7 @@ class CustomerService:
 
         return asyncio.run(run_customer_advice(self.config, complaint))
 
-    @traced_event("agent.customer_service.prepare")
+    @traced_event("agent.customer_service", agent="customer_service")
     def prepare(self, event: Event) -> tuple[Advice, str]:
         """Call outside handler transaction. A crash consumes its reservation permanently.
 

@@ -1,0 +1,16 @@
+{
+  "capturedAt": "2026-10-29T17:48:50.605Z",
+  "initial": {
+    "features": 424,
+    "run": "b0195b8f-35e8-453c-b308-c86ee0ded9ea",
+    "status": "complete"
+  },
+  "liveRun": "6f595af8-dddc-45c7-878f-4f1364296191",
+  "checks": [
+    "Local city cartography has rendered features; no external resources; completed orders and 320px empty state; keyboard map pan",
+    "Free live session: selected row, real route animation, trace link, observed history, desktop/laptop/mobile",
+    "Chromium emulated touch: pan and legend toggle (physical device not tested)"
+  ],
+  "failures": [],
+  "external": []
+}

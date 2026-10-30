@@ -20,13 +20,21 @@ from google.adk.models.llm_response import LlmResponse
 from google.adk.runners import Runner
 from google.adk.sessions import InMemorySessionService
 from google.genai import types
+from opentelemetry.trace import Span, Status, StatusCode
 from psycopg.types.json import Jsonb
 from pydantic import BaseModel, ConfigDict, Field
 
 from delivery.adk_contracts import effective_instructions
 from delivery.db import connect
 from delivery.queue import Event
-from delivery.telemetry import trace_span, traced_event
+from delivery.telemetry import (
+    mark_error,
+    record_model_usage,
+    start_span,
+    trace_span,
+    traced_event,
+    traced_tool,
+)
 
 if TYPE_CHECKING:
     from delivery.agent_runtime import LocalAgent
@@ -62,6 +70,7 @@ class RestaurantTurn:
         self.pending_step: int | None = None
         self.model_started: float | None = None
         self.declared_tool_names: frozenset[str] = frozenset()
+        self.model_span: Span | None = None
 
     def sql(self, function: str, *args: Any) -> Any:
         # Function names are literals in this module, never model arguments.
@@ -75,13 +84,14 @@ class RestaurantTurn:
             return row["data"]
 
     def invoke(self, name: str, arguments: dict[str, Any] | None = None) -> Any:
-        if self.plan is not None:
-            raise PermissionError("Decision already finished")
-        if name not in self.brain.tools:
-            raise PermissionError("Capability is not enabled by the frozen template")
         with trace_span(
-            "agent.tool", attributes={"delivery.tool": name, "delivery.agent": "restaurant"}
+            "agent.capability",
+            attributes={"delivery.agent": "restaurant", "delivery.capability": name},
         ):
+            if self.plan is not None:
+                raise PermissionError("Decision already finished")
+            if name not in self.brain.tools:
+                raise PermissionError("Capability is not enabled by the frozen template")
             return self.sql("restaurant_tool", name, Jsonb(arguments or {}))
 
     def read_order(self) -> dict[str, Any]:
@@ -202,6 +212,15 @@ class RestaurantTurn:
         )
         self.sql("restaurant_model_trace", self.pending_step, Jsonb(json.loads(body)), None, None)
         self.model_started = time.monotonic()
+        self.model_span = start_span(
+            "agent.model",
+            {
+                "delivery.agent": "restaurant",
+                "gen_ai.system": self.brain.provider,
+                "gen_ai.request.model": self.brain.vertex.model if self.brain.vertex else "offline",
+                "delivery.model_step": self.pending_step,
+            },
+        )
         self.fault("before_adk_model")
 
     def after_model(self, callback_context: CallbackContext, llm_response: LlmResponse) -> None:
@@ -218,6 +237,20 @@ class RestaurantTurn:
         }
         if usage is not None:
             receipt.update(usage.model_dump(mode="json", exclude_none=True))
+        if self.model_span is not None:
+            profile = self.brain.vertex
+            record_model_usage(
+                self.model_span,
+                usage,
+                profile.input_usd_per_million if profile else 0.0,
+                profile.output_usd_per_million if profile else 0.0,
+            )
+            self.model_span.set_attribute("delivery.success", not bool(llm_response.error_code))
+            if llm_response.error_code:
+                self.model_span.set_attribute("error.type", "ModelResponseError")
+                self.model_span.set_status(Status(StatusCode.ERROR))
+            self.model_span.end()
+            self.model_span = None
         self.sql(
             "restaurant_model_trace",
             self.pending_step,
@@ -258,7 +291,7 @@ class RestaurantTurn:
             name="restaurant",
             model=model,
             instruction=lambda _: effective_instructions(self.brain, self.agent.role.soul),
-            tools=[tool for tool in tools],
+            tools=[traced_tool("restaurant")(tool) for tool in tools],
             before_model_callback=self.before_model,
             after_model_callback=self.after_model,
             before_tool_callback=self.before_tool,
@@ -281,6 +314,19 @@ class RestaurantTurn:
         )
 
     def before_tool(
+        self, tool: Any, args: dict[str, Any], tool_context: Any
+    ) -> dict[str, Any] | None:
+        try:
+            return self._before_tool(tool, args, tool_context)
+        except Exception:
+            # Validation rejects before the normal tool wrapper can run.
+            with trace_span(
+                "agent.tool",
+                attributes={"delivery.agent": "restaurant", "delivery.tool": tool.name},
+            ):
+                raise
+
+    def _before_tool(
         self, tool: Any, args: dict[str, Any], tool_context: Any
     ) -> dict[str, Any] | None:
         del tool_context
@@ -308,7 +354,17 @@ class RestaurantTurn:
         if tool.name not in fields:
             if set(args) - {"summary"} or any(type(value) is not str for value in args.values()):
                 raise PermissionError("Unknown tool cannot carry scope or arbitrary arguments")
-            return dict(self.sql("restaurant_contract_reject", tool.name, "unknown_tool"))
+            with trace_span(
+                "agent.tool",
+                attributes={
+                    "delivery.agent": "restaurant",
+                    "delivery.tool": tool.name,
+                    "delivery.success": False,
+                    "error.type": "UnknownTool",
+                },
+            ) as span:
+                span.set_status(Status(StatusCode.ERROR))
+                return dict(self.sql("restaurant_contract_reject", tool.name, "unknown_tool"))
         if set(args) != fields[tool.name] or any(type(value) is not str for value in args.values()):
             raise PermissionError("Tool arguments cannot alter scope or schema")
         return None
@@ -357,7 +413,7 @@ class RestaurantTurn:
         return self.plan
 
 
-@traced_event("agent.restaurant.inference")
+@traced_event("agent.restaurant")
 def ensure_restaurant_result(
     agent: "LocalAgent",
     event: Event,
@@ -403,5 +459,11 @@ def ensure_restaurant_result(
         turn.fault("after_adk_save")
         return True
     except Exception as exc:
+        if turn.model_span is not None:
+            mark_error(turn.model_span, exc)
         turn.sql("restaurant_turn_save", None, type(exc).__name__)
         raise
+    finally:
+        if turn.model_span is not None:
+            turn.model_span.end()
+            turn.model_span = None

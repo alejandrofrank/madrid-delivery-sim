@@ -14,8 +14,8 @@ from pydantic import BaseModel, ConfigDict, Field
 from delivery.agent_specs import RoleSpec
 from delivery.db import Connection, connect
 from delivery.inventory import receive, release, reserve
-from delivery.queue import Event, Queue, publish
-from delivery.telemetry import trace_fields, trace_span, traced_event
+from delivery.queue import Event, Queue, persist_trace_context, publish
+from delivery.telemetry import active, trace_fields, trace_span, traced_event
 
 
 class BasketRequest(BaseModel):
@@ -81,6 +81,12 @@ class ScopedTools:
         self.sim = int(row["sim"])
 
     def invoke(self, name: str, **arguments: Any) -> Any:
+        with trace_span(
+            "agent.tool", attributes={"delivery.agent": self.role.name, "delivery.tool": name}
+        ):
+            return self._invoke(name, **arguments)
+
+    def _invoke(self, name: str, **arguments: Any) -> Any:
         if name not in self.role.tools:
             raise PermissionError("Tool is not granted to this role")
         for key in ("run", "run_id", "store", "owner", "namespace", "agent_id"):
@@ -122,10 +128,7 @@ class ScopedTools:
             if not consumed or not consumed["consumed"]:
                 raise BudgetExceeded("Reserved tool slots exhausted")
         self.calls.append(name)
-        with trace_span(
-            "agent.tool", attributes={"delivery.tool": name, "delivery.agent": self.role.name}
-        ):
-            return registry[name](**arguments)
+        return registry[name](**arguments)
 
     def _json_command(self, query: str, parameters: tuple[Any, ...]) -> dict[str, Any]:
         row = self.__conn.execute(query, parameters).fetchone()
@@ -560,6 +563,9 @@ class LocalAgent:
         if not self.reserve_budget(event):
             Queue(self.dsn).fail(event, "BudgetExceeded")
             return False
+        if active():
+            with connect(self.dsn) as conn:
+                persist_trace_context(conn, event)
         if self.role.policy == "gcp_ai":
             try:
                 if not ensure_result(self, event, fault=fault):

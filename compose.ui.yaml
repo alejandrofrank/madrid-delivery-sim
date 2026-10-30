@@ -1,0 +1,10 @@
+services:
+  postgres:
+    ports: !override ["127.0.0.1:55439:5432"]
+  redis:
+    ports: !override ["127.0.0.1:56389:6379"]
+  app:
+    ports: !override ["127.0.0.1:8021:8000"]
+    volumes:
+      - ./web:/app/web:ro
+      - ./docs:/app/docs:ro

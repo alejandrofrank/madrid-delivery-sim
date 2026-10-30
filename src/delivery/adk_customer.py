@@ -20,6 +20,7 @@ from google.adk.runners import Runner
 from google.adk.sessions import InMemorySessionService
 from google.genai import types
 from google.oauth2.credentials import Credentials
+from opentelemetry.trace import Span
 
 from delivery.adk_offline import OfflineCustomerModel as OfflineCustomerModel
 from delivery.config import Settings
@@ -30,6 +31,7 @@ from delivery.customer_service import (
     Advice,
     complaint_prompt,
 )
+from delivery.telemetry import mark_error, record_model_usage, start_span, trace_span
 
 
 def create_customer_model(config: Settings) -> BaseLlm:
@@ -74,6 +76,7 @@ class CustomerAdviceTurn:
         self.calls = 0
         self.advice: Advice | None = None
         self.usage: types.GenerateContentResponseUsageMetadata | None = None
+        self.model_span: Span | None = None
 
     def before_model(self, callback_context: CallbackContext, llm_request: LlmRequest) -> None:
         del callback_context
@@ -101,8 +104,42 @@ class CustomerAdviceTurn:
         if len(body) > RESERVED_TOKENS - MAX_OUTPUT:
             raise ValueError("ADK request exceeds its existing input token reservation")
         self.calls += 1
+        self.model_span = start_span(
+            "agent.model",
+            {
+                "delivery.agent": "customer_service",
+                "gen_ai.system": self.config.llm_provider,
+                "gen_ai.request.model": "offline"
+                if self.config.llm_provider == "offline"
+                else self.config.llm_model,
+            },
+        )
 
     def after_model(self, callback_context: CallbackContext, llm_response: LlmResponse) -> None:
+        if llm_response.partial:
+            return
+        try:
+            if self.model_span is not None:
+                offline = self.config.llm_provider == "offline"
+                record_model_usage(
+                    self.model_span,
+                    llm_response.usage_metadata,
+                    0.0 if offline else self.config.llm_input_usd_per_million,
+                    0.0 if offline else self.config.llm_output_usd_per_million,
+                )
+            self._after_model(callback_context, llm_response)
+            if self.model_span is not None:
+                self.model_span.set_attribute("delivery.success", True)
+        except BaseException as exc:
+            if self.model_span is not None:
+                mark_error(self.model_span, exc)
+            raise
+        finally:
+            if self.model_span is not None:
+                self.model_span.end()
+                self.model_span = None
+
+    def _after_model(self, callback_context: CallbackContext, llm_response: LlmResponse) -> None:
         del callback_context
         if llm_response.partial:
             return
@@ -135,6 +172,21 @@ class CustomerAdviceTurn:
         )
 
     async def run(self, model: BaseLlm, complaint: dict[str, Any]) -> tuple[Advice, int, float]:
+        with trace_span(
+            "agent.customer_service", attributes={"delivery.agent": "customer_service"}
+        ):
+            try:
+                return await self._run(model, complaint)
+            except BaseException as exc:
+                if self.model_span is not None:
+                    mark_error(self.model_span, exc)
+                raise
+            finally:
+                if self.model_span is not None:
+                    self.model_span.end()
+                    self.model_span = None
+
+    async def _run(self, model: BaseLlm, complaint: dict[str, Any]) -> tuple[Advice, int, float]:
         service = InMemorySessionService()
         session = await service.create_session(app_name="bakiano_customer", user_id="customer")
         runner = Runner(

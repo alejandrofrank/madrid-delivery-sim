@@ -1,6 +1,6 @@
 "use strict";
 const $ = id => document.getElementById(id);
-let live = null, evidence = null, runId = "", activeStore = "", polling = false;
+let live = null, evidence = null, runId = new URLSearchParams(location.search).get("run") || "", activeStore = "", polling = false;
 let drawnCity = "";
 let catalogueChosen = false;
 const productKey = p => `${p.source}:${p.listing_id}`;
@@ -37,16 +37,16 @@ function drawCity(state) {
   const padding = 200 * scale;
   svg.setAttribute("viewBox", `${minX-padding} ${minY-padding} ${maxX-minX+2*padding} ${maxY-minY+2*padding}`);
   function label(x, y, text, anchor = "start") {
-    return shape("text", {x,y,"text-anchor":anchor,style:`font-size:${40*scale}px;paint-order:stroke;stroke:#ffffff;stroke-width:${8*scale}px;stroke-linejoin:round`}, text);
+    return shape("text", {x,y,"text-anchor":anchor,style:`font-size:${40*scale}px;paint-order:stroke;stroke:#101518;fill:#e7edf0;stroke-width:${8*scale}px;stroke-linejoin:round`}, text);
   }
   state.city.edges.forEach(edge => {
     const a = nodes.get(edge.from), b = nodes.get(edge.to);
-    svg.append(shape("line", {x1:a.x,y1:a.y,x2:b.x,y2:b.y,stroke:"#c4cad0","stroke-width":6*scale}));
+    svg.append(shape("line", {x1:a.x,y1:a.y,x2:b.x,y2:b.y,stroke:"#3c515b","stroke-width":6*scale}));
   });
   state.city.stores.forEach(store => {
     const point = nodes.get(store.node);
     const group = shape("g", {class:"store",tabindex:0,role:"button","aria-label":`Inspect ${store.name}`});
-    group.append(shape("circle", {cx:point.x,cy:point.y,r:24*scale,fill:store.id===activeStore?"#c9322c":"#3d596c"}));
+    group.append(shape("circle", {cx:point.x,cy:point.y,r:24*scale,fill:store.id===activeStore?"#63d5c5":"#a8b7c0"}));
     const anchor = point.x > (minX+maxX)/2 ? "end" : "start";
     group.append(label(point.x, point.y-45*scale, store.name, anchor));
     function choose() { activeStore = store.id; render(); }
@@ -56,13 +56,15 @@ function drawCity(state) {
   });
   state.city.facilities.forEach(facility => {
     const point = nodes.get(facility.node);
-    svg.append(shape("rect", {x:point.x-15*scale,y:point.y-15*scale,width:30*scale,height:30*scale,fill:"#818b95"}));
+    svg.append(shape("rect", {x:point.x-15*scale,y:point.y-15*scale,width:30*scale,height:30*scale,fill:"#81949f"}));
     const anchor = point.x > (minX+maxX)/2 ? "end" : "start";
     svg.append(label(point.x+(anchor === "end" ? -30 : 30)*scale, point.y+15*scale, facility.kind, anchor));
   });
 }
 function render() {
   if (!live?.run) return;
+  $("inventory-empty").hidden = true;
+  $("store").disabled = false;
   const checkpoint = $("checkpoint").value;
   const state = checkpoint === "live" ? live : evidence?.checkpoints[Number(checkpoint)]?.state || live;
   const products = new Map(state.catalogue.products.map(p => [productKey(p),p]));

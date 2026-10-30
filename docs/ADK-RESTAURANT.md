@@ -286,9 +286,11 @@ The execution path is:
    restaurant's current recipe, required pantry rows, public supplier quotes and
    selected current-order memory. Household identity, raw call transcript, other
    orders and supermarket stock are omitted from Jev's request.
-3. One Jev request evaluates three independent typed choices against those facts,
-   the editable role prompt and SOUL: direct versus Gemini, permitted action, and
-   quoted supplier versus abstention. It cannot invent tool names, models or URLs.
+3. One Jev request classifies requested work (finite action/factual receipt versus
+   explicit reasoning), the permitted action, and, when sourcing is needed, a
+   quoted supplier versus abstention. A stocked-pantry call omits both the supplier
+   lookup and its irrelevant question. The editable role prompt and SOUL remain
+   inputs. Jev cannot invent tool names, models or URLs.
 4. Direct action requires confidence at least **0.85**, top-to-second probability
    margin at least **0.20** on every relevant question, valid response shape and
    locally supported evidence. Stock sufficiency, replacement consent and tool
@@ -453,6 +455,52 @@ Sources: [correction admission and receipt function](../sql/migrations/025_adk_c
 [bounded live verifier](../scripts/verify_adk_contracts.py).
 Official references: [Google function-calling modes](https://docs.cloud.google.com/gemini-enterprise-agent-platform/models/tools/function-calling),
 [ADK tool callback responses](https://adk.dev/callbacks/types-of-callbacks/).
+
+### Repair verification: 2026-10-29
+
+All three new cases passed with real Jev and Vertex. The earlier failed six-arm
+comparison remains unchanged and visible below this verification in the UI.
+
+| Case | Jev / Gemini calls | Known token cost | Router latency / run wall time | Outcome |
+| --- | --- | --- | --- | --- |
+| Iris, stocked pantry | 1 / 0 | 0.000048216 USD | 172 ms / 4.783 s | Jev selected direct confirmation; one delivered meal |
+| Mateo, procurement tradeoff | 1 / 6 | 0.002603334 USD | 154 ms / 12.123 s | Gemini chose market-b and saved a valid short explanation |
+| Elena, speed tradeoff | 1 / 6 | 0.002854914 USD | 174 ms / 12.490 s | Gemini chose market-a and saved a valid short explanation |
+
+The exact router latencies and per-call measurements are retained in
+`docs/evidence/adk-contract-verification.json`; the UI's provider-mix median is a
+different measurement. Iris's real response selected both `direct` and `confirm`
+with probability/confidence 1.0. Her run contains no offline or Vertex model
+dispatches, no supplier lookup and no supplier selection question. The one-token
+secondary-model fence remained in place. SQL enforced physical pantry sufficiency,
+and the confirm/cook flow completed through twelve queue events.
+
+Both Gemini cases used `VALIDATED` declared functions and produced legal finish
+summaries without needing a correction. Offline ADK regression tests separately
+replayed the actual invented-name and 574-character failures and verified bounded
+correction, unchanged staged effects, exhausted correction denial and role/lease
+isolation. Every live case denied raw stock, model-ledger and router-ledger reads
+through its active restaurant login and passed stock, queue and replay checks.
+
+Two earlier Jev-only probes stopped at confidence 0.82 and 0.72, with no secondary
+model dispatch. They exposed a broad self-assessment question and unrelated
+supplier context. The final revision classifies the requested kind of work and
+retrieves supplier context only when relevant. It keeps the 0.85 confidence and
+0.20 margin gates. Each follow-up required review, a new configuration/run and a
+permanent marker; prior raw receipts and conservative reservations carry forward.
+No failed request was resent or overwritten.
+
+Across all three attempts, known token cost was **0.005610540 USD** and conservative
+accounting was **0.06073198 USD**, below the shared **0.15 USD** cap. Final-attempt
+usage alone was 0.005506464 USD. These are frozen-tariff calculations, with invoice
+reconciliation pending. Billing was disabled afterward through the guarded
+Terraform plan; the project and fifteen free foundation resources remain, with
+no Cloud Run service or billable runtime in state. The local evidence preview has
+no Jev key, ADC mount or paid Vertex gate.
+
+This is a three-order repair smoke check. It establishes a real direct Jev
+decision for this stocked-pantry case; it does not establish held-out quality,
+production calibration, broad savings or automatic recovery of uncertain calls.
 
 Official deployment references: [Gemini model lifecycle](https://docs.cloud.google.com/gemini-enterprise-agent-platform/models/model-versions),
 [3.5 Flash-Lite capabilities](https://docs.cloud.google.com/gemini-enterprise-agent-platform/models/gemini/3-5-flash-lite),

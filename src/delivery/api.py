@@ -18,12 +18,14 @@ from starlette.responses import Response
 from delivery.a2a_server import create_a2a_app
 from delivery.city_config import CitySettings
 from delivery.db import connect
+from delivery.dispatch_policy import DispatchPolicy
 from delivery.documentation import router as documentation_router
 from delivery.health import router as health_router
 from delivery.history import history_catalogue, history_manifest
 from delivery.lab import create_lab, export_slice, lab_snapshot
 from delivery.simulation import Simulation, create_run, initialize, snapshot
 from delivery.supply_api import router as supply_router
+from delivery.telemetry import instrument_fastapi, shutdown_telemetry
 from delivery.telemetry_api import router as telemetry_router
 from delivery.world import DATA, World
 
@@ -34,10 +36,14 @@ world: World
 async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     global world
     world = initialize()
-    yield
+    try:
+        yield
+    finally:
+        shutdown_telemetry()
 
 
 app = FastAPI(title="Madrid Delivery Sim", lifespan=lifespan)
+instrument_fastapi(app)
 
 
 class StartLab(BaseModel):
@@ -246,6 +252,7 @@ async def local_mutations(
 class StartRun(BaseModel):
     seed: int = Field(default=42, ge=0, le=2**31 - 1)
     wall_seconds: int = Field(default=600, ge=0, le=3600)
+    dispatch: DispatchPolicy = Field(default_factory=DispatchPolicy)
 
 
 def run_background(run: str) -> None:
@@ -289,7 +296,7 @@ def runs() -> list[dict[str, Any]]:
 
 @app.post("/api/runs", status_code=202)
 def start(body: StartRun, tasks: BackgroundTasks) -> dict[str, str]:
-    run = create_run(world, body.seed, body.wall_seconds)
+    run = create_run(world, body.seed, body.wall_seconds, dispatch=body.dispatch)
     tasks.add_task(run_background, run)
     return {"id": run}
 

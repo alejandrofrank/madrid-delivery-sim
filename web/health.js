@@ -166,7 +166,7 @@ function renderSummary() {
   metrics.append(
     metric(
       "Capability regressions",
-      `${caps.length} / ${evidence.capabilities.length}`,
+      run ? `${caps.length} / ${evidence.capabilities.length}` : "Not measured",
       "Selected checks · overlapping categories",
       run
         ? effectiveStatus(

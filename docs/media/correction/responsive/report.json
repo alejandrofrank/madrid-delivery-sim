@@ -1,0 +1,46 @@
+{
+  "base": "http://127.0.0.1:8021",
+  "phase": "after",
+  "capturedAt": "2026-10-29T17:43:28.778Z",
+  "results": [
+    {
+      "page": "madrid",
+      "route": "/",
+      "run": null,
+      "size": "desktop",
+      "status": 200,
+      "horizontalOverflow": false,
+      "width": 1440,
+      "title": "Madrid operations · Bakiano",
+      "heading": "Madrid operations",
+      "unlabeledControls": [],
+      "errors": []
+    },
+    {
+      "page": "madrid",
+      "route": "/",
+      "run": null,
+      "size": "laptop",
+      "status": 200,
+      "horizontalOverflow": false,
+      "width": 1280,
+      "title": "Madrid operations · Bakiano",
+      "heading": "Madrid operations",
+      "unlabeledControls": [],
+      "errors": []
+    },
+    {
+      "page": "madrid",
+      "route": "/",
+      "run": null,
+      "size": "mobile",
+      "status": 200,
+      "horizontalOverflow": false,
+      "width": 390,
+      "title": "Madrid operations · Bakiano",
+      "heading": "Madrid operations",
+      "unlabeledControls": [],
+      "errors": []
+    }
+  ]
+}

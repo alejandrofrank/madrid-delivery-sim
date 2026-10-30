@@ -21,7 +21,7 @@ variable "bigquery_location" {
 }
 
 resource "google_project_service" "bigquery" {
-  count              = var.enable_bigquery ? 1 : 0
+  count              = var.enable_bigquery || var.enable_analytics ? 1 : 0
   project            = google_project.ai.project_id
   service            = "bigquery.googleapis.com"
   disable_on_destroy = false
@@ -40,6 +40,10 @@ resource "google_bigquery_dataset" "analytics" {
     precondition {
       condition     = var.enable_billing
       error_message = "Analytics requires explicit billing opt-in. Remove analytics while billing is enabled before parking."
+    }
+    precondition {
+      condition     = !var.enable_analytics || var.bigquery_dataset_id != "mds_analytics"
+      error_message = "Receipt exports and streaming observability require distinct dataset IDs; mds_analytics belongs to streaming observability."
     }
   }
   depends_on = [google_project_service.bigquery]

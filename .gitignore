@@ -33,3 +33,7 @@ codex_run.log
 
 # ADK local evaluation histories are artifacts, not fixtures.
 .adk/
+
+# Isolated UI development
+.venv-ui/
+.impeccable/cache/
