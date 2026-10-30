@@ -28,8 +28,9 @@ memory hit, Agent Card or caller-provided role cannot grant a permission.
 
 Deployment federation must restrict the GitHub repository and owner by immutable
 IDs, the main branch and the deployment workflow. The CI identity may upload images
-to this application's repository and update its pre-provisioned Cloud Run
-services. It may act as only the attached application identities. It does not
+to this application's repository and update only its pre-provisioned public replay
+service. It may act as only the replay identity. It cannot wake an absent service,
+read Terraform state, change the spending cap or promote the private workers. It does not
 receive project-owner, IAM-admin, billing-admin or service-account-key creation
 rights. Infrastructure changes require the separate Terraform operator.
 
@@ -37,6 +38,13 @@ Local development retains its existing loopback controls and in-process transpor
 Production starts through `delivery.production:create_app`; explicitly selecting
 live mode without an HTTPS audience and operator policy fails closed. The live
 API also installs its boundary when its original module is started directly.
+
+The public replay has been deployed and removed after verification. Private live
+workers remain disabled: role-specific Cloud IAM is implemented, but the local
+lab's dynamic SQL identity provisioning still needs a least-privilege controller
+bootstrap. Do not place the database owner's DSN into runtime secrets or grant
+runtime logins CREATEROLE, unrestricted role administration or blanket RLS bypass.
+`live_ready=false` is the default until that boundary is implemented and qualified.
 
 References: [Google agent authentication](https://docs.cloud.google.com/run/docs/ai/authenticate-agents)
 and [deployment federation](https://docs.cloud.google.com/iam/docs/workload-identity-federation-with-deployment-pipelines).

@@ -1,0 +1,11 @@
+project_id = "madrid-delivery-sim-YOUR-SUFFIX"
+billing_account = "YOUR-BILLING-ACCOUNT"
+region = "europe-west1"
+active = false
+monthly_budget = 4
+budget_currency = "EUR"
+alert_email = "YOUR-OPERATOR-EMAIL"
+enable_live = false
+enable_vector_search = false
+live_ready = false
+operator_principals = []

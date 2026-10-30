@@ -27,6 +27,7 @@ COPY infra/gcp-ai/STATE-MIGRATION.md ./infra/gcp-ai/
 COPY infra/gcp-ai/sql ./infra/gcp-ai/sql
 COPY infra/gcp-ai/schemas ./infra/gcp-ai/schemas
 COPY infra/gcp-ai/tests ./infra/gcp-ai/tests
+COPY infra/production ./infra/production
 COPY compose*.yml compose*.yaml AGENTS.md ./
 COPY scripts ./scripts
 COPY Makefile Dockerfile ./

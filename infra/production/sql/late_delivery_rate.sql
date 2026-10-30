@@ -4,6 +4,7 @@ WITH latest AS (
   QUALIFY ROW_NUMBER() OVER (PARTITION BY event_id ORDER BY observed_at DESC) = 1
 )
 SELECT run_id, COUNT(*) AS attempted_orders, COUNTIF(delivered) AS delivered_orders,
+  COUNTIF(delivered AND late IS NOT NULL) AS known_deadline_deliveries,
   COUNTIF(late) AS late_deliveries,
   SAFE_DIVIDE(COUNTIF(late), COUNTIF(delivered AND late IS NOT NULL)) AS late_delivery_rate,
   SAFE_DIVIDE(COUNTIF(NOT delivered), COUNT(*)) AS lost_order_rate
