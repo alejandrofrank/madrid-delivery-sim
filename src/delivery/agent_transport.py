@@ -39,10 +39,13 @@ class InProcessTransport:
 
 class A2ATransport:
     def __init__(
-        self, base_url: str, *, http_transport: httpx.AsyncBaseTransport | None = None
+        self, base_url: str, *, http_transport: httpx.AsyncBaseTransport | None = None,
+        endpoints: dict[str, str] | None = None, authenticated: bool = False,
     ) -> None:
         self.base_url = base_url.rstrip("/")
         self.http_transport = http_transport
+        self.endpoints = endpoints or {}
+        self.authenticated = authenticated
 
     def invoke(self, agent: str, command: dict[str, Any]) -> dict[str, Any]:
         return asyncio.run(self.send(agent, command))
@@ -50,11 +53,27 @@ class A2ATransport:
     async def send(self, agent: str, command: dict[str, Any]) -> dict[str, Any]:
         if not agent or any(c not in "abcdefghijklmnopqrstuvwxyz0123456789_-" for c in agent):
             raise ValueError("Invalid agent identifier")
-        endpoint = f"{self.base_url}/a2a/{agent}"
-        async with httpx.AsyncClient(transport=self.http_transport, timeout=60) as http:
+        from delivery.production_auth import role_for_agent
+
+        origin = self.endpoints.get(role_for_agent(agent), self.base_url).rstrip("/")
+        headers = {}
+        if self.authenticated:
+            if not origin.startswith("https://"):
+                raise ValueError("Authenticated A2A requires HTTPS")
+            from google.auth.transport.requests import Request
+            from google.oauth2.id_token import fetch_id_token
+
+            token = await asyncio.to_thread(fetch_id_token, Request(), origin)
+            headers = {"Authorization": f"Bearer {token}",
+                       "X-Serverless-Authorization": f"Bearer {token}"}
+        endpoint = f"{origin}/a2a/{agent}"
+        async with httpx.AsyncClient(
+            transport=self.http_transport, timeout=60, headers=headers, follow_redirects=False
+        ) as http:
             card = await A2ACardResolver(http, endpoint).get_agent_card()
             # Cards are discovery data, not authority to redirect to arbitrary hosts.
-            advertised = os.environ.get("DELIVERY_A2A_BASE_URL", self.base_url).rstrip("/")
+            advertised = (origin if self.authenticated else
+                          os.environ.get("DELIVERY_A2A_BASE_URL", self.base_url).rstrip("/"))
             public_endpoint = f"{advertised}/a2a/{agent}"
             if not any(
                 i.url.rstrip("/") in {endpoint, public_endpoint}
@@ -94,4 +113,8 @@ def default_transport(url: str | None = None) -> AgentTransport:
         return InProcessTransport(url)
     if os.environ.get("DELIVERY_AGENT_TRANSPORT") != "a2a":
         raise ValueError("Unknown agent transport")
-    return A2ATransport(os.environ.get("DELIVERY_A2A_INTERNAL_URL", "http://127.0.0.1:8000"))
+    return A2ATransport(
+        os.environ.get("DELIVERY_A2A_INTERNAL_URL", "http://127.0.0.1:8000"),
+        endpoints=json.loads(os.environ.get("DELIVERY_A2A_ENDPOINTS", "{}")),
+        authenticated=os.environ.get("DELIVERY_RUNTIME", "local") == "live",
+    )

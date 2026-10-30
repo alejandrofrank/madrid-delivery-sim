@@ -248,12 +248,14 @@ async def local_mutations(
     request: Request, call_next: Callable[[Request], Awaitable[Response]]
 ) -> Response:
     origin = request.headers.get("origin")
-    if request.url.path.startswith(("/api/supply", "/api/health")) and request.url.hostname not in {
+    if (os.environ.get("DELIVERY_RUNTIME", "local") != "live"
+        and request.url.path.startswith(("/api/supply", "/api/health"))
+        and request.url.hostname not in {
         "localhost",
         "127.0.0.1",
         "::1",
         "testserver",
-    }:
+    }):
         return JSONResponse({"detail": "Operator endpoints are local-only"}, status_code=403)
     if (
         request.method in {"POST", "PUT", "PATCH", "DELETE"}
@@ -383,3 +385,9 @@ def protocol_agents() -> dict[str, Any]:
 app.mount("/a2a", agent_directory())
 app.mount("/mcp", mcp_app)
 app.mount("/static", StaticFiles(directory="web"), name="static")
+
+# Fail closed even if an operator starts this module directly in live mode.
+if os.environ.get("DELIVERY_RUNTIME", "local") == "live":
+    from delivery.production_auth import AuthPolicy, ProductionAuth
+
+    app.add_middleware(ProductionAuth, policy=AuthPolicy.from_env())
