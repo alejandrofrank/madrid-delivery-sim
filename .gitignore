@@ -1,4 +1,5 @@
 .env*
+!.env.example
 *.log
 .venv/
 __pycache__/
@@ -33,6 +34,17 @@ codex_run.log
 
 # ADK local evaluation histories are artifacts, not fixtures.
 .adk/
+
+# Editor-installed Impeccable distributions are local tools, not project source.
+.cursor/agents/impeccable-*.md
+.cursor/skills/impeccable/
+.cursor/hooks.json
+.github/agents/impeccable-*.agent.md
+.github/skills/impeccable/
+.github/hooks/impeccable.json
+
+# Generated chat images are not product assets.
+ChatGPT Image*.png
 
 # Isolated UI development
 .venv-ui/

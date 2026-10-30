@@ -1,11 +1,19 @@
 {
-  "reviewed_at": "2026-10-29",
-  "source_revision": "28024442e7ecba2d758c3baa4c104d41c2efd5d5",
+  "reviewed_at": "2026-10-30",
+  "source_revision": "848b92c",
   "scanner": "gitleaks 8.30.1",
   "image_digest": "sha256:c00b6bd0aeb3071cbcb79009cb16a60dd9e0a7c60e2be9ab65d25e6bc8abbb7f",
   "scope": "git history, all local refs",
-  "commits_scanned": 114,
-  "findings": 0,
+  "commits_scanned": 177,
+  "findings": 3,
+  "confirmed_credentials": 0,
+  "false_positive_verification": {
+    "commit": "d2a2f30a992b725b71ca495e683fdaa714b7f4cd",
+    "file": "docs/evidence/a2a-chaos-local.json",
+    "lines": [276, 279, 283],
+    "rule": "generic-api-key",
+    "explanation": "source_sha256 entries equal the SHA-256 of api.py, chaos_api.py and protocol_api.py at 3c61889; they are content fingerprints, not credentials"
+  },
   "sensitive_paths_tracked_after_cleanup": [],
   "history_rewritten": false,
   "repository_visibility_changed": false,
