@@ -1,5 +1,5 @@
 ---
-name: Bakiano operations
+name: madrid-delivery-sim
 description: A calm, dense console for inspectable delivery-agent operations.
 colors:
   accent: '#23d8ce'
@@ -170,7 +170,7 @@ components:
     padding: 3px 4px
 ---
 
-# Design System: Bakiano operations
+# Design system: madrid-delivery-sim
 
 ## Overview
 

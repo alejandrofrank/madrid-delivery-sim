@@ -9,7 +9,7 @@ from delivery.simulation import Simulation, create_run, initialize
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="Madrid Delivery Sim")
+    parser = argparse.ArgumentParser(description="madrid-delivery-sim")
     sub = parser.add_subparsers(dest="command", required=True)
     sub.add_parser("init")
     lab = sub.add_parser("lab-demo")

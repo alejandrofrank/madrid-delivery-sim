@@ -42,7 +42,7 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
         shutdown_telemetry()
 
 
-app = FastAPI(title="Madrid Delivery Sim", lifespan=lifespan)
+app = FastAPI(title="madrid-delivery-sim", lifespan=lifespan)
 instrument_fastapi(app)
 
 

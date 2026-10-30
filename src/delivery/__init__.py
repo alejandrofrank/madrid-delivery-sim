@@ -1,1 +1,1 @@
-"""Madrid Delivery Sim."""
+"""madrid-delivery-sim."""

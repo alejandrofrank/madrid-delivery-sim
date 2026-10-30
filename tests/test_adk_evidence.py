@@ -54,3 +54,21 @@ def test_comparison_is_a_fixed_local_operator_artifact(tmp_path, monkeypatch):
     assert client.get("/api/supply/model-comparison").json() == {"synthetic": True}
     external = TestClient(app, base_url="http://outside.example")
     assert external.get("/api/supply/model-comparison").status_code == 403
+
+
+def test_contract_evidence_prefers_followup_and_restricts_remote_access(tmp_path, monkeypatch):
+    from fastapi.testclient import TestClient
+
+    from delivery.api import app
+
+    monkeypatch.chdir(tmp_path)
+    client = TestClient(app)
+    path = "/api/supply/contract-verification"
+    assert client.get(path).status_code == 404
+    folder = tmp_path / "artifacts"
+    folder.mkdir()
+    (folder / "adk-contract-verification.json").write_text('{"status":"failed"}')
+    assert client.get(path).json() == {"status": "failed"}
+    (folder / "adk-contract-followup.json").write_text('{"status":"completed"}')
+    assert client.get(path).json() == {"status": "completed"}
+    assert TestClient(app, base_url="http://outside.example").get(path).status_code == 403
