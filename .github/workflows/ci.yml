@@ -5,7 +5,8 @@ permissions:
 jobs:
   test:
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    # The 42-courier network expands full-day route candidates; retain every check.
+    timeout-minutes: 30
     env:
       LOCAL_UID: "1001"
       LOCAL_GID: "1001"
