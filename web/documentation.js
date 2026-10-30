@@ -503,7 +503,7 @@ async function showPage(id, resetScroll = false) {
     renderVersion++;
     headingObserver?.disconnect();
     $("#table-of-contents").replaceChildren();
-    document.title = "Unknown chapter · Bakiano engineering";
+    document.title = "Unknown chapter · madrid-delivery-sim";
     $("#error").hidden = false;
     $("#error").textContent =
       "This chapter does not exist. Choose a topic from the navigation.";
@@ -514,7 +514,7 @@ async function showPage(id, resetScroll = false) {
   const version = ++renderVersion;
   $("#error").hidden = true;
   $("#document").hidden = false;
-  document.title = `${currentPage.title} · Bakiano engineering`;
+  document.title = `${currentPage.title} · madrid-delivery-sim`;
   $("#breadcrumb-topic").textContent = currentPage.group;
   $("#chapter-title").textContent = currentPage.title;
   $("#chapter-summary").textContent = currentPage.summary;
