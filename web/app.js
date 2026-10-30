@@ -73,6 +73,11 @@ function setConsoleView(view) {
 document.querySelectorAll("[data-console-view]").forEach(b=>b.onclick=()=>setConsoleView(b.dataset.consoleView));
 document.addEventListener("click",event=>{if(event.target.closest("[data-open-simulation]"))setConsoleView("simulation");});
 ["agent-role","agent-status","agent-search"].forEach(id=>$(id).addEventListener("input",()=>state&&renderInspector()));
+$("agent-fleet").addEventListener("change",()=>{
+  if(!state?.run)return;
+  if(selected?.kind==="courier"&&!fleetCouriers().some(c=>c.id===selected.id)){selected=null;traceRows=[];}
+  renderInspector();renderCouriers();renderRoute();
+});
 $("fleet").addEventListener("click",event=>{const row=event.target.closest("[data-courier]");if(row)choose("courier",row.dataset.courier);});
 $("open-agent-details").onclick=()=>{
   const open=$("agent-details").hidden;$("agent-details").hidden=!open;$("open-agent-details").setAttribute("aria-expanded",String(open));
@@ -92,7 +97,19 @@ function observeMetrics(){
 }
 function courierTask(c){return c.status==="offline"?"Offline · unavailable":c.order_id || (c.status==="off_shift"?"Off shift":c.status==="repositioning"?"Moving toward expected demand":c.status==="returning"?"Returning to hub":"Available for assignment");}
 $("map-symbols").innerHTML='<span class="legend-working">'+Ops.icon("bike")+'Courier · working</span><span class="legend-idle">'+Ops.icon("van")+'Courier · available</span><span class="legend-pickup">'+Ops.icon("store")+'Pickup</span><span class="legend-destination">'+Ops.icon("household")+'Destination</span><span><i class="planned-route"></i>Planned route</span><span><i class="observed-route"></i>Traveled · fading</span>';
-function courierName(c){return c.id.replace(/^chamberi/,"Chamberí").replace(/^retiro/,"Retiro").replace(/^vallecas/,"Vallecas").replaceAll("-"," ");}
+function courierName(c){return c.id.replace(/^castellana-/,"Castellana · ").replace(/^sol-/,"Sol · ").replace("chamberi","Chamberí").replace("retiro","Retiro").replace("vallecas","Vallecas").replaceAll("-"," ");}
+function fleetCouriers(){return state.couriers.filter(c=>$("agent-fleet").value==="all"||(c.fleet_id||"regular")===$("agent-fleet").value);}
+function renderFleetControl(){
+  const fleets=state.fleets||[{id:"regular",name:"Bakiano",operator:"regular",couriers:state.couriers.length,coverage:"network"}];
+  const select=$("agent-fleet"),signature=fleets.map(f=>f.id+":"+f.couriers).join("|");
+  if(select.dataset.roster!==signature){
+    const prior=select.value;
+    select.replaceChildren(new Option("All fleets","all"),...fleets.map(f=>new Option(f.name+" · "+f.couriers,f.id)));
+    select.value=fleets.some(f=>f.id===prior)?prior:"all";select.dataset.roster=signature;
+  }
+  const fleet=fleets.find(f=>f.id===select.value),contractors=state.couriers.filter(c=>c.operator==="contractor").length;
+  $("fleet-summary").textContent=fleet?(fleet.operator==="contractor"?"Independent contractor":"Regular fleet")+" · "+(fleet.coverage==="home_district"?"Home district only":"Full service area"):(state.couriers.length-contractors)+" regular · "+contractors+" contractors · roster + map";
+}
 function lastDecision(kind,id){
   return [...traceRows,...(state?.decisions||[])].filter(d=>kind==="courier"?d.courier_id===id:d.order_id===id).sort((a,b)=>b.sim_time-a.sim_time)[0];
 }
@@ -186,6 +203,8 @@ async function refreshRuns() {
   $("run-select").value = runId;
 }
 async function choose(kind, id) {
+  const courier=kind==="courier"?state.couriers.find(c=>c.id===id):state.couriers.find(c=>c.order_id===id);
+  if(courier&&$("agent-fleet").value!=="all"&&$("agent-fleet").value!==(courier.fleet_id||"regular"))$("agent-fleet").value="all";
   selected = {kind, id}; traceRows = []; setTab("decisions");
   renderInspector(); renderCouriers(); renderRoute(); placeSelectedLabel(true); await refreshTrace();
 }
@@ -219,7 +238,7 @@ function renderRoute() {
   routeLayer.clearLayers();
   $("frame-selection").disabled=!selectedMapBounds();
   if(!state?.run)return;
-  for(const courier of state.couriers){
+  for(const courier of fleetCouriers()){
     const points=activeRoute(courier)?.points;if(!points?.length)continue;
     const chosen=selected?.kind==="courier"&&selected.id===courier.id||selected?.kind==="order"&&selected.id===courier.order_id;
     if(!chosen&&!["to_pickup","delivering","repositioning"].includes(courier.status))continue;
@@ -246,6 +265,9 @@ function renderCourierEconomics() {
   if(!courier){facts.replaceChildren();return;}
   const c=courier;
   const rows=[
+    ["Fleet",(c.fleet_name||"Bakiano")+" · "+(c.operator==="contractor"?"Independent contractor":"Regular fleet")],
+    ["Service area",c.coverage==="home_district"?"Home district only":"Full service area"],
+    ["Communication",human(c.communication_style||"direct")+" · deterministic courier"],
     ["Home base",human(c.hub||"Not recorded")],
     ["Current position","Node "+(c.node??"—")+" · "+measured(c.lat,"",5)+", "+measured(c.lon,"",5)],
     ["Completed jobs",measured(c.completed_jobs,"",0)],
@@ -287,9 +309,11 @@ function renderMetrics() {
 }
 function renderCouriers() {
   clusterLayer.clearLayers();
+  const visible=fleetCouriers(),visibleIds=new Set(visible.map(c=>c.id));
+  for(const [id,marker] of courierMarkers){if(!visibleIds.has(id))map.removeLayer(marker);}
   const sim = displayClock.time(performance.now());
   const groups=[];
-  for (const c of state.couriers) {
+  for (const c of visible) {
     const isSelected=selected?.kind==="courier"&&selected.id===c.id;
     const status=agentStatus(c), color=status==="working"?"#23d8ce":status==="off_shift"?"#829fb4":"#8ec6df";
     const shape=Ops.icon(c.mode,"marker-symbol").replace('viewBox="0 0 24 24"','viewBox="-5 -5 34 34"').replace('fill="none"','style="color:'+color+'" fill="none"').replace('stroke-width="1.5"','stroke-width="1.6"');
@@ -303,7 +327,7 @@ function renderCouriers() {
     const last=lastDecision("courier",c.id);
     marker.unbindTooltip();
     marker.bindTooltip(isSelected?escape(courierName(c)):escape(c.id)+" · "+escape(human(c.status)),{permanent:isSelected,direction:"right",offset:[14,0],className:isSelected?"agent-map-label":""});
-    const content='<div class="map-agent-card"><strong>'+escape(c.id)+'</strong><p>'+escape(human(c.status))+' · '+escape(c.mode)+'</p><p>Task: '+escape(courierTask(c))+'</p><p>Last decision: '+escape(last?human(last.action):"None recorded")+'</p><a href="'+agentTraceLink(c.id)+'">Open agent trace</a></div>';
+    const content='<div class="map-agent-card"><strong>'+escape(c.id)+'</strong><p>'+escape(c.fleet_name||"Bakiano")+' · '+escape(c.operator||"regular")+'</p><p>'+escape(human(c.status))+' · '+escape(c.mode)+'</p><p>Task: '+escape(courierTask(c))+'</p><p>Last decision: '+escape(last?human(last.action):"None recorded")+'</p><a href="'+agentTraceLink(c.id)+'">Open agent trace</a></div>';
     if(marker.getPopup())marker.setPopupContent(content);else marker.bindPopup(content,{minWidth:220,autoPan:false});
     const point=map.project(location,map.getZoom());
     const group=map.getZoom()<13.5&&!isSelected?groups.find(group=>!group.selected&&group.point.distanceTo(point)<38):null;
@@ -375,16 +399,17 @@ function renderLedger() {
 }
 function renderInspector() {
   if(!state?.run)return;
+  renderFleetControl();
   renderCourierEconomics();
   $("agent-count").textContent=state.couriers.length;
-  $("fleet-activity").textContent=state.couriers.filter(c=>agentStatus(c)==="working").length+" working · "+state.couriers.length+" agents";
+  $("fleet-activity").textContent=fleetCouriers().filter(c=>agentStatus(c)==="working").length+" working · "+fleetCouriers().length+" / "+state.couriers.length+" agents";
   $("open-agent-details").disabled=!selected;
   $("selected-trace").hidden=selected?.kind!=="courier";
   if(selected?.kind==="courier"){
     const c=state.couriers.find(c=>c.id===selected.id);
     if(c){
       const task=taskDetails(c),last=lastDecision("courier",c.id);
-      $("selection").innerHTML='<div><span class="evidence-label">Agent evidence</span><strong>'+escape(courierName(c))+' <span class="status-pill '+agentStatus(c)+'">'+escape(human(c.status))+'</span></strong><p>'+escape(c.id)+' · '+escape(c.mode)+' courier</p></div><div><span class="evidence-label">Current task</span><strong>'+escape(task.title)+'</strong><p>'+escape(task.note)+' · '+Math.round(c.energy)+'% energy</p></div><div><span class="evidence-label">Last decision</span><strong>'+escape(last?human(last.action):"No decision retained")+'</strong><p>'+(last?clock(last.sim_time)+' · '+escape(last.order_id||last.agent):"Select View decisions for available evidence")+'</p></div>';
+      $("selection").innerHTML='<div><span class="evidence-label">Agent evidence</span><strong>'+escape(courierName(c))+' <span class="status-pill '+agentStatus(c)+'">'+escape(human(c.status))+'</span></strong><p>'+escape(c.fleet_name||'Bakiano')+' · '+escape(c.operator||'regular')+' · '+escape(c.mode)+' courier</p></div><div><span class="evidence-label">Current task</span><strong>'+escape(task.title)+'</strong><p>'+escape(task.note)+' · '+Math.round(c.energy)+'% energy</p></div><div><span class="evidence-label">Last decision</span><strong>'+escape(last?human(last.action):"No decision retained")+'</strong><p>'+(last?clock(last.sim_time)+' · '+escape(last.order_id||last.agent):"Select View decisions for available evidence")+'</p></div>';
       $("selected-trace").href=agentTraceLink(c.id);
     }
   }else if(selected?.kind==="order"){
@@ -392,18 +417,18 @@ function renderInspector() {
     $("selection").innerHTML='<div><span class="evidence-label">Order evidence</span><strong>'+escape(selected.id)+'</strong><p>'+escape(human(o?.status||"Recorded"))+'</p></div><div><span class="evidence-label">Pickup · courier</span><strong>'+escape(o?.store||"Delivery order")+'</strong><p>'+escape(o?.courier||"Awaiting assignment")+'</p></div><div><span class="evidence-label">Last decision</span><strong>'+escape(last?human(last.action):"No decision retained")+'</strong><p>'+(last?clock(last.sim_time):"See available decisions")+'</p></div>';
   }else $("selection").innerHTML='<div><span class="evidence-label">Agent evidence</span><strong>Choose an agent</strong><p>Select a roster row or map marker to inspect its work.</p></div>';
   const role=$("agent-role").value,status=$("agent-status").value,query=$("agent-search").value.trim().toLowerCase();
-  const rows=state.couriers.filter(c=>(role==="all"||c.mode===role)&&(status==="all"||(status==="active"?agentStatus(c)==="working":agentStatus(c)===status))&&(c.id+" "+courierName(c)).toLowerCase().includes(query));
+  const rows=fleetCouriers().filter(c=>(role==="all"||c.mode===role)&&(status==="all"||(status==="active"?agentStatus(c)==="working":agentStatus(c)===status))&&(c.id+" "+courierName(c)+" "+(c.fleet_name||"Bakiano")).toLowerCase().includes(query));
   Ops.liveHTML($("fleet"),rows.map(c=>{
     const task=taskDetails(c),rates=observations.map((s,i)=>i&&s.time>observations[i-1].time?(s.agents[c.id]-observations[i-1].agents[c.id])*60/(s.time-observations[i-1].time):null);
     const curve=observations.length>2?Ops.sparkline(rates,"Deliveries per simulated minute observed this visit"):'<span class="history-unavailable" title="No time series was recorded during this visit">—</span>';
-    return '<button class="fleet-row '+(selected?.id===c.id?"active":"")+'" data-courier="'+escape(c.id)+'" aria-pressed="'+(selected?.id===c.id)+'"><span class="fleet-person">'+Ops.icon(c.mode)+'<span><strong>'+escape(courierName(c))+'</strong><small>'+escape(c.id)+'</small></span></span><span class="agent-role-column">'+escape(human(c.mode))+'</span><span class="status-pill '+agentStatus(c)+' '+escape(c.status)+'">'+escape(human(c.status))+'</span><span class="fleet-task"><strong>'+escape(task.title)+'</strong><small>'+escape(task.note)+'</small></span><span class="fleet-total">'+deliveryCount(c.id)+'</span><span class="fleet-throughput">'+curve+'</span></button>';
+    return '<button class="fleet-row '+(selected?.id===c.id?"active":"")+'" data-courier="'+escape(c.id)+'" aria-pressed="'+(selected?.id===c.id)+'"><span class="fleet-person">'+Ops.icon(c.mode)+'<span><strong>'+escape(courierName(c).replace(/^(Sol|Castellana) · /,''))+'</strong><small>'+escape(c.fleet_name||'Bakiano')+(c.operator==='contractor'?' · contractor':' · regular')+'</small></span></span><span class="agent-role-column">'+escape(human(c.mode))+'</span><span class="status-pill '+agentStatus(c)+' '+escape(c.status)+'">'+escape(human(c.status))+'</span><span class="fleet-task"><strong>'+escape(task.title)+'</strong><small>'+escape(task.note)+'</small></span><span class="fleet-total">'+deliveryCount(c.id)+'</span><span class="fleet-throughput">'+curve+'</span></button>';
   }).join("")||'<p class="empty">No agents match these filters.</p>');
   renderDecisions();
   $("service").innerHTML=state.complaints.map(c=>'<article class="complaint"><span class="badge">'+escape(human(c.status))+'</span><p>'+escape(c.text)+'</p>'+(c.response?'<blockquote>'+escape(c.response)+'</blockquote>':'')+'<small>'+escape(c.source||"pending")+' · approved refund €'+c.approved_refund_eur.toFixed(2)+'<br>'+escape(c.order_id)+'</small></article>').join("")||'<p class="empty">No service cases recorded.</p>';
 }
 function renderDecisions() {
   const rows = selected ? traceRows : state?.decisions || [];
-  $("decisions").innerHTML = rows.map(d=>`<article class="decision"><div class="decision-top"><span>${escape(d.agent)}</span><time>${clock(d.sim_time)}</time></div><strong>${escape(human(d.action))}</strong><p>${escape(d.detail.rule || d.detail.reply || (d.detail.on_time !== undefined ? (d.detail.on_time?"Delivered within promised window":"Delivered after promised window") : d.detail.store || "State transition recorded"))}</p><code>${escape(d.order_id || "")}${d.courier_id?` / ${escape(d.courier_id)}`:""}</code><details><summary>Inspect recorded evidence</summary><pre>${escape(JSON.stringify(d.detail,null,2))}</pre></details></article>`).join("") || '<p class="empty">No decisions recorded for this selection yet.</p>';
+  $("decisions").innerHTML = rows.map(d=>`<article class="decision"><div class="decision-top"><span>${escape(d.agent)}</span><time>${clock(d.sim_time)}</time></div><strong>${escape(human(d.action))}</strong><p>${escape(d.detail.message?.text || d.detail.rule || d.detail.reply || (d.detail.on_time !== undefined ? (d.detail.on_time?"Delivered within promised window":"Delivered after promised window") : d.detail.store || "State transition recorded"))}</p><code>${escape(d.order_id || "")}${d.courier_id?` / ${escape(d.courier_id)}`:""}</code><details><summary>Inspect recorded evidence</summary><pre>${escape(JSON.stringify(d.detail,null,2))}</pre></details></article>`).join("") || '<p class="empty">No decisions recorded for this selection yet.</p>';
 }
 function animate() {
   if(!document.hidden && !reducedMotion.matches && state?.run?.status==="running" && state.run.wall_seconds>0) {
@@ -420,6 +445,7 @@ async function poll() {
     const next=await api(`/api/state${runId?`?run=${runId}`:""}`);
     if(next.run?.id!==state?.run?.id) {
       traceRows=[];
+      $("agent-fleet").value="all";
       for(const marker of courierMarkers.values())marker.remove();
       courierMarkers.clear();
       const courier=next.couriers?.find(c=>["to_pickup","delivering","repositioning"].includes(c.status))||next.couriers?.[0];
@@ -428,7 +454,7 @@ async function poll() {
     state=next; displayClock.accept(state.run, performance.now());
     ChaosUI.update(state);
     $("connection").className="dot online"; $("connection-text").textContent="Local services connected";
-    if(state.run) { renderMetrics();renderCouriers();renderOrders();renderLedger();renderInspector();renderRoute();await refreshTrace(); }
+    if(state.run) { renderFleetControl();renderMetrics();renderCouriers();renderOrders();renderLedger();renderInspector();renderRoute();await refreshTrace(); }
     else $("fleet").innerHTML='<div class="empty"><strong>No session loaded</strong><p>Start a session to see the fleet, routes and orders.</p><button data-open-simulation>Set up simulation</button></div>';
     if(++pollCount%10===0) await refreshRuns();
   } catch(e) { $("connection").className="dot offline";$("connection-text").textContent="Connection interrupted";error(e.message); }
