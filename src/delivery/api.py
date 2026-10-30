@@ -289,6 +289,11 @@ def health() -> dict[str, Any]:
     return {"status": "ok", "graph_nodes": len(world.nodes)}
 
 
+@app.get("/api/runtime")
+def runtime_mode() -> dict[str, Any]:
+    return {"mode": os.environ.get("DELIVERY_RUNTIME", "local"), "read_only": False}
+
+
 @app.get("/api/world")
 def city() -> dict[str, Any]:
     with connect() as conn:
