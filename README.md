@@ -1,4 +1,4 @@
-# Madrid Delivery Sim
+# madrid-delivery-sim
 
 Queue-driven delivery agents on Madrid streets, with Google ADK, real A2A endpoints, distributed traces, and auditable BigQuery run evidence.
 

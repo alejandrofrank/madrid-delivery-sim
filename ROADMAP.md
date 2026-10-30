@@ -1,4 +1,4 @@
-# Roadmap: Bakiano delivery operations lab
+# madrid-delivery-sim roadmap
 
 Updated 2026-10-29. Implemented slices are identified below; remaining milestones are planned.
 

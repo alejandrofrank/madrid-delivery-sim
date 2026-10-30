@@ -127,7 +127,7 @@ duration. Selecting a shop or order can expose its route for inspection.
 
 ## Appearance and fictional team names
 
-The city interface follows Bakiano's dark application palette: blue-tinted surfaces,
+The madrid-delivery-sim interface uses a dark operations palette: blue-tinted surfaces,
 red brand accent, blue controls and bordered panels. Fonts use local system fallbacks
 when Space Grotesk/Space Mono are unavailable; no remote font requests are made.
 Map shops, household icons and couriers are enlarged for easier selection.
