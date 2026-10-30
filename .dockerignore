@@ -1,5 +1,8 @@
 .git
 .env*
+**/.env*
+gha-creds-*.json
+**/gha-creds-*.json
 .venv
 node_modules
 artifacts
@@ -23,6 +26,7 @@ infra/gcp-ai/.terraform
 **/*.tfstate*
 **/*.tfvars*
 **/*.tfplan
+infra/production/bootstrap_override.tf
 # Never ship host/interpreter/test assertion bytecode into Linux images.
 **/__pycache__
 **/*.pyc
