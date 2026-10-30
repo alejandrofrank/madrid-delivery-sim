@@ -69,9 +69,16 @@ def main() -> None:
         and not (args.after_review or args.resume)
     ):
         raise DemoError("A previous paid experiment is retained; inspect it before another test")
-    experiment_dir = demo.root / ".env.adk-experiments"
+    experiment_dir = demo.root / "data/local/operator/adk-experiments"
+    # Preserve one-shot spend guards when upgrading an existing local checkout.
+    legacy_dir = demo.root / ".env.adk-experiments"
+    if legacy_dir.exists():
+        experiment_dir.parent.mkdir(parents=True, exist_ok=True)
+        if experiment_dir.exists():
+            raise DemoError("Both experiment-marker locations exist; reconcile before spending")
+        legacy_dir.rename(experiment_dir)
     if args.contract_verification:
-        experiment_dir.mkdir(exist_ok=True)
+        experiment_dir.mkdir(parents=True, exist_ok=True)
         if args.reviewed_followup:
             previous_name = (
                 "contract-followup" if args.reviewed_followup == 2 else "contract-verification"
@@ -93,7 +100,7 @@ def main() -> None:
         ).exists():
             raise DemoError("Contract verification already claimed; inspect retained evidence")
     if args.routing_comparison:
-        experiment_dir.mkdir(exist_ok=True)
+        experiment_dir.mkdir(parents=True, exist_ok=True)
         original_claim = experiment_dir / "route-comparison.execution.json"
         continuation_claim = experiment_dir / "route-comparison.continuation.execution.json"
         if args.continue_planned:

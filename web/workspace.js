@@ -16,9 +16,9 @@
   const brand = document.createElement("a");
   brand.href = "/";
   brand.className = "workspace-brand";
-  brand.setAttribute("aria-label", "Bakiano operations home");
+  brand.setAttribute("aria-label", "madrid-delivery-sim home");
   brand.innerHTML =
-    '<span class="workspace-wordmark">Bakiano<small>Operations</small></span><span class="workspace-project">Madrid Delivery Sim</span>';
+    '<span class="workspace-wordmark">Madrid<small>Delivery sim</small></span><span class="workspace-project">madrid-delivery-sim</span>';
   brand.querySelector("small").textContent = pages.find(([path]) => path === location.pathname)?.[1] || "Operations";
   const nav = document.createElement("nav");
   nav.id = "workspace-navigation";
