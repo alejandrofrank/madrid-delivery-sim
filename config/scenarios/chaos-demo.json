@@ -1,0 +1,11 @@
+{
+  "demand_multiplier": 4,
+  "random_events": 0,
+  "events": [
+    {"id":"rain","kind":"heavy_rain","at":600,"duration":900,"severity":2},
+    {"id":"metro","kind":"metro_strike","at":1500,"duration":900,"district":"retiro","severity":2},
+    {"id":"kitchen","kind":"restaurant_outage","at":2400,"duration":1200,"target":"auto","severity":2},
+    {"id":"offline","kind":"courier_offline","at":3300,"duration":1200,"target":"auto","severity":2},
+    {"id":"surge","kind":"demand_surge","at":4200,"duration":600,"district":"chamberi","severity":3}
+  ]
+}

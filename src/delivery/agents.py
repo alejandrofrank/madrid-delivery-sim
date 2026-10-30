@@ -29,7 +29,8 @@ class Dispatcher:
         sim = row["sim_time"]
         policy = load_policy(row["dispatch_config"])
         pending = conn.execute(
-            """SELECT o.*, s.node AS store_node, c.node AS customer_node
+            """SELECT o.*, coalesce(o.recovery_node,s.node) AS store_node, c.node AS customer_node,
+               s.district AS store_district,c.district AS customer_district
                FROM orders o JOIN locations s ON s.id=o.store JOIN locations c ON c.id=o.customer
                WHERE o.run_id=%s AND o.status='pending' ORDER BY o.due_sim,o.id
                FOR UPDATE OF o SKIP LOCKED LIMIT 100""",
@@ -42,6 +43,11 @@ class Dispatcher:
             (event.run_id, sim),
         ).fetchall()
         routes: dict[tuple[str, str], dict[str, Any]] = {}
+        from delivery.chaos import active_events, retime, traffic_factor
+
+        disruptions = (
+            active_events(conn, str(event.run_id)) if row["chaos_config"] is not None else []
+        )
         scores: dict[tuple[str, str], dict[str, float]] = {}
         candidates = []
         ranks = fair_ranks(couriers, f"{row['seed']}:{sim}")
@@ -56,6 +62,8 @@ class Dispatcher:
                         sim,
                         order["ready_sim"],
                     )
+                    if disruptions:
+                        route = retime(route, sim, traffic_factor(disruptions, order))
                 except (nx.NetworkXNoPath, nx.NodeNotFound):
                     continue
                 required = route["distance_m"] / 1000 * ENERGY_PER_KM[courier["mode"]]

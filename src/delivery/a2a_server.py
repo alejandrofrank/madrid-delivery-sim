@@ -43,7 +43,7 @@ MAX_EVENTS_PER_REQUEST = 32
 class AgentCommand(BaseModel):
     model_config = ConfigDict(extra="forbid")
     run_id: UUID
-    operation: Literal["submit", "tick", "supply_tick"] = "submit"
+    operation: Literal["submit", "tick", "supply_tick", "replan"] = "submit"
     entity_id: str = Field(min_length=1, max_length=80, pattern=r"^[A-Za-z0-9_.:-]+$")
 
 
@@ -57,6 +57,10 @@ class QueuedAgentService:
         self.world: World | None = None
 
     def invoke(self, command: AgentCommand) -> dict[str, Any]:
+        if command.operation == "replan":
+            from delivery.chaos_agents import replan
+
+            return replan(self.role, command, self.url)
         if command.operation == "supply_tick":
             from delivery.supply import process_agent_message
 

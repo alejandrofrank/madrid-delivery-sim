@@ -15,6 +15,8 @@ from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
 from starlette.responses import Response
 
+from delivery.chaos import ChaosConfig
+from delivery.chaos_api import router as chaos_router
 from delivery.city_config import CitySettings
 from delivery.db import connect
 from delivery.dispatch_policy import DispatchPolicy
@@ -33,7 +35,9 @@ from delivery.world import DATA, World
 world: World
 mcp_server = create_mcp_server()
 mcp_app = mcp_server.streamable_http_app(
-    streamable_http_path="/", stateless_http=True, json_response=True,
+    streamable_http_path="/",
+    stateless_http=True,
+    json_response=True,
 )
 
 
@@ -259,6 +263,8 @@ class StartRun(BaseModel):
     seed: int = Field(default=42, ge=0, le=2**31 - 1)
     wall_seconds: int = Field(default=600, ge=0, le=3600)
     dispatch: DispatchPolicy = Field(default_factory=DispatchPolicy)
+    duration: int = Field(default=43200, ge=1800, le=43200, multiple_of=60)
+    chaos: ChaosConfig | None = None
 
 
 def run_background(run: str) -> None:
@@ -302,7 +308,17 @@ def runs() -> list[dict[str, Any]]:
 
 @app.post("/api/runs", status_code=202)
 def start(body: StartRun, tasks: BackgroundTasks) -> dict[str, str]:
-    run = create_run(world, body.seed, body.wall_seconds, dispatch=body.dispatch)
+    try:
+        run = create_run(
+            world,
+            body.seed,
+            body.wall_seconds,
+            duration=body.duration,
+            dispatch=body.dispatch,
+            chaos=body.chaos,
+        )
+    except ValueError as exc:
+        raise HTTPException(422, str(exc)) from None
     tasks.add_task(run_background, run)
     return {"id": run}
 
@@ -342,15 +358,21 @@ def favicon() -> None:
 
 
 app.include_router(supply_router)
+app.include_router(chaos_router)
 app.include_router(health_router)
 app.include_router(documentation_router)
 app.include_router(telemetry_router)
+
+
 @app.get("/api/agents")
 def protocol_agents() -> dict[str, Any]:
-    return {"protocol": "A2A 1.0", "agents": [
-        {"id": name, "card": f"/a2a/{name}/.well-known/agent-card.json"}
-        for name in agent_names()
-    ]}
+    return {
+        "protocol": "A2A 1.0",
+        "agents": [
+            {"id": name, "card": f"/a2a/{name}/.well-known/agent-card.json"}
+            for name in agent_names()
+        ],
+    }
 
 
 app.mount("/a2a", agent_directory())
