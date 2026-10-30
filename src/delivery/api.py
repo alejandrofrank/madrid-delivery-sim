@@ -25,6 +25,7 @@ from delivery.documentation import router as documentation_router
 from delivery.health import router as health_router
 from delivery.history import history_catalogue, history_manifest
 from delivery.lab import create_lab, export_slice, lab_snapshot
+from delivery.live_jobs import schedule
 from delivery.mcp_server import create_mcp_server
 from delivery.protocol_api import agent_directory, agent_names
 from delivery.simulation import Simulation, create_run, initialize, snapshot
@@ -43,7 +44,7 @@ async def mcp_app(scope: Scope, receive: Receive, send: Send) -> None:
 @asynccontextmanager
 async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     global world
-    world = initialize()
+    world = World() if os.environ.get("DELIVERY_RUNTIME") == "live" else initialize()
     mcp_server = create_mcp_server()
     app.state.mcp_app = mcp_server.streamable_http_app(
         streamable_http_path="/",
@@ -118,7 +119,7 @@ def start_city(body: CitySettings, tasks: BackgroundTasks) -> dict[str, str]:
         raise HTTPException(
             422, "GCP AI requires a configured Terraform gateway and caller identity"
         ) from None
-    tasks.add_task(city_background, run)
+    schedule(tasks, city_background, "city", run)
     return {"id": run}
 
 
@@ -151,7 +152,7 @@ def start_delivery(body: StartDelivery, tasks: BackgroundTasks) -> dict[str, str
     from delivery.delivery_flow import new_delivery
 
     run = new_delivery(body.seed)
-    tasks.add_task(delivery_background, run, body.playback_seconds)
+    schedule(tasks, delivery_background, "delivery", run, body.playback_seconds)
     return {"id": run}
 
 
@@ -231,7 +232,7 @@ def start_lab(body: StartLab, tasks: BackgroundTasks) -> dict[str, str]:
         run = create_lab(seed=body.seed, catalogue_path=path, store_sources=store_sources)
     except ValueError:
         raise HTTPException(422, "Invalid catalogue snapshot") from None
-    tasks.add_task(lab_background, run, body.playback_seconds)
+    schedule(tasks, lab_background, "inventory", run, body.playback_seconds)
     return {"id": run}
 
 
@@ -331,7 +332,7 @@ def start(body: StartRun, tasks: BackgroundTasks) -> dict[str, str]:
         )
     except ValueError as exc:
         raise HTTPException(422, str(exc)) from None
-    tasks.add_task(run_background, run)
+    schedule(tasks, run_background, "orders", run)
     return {"id": run}
 
 
