@@ -1,0 +1,1117 @@
+{
+  "eval_set_id": "release-heldout-v1-restaurant",
+  "eval_cases": [
+    {
+      "eval_id": "heldout-restaurant-01",
+      "session_input": {
+        "app_name": "restaurant",
+        "user_id": "eval",
+        "state": {
+          "fixture": {
+            "order": {
+              "event": "household.call",
+              "quantity": 3
+            },
+            "recipe": {
+              "ingredients": [
+                {
+                  "id": "flour",
+                  "quantity": 1
+                }
+              ]
+            },
+            "pantry": [],
+            "suppliers": [
+              {
+                "id": "release-supplier-0-0",
+                "procurement_fee_cents": 37,
+                "estimated_seconds": 251
+              },
+              {
+                "id": "release-supplier-0-1",
+                "procurement_fee_cents": 247,
+                "estimated_seconds": 51
+              }
+            ]
+          },
+          "soul": "cost"
+        }
+      },
+      "conversation": [
+        {
+          "user_content": {
+            "role": "user",
+            "parts": [
+              {
+                "text": "Handle reserved kitchen case 1, using current quantities, stock and supplier quotes."
+              }
+            ]
+          },
+          "intermediate_data": {
+            "tool_uses": [
+              {
+                "name": "read_order",
+                "args": {}
+              },
+              {
+                "name": "read_recipe",
+                "args": {}
+              },
+              {
+                "name": "read_pantry",
+                "args": {}
+              },
+              {
+                "name": "find_suppliers",
+                "args": {}
+              },
+              {
+                "name": "recall_order_memory",
+                "args": {}
+              },
+              {
+                "name": "request_missing_ingredients",
+                "args": {
+                  "supplier": "release-supplier-0-0"
+                }
+              },
+              {
+                "name": "finish_decision",
+                "args": {
+                  "summary": "Compared scoped pantry and supplier quotes."
+                }
+              }
+            ]
+          },
+          "final_response": {
+            "role": "model",
+            "parts": [
+              {
+                "text": "The scoped decision is saved for validation and commit."
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "eval_id": "heldout-restaurant-02",
+      "session_input": {
+        "app_name": "restaurant",
+        "user_id": "eval",
+        "state": {
+          "fixture": {
+            "order": {
+              "event": "household.call",
+              "quantity": 4
+            },
+            "recipe": {
+              "ingredients": [
+                {
+                  "id": "flour",
+                  "quantity": 1
+                }
+              ]
+            },
+            "pantry": [],
+            "suppliers": [
+              {
+                "id": "release-supplier-1-0",
+                "procurement_fee_cents": 38,
+                "estimated_seconds": 252
+              },
+              {
+                "id": "release-supplier-1-1",
+                "procurement_fee_cents": 248,
+                "estimated_seconds": 52
+              }
+            ]
+          },
+          "soul": "speed"
+        }
+      },
+      "conversation": [
+        {
+          "user_content": {
+            "role": "user",
+            "parts": [
+              {
+                "text": "Handle reserved kitchen case 2, using current quantities, stock and supplier quotes."
+              }
+            ]
+          },
+          "intermediate_data": {
+            "tool_uses": [
+              {
+                "name": "read_order",
+                "args": {}
+              },
+              {
+                "name": "read_recipe",
+                "args": {}
+              },
+              {
+                "name": "read_pantry",
+                "args": {}
+              },
+              {
+                "name": "find_suppliers",
+                "args": {}
+              },
+              {
+                "name": "recall_order_memory",
+                "args": {}
+              },
+              {
+                "name": "request_missing_ingredients",
+                "args": {
+                  "supplier": "release-supplier-1-1"
+                }
+              },
+              {
+                "name": "finish_decision",
+                "args": {
+                  "summary": "Compared scoped pantry and supplier quotes."
+                }
+              }
+            ]
+          },
+          "final_response": {
+            "role": "model",
+            "parts": [
+              {
+                "text": "The scoped decision is saved for validation and commit."
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "eval_id": "heldout-restaurant-03",
+      "session_input": {
+        "app_name": "restaurant",
+        "user_id": "eval",
+        "state": {
+          "fixture": {
+            "order": {
+              "event": "household.call",
+              "quantity": 5
+            },
+            "recipe": {
+              "ingredients": [
+                {
+                  "id": "flour",
+                  "quantity": 1
+                }
+              ]
+            },
+            "pantry": [
+              {
+                "ingredient": "flour",
+                "on_hand": 5,
+                "reserved": 0
+              }
+            ],
+            "suppliers": [
+              {
+                "id": "release-supplier-2-0",
+                "procurement_fee_cents": 39,
+                "estimated_seconds": 253
+              },
+              {
+                "id": "release-supplier-2-1",
+                "procurement_fee_cents": 249,
+                "estimated_seconds": 53
+              }
+            ]
+          },
+          "soul": "cost"
+        }
+      },
+      "conversation": [
+        {
+          "user_content": {
+            "role": "user",
+            "parts": [
+              {
+                "text": "Handle reserved kitchen case 3, using current quantities, stock and supplier quotes."
+              }
+            ]
+          },
+          "intermediate_data": {
+            "tool_uses": [
+              {
+                "name": "read_order",
+                "args": {}
+              },
+              {
+                "name": "read_recipe",
+                "args": {}
+              },
+              {
+                "name": "read_pantry",
+                "args": {}
+              },
+              {
+                "name": "find_suppliers",
+                "args": {}
+              },
+              {
+                "name": "recall_order_memory",
+                "args": {}
+              },
+              {
+                "name": "confirm_order",
+                "args": {}
+              },
+              {
+                "name": "finish_decision",
+                "args": {
+                  "summary": "Compared scoped pantry and supplier quotes."
+                }
+              }
+            ]
+          },
+          "final_response": {
+            "role": "model",
+            "parts": [
+              {
+                "text": "The scoped decision is saved for validation and commit."
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "eval_id": "heldout-restaurant-04",
+      "session_input": {
+        "app_name": "restaurant",
+        "user_id": "eval",
+        "state": {
+          "fixture": {
+            "order": {
+              "event": "household.call",
+              "quantity": 6
+            },
+            "recipe": {
+              "ingredients": [
+                {
+                  "id": "flour",
+                  "quantity": 1
+                }
+              ]
+            },
+            "pantry": [
+              {
+                "ingredient": "flour",
+                "on_hand": 6,
+                "reserved": 6
+              }
+            ],
+            "suppliers": [
+              {
+                "id": "release-supplier-3-0",
+                "procurement_fee_cents": 40,
+                "estimated_seconds": 254
+              },
+              {
+                "id": "release-supplier-3-1",
+                "procurement_fee_cents": 250,
+                "estimated_seconds": 54
+              }
+            ]
+          },
+          "soul": "cost"
+        }
+      },
+      "conversation": [
+        {
+          "user_content": {
+            "role": "user",
+            "parts": [
+              {
+                "text": "Handle reserved kitchen case 4, using current quantities, stock and supplier quotes."
+              }
+            ]
+          },
+          "intermediate_data": {
+            "tool_uses": [
+              {
+                "name": "read_order",
+                "args": {}
+              },
+              {
+                "name": "read_recipe",
+                "args": {}
+              },
+              {
+                "name": "read_pantry",
+                "args": {}
+              },
+              {
+                "name": "find_suppliers",
+                "args": {}
+              },
+              {
+                "name": "recall_order_memory",
+                "args": {}
+              },
+              {
+                "name": "request_missing_ingredients",
+                "args": {
+                  "supplier": "release-supplier-3-0"
+                }
+              },
+              {
+                "name": "finish_decision",
+                "args": {
+                  "summary": "Compared scoped pantry and supplier quotes."
+                }
+              }
+            ]
+          },
+          "final_response": {
+            "role": "model",
+            "parts": [
+              {
+                "text": "The scoped decision is saved for validation and commit."
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "eval_id": "heldout-restaurant-05",
+      "session_input": {
+        "app_name": "restaurant",
+        "user_id": "eval",
+        "state": {
+          "fixture": {
+            "order": {
+              "event": "household.call",
+              "quantity": 7
+            },
+            "recipe": {
+              "ingredients": [
+                {
+                  "id": "flour",
+                  "quantity": 1
+                }
+              ]
+            },
+            "pantry": [],
+            "suppliers": []
+          },
+          "soul": "cost"
+        }
+      },
+      "conversation": [
+        {
+          "user_content": {
+            "role": "user",
+            "parts": [
+              {
+                "text": "Handle reserved kitchen case 5, using current quantities, stock and supplier quotes."
+              }
+            ]
+          },
+          "intermediate_data": {
+            "tool_uses": [
+              {
+                "name": "read_order",
+                "args": {}
+              },
+              {
+                "name": "read_recipe",
+                "args": {}
+              },
+              {
+                "name": "read_pantry",
+                "args": {}
+              },
+              {
+                "name": "find_suppliers",
+                "args": {}
+              },
+              {
+                "name": "recall_order_memory",
+                "args": {}
+              },
+              {
+                "name": "decline_order",
+                "args": {
+                  "reason": "No open supplier is available."
+                }
+              },
+              {
+                "name": "finish_decision",
+                "args": {
+                  "summary": "Compared scoped pantry and supplier quotes."
+                }
+              }
+            ]
+          },
+          "final_response": {
+            "role": "model",
+            "parts": [
+              {
+                "text": "The scoped decision is saved for validation and commit."
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "eval_id": "heldout-restaurant-06",
+      "session_input": {
+        "app_name": "restaurant",
+        "user_id": "eval",
+        "state": {
+          "fixture": {
+            "order": {
+              "event": "restaurant.approval",
+              "quantity": 8
+            },
+            "recipe": {
+              "ingredients": [
+                {
+                  "id": "flour",
+                  "quantity": 1
+                }
+              ]
+            },
+            "pantry": [],
+            "suppliers": [
+              {
+                "id": "release-supplier-5-0",
+                "procurement_fee_cents": 42,
+                "estimated_seconds": 256
+              },
+              {
+                "id": "release-supplier-5-1",
+                "procurement_fee_cents": 252,
+                "estimated_seconds": 56
+              }
+            ]
+          },
+          "soul": "cost"
+        }
+      },
+      "conversation": [
+        {
+          "user_content": {
+            "role": "user",
+            "parts": [
+              {
+                "text": "Handle reserved kitchen case 6, using current quantities, stock and supplier quotes."
+              }
+            ]
+          },
+          "intermediate_data": {
+            "tool_uses": [
+              {
+                "name": "read_order",
+                "args": {}
+              },
+              {
+                "name": "read_recipe",
+                "args": {}
+              },
+              {
+                "name": "read_pantry",
+                "args": {}
+              },
+              {
+                "name": "find_suppliers",
+                "args": {}
+              },
+              {
+                "name": "recall_order_memory",
+                "args": {}
+              },
+              {
+                "name": "request_missing_ingredients",
+                "args": {
+                  "supplier": "release-supplier-5-0"
+                }
+              },
+              {
+                "name": "finish_decision",
+                "args": {
+                  "summary": "Compared scoped pantry and supplier quotes."
+                }
+              }
+            ]
+          },
+          "final_response": {
+            "role": "model",
+            "parts": [
+              {
+                "text": "The scoped decision is saved for validation and commit."
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "eval_id": "heldout-restaurant-07",
+      "session_input": {
+        "app_name": "restaurant",
+        "user_id": "eval",
+        "state": {
+          "fixture": {
+            "order": {
+              "event": "ingredient.arrived",
+              "quantity": 9
+            },
+            "recipe": {
+              "ingredients": [
+                {
+                  "id": "flour",
+                  "quantity": 1
+                }
+              ]
+            },
+            "pantry": [],
+            "suppliers": [
+              {
+                "id": "release-supplier-6-0",
+                "procurement_fee_cents": 43,
+                "estimated_seconds": 257
+              },
+              {
+                "id": "release-supplier-6-1",
+                "procurement_fee_cents": 253,
+                "estimated_seconds": 57
+              }
+            ]
+          },
+          "soul": "cost"
+        }
+      },
+      "conversation": [
+        {
+          "user_content": {
+            "role": "user",
+            "parts": [
+              {
+                "text": "Handle reserved kitchen case 7, using current quantities, stock and supplier quotes."
+              }
+            ]
+          },
+          "intermediate_data": {
+            "tool_uses": [
+              {
+                "name": "read_order",
+                "args": {}
+              },
+              {
+                "name": "read_recipe",
+                "args": {}
+              },
+              {
+                "name": "read_pantry",
+                "args": {}
+              },
+              {
+                "name": "find_suppliers",
+                "args": {}
+              },
+              {
+                "name": "recall_order_memory",
+                "args": {}
+              },
+              {
+                "name": "receive_ingredient",
+                "args": {}
+              },
+              {
+                "name": "finish_decision",
+                "args": {
+                  "summary": "Compared scoped pantry and supplier quotes."
+                }
+              }
+            ]
+          },
+          "final_response": {
+            "role": "model",
+            "parts": [
+              {
+                "text": "The scoped decision is saved for validation and commit."
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "eval_id": "heldout-restaurant-08",
+      "session_input": {
+        "app_name": "restaurant",
+        "user_id": "eval",
+        "state": {
+          "fixture": {
+            "order": {
+              "event": "restaurant.cook",
+              "quantity": 10
+            },
+            "recipe": {
+              "ingredients": [
+                {
+                  "id": "flour",
+                  "quantity": 1
+                }
+              ]
+            },
+            "pantry": [],
+            "suppliers": [
+              {
+                "id": "release-supplier-7-0",
+                "procurement_fee_cents": 44,
+                "estimated_seconds": 258
+              },
+              {
+                "id": "release-supplier-7-1",
+                "procurement_fee_cents": 254,
+                "estimated_seconds": 58
+              }
+            ]
+          },
+          "soul": "cost"
+        }
+      },
+      "conversation": [
+        {
+          "user_content": {
+            "role": "user",
+            "parts": [
+              {
+                "text": "Handle reserved kitchen case 8, using current quantities, stock and supplier quotes."
+              }
+            ]
+          },
+          "intermediate_data": {
+            "tool_uses": [
+              {
+                "name": "read_order",
+                "args": {}
+              },
+              {
+                "name": "read_recipe",
+                "args": {}
+              },
+              {
+                "name": "read_pantry",
+                "args": {}
+              },
+              {
+                "name": "find_suppliers",
+                "args": {}
+              },
+              {
+                "name": "recall_order_memory",
+                "args": {}
+              },
+              {
+                "name": "prepare_meal",
+                "args": {}
+              },
+              {
+                "name": "finish_decision",
+                "args": {
+                  "summary": "Compared scoped pantry and supplier quotes."
+                }
+              }
+            ]
+          },
+          "final_response": {
+            "role": "model",
+            "parts": [
+              {
+                "text": "The scoped decision is saved for validation and commit."
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "eval_id": "heldout-restaurant-09",
+      "session_input": {
+        "app_name": "restaurant",
+        "user_id": "eval",
+        "state": {
+          "fixture": {
+            "order": {
+              "event": "ingredient.shortage",
+              "quantity": 11,
+              "safe_alternative": "rice"
+            },
+            "recipe": {
+              "ingredients": [
+                {
+                  "id": "flour",
+                  "quantity": 1
+                }
+              ]
+            },
+            "pantry": [],
+            "suppliers": [
+              {
+                "id": "release-supplier-8-0",
+                "procurement_fee_cents": 45,
+                "estimated_seconds": 259
+              },
+              {
+                "id": "release-supplier-8-1",
+                "procurement_fee_cents": 255,
+                "estimated_seconds": 59
+              }
+            ]
+          },
+          "soul": "cost"
+        }
+      },
+      "conversation": [
+        {
+          "user_content": {
+            "role": "user",
+            "parts": [
+              {
+                "text": "Handle reserved kitchen case 9, using current quantities, stock and supplier quotes."
+              }
+            ]
+          },
+          "intermediate_data": {
+            "tool_uses": [
+              {
+                "name": "read_order",
+                "args": {}
+              },
+              {
+                "name": "read_recipe",
+                "args": {}
+              },
+              {
+                "name": "read_pantry",
+                "args": {}
+              },
+              {
+                "name": "find_suppliers",
+                "args": {}
+              },
+              {
+                "name": "recall_order_memory",
+                "args": {}
+              },
+              {
+                "name": "offer_substitution",
+                "args": {
+                  "substitute": "rice"
+                }
+              },
+              {
+                "name": "finish_decision",
+                "args": {
+                  "summary": "Compared scoped pantry and supplier quotes."
+                }
+              }
+            ]
+          },
+          "final_response": {
+            "role": "model",
+            "parts": [
+              {
+                "text": "The scoped decision is saved for validation and commit."
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "eval_id": "heldout-restaurant-10",
+      "session_input": {
+        "app_name": "restaurant",
+        "user_id": "eval",
+        "state": {
+          "fixture": {
+            "order": {
+              "event": "ingredient.shortage",
+              "quantity": 12
+            },
+            "recipe": {
+              "ingredients": [
+                {
+                  "id": "flour",
+                  "quantity": 1
+                }
+              ]
+            },
+            "pantry": [],
+            "suppliers": [
+              {
+                "id": "release-supplier-9-0",
+                "procurement_fee_cents": 46,
+                "estimated_seconds": 260
+              },
+              {
+                "id": "release-supplier-9-1",
+                "procurement_fee_cents": 256,
+                "estimated_seconds": 60
+              }
+            ]
+          },
+          "soul": "cost"
+        }
+      },
+      "conversation": [
+        {
+          "user_content": {
+            "role": "user",
+            "parts": [
+              {
+                "text": "Handle reserved kitchen case 10, using current quantities, stock and supplier quotes."
+              }
+            ]
+          },
+          "intermediate_data": {
+            "tool_uses": [
+              {
+                "name": "read_order",
+                "args": {}
+              },
+              {
+                "name": "read_recipe",
+                "args": {}
+              },
+              {
+                "name": "read_pantry",
+                "args": {}
+              },
+              {
+                "name": "find_suppliers",
+                "args": {}
+              },
+              {
+                "name": "recall_order_memory",
+                "args": {}
+              },
+              {
+                "name": "decline_order",
+                "args": {
+                  "reason": "No safe available ingredient alternative."
+                }
+              },
+              {
+                "name": "finish_decision",
+                "args": {
+                  "summary": "Compared scoped pantry and supplier quotes."
+                }
+              }
+            ]
+          },
+          "final_response": {
+            "role": "model",
+            "parts": [
+              {
+                "text": "The scoped decision is saved for validation and commit."
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "eval_id": "heldout-restaurant-11",
+      "session_input": {
+        "app_name": "restaurant",
+        "user_id": "eval",
+        "state": {
+          "fixture": {
+            "order": {
+              "event": "household.call",
+              "quantity": 13
+            },
+            "recipe": {
+              "ingredients": [
+                {
+                  "id": "flour",
+                  "quantity": 1
+                }
+              ]
+            },
+            "pantry": [],
+            "suppliers": [
+              {
+                "id": "release-supplier-10-0",
+                "procurement_fee_cents": 47,
+                "estimated_seconds": 261
+              },
+              {
+                "id": "release-supplier-10-1",
+                "procurement_fee_cents": 257,
+                "estimated_seconds": 61
+              }
+            ]
+          },
+          "soul": "cost"
+        }
+      },
+      "conversation": [
+        {
+          "user_content": {
+            "role": "user",
+            "parts": [
+              {
+                "text": "Handle reserved kitchen case 11, using current quantities, stock and supplier quotes."
+              }
+            ]
+          },
+          "intermediate_data": {
+            "tool_uses": [
+              {
+                "name": "read_order",
+                "args": {}
+              },
+              {
+                "name": "read_recipe",
+                "args": {}
+              },
+              {
+                "name": "read_pantry",
+                "args": {}
+              },
+              {
+                "name": "find_suppliers",
+                "args": {}
+              },
+              {
+                "name": "recall_order_memory",
+                "args": {}
+              },
+              {
+                "name": "request_missing_ingredients",
+                "args": {
+                  "supplier": "release-supplier-10-0"
+                }
+              },
+              {
+                "name": "finish_decision",
+                "args": {
+                  "summary": "Compared scoped pantry and supplier quotes."
+                }
+              }
+            ]
+          },
+          "final_response": {
+            "role": "model",
+            "parts": [
+              {
+                "text": "The scoped decision is saved for validation and commit."
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "eval_id": "heldout-restaurant-12",
+      "session_input": {
+        "app_name": "restaurant",
+        "user_id": "eval",
+        "state": {
+          "fixture": {
+            "order": {
+              "event": "household.call",
+              "quantity": 14
+            },
+            "recipe": {
+              "ingredients": [
+                {
+                  "id": "flour",
+                  "quantity": 1
+                }
+              ]
+            },
+            "pantry": [],
+            "suppliers": [
+              {
+                "id": "release-supplier-11-0",
+                "procurement_fee_cents": 48,
+                "estimated_seconds": 262
+              },
+              {
+                "id": "release-supplier-11-1",
+                "procurement_fee_cents": 258,
+                "estimated_seconds": 62
+              }
+            ]
+          },
+          "soul": "speed"
+        }
+      },
+      "conversation": [
+        {
+          "user_content": {
+            "role": "user",
+            "parts": [
+              {
+                "text": "Handle reserved kitchen case 12, using current quantities, stock and supplier quotes."
+              }
+            ]
+          },
+          "intermediate_data": {
+            "tool_uses": [
+              {
+                "name": "read_order",
+                "args": {}
+              },
+              {
+                "name": "read_recipe",
+                "args": {}
+              },
+              {
+                "name": "read_pantry",
+                "args": {}
+              },
+              {
+                "name": "find_suppliers",
+                "args": {}
+              },
+              {
+                "name": "recall_order_memory",
+                "args": {}
+              },
+              {
+                "name": "request_missing_ingredients",
+                "args": {
+                  "supplier": "release-supplier-11-1"
+                }
+              },
+              {
+                "name": "finish_decision",
+                "args": {
+                  "summary": "Compared scoped pantry and supplier quotes."
+                }
+              }
+            ]
+          },
+          "final_response": {
+            "role": "model",
+            "parts": [
+              {
+                "text": "The scoped decision is saved for validation and commit."
+              }
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

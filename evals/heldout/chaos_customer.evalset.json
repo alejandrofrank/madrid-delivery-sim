@@ -1,0 +1,665 @@
+{
+  "eval_set_id": "release-heldout-v1-chaos_customer",
+  "eval_cases": [
+    {
+      "eval_id": "heldout-chaos_customer-01",
+      "session_input": {
+        "app_name": "customer_service",
+        "user_id": "eval",
+        "state": {
+          "facts": {
+            "order_id": "heldout-order-210",
+            "status": "assigned",
+            "courier_status": "delivering",
+            "sim": 157,
+            "duration": 3637,
+            "due_sim": 937,
+            "ready_sim": 337,
+            "earliest_ready": 337,
+            "eta_sim": 817
+          }
+        }
+      },
+      "conversation": [
+        {
+          "user_content": {
+            "role": "user",
+            "parts": [
+              {
+                "text": "Assess the current delivery facts for reserved release case 1; use only your scoped recovery tools."
+              }
+            ]
+          },
+          "intermediate_data": {
+            "tool_uses": [
+              {
+                "name": "read_context",
+                "args": {}
+              },
+              {
+                "name": "contact_customer",
+                "args": {
+                  "apology": true,
+                  "include_eta": true
+                }
+              }
+            ]
+          },
+          "final_response": {
+            "role": "model",
+            "parts": [
+              {
+                "text": "Recovery decision recorded."
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "eval_id": "heldout-chaos_customer-02",
+      "session_input": {
+        "app_name": "customer_service",
+        "user_id": "eval",
+        "state": {
+          "facts": {
+            "order_id": "heldout-order-211",
+            "status": "assigned",
+            "courier_status": "delivering",
+            "sim": 194,
+            "duration": 3674,
+            "due_sim": 974,
+            "ready_sim": 374,
+            "earliest_ready": 374,
+            "eta_sim": 854
+          }
+        }
+      },
+      "conversation": [
+        {
+          "user_content": {
+            "role": "user",
+            "parts": [
+              {
+                "text": "Assess the current delivery facts for reserved release case 2; use only your scoped recovery tools."
+              }
+            ]
+          },
+          "intermediate_data": {
+            "tool_uses": [
+              {
+                "name": "read_context",
+                "args": {}
+              },
+              {
+                "name": "contact_customer",
+                "args": {
+                  "apology": true,
+                  "include_eta": true
+                }
+              }
+            ]
+          },
+          "final_response": {
+            "role": "model",
+            "parts": [
+              {
+                "text": "Recovery decision recorded."
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "eval_id": "heldout-chaos_customer-03",
+      "session_input": {
+        "app_name": "customer_service",
+        "user_id": "eval",
+        "state": {
+          "facts": {
+            "order_id": "heldout-order-212",
+            "status": "assigned",
+            "courier_status": "delivering",
+            "sim": 231,
+            "duration": 3711,
+            "due_sim": 1011,
+            "ready_sim": 411,
+            "earliest_ready": 411,
+            "eta_sim": 891
+          }
+        }
+      },
+      "conversation": [
+        {
+          "user_content": {
+            "role": "user",
+            "parts": [
+              {
+                "text": "Assess the current delivery facts for reserved release case 3; use only your scoped recovery tools."
+              }
+            ]
+          },
+          "intermediate_data": {
+            "tool_uses": [
+              {
+                "name": "read_context",
+                "args": {}
+              },
+              {
+                "name": "contact_customer",
+                "args": {
+                  "apology": true,
+                  "include_eta": true
+                }
+              }
+            ]
+          },
+          "final_response": {
+            "role": "model",
+            "parts": [
+              {
+                "text": "Recovery decision recorded."
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "eval_id": "heldout-chaos_customer-04",
+      "session_input": {
+        "app_name": "customer_service",
+        "user_id": "eval",
+        "state": {
+          "facts": {
+            "order_id": "heldout-order-213",
+            "status": "assigned",
+            "courier_status": "delivering",
+            "sim": 268,
+            "duration": 3748,
+            "due_sim": 1048,
+            "ready_sim": 448,
+            "earliest_ready": 448,
+            "eta_sim": 928
+          }
+        }
+      },
+      "conversation": [
+        {
+          "user_content": {
+            "role": "user",
+            "parts": [
+              {
+                "text": "Assess the current delivery facts for reserved release case 4; use only your scoped recovery tools."
+              }
+            ]
+          },
+          "intermediate_data": {
+            "tool_uses": [
+              {
+                "name": "read_context",
+                "args": {}
+              },
+              {
+                "name": "contact_customer",
+                "args": {
+                  "apology": true,
+                  "include_eta": true
+                }
+              }
+            ]
+          },
+          "final_response": {
+            "role": "model",
+            "parts": [
+              {
+                "text": "Recovery decision recorded."
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "eval_id": "heldout-chaos_customer-05",
+      "session_input": {
+        "app_name": "customer_service",
+        "user_id": "eval",
+        "state": {
+          "facts": {
+            "order_id": "heldout-order-214",
+            "status": "assigned",
+            "courier_status": "delivering",
+            "sim": 305,
+            "duration": 3785,
+            "due_sim": 1085,
+            "ready_sim": 485,
+            "earliest_ready": 1385,
+            "eta_sim": 965
+          }
+        }
+      },
+      "conversation": [
+        {
+          "user_content": {
+            "role": "user",
+            "parts": [
+              {
+                "text": "Assess the current delivery facts for reserved release case 5; use only your scoped recovery tools."
+              }
+            ]
+          },
+          "intermediate_data": {
+            "tool_uses": [
+              {
+                "name": "read_context",
+                "args": {}
+              },
+              {
+                "name": "contact_customer",
+                "args": {
+                  "apology": true,
+                  "include_eta": true
+                }
+              }
+            ]
+          },
+          "final_response": {
+            "role": "model",
+            "parts": [
+              {
+                "text": "Recovery decision recorded."
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "eval_id": "heldout-chaos_customer-06",
+      "session_input": {
+        "app_name": "customer_service",
+        "user_id": "eval",
+        "state": {
+          "facts": {
+            "order_id": "heldout-order-215",
+            "status": "assigned",
+            "courier_status": "delivering",
+            "sim": 342,
+            "duration": 3822,
+            "due_sim": 1122,
+            "ready_sim": 522,
+            "earliest_ready": 522,
+            "eta_sim": 1002
+          }
+        }
+      },
+      "conversation": [
+        {
+          "user_content": {
+            "role": "user",
+            "parts": [
+              {
+                "text": "Assess the current delivery facts for reserved release case 6; use only your scoped recovery tools."
+              }
+            ]
+          },
+          "intermediate_data": {
+            "tool_uses": [
+              {
+                "name": "read_context",
+                "args": {}
+              },
+              {
+                "name": "contact_customer",
+                "args": {
+                  "apology": true,
+                  "include_eta": true
+                }
+              }
+            ]
+          },
+          "final_response": {
+            "role": "model",
+            "parts": [
+              {
+                "text": "Recovery decision recorded."
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "eval_id": "heldout-chaos_customer-07",
+      "session_input": {
+        "app_name": "customer_service",
+        "user_id": "eval",
+        "state": {
+          "facts": {
+            "order_id": "heldout-order-216",
+            "status": "assigned",
+            "courier_status": "offline",
+            "sim": 379,
+            "duration": 3859,
+            "due_sim": 1159,
+            "ready_sim": 559,
+            "earliest_ready": 559,
+            "eta_sim": null
+          }
+        }
+      },
+      "conversation": [
+        {
+          "user_content": {
+            "role": "user",
+            "parts": [
+              {
+                "text": "Assess the current delivery facts for reserved release case 7; use only your scoped recovery tools."
+              }
+            ]
+          },
+          "intermediate_data": {
+            "tool_uses": [
+              {
+                "name": "read_context",
+                "args": {}
+              },
+              {
+                "name": "contact_customer",
+                "args": {
+                  "apology": true,
+                  "include_eta": false
+                }
+              }
+            ]
+          },
+          "final_response": {
+            "role": "model",
+            "parts": [
+              {
+                "text": "Recovery decision recorded."
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "eval_id": "heldout-chaos_customer-08",
+      "session_input": {
+        "app_name": "customer_service",
+        "user_id": "eval",
+        "state": {
+          "facts": {
+            "order_id": "heldout-order-217",
+            "status": "assigned",
+            "courier_status": "delivering",
+            "sim": 416,
+            "duration": 3896,
+            "due_sim": 1196,
+            "ready_sim": 596,
+            "earliest_ready": 596,
+            "eta_sim": 1076
+          }
+        }
+      },
+      "conversation": [
+        {
+          "user_content": {
+            "role": "user",
+            "parts": [
+              {
+                "text": "Assess the current delivery facts for reserved release case 8; use only your scoped recovery tools."
+              }
+            ]
+          },
+          "intermediate_data": {
+            "tool_uses": [
+              {
+                "name": "read_context",
+                "args": {}
+              },
+              {
+                "name": "contact_customer",
+                "args": {
+                  "apology": true,
+                  "include_eta": true
+                }
+              }
+            ]
+          },
+          "final_response": {
+            "role": "model",
+            "parts": [
+              {
+                "text": "Recovery decision recorded."
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "eval_id": "heldout-chaos_customer-09",
+      "session_input": {
+        "app_name": "customer_service",
+        "user_id": "eval",
+        "state": {
+          "facts": {
+            "order_id": "heldout-order-218",
+            "status": "assigned",
+            "courier_status": "delivering",
+            "sim": 453,
+            "duration": 3933,
+            "due_sim": 1233,
+            "ready_sim": 633,
+            "earliest_ready": 633,
+            "eta_sim": 1113
+          }
+        }
+      },
+      "conversation": [
+        {
+          "user_content": {
+            "role": "user",
+            "parts": [
+              {
+                "text": "Assess the current delivery facts for reserved release case 9; use only your scoped recovery tools."
+              }
+            ]
+          },
+          "intermediate_data": {
+            "tool_uses": [
+              {
+                "name": "read_context",
+                "args": {}
+              },
+              {
+                "name": "contact_customer",
+                "args": {
+                  "apology": true,
+                  "include_eta": true
+                }
+              }
+            ]
+          },
+          "final_response": {
+            "role": "model",
+            "parts": [
+              {
+                "text": "Recovery decision recorded."
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "eval_id": "heldout-chaos_customer-10",
+      "session_input": {
+        "app_name": "customer_service",
+        "user_id": "eval",
+        "state": {
+          "facts": {
+            "order_id": "heldout-order-219",
+            "status": "assigned",
+            "courier_status": "delivering",
+            "sim": 490,
+            "duration": 3970,
+            "due_sim": 1270,
+            "ready_sim": 670,
+            "earliest_ready": 670,
+            "eta_sim": 1150
+          }
+        }
+      },
+      "conversation": [
+        {
+          "user_content": {
+            "role": "user",
+            "parts": [
+              {
+                "text": "Assess the current delivery facts for reserved release case 10; use only your scoped recovery tools."
+              }
+            ]
+          },
+          "intermediate_data": {
+            "tool_uses": [
+              {
+                "name": "read_context",
+                "args": {}
+              },
+              {
+                "name": "contact_customer",
+                "args": {
+                  "apology": true,
+                  "include_eta": true
+                }
+              }
+            ]
+          },
+          "final_response": {
+            "role": "model",
+            "parts": [
+              {
+                "text": "Recovery decision recorded."
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "eval_id": "heldout-chaos_customer-11",
+      "session_input": {
+        "app_name": "customer_service",
+        "user_id": "eval",
+        "state": {
+          "facts": {
+            "order_id": "heldout-order-220",
+            "status": "assigned",
+            "courier_status": "delivering",
+            "sim": 527,
+            "duration": 4007,
+            "due_sim": 1307,
+            "ready_sim": 707,
+            "earliest_ready": 707,
+            "eta_sim": 1187
+          }
+        }
+      },
+      "conversation": [
+        {
+          "user_content": {
+            "role": "user",
+            "parts": [
+              {
+                "text": "Assess the current delivery facts for reserved release case 11; use only your scoped recovery tools."
+              }
+            ]
+          },
+          "intermediate_data": {
+            "tool_uses": [
+              {
+                "name": "read_context",
+                "args": {}
+              },
+              {
+                "name": "contact_customer",
+                "args": {
+                  "apology": true,
+                  "include_eta": true
+                }
+              }
+            ]
+          },
+          "final_response": {
+            "role": "model",
+            "parts": [
+              {
+                "text": "Recovery decision recorded."
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "eval_id": "heldout-chaos_customer-12",
+      "session_input": {
+        "app_name": "customer_service",
+        "user_id": "eval",
+        "state": {
+          "facts": {
+            "order_id": "heldout-order-221",
+            "status": "assigned",
+            "courier_status": "delivering",
+            "sim": 564,
+            "duration": 4044,
+            "due_sim": 1344,
+            "ready_sim": 744,
+            "earliest_ready": 744,
+            "eta_sim": 1224
+          }
+        }
+      },
+      "conversation": [
+        {
+          "user_content": {
+            "role": "user",
+            "parts": [
+              {
+                "text": "Assess the current delivery facts for reserved release case 12; use only your scoped recovery tools."
+              }
+            ]
+          },
+          "intermediate_data": {
+            "tool_uses": [
+              {
+                "name": "read_context",
+                "args": {}
+              },
+              {
+                "name": "contact_customer",
+                "args": {
+                  "apology": true,
+                  "include_eta": true
+                }
+              }
+            ]
+          },
+          "final_response": {
+            "role": "model",
+            "parts": [
+              {
+                "text": "Recovery decision recorded."
+              }
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}
