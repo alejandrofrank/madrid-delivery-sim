@@ -251,7 +251,53 @@ were reviewed against source and official Google documentation on 2026-10-28;
 reading them requires no cloud deployment or paid inference.
 
 
-Milestone 1 includes 18 bike, moto, and van couriers across Chamberí, Retiro, and Puente de Vallecas; 24 real OSM pickup locations; 180 synthetic customers; and a seeded 10:00 to 22:00 service day. The map renders cached street geometry with no tile API key or external map requests.
+New Madrid runs include **42 couriers**, **48 real OSM pickup sites** and **270
+synthetic customer locations** across Chamberí, Retiro, and Puente de Vallecas,
+with a seeded 10:00–22:00 service day. Pickup sites come from the packaged OSM
+snapshot, rather than a claim about current business opening hours. The original
+24 site IDs and district assignments are preserved. Existing runs keep their
+recorded courier rosters; start a new session to use the expanded network.
+
+### Independent courier fleets
+
+These are simulated operators. Each run freezes its fleet definitions in
+`runs.fleet_config`; courier membership is stored separately from vehicle mode.
+
+| Fleet | Couriers | Vehicles | Service rule | Communication |
+| --- | ---: | --- | --- | --- |
+| Bakiano | 24 | Bike, moto, van | Full service area | Direct: “Route accepted.” |
+| Sol Riders | 9 | Bike | Pickup and delivery in the rider's home district | Conversational: “Got it. Route accepted.” |
+| Castellana Logistics | 9 | Moto, van | Full service area | Radio style: “Copy. Route accepted.” |
+
+Each contractor has its own roster, availability, delivery count and cost ledger.
+Dispatch and demand-aware repositioning enforce the service rules. The normal
+deadline/cost optimizer selects among eligible riders; no fleet receives a hidden
+priority. Couriers still use the existing deterministic execution policy, with no
+additional paid model calls. Fleet independence here means separate simulated
+operators and contracts, not separate worker processes or security tenants.
+
+Acceptances use the durable `courier.accepted` queue message. A shared
+`courier-status/1` envelope records fleet identity, sender, recipient, order,
+status and a route-derived ETA. Only the human-readable wording varies. Pickup,
+completion and repositioning messages are retained in decision evidence; this
+does not add new A2A wire formats. Dispatcher calls continue through the existing
+A2A/in-process interface. `/api/state` and run exports include per-fleet totals;
+the read-only MCP courier query includes fleet membership.
+
+Use **Fleet** above the roster to filter both agents and map trails. Select a
+courier and **View decisions** to inspect its messages, operator, service area and
+costs. Contractor names are simulation fixtures, not affiliations with real firms.
+
+### Ingredient mismatch coverage
+
+The **Restaurant lab** already compares recipes with stock, requests missing
+quantities from markets, and handles approved ingredient substitutions. Both
+household and restaurant approval are required; exclusions and denied
+substitutions can make an order unfulfillable. These behaviors are covered by
+`tests/test_supply_integration.py`. The main Madrid operations map does not model
+ingredient inventories, and accidental wrong ingredients in a delivered meal are
+not a physical simulation event. Customer-service wrong-item evaluation is a
+separate policy/escalation scenario.
 
 
 
