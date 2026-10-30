@@ -395,6 +395,65 @@ Sources: [Jev decision adapter](../src/delivery/jev_routing.py),
 [local failure/isolation checks](../tests/test_jev_routing.py),
 [matched comparison runner](../scripts/compare_agent_routing.py).
 
+## Tool-contract enforcement and correction
+
+Gemini requests now use `VALIDATED` function calling with an explicit allowlist
+derived from this frozen agent's actual tools. The platform instructions, role
+prompt and `finish_decision` declaration state the 1–500-character summary limit.
+Google's function schema support does not make arbitrary string-length constraints
+a server guarantee; Python and SQL continue to enforce the bound independently.
+
+A completed model proposal can receive a structured `tool_contract` response for
+an invented function name or an invalid summary length. An invented name is never
+aliased or executed. A long summary is never silently truncated. The agent must
+propose an exact declared function or rewrite its explanation while keeping its
+original staged action. Successful `finish_decision` ends the ADK loop, avoiding
+a further model call just to summarize the saved decision.
+
+Postgres records each rejection in the existing private tool-receipt ledger,
+under the current authenticated turn, nonce and lease. At most two corrections
+are allowed per event, serialized with the live turn lock. Each costs an ordinary
+tool slot, and each subsequent model call needs its own durable token/money
+admission. The correction helper requires a completed model response and refuses
+unfinished dispatches, finished plans and foreign roles. Scope-bearing arguments,
+disabled tools, budget denials, stale facts and lease failures remain fatal. No
+provider timeout or unknown dispatch is retried by this mechanism.
+
+Local tests replay both observed failures, verify one staging receipt and one
+valid finish before atomic effects, and terminate repeated malformed proposals
+without sourcing. Cross-role helper calls and scope injection remain denied.
+
+The one-shot live verification is separate from the original failed comparison:
+
+```bash
+make gcp-vertex-start
+make verify-adk-contracts
+make gcp-stop
+```
+
+It runs three one-order cases: a stocked pantry for direct Jev confirmation,
+Mateo's cost explanation and Elena's speed-versus-fee explanation. The latter
+cases explicitly request reasoned explanations to exercise Gemini's tool contract.
+They are repair checks, not a new paired architecture benchmark. Thresholds remain
+0.85 confidence and 0.20 margin. Each case admits one Jev call and no legacy
+relevance searches; Vertex admission is at most 0.06 USD in each Gemini case.
+The combined conservative reservation ceiling is 0.1215 USD, within a 0.15 USD
+allowance. A permanent marker prevents automatic repeat spending.
+
+The direct case uses an offline secondary-model profile with a one-token
+admission ceiling. If Jev is uncertain, it cannot dispatch any secondary model.
+Success requires an actual validated Jev `direct` / `confirm` response, physical
+delivery, and an empty model-call ledger—not merely zero Gemini cost. All cases
+must preserve stock, replay and queue invariants and deny raw stock/model/router
+table access through the restaurant's actual login. The normal UI retains no
+provider credentials or paid opt-in. `/agent-traces` shows the new results above
+the unchanged failed comparison.
+
+Sources: [correction admission and receipt function](../sql/migrations/025_adk_contract_corrections.sql),
+[bounded live verifier](../scripts/verify_adk_contracts.py).
+Official references: [Google function-calling modes](https://docs.cloud.google.com/gemini-enterprise-agent-platform/models/tools/function-calling),
+[ADK tool callback responses](https://adk.dev/callbacks/types-of-callbacks/).
+
 Official deployment references: [Gemini model lifecycle](https://docs.cloud.google.com/gemini-enterprise-agent-platform/models/model-versions),
 [3.5 Flash-Lite capabilities](https://docs.cloud.google.com/gemini-enterprise-agent-platform/models/gemini/3-5-flash-lite),
 [Vertex pricing](https://cloud.google.com/model-garden/pricing),

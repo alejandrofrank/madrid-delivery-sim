@@ -40,9 +40,12 @@ def main() -> None:
     parser.add_argument("--resume", action="store_true")
     parser.add_argument("--routing-comparison", action="store_true")
     parser.add_argument("--contract-verification", action="store_true")
+    parser.add_argument("--reviewed-followup", action="store_true")
     parser.add_argument("--continue-planned", action="store_true")
     parser.add_argument("--reviewed-failure", action="store_true")
     args = parser.parse_args()
+    if args.reviewed_followup and not args.contract_verification:
+        raise DemoError("Reviewed follow-up is restricted to the contract verifier")
     if args.contract_verification and (
         args.routing_comparison
         or args.resume
@@ -69,7 +72,14 @@ def main() -> None:
     experiment_dir = demo.root / ".env.adk-experiments"
     if args.contract_verification:
         experiment_dir.mkdir(exist_ok=True)
-        if (experiment_dir / "contract-verification.execution.json").exists() or (
+        if args.reviewed_followup:
+            if (
+                not (experiment_dir / "contract-verification.execution.json").is_file()
+                or not (demo.root / "artifacts/adk-contract-verification.json").is_file()
+                or (experiment_dir / "contract-followup.execution.json").exists()
+            ):
+                raise DemoError("Prior stopped evidence required; reviewed follow-up claimed once")
+        elif (experiment_dir / "contract-verification.execution.json").exists() or (
             demo.root / "artifacts/adk-contract-verification.json"
         ).exists():
             raise DemoError("Contract verification already claimed; inspect retained evidence")
@@ -182,6 +192,7 @@ def main() -> None:
                 *(["--after-review"] if args.after_review else []),
                 *(["--resume"] if args.resume else []),
                 *continuation_flags,
+                *(["--reviewed-followup"] if args.reviewed_followup else []),
                 env=env,
             )
         )

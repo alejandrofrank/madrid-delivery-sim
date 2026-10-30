@@ -109,6 +109,42 @@ def benchmark(monkeypatch):
     return module
 
 
+def test_reviewed_followup_retains_cost_and_rejects_attempted_or_overbudget_cases(
+    contracts, benchmark, profile, route
+):
+    evidence = {"calls": [], "turns": [], "jev_calls": [], "searches": []}
+    cost = benchmark.account_evidence(evidence, [route])["cost"]
+    previous = {
+        "status": "failed",
+        "arms": [
+            {"id": "pantry-direct", "status": "failed", "run": "retained-run",
+             "evidence": evidence, "route_decisions": [route], "cost": cost,
+             "provider_calls": {"gemini": 0}},
+            {"status": "planned", "run": None},
+            {"status": "planned", "run": None},
+        ],
+    }
+    budget = contracts.admission(contracts.planned_cases(profile))
+    carryover = contracts.followup_budget(previous, budget)
+    assert Decimal(carryover["prior_total_accounted_usd"]) > 0
+    receipt = {"arms": [], "carryover": carryover}
+    contracts.update(receipt)
+    assert receipt["accounting"]["total_accounted_usd"] == carryover["prior_total_accounted_usd"]
+    for mutate in (
+        lambda p: p["arms"][1].update(run="already-attempted"),
+        lambda p: p["arms"][0]["cost"].update(accounted_usd="0"),
+        lambda p: p["arms"][0]["provider_calls"].update(gemini=1),
+    ):
+        altered = copy.deepcopy(previous)
+        mutate(altered)
+        with pytest.raises(PermissionError):
+            contracts.followup_budget(altered, budget)
+    with pytest.raises(PermissionError, match="allowance"):
+        contracts.followup_budget(
+            previous, {**budget, "combined_conservative_admission_usd": ".15"}
+        )
+
+
 @pytest.fixture
 def profile(benchmark):
     return benchmark.VertexProfile(
