@@ -26,6 +26,7 @@ from delivery.chaos import (
     evidence as chaos_evidence,
 )
 from delivery.config import settings
+from delivery.contractors import fleet_contract, fleet_plan
 from delivery.customer_service import CustomerService
 from delivery.db import Connection, connect, migrate
 from delivery.dispatch_policy import DispatchPolicy, load_policy
@@ -94,12 +95,14 @@ def create_run(
 ) -> str:
     run = str(uuid4())
     policy = dispatch or DispatchPolicy()
+    fleets = fleet_plan()
     disruptions = schedule(chaos, seed, duration) if chaos is not None else []
     with connect(url) as conn:
         seed_locations(conn, world)
         conn.execute(
-            "INSERT INTO runs(id,seed,wall_seconds,duration,dispatch_config,chaos_config) "
-            "VALUES (%s,%s,%s,%s,%s,%s)",
+            "INSERT INTO runs(id,seed,wall_seconds,duration,dispatch_config,"
+            "chaos_config,fleet_config) "
+            "VALUES (%s,%s,%s,%s,%s,%s,%s)",
             (
                 run,
                 seed,
@@ -107,6 +110,7 @@ def create_run(
                 duration,
                 Jsonb(policy.model_dump()),
                 Jsonb(chaos.model_dump()) if chaos is not None else None,
+                Jsonb(fleets),
             ),
         )
         hubs = conn.execute("SELECT * FROM locations WHERE kind='hub' ORDER BY id").fetchall()
@@ -118,19 +122,26 @@ def create_run(
                     "WHERE kind='store' AND district=%s ORDER BY node,id",
                     (hub["district"],),
                 ).fetchall() or [hub]
-            for index, mode in enumerate(("bike", "bike", "moto", "moto", "van", "van")):
-                start = starts[index % len(starts)]
+            roster = [
+                (fleet["id"], index, mode)
+                for fleet in fleets["fleets"]
+                for index, mode in enumerate(fleet["modes_per_hub"])
+            ]
+            for offset, (fleet_id, index, mode) in enumerate(roster):
+                start = starts[offset % len(starts)]
+                prefix = "" if fleet_id == "regular" else f"{fleet_id}-"
                 conn.execute(
-                    """INSERT INTO couriers(run_id,id,hub,mode,node,point,shift_end)
-                       VALUES (%s,%s,%s,%s,%s,%s,%s)""",
+                    """INSERT INTO couriers(run_id,id,hub,mode,node,point,shift_end,fleet_id)
+                       VALUES (%s,%s,%s,%s,%s,%s,%s,%s)""",
                     (
                         run,
-                        f"{hub['id']}-{index + 1:02d}",
+                        f"{prefix}{hub['id']}-{index + 1:02d}",
                         hub["id"],
                         mode,
                         start["node"],
                         start["point"],
                         duration,
+                        fleet_id,
                     ),
                 )
         for event in disruptions:
@@ -241,7 +252,7 @@ def snapshot(run: str | None = None, url: str | None = None) -> dict[str, Any]:
             else None
         )
         couriers = conn.execute(
-            """SELECT c.id,c.hub,c.node,c.mode,c.status,c.energy,c.distance_m,
+            """SELECT c.id,c.hub,c.node,c.mode,c.status,c.energy,c.distance_m,c.fleet_id,
                c.completed_jobs,c.empty_distance_m,c.reposition_distance_m,c.operating_cost_eur,
                ST_X(c.point) AS lon,ST_Y(c.point) AS lat,o.id AS order_id,
                coalesce(o.route,c.reposition_route) AS route FROM couriers c LEFT JOIN orders o
@@ -249,6 +260,25 @@ def snapshot(run: str | None = None, url: str | None = None) -> dict[str, Any]:
                WHERE c.run_id=%s ORDER BY c.id""",
             (run,),
         ).fetchall()
+        for courier in couriers:
+            contract = fleet_contract(state["fleet_config"], courier["fleet_id"])
+            courier["fleet_name"] = contract["name"]
+            courier["operator"] = contract["operator"]
+            courier["communication_style"] = contract["style"]
+            courier["coverage"] = contract["coverage"]
+        fleets_state = []
+        for fleet_id in sorted({c["fleet_id"] for c in couriers}):
+            members = [c for c in couriers if c["fleet_id"] == fleet_id]
+            contract = fleet_contract(state["fleet_config"], fleet_id)
+            fleets_state.append(
+                {
+                    **contract,
+                    "couriers": len(members),
+                    "available": sum(c["status"] == "idle" for c in members),
+                    "completed_jobs": sum(c["completed_jobs"] for c in members),
+                    "operating_cost_eur": round(sum(c["operating_cost_eur"] for c in members), 4),
+                }
+            )
         metrics["empty_km"] = round(sum(c["empty_distance_m"] for c in couriers) / 1000, 3)
         metrics["reposition_km"] = round(
             sum(c["reposition_distance_m"] for c in couriers) / 1000, 3
@@ -260,6 +290,8 @@ def snapshot(run: str | None = None, url: str | None = None) -> dict[str, Any]:
             metrics["cost_basis"] = "legacy_completed_task_estimate"
             metrics["empty_km"] = metrics["reposition_km"] = None
             metrics["operating_cost_eur"] = metrics["delivery_cost_eur"]
+            for fleet in fleets_state:
+                fleet["completed_jobs"] = fleet["operating_cost_eur"] = None
             for courier in couriers:
                 for field in (
                     "empty_distance_m",
@@ -309,6 +341,7 @@ def snapshot(run: str | None = None, url: str | None = None) -> dict[str, Any]:
         "run": state,
         "metrics": metrics,
         "couriers": couriers,
+        "fleets": fleets_state,
         "orders": orders,
         "queue": {r["state"]: r["count"] for r in queue},
         "decisions": decisions,

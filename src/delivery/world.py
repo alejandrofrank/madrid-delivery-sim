@@ -245,12 +245,24 @@ def seed_locations(conn: Connection, world: World) -> None:
     stores = json.loads((DATA / "stores.json").read_text(encoding="utf-8"))
     locations = []
     selected: set[str] = set()
+    # Reserve the original eight sites per district before extending each roster.
+    # This preserves existing site IDs and district ownership on upgrade/reseed.
+    ranked_by_hub = {
+        hub_id: sorted(
+            stores, key=lambda s: (math.hypot(s["lon"] - lon, s["lat"] - lat), s["osm_id"])
+        )
+        for hub_id, _, lat, lon in HUBS
+    }
+    store_rosters: dict[str, list[dict[str, Any]]] = {h[0]: [] for h in HUBS}
+    for _ in range(2):
+        for hub_id, _, _, _ in HUBS:
+            additions = [s for s in ranked_by_hub[hub_id] if s["osm_id"] not in selected][:8]
+            store_rosters[hub_id].extend(additions)
+            selected.update(s["osm_id"] for s in additions)
     for hub_id, district, lat, lon in HUBS:
         hub_node = world.nearest(lon, lat)
         locations.append((hub_id, "hub", f"{district} hub", district, hub_node, None))
-        ranked = sorted(stores, key=lambda s: math.hypot(s["lon"] - lon, s["lat"] - lat))
-        for store in [s for s in ranked if s["osm_id"] not in selected][:8]:
-            selected.add(store["osm_id"])
+        for store in store_rosters[hub_id]:
             locations.append(
                 (
                     f"store-{store['osm_id']}",
@@ -263,7 +275,7 @@ def seed_locations(conn: Connection, world: World) -> None:
             )
         nearby = sorted(world.nodes, key=lambda n: math.dist(world.coord(n), [lon, lat]))
         # Stable, distinct synthetic customers on actual street nodes in each district.
-        for i, node in enumerate(nearby[20:620:10]):
+        for i, node in enumerate(nearby[20:920:10]):
             locations.append(
                 (
                     f"customer-{hub_id}-{i:03d}",

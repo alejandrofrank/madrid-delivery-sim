@@ -9,6 +9,7 @@ from typing import Any
 import networkx as nx
 from psycopg.types.json import Jsonb
 
+from delivery.contractors import fleet_contract
 from delivery.db import Connection
 from delivery.dispatch_policy import DispatchPolicy, operating_cost
 from delivery.queue import Event, publish
@@ -40,12 +41,18 @@ def relocation_choice(
         return sum(
             min(3.0, d["orders"] * 900 / policy.demand_window_seconds)
             * min(
-                pickup_seconds(
-                    moved_to if c["id"] == courier["id"] and moved_to is not None else c["node"],
-                    d["node"],
-                    c["mode"],
-                )
-                for c in fleet
+                (
+                    pickup_seconds(
+                        moved_to
+                        if c["id"] == courier["id"] and moved_to is not None
+                        else c["node"],
+                        d["node"],
+                        c["mode"],
+                    )
+                    for c in fleet
+                    if not c.get("service_district") or c["service_district"] == d.get("district")
+                ),
+                default=7200.0,
             )
             for d in demand
         )
@@ -53,6 +60,8 @@ def relocation_choice(
     before = coverage()
     best: tuple[dict[str, Any], float] | None = None
     for store in sorted(demand, key=lambda d: d["store"]):
+        if courier.get("service_district") and courier["service_district"] != store.get("district"):
+            continue
         if store["orders"] < 2 or store["node"] == courier["node"]:
             continue
         try:
@@ -82,24 +91,36 @@ def reposition_idle(
 ) -> None:
     sim = run["sim_time"]
     demand = conn.execute(
-        """SELECT o.store,l.node,count(*) AS orders FROM orders o
+        """SELECT o.store,l.node,l.district,count(*) AS orders FROM orders o
            JOIN locations l ON l.id=o.store WHERE o.run_id=%s
-           AND o.created_sim BETWEEN %s AND %s GROUP BY o.store,l.node""",
+           AND o.created_sim BETWEEN %s AND %s GROUP BY o.store,l.node,l.district""",
         (event.run_id, max(0, sim - policy.demand_window_seconds), sim),
     ).fetchall()
     idle = conn.execute(
-        """SELECT * FROM couriers WHERE run_id=%s AND status='idle' AND energy>10
-           AND shift_end>%s ORDER BY idle_since_sim,completed_jobs,id
-           FOR UPDATE SKIP LOCKED LIMIT 100""",
+        """SELECT c.*,h.district AS home_district FROM couriers c
+           JOIN locations h ON h.id=c.hub WHERE c.run_id=%s AND c.status='idle' AND c.energy>10
+           AND c.shift_end>%s ORDER BY c.idle_since_sim,c.completed_jobs,c.id
+           FOR UPDATE OF c SKIP LOCKED LIMIT 100""",
         (event.run_id, sim),
     ).fetchall()
     moving = conn.execute(
-        "SELECT id,mode,reposition_route FROM couriers WHERE run_id=%s "
-        "AND status IN ('repositioning','reposition_reserved')",
+        "SELECT c.id,c.mode,c.reposition_route,c.fleet_id,h.district AS home_district "
+        "FROM couriers c JOIN locations h ON h.id=c.hub WHERE c.run_id=%s "
+        "AND c.status IN ('repositioning','reposition_reserved')",
         (event.run_id,),
     ).fetchall()
+    for c in idle + moving:
+        contract = fleet_contract(run["fleet_config"], c["fleet_id"])
+        c["service_district"] = (
+            c["home_district"] if contract["coverage"] == "home_district" else None
+        )
     fleet = [dict(c) for c in idle] + [
-        {"id": c["id"], "mode": c["mode"], "node": c["reposition_route"]["destination"]}
+        {
+            "id": c["id"],
+            "mode": c["mode"],
+            "node": c["reposition_route"]["destination"],
+            "service_district": c["service_district"],
+        }
         for c in moving
     ]
     # A maximum of two moves per event; reserved destinations cover subsequent choices.

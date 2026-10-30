@@ -31,7 +31,7 @@ def create_mcp_server(url: str | None = None) -> MCPServer[Any]:
     def courier_positions(run_id: UUID) -> list[dict[str, Any]]:
         """Read courier positions, mode and availability in a run."""
         return query(
-            "SELECT id,mode,status,ST_X(point) lon,ST_Y(point) lat "
+            "SELECT id,mode,status,fleet_id,ST_X(point) lon,ST_Y(point) lat "
             "FROM couriers WHERE run_id=%s ORDER BY id LIMIT 500",
             (run_id,),
         )

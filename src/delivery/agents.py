@@ -5,6 +5,7 @@ from typing import Any
 import networkx as nx
 from psycopg.types.json import Jsonb
 
+from delivery.contractors import communication, eligible, fleet_contract
 from delivery.customer_service import Advice, refund_policy
 from delivery.db import Connection
 from delivery.dispatch_optimizer import Candidate, optimize_dispatch
@@ -37,9 +38,10 @@ class Dispatcher:
             (event.run_id,),
         ).fetchall()
         couriers = conn.execute(
-            """SELECT * FROM couriers WHERE run_id=%s AND status='idle'
-               AND energy>10 AND shift_end>%s ORDER BY idle_since_sim,completed_jobs,id
-               FOR UPDATE SKIP LOCKED LIMIT 100""",
+            """SELECT c.*,h.district AS home_district FROM couriers c
+               JOIN locations h ON h.id=c.hub WHERE c.run_id=%s AND c.status='idle'
+               AND c.energy>10 AND c.shift_end>%s ORDER BY c.idle_since_sim,c.completed_jobs,c.id
+               FOR UPDATE OF c SKIP LOCKED LIMIT 100""",
             (event.run_id, sim),
         ).fetchall()
         routes: dict[tuple[str, str], dict[str, Any]] = {}
@@ -53,6 +55,9 @@ class Dispatcher:
         ranks = fair_ranks(couriers, f"{row['seed']}:{sim}")
         for order in pending:
             for courier in couriers:
+                contract = fleet_contract(row["fleet_config"], courier["fleet_id"])
+                if not eligible(contract, courier, order):
+                    continue
                 try:
                     route = self.world.route(
                         courier["node"],
@@ -131,7 +136,11 @@ class Dispatcher:
                 run_id=event.run_id,
                 producer="dispatcher",
                 topic="courier.assigned",
-                payload={"order_id": order["id"], "courier_id": courier["id"]},
+                payload={
+                    "order_id": order["id"],
+                    "courier_id": courier["id"],
+                    "fleet_id": courier["fleet_id"],
+                },
                 key=f"assignment:{order['id']}:{order['version'] + 1}",
                 trace_id=order["id"],
                 parent_id=event.id,
@@ -146,6 +155,7 @@ class Dispatcher:
                 "assigned",
                 {
                     "rule": policy.strategy,
+                    "fleet": fleet_contract(row["fleet_config"], courier["fleet_id"]),
                     "objective": (
                         "max served; earliest deadlines; min cost; longest idle/fewer jobs"
                         if policy.strategy == "min_cost"
@@ -186,6 +196,33 @@ class Dispatcher:
             reposition_idle(conn, event, self.world, row, policy)
 
 
+def courier_trace(
+    conn: Connection,
+    run: str,
+    sim: int,
+    agent: str,
+    action: str,
+    detail: dict[str, Any],
+    order: str | None = None,
+    courier: str | None = None,
+    event: int | None = None,
+) -> None:
+    row = conn.execute(
+        "SELECT c.fleet_id,r.fleet_config FROM couriers c JOIN runs r ON r.id=c.run_id "
+        "WHERE c.run_id=%s AND c.id=%s",
+        (run, courier),
+    ).fetchone()
+    assert row and courier
+    message = communication(
+        fleet_contract(row["fleet_config"], row["fleet_id"]),
+        courier,
+        action,
+        order=order,
+        eta_sim=detail.get("eta_sim"),
+    )
+    trace(conn, run, sim, agent, action, {**detail, "message": message}, order, courier, event)
+
+
 class Courier:
     def handle(self, conn: Connection, event: Event) -> None:
         courier = event.payload["courier_id"]
@@ -216,7 +253,7 @@ class Courier:
                     parent_id=event.id,
                     due_sim=row["sim_time"],
                 )
-                trace(
+                courier_trace(
                     conn,
                     str(event.run_id),
                     row["sim_time"],
@@ -232,7 +269,7 @@ class Courier:
                 "WHERE run_id=%s AND id=%s",
                 (Jsonb(route), event.run_id, courier),
             )
-            trace(
+            courier_trace(
                 conn,
                 str(event.run_id),
                 row["sim_time"],
@@ -275,7 +312,7 @@ class Courier:
                 parent_id=event.id,
                 due_sim=order["sim_time"],
             )
-            trace(
+            courier_trace(
                 conn,
                 str(event.run_id),
                 order["sim_time"],
@@ -295,7 +332,7 @@ class Courier:
             "UPDATE couriers SET status='to_pickup' WHERE run_id=%s AND id=%s",
             (event.run_id, courier),
         )
-        trace(
+        courier_trace(
             conn,
             str(event.run_id),
             order["sim_time"],
@@ -304,10 +341,36 @@ class Courier:
             {
                 "rule": "follow approved road route; depart after acceptance; wait for preparation",
                 "departure_sim": route.get("start_at", route["points"][0][2]),
+                "eta_sim": route["end_at"],
             },
             event.payload["order_id"],
             courier,
             event.id,
+        )
+
+        fleet = conn.execute(
+            "SELECT c.fleet_id,r.fleet_config FROM couriers c JOIN runs r ON r.id=c.run_id "
+            "WHERE c.run_id=%s AND c.id=%s",
+            (event.run_id, courier),
+        ).fetchone()
+        assert fleet
+        message = communication(
+            fleet_contract(fleet["fleet_config"], fleet["fleet_id"]),
+            courier,
+            "accepted_route",
+            order=order["id"],
+            eta_sim=route["end_at"],
+        )
+        publish(
+            conn,
+            run_id=event.run_id,
+            producer="courier",
+            topic="courier.accepted",
+            payload={"order_id": order["id"], "courier_id": courier, "message": message},
+            key=f"accepted:{event.id}",
+            trace_id=order["id"],
+            parent_id=event.id,
+            due_sim=order["sim_time"],
         )
 
     def advance(self, conn: Connection, run: str, sim: int) -> None:
@@ -335,7 +398,7 @@ class Courier:
                     trace_id=f"reposition:{courier['id']}:{route['start_at']}",
                     due_sim=sim,
                 )
-                trace(
+                courier_trace(
                     conn,
                     run,
                     sim,
@@ -370,7 +433,7 @@ class Courier:
                     "UPDATE couriers SET status='delivering' WHERE run_id=%s AND id=%s",
                     (run, order["courier"]),
                 )
-                trace(
+                courier_trace(
                     conn,
                     run,
                     sim,
@@ -405,7 +468,7 @@ class Courier:
                         due_sim=sim,
                         parent_id=parent_id,
                     )
-                trace(
+                courier_trace(
                     conn,
                     run,
                     sim,
