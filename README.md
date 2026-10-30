@@ -6,7 +6,8 @@ Queue-driven delivery agents on Madrid streets, with Google ADK, real A2A endpoi
 
 The redesigned console spans seven workspaces. Run `make setup` and open
 **[localhost:8010](http://localhost:8010/)**. This is the single development instance;
-run it from the active feature worktree using the existing Compose project name.
+the consolidated instance runs from the main checkout under the existing Compose
+project name. Keep one instance when switching a development checkout.
 The older 8021 UI preview has been stopped. Its UI changes were already merged
 into `main`; its files and data were preserved. [Before/after, verification and limits](docs/UI-REDESIGN.md).
 
@@ -34,7 +35,7 @@ flowchart LR
 
 | Headline result | Evidence and scope |
 | --- | --- |
-| Tests | **842 passed**; Ruff and mypy (72 modules) passed. [A2A and Chaos verification](docs/evidence/a2a-chaos-local.json). |
+| Tests | **852 passed**; six courier-motion checks, Ruff and mypy (73 modules) passed. [Combined verification](docs/evidence/public-integration.json). |
 | Scenarios | 12 deterministic role scenarios, run twice with matching outcomes. |
 | Cost per local run | **$0 in cloud/model charges**; local compute excluded. |
 | Evaluation pass rate | **144/144 ADK attempts**, four A2A recovery scenarios repeated twice, and two matching seeded Chaos runs. These scripted checks measure contracts, recovery and policy, not live-model quality. [Verification](docs/evidence/a2a-chaos-local.json). |

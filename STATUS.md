@@ -1,5 +1,21 @@
 # Status
 
+2026-10-30 (public-release preparation and A2A integration): Preserved the pending
+eval-branch work as three logical commits, then retained main's newer ADK repair
+accounting and live trace page during integration. The combined A2A, Chaos and
+contractor-fleet branch passed 852 Python tests, six courier-motion checks, Ruff,
+mypy across 73 modules, and the seeded Chaos recovery/policy checks. No code was
+stashed. Repository snapshots, the generated image, local logs and duplicated
+editor tooling were removed from the working tree; private local files were
+preserved outside Git and paid-experiment markers retained. The project name is
+madrid-delivery-sim throughout current labels and contributor documents. The
+history scan found three verified source-fingerprint false positives and zero
+confirmed credentials. No history rewrite or visibility change was performed.
+See [combined evidence](docs/evidence/public-integration.json) and the
+[public-readiness review](docs/PUBLIC-READINESS.md). PR #4 carries the eval cleanup;
+PR #3 carries A2A, Chaos and fleets. Both require their current test/eval results
+before merge. The consolidated local runtime uses port 8010 from main.
+
 2026-10-29 (complete branch integration): Added the completed economic-dispatch
 branch to the Google stack, evaluation, observability and UI integration. The
 approved dark operations layout now includes dispatch policies, operating costs
