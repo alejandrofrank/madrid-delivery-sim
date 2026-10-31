@@ -12,7 +12,7 @@ Technical reviewers evaluating a Google Cloud AI application portfolio are the p
 Make queue-driven delivery agents, their role boundaries, tool/model decisions, recovery behavior and operational outcomes inspectable. madrid-delivery-sim runs local simulations and optionally uses Google Cloud AI.
 
 ## Operating Context
-Existing static HTML/CSS/JavaScript pages backed by the Python service. Workspaces: Madrid baseline, delivery flow, restaurant supply, inventory lab, health/evaluations, AI traces and architecture documentation. Default runs make no paid provider calls.
+Existing static HTML/CSS/JavaScript pages backed by the Python service. Workspaces: Madrid operations, restaurant supply, inventory lab, health/evaluations, AI traces and architecture documentation. Default runs make no paid provider calls.
 
 ## Capabilities and Constraints
 Preserve backend behavior and existing tests. Use dependency-light, free map/chart solutions. All redesign work occurs in the isolated mds-ui worktree on feat/ui-redesign. Keep private configuration, credentials, state and plans out of Git. Metrics and costs must disclose unavailable evidence rather than fabricate values.

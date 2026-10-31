@@ -1,8 +1,9 @@
 # UI redesign · verification and visual record
 
-The redesign is integrated into all seven live routes on `feat/ui-redesign`.
-The isolated preview is **[localhost:8021](http://localhost:8021/)**.
-The original checkout and its server on port 8010 were not changed. The separately hosted concept review was a reference, not the application.
+The redesign is integrated into the main application at **[localhost:8010](http://localhost:8010/)**.
+The original seven-workspace review below is a historical record. The Delivery
+grid UI has since been retired, leaving six workspaces; its URL redirects to Operations.
+The former port 8021 preview is no longer a separate development target.
 
 The audience is technical reviewers first, with operators using the same interface.
 The selected direction combines an agent-led roster with a continuously visible map.
@@ -14,7 +15,6 @@ The product view shows business metrics and concise evidence, with deeper detail
 | Workspace | Change |
 | --- | --- |
 | Madrid · `/` | Dense agent/map pairing, role/status/search filters, distinct bike/moto/van SVGs, status colors, low-zoom clustering, route interpolation, fading traveled trails, symbol/route legend, popups and trace links. Delivered orders, on-time rate, estimated cost/delivery and orders/min use actual runtime data. |
-| Delivery · `/delivery-lab` | Live role roster beside the city, map/agent selection, truthful offline status, observed throughput, separate simulation controls, collapsed run evidence and trace navigation. |
 | Restaurants · `/restaurant-lab` | Unique entity names and stable agent IDs, searchable role/status roster, map selection, business metrics, observed fact counts and separate definitions. |
 | Inventory · `/lab` | Shared shell and dark map, clear no-session state, unavailable controls disabled, checkpoint and stock inspection retained. |
 | Health · `/health` | Shared visual hierarchy, readable evidence/status tables, explicit missing measurements and stale-result warnings; original test/evaluation behavior preserved. |
@@ -63,7 +63,6 @@ Full-page, laptop and mobile captures are retained alongside each viewport image
 | Page | Before | After |
 | --- | --- | --- |
 | Madrid | ![Madrid before](media/before/madrid-viewport.png) | ![Madrid after](media/after/madrid-viewport.png) |
-| Delivery | ![Delivery before](media/before/flow-viewport.png) | ![Delivery after](media/after/flow-viewport.png) |
 | Restaurants | ![Restaurants before](media/before/supply-viewport.png) | ![Restaurants after](media/after/supply-viewport.png) |
 | Inventory | ![Inventory before](media/before/lab-viewport.png) | ![Inventory after](media/after/lab-viewport.png) |
 | Health | ![Health before](media/before/health-viewport.png) | ![Health after](media/after/health-viewport.png) |

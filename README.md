@@ -345,20 +345,17 @@ Imported data stays in ignored `artifacts/`; the UI offers it when that snapshot
 Prices retain their observed dates; catalogue listings do not establish real stock.
 See [M2 validation](docs/M2-VALIDATION.md) for guarantees and current limits.
 
-### Running city
+### Operations and specialist labs
 
-Open **http://localhost:8010/delivery-lab** for the map-first city. Click a store to
-configure its opening stock, demand weight and home couriers. Global controls set
-order intensity, traffic, dropout rates, duration and seed. Orders arrive over time.
-Click a store's team member or a courier to inspect its parameters and private memory.
-Settings apply to the next session; each run keeps its frozen starting configuration.
+Open **http://localhost:8010/** for Madrid operations: the real street map,
+courier fleets, orders, delivery performance and chaos controls. Simulation setup
+is under **Simulation & diagnostics** on the same page.
 
-See [running city controls and limits](docs/RUNNING-CITY.md). All agents retain their
-separate database identities, scoped tools, budgets and queued handoffs. Everything
-runs locally by default with no model/provider calls. Optional GCP mode uses a bounded,
-IAM-protected judge with only a synthetic seven-meal supermarket snapshot and
-numeric recovery facts. See [live GCP verification](docs/GCP-VERIFICATION.md) and
-[enterprise design tradeoffs](docs/ENTERPRISE-GCP.md).
+The older **Delivery** workspace and its fictional grid-city UI have been retired.
+`/delivery-lab` redirects to Operations. Its separate run IDs are not forwarded to
+the Madrid engine. The [running-city backend](docs/RUNNING-CITY.md), delivery APIs,
+CLI regression scenarios and retained evidence remain available for testing;
+Health links legacy delivery runs directly to their recorded JSON evidence.
 
 The [restaurant supply lab](http://localhost:8010/restaurant-lab) adds scheduled
 household meal calls, seven restaurants, nearby ingredient markets, reservations,

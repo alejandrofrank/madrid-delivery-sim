@@ -178,9 +178,9 @@ For the next guided session, inspect these in order:
    reservations and returned usage. Explain why those controls are not a dollar cap.
 6. **Evals:** run the fixed recovery cases, distinguish policy-gate answers from actual
    model answers, and compare with the preserved initial failure and guarded results.
-7. **Live switch:** run the explicit `scripts/verify_gcp_switch.py --live-cloud`
-   verification. Inspect one cloud decision and the paired local run with zero calls,
-   including stock, custody and retry invariants.
+7. **Recorded live switch:** inspect the [paired cloud/local evidence](GCP-VERIFICATION.md)
+   for stock, custody and retry invariants. The former grid-UI verification script
+   was retired with the Delivery workspace; this receipt is historical evidence.
 8. **Cleanup:** delete runtime resources with billing linked, then unlink billing.
    Verify the protected project remains active and state retains project/APIs/IAM,
    and billing is disabled. Recreate the app using base compose.
