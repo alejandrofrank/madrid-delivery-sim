@@ -11,7 +11,13 @@ def test_delivery_operator_routes(db_url, monkeypatch):
     settings.cache_clear()
     try:
         with TestClient(app) as client:
-            assert client.get("/delivery-lab").status_code == 200
+            for path in ("/delivery-lab", f"/delivery-lab?run={uuid4()}"):
+                response = client.get(path, follow_redirects=False)
+                assert response.status_code == 308
+                assert response.headers["location"] == "/"
+                assert "Madrid operations" in client.get(path).text
+            for asset in ("flow.html", "flow.js", "flow.css"):
+                assert client.get(f"/static/{asset}").status_code == 404
             config = client.get("/api/lab/city-config").json()
             assert len(config["city"]["nodes"]) == 1024
             assert len(config["defaults"]["stores"]) == 12

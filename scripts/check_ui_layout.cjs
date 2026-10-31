@@ -7,7 +7,7 @@ const assert=require('node:assert/strict');
  try {
   const page=await browser.newPage({viewport:{width:1536,height:1024},reducedMotion:'reduce'});
   const runs=JSON.parse(await fs.readFile('artifacts/ui-runs.json','utf8')),checks=[];
-  await page.goto('http://localhost:8021/?run='+runs.madrid);
+  await page.goto('http://localhost:8010/?run='+runs.madrid);
   await page.waitForFunction(()=>document.getElementById('map').dataset.basemap==='ready');
   for(const [width,height] of [[1536,1024],[1280,800],[390,844],[1536,1024],[1036,850]]){
    await page.setViewportSize({width,height});
@@ -33,19 +33,6 @@ const assert=require('node:assert/strict');
   assert(ledger.sixthRowBottom<=1024&&ledger.mapHeight>=458,'Six readable order rows and full map: '+JSON.stringify(ledger));
   checks.push({check:'native ledger density',...ledger});
   await page.screenshot({path:'docs/media/correction/verified/completed-1536.png',fullPage:true});
-  await page.goto('http://localhost:8021/delivery-lab?run='+runs.flow);
-  await page.waitForSelector('#city[data-node-count]');
-  for(const width of [390,320]){
-   await page.setViewportSize({width,height:844});
-   const boxes=await page.evaluate(()=>{
-    const tools=document.querySelector('.map-tools').getBoundingClientRect(),filters=document.querySelector('.entity-tools').getBoundingClientRect();
-    return {tools:tools.toJSON(),filters:filters.toJSON(),overflow:document.documentElement.scrollWidth>innerWidth};
-   });
-   assert(boxes.tools.top>=boxes.filters.bottom&&!boxes.overflow,'Delivery filters and map controls do not overlap: '+JSON.stringify(boxes));
-   checks.push({check:'Delivery map toolbar',width,...boxes});
-   await page.evaluate(()=>{document.activeElement?.blur();scrollTo(0,0);});
-   await page.screenshot({path:'docs/media/correction/verified/flow-'+width+'.png',fullPage:true});
-  }
   await fs.writeFile('docs/media/correction/verified/layout-checks.json',JSON.stringify({capturedAt:new Date().toISOString(),checks},null,2));
   console.log('Passed '+checks.length+' reviewed layout checks');
  } finally {await browser.close();}
