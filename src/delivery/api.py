@@ -61,6 +61,17 @@ app = FastAPI(title="madrid-delivery-sim", lifespan=lifespan)
 instrument_fastapi(app)
 
 
+@app.middleware("http")
+async def revalidate_workspace_html(
+    request: Request, call_next: Callable[[Request], Awaitable[Response]]
+) -> Response:
+    response = await call_next(request)
+    if response.headers.get("content-type", "").startswith("text/html"):
+        # Recheck the shell so browsers discover new versioned JS/CSS after an update.
+        response.headers["Cache-Control"] = "no-cache"
+    return response
+
+
 class StartLab(BaseModel):
     seed: int = Field(default=42, ge=0, le=2**31 - 1)
     catalogue: Literal["fixture", "bakiano-local", "bakiano-history"] = "fixture"
