@@ -1,8 +1,9 @@
 # Local basket-to-delivery slice
 
-This document describes the preserved first delivery slice. The default `/delivery-lab`
-now uses the [expanded fleet recovery scenario](FLEET-RECOVERY.md). Saved legacy
-runs retain the behavior described below.
+This document describes the preserved first delivery slice and its regression
+backend. The Delivery grid UI is retired and `/delivery-lab` redirects to Operations.
+Saved legacy runs remain available through the delivery APIs. See also the
+[expanded fleet recovery scenario](FLEET-RECOVERY.md).
 The existing `/lab` last-unit/crash/delayed-supply scenario remains available.
 Both use the same local factory, permissions, scoped tools, private memory,
 durable budgets and fenced event-processing transaction.
@@ -13,9 +14,8 @@ docker compose exec -T app delivery delivery-demo
 
 This runs a synthetic one-item basket on the 10×10 city, exports an evidence bundle
 to ignored `artifacts/delivery-<run>.json`, and makes no model or provider calls.
-The UI offers paced playback, a courier route, stage progress, role boundaries,
-budgets, decision inputs and queue lineage. Its run URL survives reload. Downloaded
-evidence includes consistent checkpoints, not a complete replay engine.
+Recorded evidence includes role boundaries, budgets, decision inputs, queue lineage
+and consistent checkpoints. It is not a complete replay engine.
 
 ## Queue-only lifecycle
 

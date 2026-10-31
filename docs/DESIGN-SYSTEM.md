@@ -15,7 +15,6 @@ Local font files live in `web/fonts/` with their licenses. Their URLs require no
 | Workspace | Route | Working emphasis |
 | --- | --- | --- |
 | Operations | `/` | Madrid couriers, full local vector basemap plus street graph, selected decisions and order ledger |
-| Delivery | `/delivery-lab` | Agent roster, fictional grid, delivery handoffs and order book |
 | Restaurants | `/restaurant-lab` | Household calls, kitchen and market agents, city network and entity inspector |
 | Inventory | `/lab` | Synthetic stock scenario, checkpoint evidence and recovery |
 | Health | `/health` | Test categories, evaluations, source freshness and operational checks |

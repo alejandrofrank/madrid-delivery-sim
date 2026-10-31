@@ -10,7 +10,7 @@ from typing import Any, Literal
 from uuid import UUID
 
 from fastapi import BackgroundTasks, FastAPI, HTTPException, Request
-from fastapi.responses import FileResponse, JSONResponse
+from fastapi.responses import FileResponse, JSONResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
 from starlette.responses import Response
@@ -133,8 +133,9 @@ def inspect_city_agent(run: UUID, agent_id: str) -> dict[str, Any]:
 
 
 @app.get("/delivery-lab")
-def delivery_page() -> FileResponse:
-    return FileResponse("web/flow.html")
+def delivery_page() -> RedirectResponse:
+    # Grid-lab run IDs belong to a different engine; do not forward them to Madrid.
+    return RedirectResponse("/", status_code=308)
 
 
 def delivery_background(run: str, seconds: int) -> None:

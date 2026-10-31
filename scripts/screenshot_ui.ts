@@ -4,16 +4,15 @@ const fs = require('node:fs/promises');
 const path = require('node:path');
 const args = process.argv.slice(2);
 const option = (name, fallback) => args.includes(name) ? args[args.indexOf(name) + 1] : fallback;
-const base = option('--url', 'http://127.0.0.1:8021').replace(/\/$/, '');
+const base = option('--url', 'http://127.0.0.1:8010').replace(/\/$/, '');
 const phase = option('--phase', 'after');
 if (args.includes('--help')) {
-  console.log('Usage: node scripts/screenshot_ui.ts [--url URL] [--phase NAME] [--out PATH] [--only flow,supply,lab,health,agent-traces,documentation,madrid] [--width N --height N] [--runs JSON_FILE] [--trace-source delivery --trace-agent AGENT_ID] [--check]');
+  console.log('Usage: node scripts/screenshot_ui.ts [--url URL] [--phase NAME] [--out PATH] [--only supply,lab,health,agent-traces,documentation,madrid] [--width N --height N] [--runs JSON_FILE] [--trace-source delivery --trace-agent AGENT_ID] [--check]');
   process.exit(0);
 }
 if (!/^[a-z0-9-]+$/.test(phase)) throw Error('Use a simple phase name, such as before or after.');
 const out = path.resolve(option('--out', 'docs/media/' + phase));
 const catalogue = [
-  ['flow', '/delivery-lab', '#city[data-node-count]'],
   ['supply', '/restaurant-lab', '#city-map'],
   ['lab', '/lab', '#city'],
   ['health', '/health', '#main'],
