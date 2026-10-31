@@ -5,7 +5,7 @@ part of the existing FastAPI application, not a separate hosted product. It does
 not start infrastructure, invoke a model or read the simulation database. The
 existing `/docs` API reference remains available.
 
-Restaurants, delivery, inventory, health, architecture and the Madrid baseline
+Operations, Restaurants, Inventory, Health, Traces and Architecture
 share the same [workspace shell](../web/workspace.js) and
 [visual tokens and controls](../web/workspace.css). The navigation keeps every
 workspace reachable through a disclosure menu on smaller screens. See the

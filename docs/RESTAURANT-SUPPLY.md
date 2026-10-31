@@ -212,12 +212,13 @@ make up
 ```
 
 Open [the restaurant lab](http://localhost:8010/restaurant-lab), or choose
-Restaurants in the delivery sidebar. Select any map entity to edit its next-run
+Restaurants in the shared navigation. Search or filter the agent roster, then
+select a restaurant, supermarket or household to edit its next-run
 definition or inspect its frozen stock, orders, memory and budget. Advanced JSON
 supports per-ingredient opening stock and per-entity or shared agent definitions.
 
 Click the **Orders** metric to open all orders for the current run, independent of
-the map selection. Each order expands into its customer call, ingredient requests,
+the selected agent. Each order expands into its customer call, ingredient requests,
 complete timeline, queued messages and agent memory. The order opens with a chat:
 stable fictional agent names, entity/role labels, simulation timestamps, delivery
 receipts and readable memory changes. Raw queue evidence remains collapsed.
@@ -266,7 +267,7 @@ or cloud model is enabled by starting a supply run.
 | --- | --- |
 | `GET/PUT /api/supply/blueprint` | Trusted local operator; `PUT` requires `If-Match` revision |
 | `POST /api/supply/runs` | Freeze the saved revision and start a local run |
-| `GET /api/supply/runs/{run}` | Operator's map, stock, orders, queue and metrics |
+| `GET /api/supply/runs/{run}` | Operator's entities, stock, orders, queue and metrics |
 | `GET /api/supply/runs/{run}/orders/{order}` | Complete single-order events, facts, decisions, requests and recorded memory; no recent-window truncation |
 | `GET /api/supply/runs/{run}/agents/{agent}` | Operator inspection of one agent's memory, definition and decisions |
 | `POST .../agents/{agent}/channel` | Requires a separately configured `DELIVERY_OPERATOR_KEY` in `X-Operator-Key`; disabled by default |
@@ -324,7 +325,7 @@ last-mile courier routes use the directed road graph.
 Inventory conservation checks each ingredient independently: opening physical
 stock equals closing physical stock plus cooked consumption plus quantities still
 in supplier transit. Reserved units remain part of physical on-hand stock.
-The live map limits its event window to 1,000 messages and fact window to 100;
+The live snapshot limits its event window to 1,000 messages and fact window to 100;
 evidence export includes every message, decision, fact and search audit without
 channel credentials or event lease tokens. A capture made while the run is active
 is marked `live_capture`; use a finished run for final evidence.

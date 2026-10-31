@@ -1,12 +1,12 @@
 # Shared workspace design
 
-The seven local workspaces share the dark operations system defined in [DESIGN.md](../DESIGN.md). Its frontmatter is the normative portable token record; [the design sidecar](../.impeccable/design.json) adds component specimens, focus behavior, motion, elevation and responsive metadata. This file describes how that system fits the existing application.
+The six local workspaces share the dark operations system defined in [DESIGN.md](../DESIGN.md). Its frontmatter is the normative portable token record; [the design sidecar](../.impeccable/design.json) adds component specimens, focus behavior, motion, elevation and responsive metadata. This file describes how that system fits the existing application.
 
 ## Direction and source of truth
 
 The approved replacement direction is a calm, dense operations console: deep blue graphite ground, local IBM Plex Sans and Mono, cyan selection, fine neutral rules and readable working rows. The current rebuild also replaces the rejected raised gray panels and sparse Madrid graph-only map. Compact titles and working controls take precedence over decorative presentation. Agents and the map share the operational viewport, while technical reviewers can reach the retained evidence behind each decision.
 
-Palette and font primitives come from `web/tokens.css`. The page first loads these tokens, then its own layout stylesheet and the shared `web/workspace.css` layer. Delivery and Restaurants also load `web/agents.css` for the shared roster. Page styles still contain older aliases and exceptions; follow the resulting cascade and rendered artifact, not an isolated earlier declaration. `web/console.js` provides small shared SVG symbols, observed-series sparklines and accessible roster/map behavior.
+Palette and font primitives come from `web/tokens.css`. The page first loads these tokens, then its own layout stylesheet and the shared `web/workspace.css` layer. Operations and Restaurants also load `web/agents.css` for the shared roster. Page styles still contain older aliases and exceptions; follow the resulting cascade and rendered artifact, not an isolated earlier declaration. `web/console.js` provides small shared SVG symbols, observed-series sparklines and accessible roster behavior.
 
 Local font files live in `web/fonts/` with their licenses. Their URLs require no external font service. IBM Plex Sans Regular, Medium and SemiBold and IBM Plex Mono Regular are available; do not assume a full family of additional weights exists. The vector basemap is the explicit exception: locally cached Noto Sans Regular glyphs provide cartographic labels, while UI controls, selected-agent labels and operational overlays stay Plex.
 
@@ -15,39 +15,39 @@ Local font files live in `web/fonts/` with their licenses. Their URLs require no
 | Workspace | Route | Working emphasis |
 | --- | --- | --- |
 | Operations | `/` | Madrid couriers, full local vector basemap plus street graph, selected decisions and order ledger |
-| Restaurants | `/restaurant-lab` | Household calls, kitchen and market agents, city network and entity inspector |
+| Restaurants | `/restaurant-lab` | Household calls, kitchen and market agents, searchable agent roster and entity inspector |
 | Inventory | `/lab` | Synthetic stock scenario, checkpoint evidence and recovery |
 | Health | `/health` | Test categories, evaluations, source freshness and operational checks |
 | Traces | `/agent-traces` | Recorded decisions, scoped tools and retained model evidence |
 | Architecture | `/architecture` | Twenty chapters, component explorer and eight source-backed diagrams |
 
-`web/workspace.js` mounts the same seven-link navigation, active-page indication, skip link and mobile disclosure everywhere. Escape closes the mobile menu and restores focus; ordinary anchors preserve browser navigation. Existing no-script links are a fallback rather than an alternate interactive application.
+`web/workspace.js` mounts the same six-link navigation, active-page indication, skip link and mobile disclosure everywhere. Escape closes the mobile menu and restores focus; ordinary anchors preserve browser navigation. Existing no-script links are a fallback rather than an alternate interactive application.
 
-The page identity is `data-page` on the body. Delivery's `data-workspace` attributes remain reserved for its local Overview, Orders, Fleet and Stores controls; assigning that attribute to an ancestor would interfere with its delegated click handler.
+The page identity is `data-page` on the body. The retired `/delivery-lab` route redirects to Operations; legacy delivery runs remain inspectable through their JSON evidence.
 
-The desktop shell uses a 44px header token, with a 56px token below 600px; it collapses to a menu at 1080px. Madrid's agent/map columns stack at 850px; Delivery and Restaurants stack at 900px. The Architecture page removes its right outline at 1250px and converts the topic list to a disclosure at 700px. Preserve local overflow for wide tables, roster history, code and expanded diagrams.
+The desktop shell uses a 44px header token, with a 56px token below 600px; it collapses to a menu at 1080px. Madrid's agent/map columns stack at 850px; the restaurant roster and inspector stack at 900px. The Architecture page removes its right outline at 1250px and converts the topic list to a disclosure at 700px. Preserve local overflow for wide tables, roster history, code and expanded diagrams.
 
 ## Operational information and truthful evidence
 
-Simulation and definition settings are separate from the operation view in Madrid, Delivery and Restaurants. Starting the Madrid simulation returns to the operational view. Compact metric strips lead into the roster/map pair; selection opens a concise summary before detailed evidence.
+Simulation and definition settings are separate from the operation view in Operations and Restaurants. Starting the Madrid simulation returns to the operational view. Compact metric strips lead into the working interface. Operations pairs its roster with the real Madrid map. Restaurants expands its roster across the page until selection opens an adjacent inspector. Inventory puts the store selector and stock table first, followed by basket and recovery evidence.
 
 Madrid's desktop title uses 25px Plex Sans/600, reducing to 23px below 1400px and 22px below 850px. Four shallow metrics use a single ground-colored band with an 80px minimum height. The roster/map split is 45.5/54.5 with an 8px gap and a shared height of clamp(360px, 45vh, 460px). Its comparison columns expose Agent, Role, Status, Current task, Delivered and Rate/min; responsive layouts hide secondary columns while keeping identity/task/state legible.
 
 The selected-evidence strip has an 88px minimum height and exposes identity, task/energy, last decision and trace/detail actions. The compact ledger follows at an 8px gap, with 11px text, 5px vertical heading padding and 1px vertical cell padding. Completed runs default to existing All orders, preserving a useful populated ledger instead of manufacturing data. First-viewport row count is assessed by fresh captures, not assumed from a CSS change.
 
-Below 850px Madrid uses a 400px map region followed by its legend in normal document flow. The open or closed legend no longer occupies the selected courier's map space. Delivery's controls below 900px also use normal layout after the wrapped entity filters, preventing zoom/Fit city from covering Find customer.
+Below 850px Madrid uses a 400px map region followed by its legend in normal document flow. The open or closed legend no longer occupies the selected courier's map space.
 
 An agent's actual name is distinct from its role template and technical identifier. Restaurants exposes all three when available. Offline couriers are labeled as unavailable for assignment. Search must still find the real entity identity.
 
-Totals and rates are distinct. `Ops.sparkline` renders only after two finite samples exist. All curves use observations from the current visit and activity per simulated minute. Madrid retains at most 40 metric observations; the shared Delivery/Restaurant roster retains at most 30 rate samples. A completed run without captured history explicitly reports that history is unavailable. Do not generate a decorative series to fill that gap.
+Totals and rates are distinct. `Ops.sparkline` renders only after two finite samples exist. All curves use observations from the current visit and activity per simulated minute. Madrid retains at most 40 metric observations; the shared restaurant roster retains at most 30 rate samples. A completed run without captured history explicitly reports that history is unavailable. Do not generate a decorative series to fill that gap.
 
-The Madrid cost tile is an operating estimate in EUR. Per-decision latency, step cost and individual tool inputs/outputs remain unknown or not retained when the source does not provide them. Health preserves historical receipt dates and source-change warnings. Inventory's stock, locations and fixture roads remain visibly synthetic. UI polish does not establish model quality or current source health.
+The Madrid cost tile is an operating estimate in EUR. Per-decision latency, step cost and individual tool inputs/outputs remain unknown or not retained when the source does not provide them. Health preserves historical receipt dates and source-change warnings. Inventory's stock remains labeled as simulated; fixture roads are no longer rendered. UI polish does not establish model quality or current source health.
 
 ## Madrid cartography and navigation
 
 Madrid uses a full local OpenFreeMap vector basemap, rendered by vendored MapLibre GL JS 5.15.0 through the Leaflet bridge. Real street hierarchy, water, land use and Spanish place labels provide continuous geographic context. The simulator's cached OpenStreetMap graph remains a fine service-area overlay rather than the entire map.
 
-The committed `web/map/manifest.json` records 332 source tiles at zoom levels 10–14 totaling 36,512,766 bytes (36.51 MB), covering longitude/latitude bounds [-3.85, 40.3, -3.52, 40.54]. `web/map/style.json` references local tile and Noto Sans Regular glyph URLs. The two level-10 tiles keep cartography available when fitted MapLibre camera zoom falls below 11 at laptop widths. Higher display zooms overzoom those finite cached tiles. Renderer provenance, licenses and attribution are retained; OpenFreeMap, OpenMapTiles and OpenStreetMap credit stays visible. No live paid map provider is required. The fixture grid maps on the other simulation routes remain explicitly fictional.
+The committed `web/map/manifest.json` records 332 source tiles at zoom levels 10–14 totaling 36,512,766 bytes (36.51 MB), covering longitude/latitude bounds [-3.85, 40.3, -3.52, 40.54]. `web/map/style.json` references local tile and Noto Sans Regular glyph URLs. The two level-10 tiles keep cartography available when fitted MapLibre camera zoom falls below 11 at laptop widths. Higher display zooms overzoom those finite cached tiles. Renderer provenance, licenses and attribution are retained; OpenFreeMap, OpenMapTiles and OpenStreetMap credit stays visible. No live paid map provider is required. Restaurants and Inventory no longer render fixture grid maps. Their backend fixture geometry remains available for repeatable simulations and advanced definitions.
 
 Dragging, mouse-wheel zoom, keyboard movement, touch zoom, double-click zoom and visible zoom buttons are enabled in the initial view. Escape disables wheel zoom so the wheel scrolls the page; the Scroll zoom toggle restores it. Panning has no inertia. Fit network frames the service area, and Locate agent frames valid selection geometry without changing actual route length or coordinates.
 
@@ -87,7 +87,7 @@ python3 scripts/version_web_assets.py --write
 python3 scripts/version_web_assets.py
 ```
 
-The second command checks all seven HTML pages for stale URLs and missing local assets. This prevents an older cached theme from surviving a new HTML shell without changing API endpoints or simulation definitions.
+The second command checks all six HTML pages for stale URLs and missing local assets. This prevents an older cached theme from surviving a new HTML shell without changing API endpoints or simulation definitions.
 
 Inspect idle and populated states across all seven routes at desktop, laptop and mobile widths. Check navigation, active selection, keyboard focus, Escape, reduced motion and local overflow. Exercise a complete selection-to-evidence path, actual identity search, simulation settings, map modes, order filters, source inspection, chapter search and all eight diagrams. Preserve existing seeded outcome and role-isolation checks as the business-behavior baseline.
 

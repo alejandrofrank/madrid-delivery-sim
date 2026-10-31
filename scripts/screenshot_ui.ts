@@ -13,8 +13,8 @@ if (args.includes('--help')) {
 if (!/^[a-z0-9-]+$/.test(phase)) throw Error('Use a simple phase name, such as before or after.');
 const out = path.resolve(option('--out', 'docs/media/' + phase));
 const catalogue = [
-  ['supply', '/restaurant-lab', '#city-map'],
-  ['lab', '/lab', '#city'],
+  ['supply', '/restaurant-lab', '#supply-agents .roster-row'],
+  ['lab', '/lab', '#stock'],
   ['health', '/health', '#main'],
   ['agent-traces', '/agent-traces', '#traces'],
   ['documentation', '/architecture', '#document:not([hidden])'],

@@ -19,7 +19,7 @@ const base=arg('--url','http://127.0.0.1:8010'),runFile=arg('--runs','artifacts/
  });
  await check('Restaurant selection, filters, trace and separate definitions',async()=>{
   await page.goto(base+'/restaurant-lab?run='+runs.supply);
-  await page.waitForFunction(()=>document.getElementById('map-source').textContent.includes('Frozen'));
+  await page.waitForFunction(()=>document.getElementById('entity-source').textContent.includes('Frozen'));
   assert(await page.locator('#supply-controls').isHidden());
   await page.locator('#supply-agents .roster-role').selectOption('restaurant');
   await page.locator('#supply-agents .roster-search').fill('Pizza Kitchen');
@@ -27,6 +27,7 @@ const base=arg('--url','http://127.0.0.1:8010'),runFile=arg('--runs','artifacts/
   assert(await page.locator('#supply-agents .roster-id').innerText());
   await page.locator('#supply-agents .roster-row').first().click();
   assert(await page.locator('#supply-inspector').isVisible());
+  assert.equal(await page.locator('#city-map').count(),0);
   assert(await page.locator('#inspection-panel').isVisible());
   const href=await page.locator('#supply-trace-link').getAttribute('href');assert(href.includes('source=supply'));
   await page.locator('#supply-agents .roster-search').fill('no-such-agent');
@@ -55,7 +56,16 @@ const base=arg('--url','http://127.0.0.1:8010'),runFile=arg('--runs','artifacts/
   await page.waitForFunction(()=>document.getElementById('checkpoint').options.length>1);
   await page.locator('#checkpoint').selectOption('0');
   assert((await page.locator('#clock').innerText()).includes('checkpoint'));
-  assert(await page.locator('#city g[role=button]').count()>0);
+  const stores=await page.locator('#store option').evaluateAll(options=>options.map(option=>option.value));
+  assert(stores.length>1);
+  const original=await page.locator('#agent-scope').innerText();
+  for (const store of stores) {
+   await page.locator('#store').selectOption(store);
+   if ((await page.locator('#agent-scope').innerText())!==original) break;
+  }
+  assert.notEqual(await page.locator('#agent-scope').innerText(),original);
+  assert(await page.locator('#stock tr').count()>0);
+  assert.equal(await page.locator('#city').count(),0);
  });
  await check('Architecture flow, component links and reduced motion',async()=>{
   await page.goto(base+'/architecture');

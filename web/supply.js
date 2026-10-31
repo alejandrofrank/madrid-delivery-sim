@@ -5,7 +5,6 @@ const $ = id => document.getElementById(id);
 const clone = value => JSON.parse(JSON.stringify(value));
 const pretty = value => JSON.stringify(value, null, 2);
 const roles = {household: 'Household', restaurant: 'Restaurant', market: 'Supermarket'};
-const colors = {household: '#81949f', restaurant: '#b4c8ce', market: '#a8b7c0'};
 const budgetLabels = {
   events_per_run: ['Events / run', 1, 1000],
   tool_calls_per_event: ['Tool calls / event', 1, 16],
@@ -40,10 +39,6 @@ let inspectionAgentId = null;
 let inspectionLoadedAt = 0;
 let runId = null;
 let replay = null;
-let activityRoutes = [];
-let mapSignature = '';
-let displayedClock = '';
-let clock = {from: 0, to: 0, at: performance.now(), interval: 500};
 let searchContext = '';
 let searchVersion = 0;
 let orderBookRun = null;
@@ -56,12 +51,6 @@ function element(tag, text, className) {
   const node = document.createElement(tag);
   if (text !== undefined && text !== null) node.textContent = String(text);
   if (className) node.className = className;
-  return node;
-}
-
-function svgNode(tag, attrs = {}) {
-  const node = document.createElementNS('http://www.w3.org/2000/svg', tag);
-  for (const [key, value] of Object.entries(attrs)) node.setAttribute(key, String(value));
   return node;
 }
 
@@ -149,7 +138,6 @@ function captureEditor(report = true) {
   try {
     const entity = currentEntity();
     entity.name = $('entity-name').value.trim();
-    entity.node = Number($('entity-node').value);
     entity.opening_hours = parseWindow($('entity-opening').value);
     entity.recipe_ids = csv($('entity-recipes').value);
     entity.order_hours = csv($('entity-hours').value).map(parseWindow);
@@ -291,7 +279,7 @@ function syncRoutingFields() {
 
 function renderEntityHeading(entity) {
   $('inspector-title').textContent = entity.name;
-  $('entity-context').textContent = `${entity.id} · node ${entity.node} · grid ${entity.node % 32}, ${Math.floor(entity.node / 32)}`;
+  $('entity-context').textContent = `${entity.id} · ${roles[entity.kind] || entity.kind}`;
   $('entity-kind').textContent = roles[entity.kind] || entity.kind;
 }
 
@@ -300,7 +288,6 @@ function renderEditor() {
   if (!entity) return;
   renderEntityHeading(entity);
   $('entity-name').value = entity.name;
-  $('entity-node').value = entity.node;
   $('entity-opening').value = hourWindow(entity.opening_hours);
   $('entity-recipes').value = (entity.recipe_ids || []).join(', ');
   $('entity-hours').value = (entity.order_hours || []).map(hourWindow).join(', ');
@@ -330,7 +317,7 @@ function applyAdvanced(report = true) {
     markDirty();
     renderEditor();
     renderEntityOptions();
-    drawMap(true);
+    renderSupplyRoster();
     if (report) { clearError(); notice('JSON applied to your draft. Save the blueprint to validate all definitions.'); }
     return true;
   } catch (error) {
@@ -355,7 +342,7 @@ async function saveBlueprint() {
     renderSettings();
     renderEntityOptions();
     renderEditor();
-    drawMap(true);
+    renderSupplyRoster();
     notice(snapshot ? 'Blueprint saved. The selected run keeps its original definitions. Start a new simulation to use these edits.' : 'Blueprint saved. The next simulation will use these definitions.');
     return true;
   } catch (error) {
@@ -385,7 +372,6 @@ async function startRun() {
     inspection = null;
     inspectionAgentId = null;
     inspectVersion++;
-    mapSignature = '';
     $('replay-result').hidden = true;
     $('replay-state').textContent = 'Replay becomes available after this run finishes.';
     notice('Simulation started. Calls, ingredient requests, and deliveries are synthetic local events.');
@@ -396,18 +382,13 @@ async function startRun() {
 }
 
 function useSnapshot(data) {
-  const sameRun = snapshot?.run.id === data.run.id;
-  const now = performance.now();
-  const previous = visualTime(now);
-  clock = {from: sameRun ? Math.min(previous, Number(data.run.sim_time)) : Number(data.run.sim_time), to: Number(data.run.sim_time), at: now, interval: sameRun ? Math.max(200, Math.min(1500, now - clock.at)) : 500};
   snapshot = data;
   $('run-state').textContent = `${String(data.run.status).replaceAll('_', ' ')} · ${relativeTime(data.run.sim_time)}`;
   $('run-id').textContent = `Run ${data.run.id}`;
-  $('map-source').textContent = `Frozen run · ${String(data.run.id).slice(0, 8)}`;
-  $('map-context').textContent = '32 × 32 fictional grid · run positions frozen at start';
+  $('entity-source').textContent = `Frozen run · ${String(data.run.id).slice(0, 8)}`;
+  $('sim-clock').textContent = formatHour(data.run.sim_time);
   $('evidence-context').textContent = `Run ${String(data.run.id).slice(0, 8)} · simulated conversations and append-only facts`;
   renderMetrics();
-  drawMap();
   renderInspection();
   renderEvidence();
   renderInvariants();
@@ -478,118 +459,11 @@ function renderMetrics() {
   }));
 }
 
-function mapEntities() { return snapshot?.entities || draft?.entities || []; }
-
-function coordinates(entity) {
-  const node = Number(entity?.node ?? entity?.definition?.node);
-  return {x: node % 32, y: Math.floor(node / 32)};
-}
-
-function drawMap(force = false) {
-  if (!draft) return;
-  const entities = mapEntities();
-  const filter = $('map-filter').value;
-  const signature = `${snapshot?.run.id || blueprint?.revision}:${filter}:${selectedId}:${JSON.stringify(entities.map(entity => [entity.id, entity.name, entity.node]))}`;
-  const svg = $('city-map');
-  if (signature !== mapSignature || force) {
-    mapSignature = signature;
-    svg.replaceChildren();
-    const city = snapshot?.city || blueprint.city || {};
-    const fabric = svgNode('g', {'aria-hidden': 'true', 'pointer-events': 'none'});
-    const spacing = Number(city.spacing_m || 500);
-    for (const area of city.neighborhoods || []) {
-      fabric.append(svgNode('rect', {x: Number(area.x) / spacing, y: Number(area.y) / spacing, width: Number(area.width) / spacing, height: Number(area.height) / spacing, fill: '#172126', stroke: '#26373e', 'stroke-width': '.03'}));
-      const label = svgNode('text', {x: Number(area.x) / spacing + .5, y: Number(area.y) / spacing + .75, class: 'district-label'});
-      label.textContent = area.name;
-      fabric.append(label);
-    }
-    for (const building of city.buildings || []) {
-      if (['home', 'apartment'].includes(building.kind)) continue;
-      fabric.append(svgNode('rect', {x: Number(building.x) / spacing, y: Number(building.y) / spacing, width: Math.max(.2, Number(building.width) / spacing), height: Math.max(.2, Number(building.height) / spacing), rx: '.05', fill: building.kind === 'park' ? '#1b302d' : '#26373e'}));
-    }
-    svg.append(fabric);
-    const roads = svgNode('g', {'aria-hidden': 'true', 'pointer-events': 'none'});
-    for (let n = 0; n < 32; n++) {
-      roads.append(svgNode('line', {x1: 0, x2: 31, y1: n, y2: n, stroke: n % 4 ? '#2a3c44' : '#49606a', 'stroke-width': n % 4 ? '.045' : '.08'}));
-      roads.append(svgNode('line', {y1: 0, y2: 31, x1: n, x2: n, stroke: n % 4 ? '#2a3c44' : '#49606a', 'stroke-width': n % 4 ? '.045' : '.08'}));
-    }
-    svg.append(roads, svgNode('g', {id: 'activity-routes', 'aria-hidden': 'true'}));
-    const markers = svgNode('g');
-    for (const entity of [...entities].sort((a, b) => (a.kind === 'household' ? 0 : 1) - (b.kind === 'household' ? 0 : 1))) {
-      if (filter !== 'all' && entity.kind !== filter) continue;
-      const {x, y} = coordinates(entity);
-      if (!Number.isFinite(x) || !Number.isFinite(y)) continue;
-      const selected = selectedId === entity.id;
-      const radius = entity.kind === 'household' ? .22 : .38;
-      const group = svgNode('g', {class: 'entity', role: 'button', tabindex: '0', 'aria-label': `${entity.name}, ${roles[entity.kind] || entity.kind}, grid ${x}, ${y}`, 'aria-pressed': selected, 'data-entity-id': entity.id});
-      const title = svgNode('title'); title.textContent = `${entity.name} · ${entity.id}`;
-      group.append(title, svgNode('circle', {cx: x, cy: y, r: radius + .2, fill: 'transparent'}));
-      if (selected) group.append(svgNode('circle', {cx: x, cy: y, r: radius + .17, class: 'selected-ring'}));
-      let shape;
-      if (entity.kind === 'household') shape = svgNode('path', {d: `M${x - radius},${y - .02}L${x},${y - radius}L${x + radius},${y - .02}V${y + radius}H${x - radius}Z`});
-      else if (entity.kind === 'restaurant') shape = svgNode('rect', {x: x - radius, y: y - radius, width: radius * 2, height: radius * 2, rx: '.11'});
-      else shape = svgNode('path', {d: `M${x},${y - radius - .06}L${x + radius + .06},${y}L${x},${y + radius + .06}L${x - radius - .06},${y}Z`});
-      shape.setAttribute('fill', selected ? '#63d5c5' : colors[entity.kind] || '#a8b7c0');
-      shape.setAttribute('stroke', '#101518');
-      shape.setAttribute('stroke-width', '.075');
-      shape.setAttribute('class', 'marker-body');
-      group.append(shape);
-      if (entity.kind !== 'household' || selected) {
-        const label = svgNode('text', {x: x > 23 ? x - radius - .22 : x + radius + .22, y: y + .12, 'text-anchor': x > 23 ? 'end' : 'start', class: 'entity-label'});
-        label.textContent = entity.name;
-        group.append(label);
-      }
-      group.addEventListener('click', () => selectEntity(entity.id));
-      group.addEventListener('keydown', event => { if (['Enter', ' '].includes(event.key)) { event.preventDefault(); selectEntity(entity.id); } });
-      markers.append(group);
-    }
-    svg.append(markers);
-    $('map-empty').hidden = true;
-  }
-  const counts = Object.keys(roles).map(kind => `${entities.filter(entity => entity.kind === kind).length} ${kind === 'market' ? 'supermarkets' : kind + 's'}`);
-  $('map-counts').textContent = counts.join(' · ');
-  drawActivity();
-}
+function currentEntities() { return snapshot?.entities || draft?.entities || []; }
 
 function findEntity(value) {
   if (!value) return null;
-  return mapEntities().find(entity => value === entity.id || String(value).endsWith(`:${entity.id}`)) || null;
-}
-
-function drawActivity() {
-  const layer = $('activity-routes');
-  if (!layer) return;
-  layer.replaceChildren();
-  activityRoutes = [];
-  for (const event of (snapshot?.events || []).filter(item => ['pending', 'queued', 'leased'].includes(item.state)).slice(-36)) {
-    const from = findEntity(event.producer) || findEntity(event.payload?.household) || findEntity(event.payload?.restaurant);
-    const to = findEntity(event.target_store);
-    if (!from || !to || from.id === to.id) continue;
-    const a = coordinates(from), b = coordinates(to);
-    const path = svgNode('path', {d: `M${a.x},${a.y}L${b.x},${b.y}`, class: 'activity-route'});
-    const dot = svgNode('circle', {r: '.13', class: 'activity-dot'});
-    layer.append(path, dot);
-    const latency = Math.max(1, Number(snapshot.config?.communication_latency_seconds || 5));
-    activityRoutes.push({a, b, dot, due: Number(event.due_sim), latency});
-  }
-}
-
-function visualTime(now = performance.now()) {
-  const fraction = Math.max(0, Math.min(1, (now - clock.at) / clock.interval));
-  return clock.from + (clock.to - clock.from) * fraction;
-}
-
-function animate(now) {
-  const time = visualTime(now);
-  const text = formatHour(time);
-  if (text !== displayedClock) { $('sim-clock').textContent = text; displayedClock = text; }
-  for (const route of activityRoutes) {
-    const fraction = Math.max(0, Math.min(1, (time - route.due + route.latency) / route.latency));
-    const progress = matchMedia('(prefers-reduced-motion: reduce)').matches ? 1 : fraction;
-    route.dot.setAttribute('cx', route.a.x + (route.b.x - route.a.x) * progress);
-    route.dot.setAttribute('cy', route.a.y + (route.b.y - route.a.y) * progress);
-  }
-  requestAnimationFrame(animate);
+  return currentEntities().find(entity => value === entity.id || String(value).endsWith(`:${entity.id}`)) || null;
 }
 
 function selectEntity(id) {
@@ -605,7 +479,7 @@ function selectEntity(id) {
   inspectionLoadedAt = 0;
   $('entity-select').value = id;
   renderEditor();
-  drawMap(true);
+  renderSupplyRoster();
   renderInspection();
   renderEvidence();
   loadAgentInspection();
@@ -936,7 +810,7 @@ function memoryCard(write, person) {
 function renderOrderHistory(data, box, refresh) {
   box.replaceChildren();
   const header = element('div', null, 'order-history-heading');
-  header.append(element('p', `${data.order.id} · ${data.facts.length} facts · ${data.events.length} messages · ${data.decisions.length} decisions. Complete order history, independent of the map selection.`));
+  header.append(element('p', `${data.order.id} · ${data.facts.length} facts · ${data.events.length} messages · ${data.decisions.length} decisions. Complete order history, independent of the selected agent.`));
   const button = element('button', 'Refresh history'); button.type = 'button'; button.addEventListener('click', refresh);
   header.append(button); box.append(header);
   if (data.order.reason) box.append(element('p', data.order.reason, 'order-outcome'));
@@ -1172,7 +1046,6 @@ for (const id of ['entity-json', 'agent-json']) $(id).addEventListener('input', 
 document.querySelector('.advanced').addEventListener('toggle', event => { if (event.target.open && editorDirty && !jsonDirty) captureEditor(); });
 $('apply-json').addEventListener('click', () => applyAdvanced());
 $('entity-select').addEventListener('change', () => selectEntity($('entity-select').value));
-$('map-filter').addEventListener('change', () => drawMap(true));
 $('entity-only').addEventListener('change', renderEvidence);
 $('ingredient-search-form').addEventListener('submit', searchIngredients);
 $('save-blueprint').addEventListener('click', saveBlueprint);
@@ -1194,16 +1067,15 @@ window.addEventListener('beforeunload', event => { if (draftDirty) { event.preve
 
 (async function initialize() {
   renderMetrics(); renderEvidence();
-  requestAnimationFrame(animate);
   try {
     [blueprint, agentTemplates] = await Promise.all([api('/api/supply/blueprint'), api('/api/supply/agent-templates')]);
     draft = clone(blueprint.config);
     selectedId = draft.entities.find(entity => entity.kind === 'restaurant')?.id || draft.entities[0]?.id;
     agentEditScope = currentEntity()?.agent ? 'entity' : 'inherit';
-    renderSettings(); renderEntityOptions(); renderEditor(); renderMetrics(); drawMap(true); updateButtons();
+    renderSettings(); renderEntityOptions(); renderEditor(); renderMetrics(); renderSupplyRoster(); updateButtons();
     runId = new URLSearchParams(location.search).get('run') || sessionStorage.getItem('supply-run-id');
     if (runId) await pollRun();
-  } catch (error) { showError(error); $('map-empty').textContent = 'City unavailable. Check the local API error above.'; }
+  } catch (error) { showError(error); }
 })();
 
 function renderSupplyRoster() {
@@ -1211,7 +1083,7 @@ function renderSupplyRoster() {
   const thisRun = snapshot?.run?.id || 'blueprint';
   if (rosterRun !== thisRun) { supplyRoster.reset(); observedRosterFacts.clear(); rosterRun = thisRun; }
   for (const fact of snapshot?.facts || []) observedRosterFacts.set(fact.sequence, fact);
-  const rows = [...mapEntities()].sort((a,b) => Number(a.kind === 'household') - Number(b.kind === 'household')).map(entity => {
+  const rows = [...currentEntities()].sort((a,b) => Number(a.kind === 'household') - Number(b.kind === 'household')).map(entity => {
     const agent = agents.find(a => a.entity_id === entity.id || a.namespace === entity.id || String(a.agent_id || '').endsWith(':' + entity.id));
     const pending = (snapshot?.events || []).filter(e => ['pending','queued','leased'].includes(e.state) && (e.target_store === entity.id || e.target_store === agent?.agent_id)).length;
     return {id:entity.id, name:entity.name || entity.id, identity:agent?.agent_id || entity.id, roleLabel:agent?.display_name || roles[entity.kind], role:entity.kind, status:!snapshot ? 'ready' : pending ? 'working' : 'idle',
@@ -1234,5 +1106,3 @@ function showSupplySimulation(open) {
 $('supply-operations').onclick = () => showSupplySimulation(false);
 $('supply-simulation').onclick = () => showSupplySimulation(true);
 $('close-inspector').onclick = () => { $('supply-inspector').hidden = true; };
-
-Ops.enableMapKeyboard(document.getElementById('city-map'));
