@@ -406,7 +406,7 @@ function renderLedger() {
   $("orders-empty").hidden=rows.length>0;
   $("orders-empty").textContent=state.orders.length?"No orders match this view. Adjust the search or choose All orders.":"No orders yet. New requests will appear here during the session.";
   document.querySelector(".ledger .table-scroll").hidden=rows.length===0;
-  document.querySelectorAll("[data-order]").forEach(b=>b.onclick=()=>choose("order",b.dataset.order));
+  document.querySelectorAll("[data-order]").forEach(b=>b.onclick=()=>{choose("order",b.dataset.order);StoreUI.selectOrder(b.dataset.order);});
 }
 function renderInspector() {
   if(!state?.run)return;
@@ -465,6 +465,7 @@ async function poll() {
     state=next;
     displayClock.accept(runtime.mode==="replay"&&state.run?{...state.run,id:state.run.id+":"+replayStarted}:state.run, performance.now());
     ChaosUI.update(state);
+    await StoreUI.update(state,runtime);
     $("connection").className="dot online"; $("connection-text").textContent=runtime.mode==="replay"?"Recorded replay · no model calls":"Local services connected";
     if(state.run) { renderFleetControl();renderMetrics();renderCouriers();renderOrders();renderLedger();renderInspector();renderRoute();await refreshTrace(); }
     else $("fleet").innerHTML='<div class="empty"><strong>No session loaded</strong><p>Start a session to see the fleet, routes and orders.</p><button data-open-simulation>Set up simulation</button></div>';
@@ -496,4 +497,8 @@ async function initialize() {
   } catch(e) { error(e.message); }
   setInterval(poll,1000); animate();
 }
+StoreUI.init({map,api,choose,locate:()=>$("frame-selection").click(),selectRun:async id=>{
+ runId=id;$("run-select").value=id;setConsoleView("operations");
+ history.replaceState(null,"","?run="+encodeURIComponent(id));await refreshRuns();await poll();
+}});
 initialize();

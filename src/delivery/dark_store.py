@@ -67,7 +67,11 @@ class DarkStore(RunEnvironment):
             store["orders"] = list(
                 conn.execute(
                     "SELECT s.order_id,s.stage,s.lines,s.picked,s.worker,s.revision,s.packed_sim,"
-                    "s.dock_sim,o.status,o.courier,o.due_sim,o.delivered_sim,o.route "
+                    "s.dock_sim,o.status,o.courier,o.due_sim,o.delivered_sim,o.route,"
+                    "(SELECT jsonb_build_object('action',d.action,'reason',d.detail->>'reason',"
+                    "'sim_time',d.sim_time) FROM decisions d WHERE d.run_id=s.run_id "
+                    "AND d.order_id=s.order_id AND d.agent='fulfillment' "
+                    "ORDER BY d.id DESC LIMIT 1) AS decision "
                     "FROM store_orders s JOIN orders o ON o.run_id=s.run_id AND o.id=s.order_id "
                     "WHERE s.run_id=%s AND s.store=%s ORDER BY o.created_sim,s.order_id",
                     (run, key),
