@@ -38,5 +38,51 @@
     "model_calls": 0,
     "model_tokens": 0,
     "model_usd": 0
-  }
+  },
+  "display_name": "Dispatcher",
+  "mission": "Match ready orders to available couriers and recover disrupted deliveries.",
+  "why_it_exists": "A shared fleet needs one consistent assignment decision.",
+  "design_decisions": [
+    "Batch assignment accounts for travel and lateness.",
+    "Recovery proposals go through validated tools and A2A."
+  ],
+  "known_limits": [
+    "Travel and demand are simulated, not live traffic predictions."
+  ],
+  "service_events": {
+    "accepts": [
+      "basket.ready",
+      "courier.accepted",
+      "courier.available",
+      "delivery.arrived",
+      "dispatch.retry",
+      "order.created",
+      "recovery.reviewed"
+    ],
+    "emits": [
+      "courier.assigned",
+      "courier.briefed",
+      "courier.reposition",
+      "delivery.assigned",
+      "delivery.completed",
+      "dispatch.noted",
+      "dispatch.retry",
+      "recovery.requested"
+    ]
+  },
+  "tool_descriptions": {
+    "dispatch.assign": "Assign a feasible courier and route to a basket.",
+    "dispatch.complete": "Record completion only after physical arrival.",
+    "dispatch.defer": "Defer dispatch until capacity becomes available.",
+    "dispatch.read": "Read delivery candidates and physical fleet state.",
+    "dispatch.recover": "Apply an approved recovery attempt.",
+    "memory.read": "Recall evidence inside the current run, role and order scope.",
+    "memory.write": "Append a bounded memory observation with provenance.",
+    "queue.publish": "Publish an allowed topic to a permitted recipient."
+  },
+  "recovery_tools": [
+    "read_context",
+    "reassign_order",
+    "keep_assignment"
+  ]
 }

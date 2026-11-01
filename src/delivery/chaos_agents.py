@@ -25,6 +25,7 @@ from google.genai import types
 from psycopg.types.json import Jsonb
 
 from delivery.adk_offline import OfflineRestaurantModel
+from delivery.agent_specs import load_role
 from delivery.chaos import active_events, affected, recovery_world
 from delivery.config import settings
 from delivery.customer_service import refund_policy
@@ -110,6 +111,10 @@ class OfflineRecoveryModel(BaseLlm):
 class RecoveryTurn:
     def __init__(self, role: str, facts: dict[str, Any] | None = None) -> None:
         self.role, self.facts = role, facts
+        name = "restaurant" if role.startswith("restaurant-") else role
+        if name not in {"restaurant", "dispatcher", "customer_service"}:
+            raise ValueError("Unknown recovery role")
+        self.permissions = load_role(name).recovery_tools
         self.session_facts = facts is None
         self.read = False
         self.plan: dict[str, Any] | None = None
@@ -129,13 +134,7 @@ class RecoveryTurn:
         if not self.read or self.plan is not None:
             raise PermissionError("Read context and choose exactly one action")
         assert self.facts is not None
-        permitted = (
-            {"reassign_order", "keep_assignment"}
-            if self.role == "dispatcher"
-            else {"contact_customer", "refund_customer", "escalate"}
-            if self.role == "customer_service"
-            else {"update_prep_time", "keep_preparation", "reject_order"}
-        )
+        permitted = set(self.permissions) - {"read_context"}
         if action not in permitted:
             raise PermissionError("Action is outside this agent's tools")
         if len(json.dumps(arguments).encode()) > 1024:
@@ -216,18 +215,12 @@ class RecoveryTurn:
             self.facts = None
 
     def build(self, model: BaseLlm) -> LlmAgent:
-        actions = (
-            [self.reassign_order, self.keep_assignment]
-            if self.role == "dispatcher"
-            else [self.contact_customer, self.refund_customer, self.escalate]
-            if self.role == "customer_service"
-            else [self.update_prep_time, self.keep_preparation, self.reject_order]
-        )
+        tools = [getattr(self, name) for name in self.permissions]
         return LlmAgent(
             name=self.role.replace("-", "_"),
             model=model,
             instruction=INSTRUCTION,
-            tools=[self.read_context, *actions],
+            tools=tools,
             before_model_callback=self.before_model,
             before_agent_callback=self.before_agent,
             disallow_transfer_to_parent=True,

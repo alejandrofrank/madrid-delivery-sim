@@ -1,0 +1,112 @@
+{
+  "schema_version": 1,
+  "role": "restaurant",
+  "version": "1",
+  "policy": "deterministic",
+  "soul_file": "SOUL.md",
+  "accepts": [
+    "household.call",
+    "ingredient.arrived",
+    "ingredient.shortage",
+    "restaurant.approval",
+    "restaurant.cook"
+  ],
+  "emits": [
+    "basket.ready",
+    "household.offer",
+    "household.status",
+    "market.request",
+    "meal.delivery",
+    "restaurant.cook"
+  ],
+  "tools": [
+    "memory.read",
+    "memory.write",
+    "restaurant.confirm",
+    "restaurant.cook",
+    "restaurant.decline",
+    "restaurant.finish",
+    "restaurant.offer",
+    "restaurant.order",
+    "restaurant.pantry",
+    "restaurant.receive",
+    "restaurant.recipe",
+    "restaurant.request_supply",
+    "restaurant.suppliers",
+    "supply.command",
+    "supply.read",
+    "supply.search"
+  ],
+  "limits": {
+    "events_per_run": 500,
+    "tool_calls_per_event": 5,
+    "tool_calls_per_run": 2000,
+    "memory_entries": 64,
+    "memory_bytes": 16384,
+    "model_calls": 0,
+    "model_tokens": 0,
+    "model_usd": 0
+  },
+  "display_name": "Restaurant",
+  "mission": "Prepare a feasible meal or explain why it cannot be made.",
+  "why_it_exists": "Physical ingredients, customer consent and deadlines must agree.",
+  "design_decisions": [
+    "ADK gets granular tools instead of unrestricted commands.",
+    "Shortages trigger sourcing; substitutions require consent."
+  ],
+  "known_limits": [
+    "Offline ADK uses scripted decisions, not evidence of live model quality.",
+    "The editable blueprint may choose different limits and memory profiles."
+  ],
+  "tool_profiles": {
+    "deterministic": [
+      "memory.read",
+      "memory.write",
+      "supply.command",
+      "supply.read",
+      "supply.search"
+    ],
+    "adk": [
+      "memory.read",
+      "memory.write",
+      "restaurant.confirm",
+      "restaurant.cook",
+      "restaurant.decline",
+      "restaurant.finish",
+      "restaurant.offer",
+      "restaurant.order",
+      "restaurant.pantry",
+      "restaurant.receive",
+      "restaurant.recipe",
+      "restaurant.request_supply",
+      "restaurant.suppliers"
+    ],
+    "optional": [
+      "supply.search"
+    ]
+  },
+  "tool_descriptions": {
+    "memory.read": "Recall evidence inside the current run, role and order scope.",
+    "memory.write": "Append a bounded memory observation with provenance.",
+    "restaurant.confirm": "Confirm a feasible meal request.",
+    "restaurant.cook": "Cook only from allocated physical ingredients and consent.",
+    "restaurant.decline": "Decline an infeasible request with a reason.",
+    "restaurant.finish": "Finish the turn with a factual decision receipt.",
+    "restaurant.offer": "Offer a substitution for household approval.",
+    "restaurant.order": "Inspect the current meal request and customer exclusions.",
+    "restaurant.pantry": "Read physically available ingredients.",
+    "restaurant.receive": "Accept a confirmed ingredient arrival.",
+    "restaurant.recipe": "Read the requested recipe and canonical quantities.",
+    "restaurant.request_supply": "Request missing ingredients from a permitted supplier.",
+    "restaurant.suppliers": "Inspect eligible ingredient suppliers.",
+    "supply.command": "Execute this role’s fixed transactional supply step.",
+    "supply.read": "Read canonical order, stock, consent and sourcing facts.",
+    "supply.search": "Search scoped catalogue observations; results grant no authority."
+  },
+  "recovery_tools": [
+    "read_context",
+    "update_prep_time",
+    "keep_preparation",
+    "reject_order"
+  ]
+}

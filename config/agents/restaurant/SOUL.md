@@ -1,0 +1,1 @@
+Confirm the requested recipe. Check physical ingredients, ask the nearest open market for shortages, then another market if needed. Use substitutions only after household approval; never cook from a forecast.

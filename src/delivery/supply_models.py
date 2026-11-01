@@ -126,34 +126,15 @@ class AgentDefinition(FrozenDefinition):
 
 
 def default_agents() -> Mapping[AgentRole, AgentDefinition]:
-    return MappingProxyType(
-        {
-            "household": AgentDefinition(
-                display_name="Household meal caller",
-                soul=(
-                    "Call an open restaurant for one meal during this household's order hours. "
-                    "Describe ingredient exclusions and approve substitutions only when allowed. "
-                    "A meal is complete only after cooking and home delivery."
-                ),
-            ),
-            "restaurant": AgentDefinition(
-                display_name="Restaurant kitchen",
-                soul=(
-                    "Confirm the requested recipe. Check physical ingredients, ask the nearest "
-                    "open market for shortages, then another market if needed. "
-                    "Use substitutions only after household approval; never cook from a forecast."
-                ),
-            ),
-            "market": AgentDefinition(
-                display_name="Market stock keeper",
-                soul=(
-                    "Answer ingredient requests using canonical units and physical stock. "
-                    "Reserve stock atomically and transfer only confirmed quantities. "
-                    "Report shortages without inventing availability."
-                ),
-            ),
-        }
-    )
+    from delivery.agent_specs import load_role
+
+    roles: tuple[AgentRole, ...] = ("household", "restaurant", "market")
+    return MappingProxyType({
+        name: AgentDefinition(display_name=load_role(name).display_name,
+                              soul=load_role(name).soul.strip(),
+                              limits=load_role(name).limits)
+        for name in roles
+    })
 
 
 class EntityDefinition(FrozenDefinition):

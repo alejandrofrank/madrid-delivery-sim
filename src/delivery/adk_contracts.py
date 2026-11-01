@@ -14,24 +14,10 @@ from pydantic import (
     model_validator,
 )
 
-RESTAURANT_TOOLS = frozenset(
-    {
-        "restaurant.order",
-        "restaurant.pantry",
-        "restaurant.recipe",
-        "restaurant.suppliers",
-        "restaurant.request_supply",
-        "restaurant.confirm",
-        "restaurant.receive",
-        "restaurant.cook",
-        "restaurant.offer",
-        "restaurant.decline",
-        "restaurant.finish",
-        "memory.read",
-        "memory.write",
-    }
-)
-OPTIONAL_RESTAURANT_TOOLS = frozenset({"supply.search"})
+from delivery.role_manifest import restaurant_capabilities
+
+RESTAURANT_TOOLS = restaurant_capabilities("adk")
+OPTIONAL_RESTAURANT_TOOLS = restaurant_capabilities("optional")
 
 
 class JevRouting(BaseModel):
