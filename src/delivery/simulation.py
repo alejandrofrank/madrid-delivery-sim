@@ -18,8 +18,6 @@ from delivery.chaos import (
     ChaosConfig,
     demand_factors,
     insert_event,
-    observe,
-    physical_tick,
     schedule,
 )
 from delivery.chaos import (
@@ -30,6 +28,7 @@ from delivery.contractors import fleet_contract, fleet_plan
 from delivery.customer_service import CustomerService
 from delivery.db import Connection, connect, migrate
 from delivery.dispatch_policy import DispatchPolicy, load_policy
+from delivery.madrid_city import MadridCity
 from delivery.queue import Queue, publish
 from delivery.telemetry import active, order_span
 from delivery.world import World, seed_locations
@@ -364,6 +363,7 @@ class Simulation:
         self.queue = Queue(url)
         self.dispatcher = Dispatcher(world)
         self.courier = Courier()
+        self.environment = MadridCity(world, self.courier)
         self.service = service or CustomerService(url)
         self.transport = transport or default_transport(url)
         if isinstance(self.transport, InProcessTransport):
@@ -405,15 +405,8 @@ class Simulation:
     def step(self, run: str, sim: int, seed: int, duration: int) -> None:
         with connect(self.url) as conn:
             conn.execute("SELECT pg_advisory_xact_lock(hashtextextended(%s, 0))", (run,))
-            conn.execute("UPDATE runs SET sim_time=%s WHERE id=%s", (sim, run))
-            self.courier.advance(conn, run, sim)
-            row = conn.execute("SELECT chaos_config FROM runs WHERE id=%s", (run,)).fetchone()
-            chaos = row is not None and row["chaos_config"] is not None
-            if chaos:
-                physical_tick(conn, run, sim)
-            generate(conn, run, sim, seed, duration)
-            if chaos:
-                observe(conn, run, sim)
+            effects = self.environment.advance(conn, run, sim, seed=seed, duration=duration)
+            chaos = effects["chaos"]
         if chaos:
             self.recover(run, sim)
         self.drain(run, sim)
