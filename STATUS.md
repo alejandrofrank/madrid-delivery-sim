@@ -1,5 +1,21 @@
 # Status
 
+2026-11-01 (main consolidation): Combined the production foundations with the
+latest Operations, Restaurants and Inventory cleanup in PR #5. The full local
+suite passed 969 Python tests, six courier-motion checks, seven mocked Terraform
+plans, Ruff and mypy across 80 modules. Fresh development ADK attempts showed no
+significant regression against the exact current main source; all 360 held-out
+attempts passed. The full A2A day delivered 247 orders with 1,243 acknowledgements,
+all three fleets and no stranded work. Seeded Chaos recovery/policy checks and
+the real worker-crash demonstration passed. The replay image starts with networking
+disabled. GitHub Actions could not start because of an account billing/spending
+block; no hosted-green result is claimed. Previously merged feature branches were
+removed, and private deployment material and the experimental controller patch
+were preserved under ignored local artifacts before worktree cleanup. No cloud
+services were started. Private live mode remains disabled pending the documented
+least-privilege SQL controller implementation. See
+[consolidation evidence](docs/evidence/main-consolidation.json).
+
 2026-10-30 (public-release preparation and A2A integration): Preserved the pending
 eval-branch work as three logical commits, then retained main's newer ADK repair
 accounting and live trace page during integration. The combined A2A, Chaos and

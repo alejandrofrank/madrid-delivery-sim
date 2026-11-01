@@ -54,12 +54,14 @@ enforce the same current-order/request/attempt scope. These are recall projectio
 semantic recall is now implemented, while unrestricted model-written memories remain planned. See
 [memory profiles and isolation](docs/AGENT-MEMORY.md).
 
-Shared UI slice: restaurants, delivery, inventory, health, architecture and the
-Madrid baseline now use one local workspace shell, visual tokens and control
-states. Responsive navigation retains every workspace on a small screen. Maps,
-entity definitions, order chats, memory, health filters and code inspection remain
-in their working layouts. Content versions prevent stale CSS/JavaScript/SVGs from
-surviving an updated shell. Eight monochrome D2 diagrams include recovery review,
+Shared UI slice: Operations, Restaurants, Inventory, Health, Traces and Architecture
+use one local workspace shell, visual tokens and control states. Operations owns
+the Madrid map; the duplicate Delivery workspace and fictional grid maps are
+retired. Restaurant agents and inventory stores use searchable lists with their
+existing inspectors. Responsive navigation retains every workspace on a small
+screen. Entity definitions, order chats, memory, health filters and code inspection
+remain available. Content versions and HTML revalidation prevent stale assets
+from surviving an updated shell. Eight monochrome D2 diagrams include recovery review,
 dispatch gates and physical handoff, with labels separated from arrowheads.
 See [design sources and maintenance](docs/DESIGN-SYSTEM.md).
 

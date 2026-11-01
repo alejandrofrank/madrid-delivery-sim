@@ -82,7 +82,7 @@ flowchart LR
 
 | Headline result | Evidence and scope |
 | --- | --- |
-| Tests | **963 Python checks passed** (957 in the full run plus six new lifecycle tests); six courier-motion checks, seven Terraform checks, Ruff and mypy (80 modules). [Production verification](docs/evidence/production-verification.json). |
+| Tests | **969 Python tests passed** in the combined full suite; six courier-motion checks, seven Terraform checks, Ruff and mypy (80 modules). [Main consolidation verification](docs/evidence/main-consolidation.json). GitHub-hosted checks are currently blocked by account billing; these results were verified locally. |
 | Scenarios | 12 deterministic role scenarios, run twice with matching outcomes. |
 | Cost per local run | **$0 in cloud/model charges**; local compute excluded. |
 | Evaluation pass rate | **360/360 held-out ADK attempts** across 72 cases; [release results](#held-out-release-results). Four A2A recovery scenarios and matching seeded Chaos runs remain covered by [Chaos verification](docs/evidence/a2a-chaos-local.json). These scripted checks measure contracts, recovery and policy, not live-model quality. |
@@ -624,17 +624,17 @@ These public fixtures are reserved by workflow, not a secret benchmark.
 <!-- release-results:start -->
 | Held-out arm | Cases × k | pass^k | Bootstrap 95% CI | Cost / success | p95 |
 | --- | ---: | ---: | --- | ---: | ---: |
-| adk-chaos-customer | 12 × 5 | 1.000 | [1.000, 1.000] | $0.0000 | 10.3 ms |
-| adk-chaos-dispatcher | 12 × 5 | 1.000 | [1.000, 1.000] | $0.0000 | 10.8 ms |
-| adk-chaos-restaurant | 12 × 5 | 1.000 | [1.000, 1.000] | $0.0000 | 11.3 ms |
-| adk-customer-policy | 12 × 5 | 1.000 | [1.000, 1.000] | $0.0000 | 1.9 ms |
-| adk-offline-customer | 12 × 5 | 1.000 | [1.000, 1.000] | $0.0000 | 1.9 ms |
-| adk-offline-restaurant | 12 × 5 | 1.000 | [1.000, 1.000] | $0.0000 | 42.0 ms |
+| adk-chaos-customer | 12 × 5 | 1.000 | [1.000, 1.000] | $0.0000 | 15.7 ms |
+| adk-chaos-dispatcher | 12 × 5 | 1.000 | [1.000, 1.000] | $0.0000 | 18.6 ms |
+| adk-chaos-restaurant | 12 × 5 | 1.000 | [1.000, 1.000] | $0.0000 | 23.9 ms |
+| adk-customer-policy | 12 × 5 | 1.000 | [1.000, 1.000] | $0.0000 | 2.5 ms |
+| adk-offline-customer | 12 × 5 | 1.000 | [1.000, 1.000] | $0.0000 | 2.5 ms |
+| adk-offline-restaurant | 12 × 5 | 1.000 | [1.000, 1.000] | $0.0000 | 17.8 ms |
 
 Measured with fresh ADK sessions and scripted offline models. This is contract
 evidence, not live-model quality, inference cost or production latency.
 pass^k is the fraction of cases passing every attempt; bootstrap intervals
 resample cases. An all-pass cohort has a degenerate [1, 1] interval and does
 not establish certainty on unseen workloads. Costs include failed attempts.
-Source revision: `b3075f3bd2250d147e2a050afdd369ff951405c6`.
+Source revision: `751b2d5f8a9c3b33b8301e37680809a452a99d8c`.
 <!-- release-results:end -->

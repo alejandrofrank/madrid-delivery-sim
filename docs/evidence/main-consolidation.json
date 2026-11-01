@@ -1,0 +1,55 @@
+{
+  "verified_at_local_date": "2026-11-01",
+  "source_revision": "751b2d5f8a9c3b33b8301e37680809a452a99d8c",
+  "source_fingerprint": "e8c4fe80ac28ead56ac53cdd05fdf594c59c968cb3581a644a4b41f0e7a5eb84",
+  "scope": "Production foundations combined with main's six-workspace UI and retired grids",
+  "execution": "Local disposable Docker environments; no paid calls or cloud deployment",
+  "receipt_note": "The merged working tree was tested before the merge commit was made; raw receipts label it production-main-consolidation-candidate.",
+  "checks": {
+    "pytest": {"passed": 969, "failed": 0, "skipped": 0, "warnings": 53, "seconds": 778.57},
+    "ruff": "passed",
+    "mypy": {"passed": true, "source_files": 80},
+    "courier_motion": {"passed": 6},
+    "javascript_syntax": "passed",
+    "web_asset_versions": {"workspaces": 6, "status": "passed"},
+    "documentation_diagrams": {"passed": 8},
+    "terraform": {"version": "1.14.3", "mock_plans_passed": 7, "format_and_validate": "passed", "cloud_resources_created": false},
+    "production_session_bash_syntax": "passed",
+    "replay_image_network_disabled_startup": "passed"
+  },
+  "evals": {
+    "development_attempts": 144,
+    "baseline_revision": "c31d87dddd6f09fb7e4ada884b70a2917c50df46",
+    "baseline_origin": "Fresh local execution of unchanged main; network disabled",
+    "comparison": "no_significant_regression",
+    "chaos_recovery_policy_and_seeded_replay": "passed",
+    "heldout_cases": 72,
+    "heldout_attempts_per_case": 5,
+    "heldout_passed_attempts": 360,
+    "heldout_comparison": "bootstrap; no prior trusted main release artifact exists",
+    "limits": "Scripted offline ADK contract/policy checks, not live-model quality or production latency."
+  },
+  "end_to_end": {
+    "transport": "A2A HTTP via official SDK",
+    "seed": 42,
+    "deliveries": 247,
+    "acknowledgements": 1243,
+    "fleets": 3,
+    "stranded_orders": 0,
+    "worker_crash_exit_code": 73,
+    "recovered_attempt": 2,
+    "stock_conserved": true,
+    "nonnegative_stock": true,
+    "agent_budgets_within_caps": true
+  },
+  "hosted_ci": {
+    "status": "blocked_before_execution",
+    "observed_main_run": "https://github.com/alejandrofrank/madrid-delivery-sim/actions/runs/41249610391",
+    "reason": "GitHub reports recent account payments failed or the spending limit must be increased.",
+    "policy": "No billing settings, repository visibility or branch protection were changed; no hosted-green claim."
+  },
+  "remaining": [
+    "Resolve the GitHub Actions account billing/spending block before expecting hosted checks to run.",
+    "Private live SQL controller provisioning, cloud qualification and browser login remain explicitly disabled/unfinished as documented in production/DEPLOYMENT.md."
+  ]
+}
