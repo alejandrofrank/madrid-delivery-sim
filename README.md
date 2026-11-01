@@ -677,3 +677,15 @@ resample cases. An all-pass cohort has a degenerate [1, 1] interval and does
 not establish certainty on unseen workloads. Costs include failed attempts.
 Source revision: `751b2d5f8a9c3b33b8301e37680809a452a99d8c`.
 <!-- release-results:end -->
+
+### Store model credits
+
+The dark-store view uses NVIDIA SimReady models converted by
+[codepawl/simready-glb](https://huggingface.co/datasets/codepawl/simready-glb),
+licensed [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/).
+This project simplifies geometry, downsizes textures to 256 px and compresses
+meshes for the browser. The seven local models total 920,992 bytes; these are
+visual assets, not a robotics physics simulation. Original URLs, the pinned
+dataset revision and SHA-256 checksums are in
+[the asset manifest](web/vendor/simready/manifest.json). Rebuild with
+`node scripts/build_store_assets.mjs` after `npm ci`.
