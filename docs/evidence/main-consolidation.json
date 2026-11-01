@@ -43,13 +43,13 @@
     "agent_budgets_within_caps": true
   },
   "hosted_ci": {
-    "status": "blocked_before_execution",
+    "status": "previous_main_run_blocked; new PR checks started normally",
     "observed_main_run": "https://github.com/alejandrofrank/madrid-delivery-sim/actions/runs/41249610391",
     "reason": "GitHub reports recent account payments failed or the spending limit must be increased.",
-    "policy": "No billing settings, repository visibility or branch protection were changed; no hosted-green claim."
+    "integration_checks": "https://github.com/alejandrofrank/madrid-delivery-sim/pull/5/checks",
+    "policy": "No billing settings, repository visibility or branch protection were changed. The results in this receipt are local; hosted outcomes are recorded separately on the PR."
   },
   "remaining": [
-    "Resolve the GitHub Actions account billing/spending block before expecting hosted checks to run.",
     "Private live SQL controller provisioning, cloud qualification and browser login remain explicitly disabled/unfinished as documented in production/DEPLOYMENT.md."
   ]
 }

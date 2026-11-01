@@ -8,8 +8,9 @@ significant regression against the exact current main source; all 360 held-out
 attempts passed. The full A2A day delivered 247 orders with 1,243 acknowledgements,
 all three fleets and no stranded work. Seeded Chaos recovery/policy checks and
 the real worker-crash demonstration passed. The replay image starts with networking
-disabled. GitHub Actions could not start because of an account billing/spending
-block; no hosted-green result is claimed. Previously merged feature branches were
+disabled. The previous main GitHub Actions run could not start because of an
+account billing/spending block; the new PR checks started normally. Hosted results
+are tracked on PR #5 separately from these local measurements. Previously merged feature branches were
 removed, and private deployment material and the experimental controller patch
 were preserved under ignored local artifacts before worktree cleanup. No cloud
 services were started. Private live mode remains disabled pending the documented

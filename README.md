@@ -82,7 +82,7 @@ flowchart LR
 
 | Headline result | Evidence and scope |
 | --- | --- |
-| Tests | **969 Python tests passed** in the combined full suite; six courier-motion checks, seven Terraform checks, Ruff and mypy (80 modules). [Main consolidation verification](docs/evidence/main-consolidation.json). GitHub-hosted checks are currently blocked by account billing; these results were verified locally. |
+| Tests | **969 Python tests passed** in the combined local full suite; six courier-motion checks, seven Terraform checks, Ruff and mypy (80 modules). [Main consolidation verification](docs/evidence/main-consolidation.json); hosted check results are tracked on [PR #5](https://github.com/alejandrofrank/madrid-delivery-sim/pull/5). |
 | Scenarios | 12 deterministic role scenarios, run twice with matching outcomes. |
 | Cost per local run | **$0 in cloud/model charges**; local compute excluded. |
 | Evaluation pass rate | **360/360 held-out ADK attempts** across 72 cases; [release results](#held-out-release-results). Four A2A recovery scenarios and matching seeded Chaos runs remain covered by [Chaos verification](docs/evidence/a2a-chaos-local.json). These scripted checks measure contracts, recovery and policy, not live-model quality. |
