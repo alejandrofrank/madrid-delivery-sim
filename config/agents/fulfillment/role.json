@@ -43,5 +43,48 @@
     "memory.read": "Recall evidence inside the current run, role and order scope.",
     "memory.write": "Append a bounded memory observation with provenance.",
     "queue.publish": "Publish an allowed topic to a permitted recipient."
+  },
+  "environment_limits": {
+    "dark_store": {
+      "events_per_run": 1000,
+      "tool_calls_per_event": 8,
+      "tool_calls_per_run": 2000,
+      "memory_entries": 32,
+      "memory_bytes": 16384,
+      "model_calls": 0,
+      "model_tokens": 0,
+      "model_usd": 0
+    }
+  },
+  "tool_profiles": {
+    "dark_store": [
+      "fulfillment.pick",
+      "fulfillment.read",
+      "memory.read",
+      "memory.write",
+      "queue.publish",
+      "fulfillment.route",
+      "fulfillment.pack",
+      "fulfillment.handoff",
+      "fulfillment.restock"
+    ]
+  },
+  "service_events": {
+    "accepts": [
+      "basket.reserved",
+      "store.order.reserved",
+      "store.worker.arrived",
+      "store.replan"
+    ],
+    "emits": [
+      "basket.ready",
+      "store.pick.started",
+      "store.item.picked",
+      "store.packed",
+      "store.dock.ready",
+      "store.replanned",
+      "store.restock.started",
+      "order.created"
+    ]
   }
 }

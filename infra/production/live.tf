@@ -1,9 +1,9 @@
 locals {
-  live_roles    = toset(["api", "dispatcher", "restaurant", "customer-service"])
+  live_roles    = toset(["api", "dispatcher", "restaurant", "customer-service", "inventory", "fulfillment"])
   live_services = var.active && var.enable_live && var.live_ready ? local.live_roles : toset([])
   live_urls = { for role in local.live_roles : role =>
   "https://mds-${role}-${google_project.app.number}.${var.region}.run.app" }
-  agent_endpoints = { for role in ["dispatcher", "restaurant", "customer-service"] :
+  agent_endpoints = { for role in ["dispatcher", "restaurant", "customer-service", "inventory", "fulfillment"] :
   replace(role, "-", "_") => local.live_urls[role] }
   live_environment = {
     DELIVERY_RUNTIME             = "live"
@@ -11,7 +11,7 @@ locals {
     DELIVERY_A2A_ENDPOINTS       = jsonencode(local.agent_endpoints)
     DELIVERY_OPERATOR_PRINCIPALS = jsonencode(var.operator_principals)
     DELIVERY_A2A_CALLERS = jsonencode({
-      (google_service_account.role["api"].email) = ["dispatcher", "restaurant", "customer_service"]
+      (google_service_account.role["api"].email) = ["dispatcher", "restaurant", "customer_service", "inventory", "fulfillment"]
     })
     DELIVERY_CLOUD_RUN_JOB      = "projects/${var.project_id}/locations/${var.region}/jobs/mds-shift"
     GOOGLE_CLOUD_PROJECT        = var.project_id

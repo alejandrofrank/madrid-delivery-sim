@@ -29,6 +29,8 @@ from delivery.live_jobs import schedule
 from delivery.mcp_server import create_mcp_server
 from delivery.protocol_api import agent_directory, agent_names
 from delivery.simulation import Simulation, create_run, initialize, snapshot
+from delivery.store_api import router as store_router
+from delivery.store_layout import StoreConfig
 from delivery.supply_api import router as supply_router
 from delivery.telemetry import instrument_fastapi, shutdown_telemetry
 from delivery.telemetry_api import router as telemetry_router
@@ -285,6 +287,7 @@ class StartRun(BaseModel):
     dispatch: DispatchPolicy = Field(default_factory=DispatchPolicy)
     duration: int = Field(default=43200, ge=1800, le=43200, multiple_of=60)
     chaos: ChaosConfig | None = None
+    dark_store: StoreConfig | None = None
 
 
 def run_background(run: str) -> None:
@@ -341,6 +344,7 @@ def start(body: StartRun, tasks: BackgroundTasks) -> dict[str, str]:
             duration=body.duration,
             dispatch=body.dispatch,
             chaos=body.chaos,
+            dark_store=body.dark_store,
         )
     except ValueError as exc:
         raise HTTPException(422, str(exc)) from None
@@ -384,6 +388,7 @@ def favicon() -> None:
 
 app.include_router(supply_router)
 app.include_router(chaos_router)
+app.include_router(store_router)
 app.include_router(health_router)
 app.include_router(documentation_router)
 app.include_router(telemetry_router)

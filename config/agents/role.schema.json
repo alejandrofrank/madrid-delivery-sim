@@ -421,6 +421,13 @@
       "title": "Service Events",
       "type": "object"
     },
+    "environment_limits": {
+      "additionalProperties": {
+        "$ref": "#/$defs/RoleLimits"
+      },
+      "title": "Environment Limits",
+      "type": "object"
+    },
     "recovery_tools": {
       "default": [],
       "items": {

@@ -26,10 +26,13 @@ from delivery.chaos import (
 from delivery.config import settings
 from delivery.contractors import fleet_contract, fleet_plan
 from delivery.customer_service import CustomerService
+from delivery.dark_store import DarkStore
 from delivery.db import Connection, connect, migrate
 from delivery.dispatch_policy import DispatchPolicy, load_policy
 from delivery.madrid_city import MadridCity
 from delivery.queue import Queue, publish
+from delivery.store_layout import StoreConfig
+from delivery.store_setup import attach_store_order, initialize_stores
 from delivery.telemetry import active, order_span
 from delivery.world import World, seed_locations
 
@@ -58,6 +61,16 @@ def finish_run(run: str, url: str | None = None) -> None:
             "(SELECT 1 FROM runs WHERE id=%s AND chaos_config IS NOT NULL)",
             (run, run),
         )
+        from delivery.store_agents import cancel_order
+
+        for stored in conn.execute(
+            "SELECT s.* FROM store_orders s JOIN orders o ON o.run_id=s.run_id "
+            "AND o.id=s.order_id WHERE s.run_id=%s AND o.status='unserved' "
+            "AND s.stage NOT IN ('cancelled','handed_off')", (run,)
+        ).fetchall():
+            clock = conn.execute("SELECT sim_time FROM runs WHERE id=%s",(run,)).fetchone()
+            assert clock
+            cancel_order(conn,run,stored,clock["sim_time"])
     try:
         for order in unserved:
             attributes: dict[str, Any] = {
@@ -91,6 +104,7 @@ def create_run(
     url: str | None = None,
     dispatch: DispatchPolicy | None = None,
     chaos: ChaosConfig | None = None,
+    dark_store: StoreConfig | None = None,
 ) -> str:
     run = str(uuid4())
     policy = dispatch or DispatchPolicy()
@@ -143,6 +157,10 @@ def create_run(
                         fleet_id,
                     ),
                 )
+        if dark_store is not None and dark_store.enabled:
+            conn.execute("UPDATE runs SET store_config=%s WHERE id=%s",
+                         (Jsonb(dark_store.model_dump(mode="json")),run))
+            initialize_stores(conn,run,dark_store)
         for event in disruptions:
             insert_event(conn, run, event)
     return run
@@ -173,6 +191,8 @@ def generate(conn: Connection, run: str, sim: int, seed: int, duration: int) -> 
                VALUES (%s,%s,%s,%s,%s,%s,%s) ON CONFLICT DO NOTHING""",
             (run, order, store["id"], customer["id"], sim, ready, sim + 1800),
         )
+        if attach_store_order(conn,run,order,sim,seed):
+            continue
         publish(
             conn,
             run_id=run,
@@ -307,7 +327,7 @@ def snapshot(run: str | None = None, url: str | None = None) -> dict[str, Any]:
         )
         orders = conn.execute(
             """SELECT o.id,o.status,o.courier,o.created_sim,o.due_sim,o.delivered_sim,
-               ST_X(c.point) AS lon,ST_Y(c.point) AS lat,s.name AS store
+               ST_X(c.point) AS lon,ST_Y(c.point) AS lat,s.name AS store,o.store AS store_id
                FROM orders o JOIN locations c ON c.id=o.customer JOIN locations s ON s.id=o.store
                WHERE o.run_id=%s ORDER BY o.created_sim DESC,o.id LIMIT 300""",
             (run,),
@@ -364,6 +384,7 @@ class Simulation:
         self.dispatcher = Dispatcher(world)
         self.courier = Courier()
         self.environment = MadridCity(world, self.courier)
+        self.store_environment = DarkStore()
         self.service = service or CustomerService(url)
         self.transport = transport or default_transport(url)
         if isinstance(self.transport, InProcessTransport):
@@ -376,16 +397,20 @@ class Simulation:
                 self.transport.services[role] = worker
 
     def drain(self, run: str, sim: int) -> None:
+        with connect(self.url) as conn:
+            state = conn.execute("SELECT store_config FROM runs WHERE id=%s",(run,)).fetchone()
+        store_roles = ("inventory", "fulfillment") if state and state["store_config"] else ()
         for _ in range(500):  # hard loop bound; cycles cannot monopolize a tick
             progress = False
-            for role in ("dispatcher", "courier", "customer_service", "audit"):
-                if role in {"dispatcher", "customer_service"}:
+            for role in (*store_roles, "dispatcher", "courier", "customer_service", "audit",
+                         *(("store_audit",) if store_roles else ())):
+                if role in {"dispatcher", "customer_service", *store_roles}:
                     receipt = self.transport.invoke(
                         role,
                         {
                             "run_id": run,
                             "entity_id": "clock",
-                            "operation": "tick",
+                            "operation": "store_tick" if role in store_roles else "tick",
                         },
                     )
                     progress = progress or receipt["progressed"]
@@ -407,9 +432,15 @@ class Simulation:
             conn.execute("SELECT pg_advisory_xact_lock(hashtextextended(%s, 0))", (run,))
             effects = self.environment.advance(conn, run, sim, seed=seed, duration=duration)
             chaos = effects["chaos"]
+            stores = conn.execute("SELECT store_config FROM runs WHERE id=%s",(run,)).fetchone()
+            if stores and stores["store_config"]:
+                self.store_environment.advance(conn,run,sim)
         if chaos:
             self.recover(run, sim)
         self.drain(run, sim)
+        if stores and stores["store_config"]:
+            with connect(self.url) as conn:
+                self.store_environment.record(conn,run)
 
     def recover(self, run: str, sim: int) -> None:
         with connect(self.url) as conn:
@@ -460,7 +491,8 @@ class Simulation:
         redis_available = True
         first = row["sim_time"]
         try:
-            for sim in range(first, row["duration"] + 1, STEP_SECONDS):
+            step_seconds = 10 if row["store_config"] else STEP_SECONDS
+            for sim in range(first, row["duration"] + 1, step_seconds):
                 self.step(run, sim, row["seed"], row["duration"])
                 if redis_available:
                     try:

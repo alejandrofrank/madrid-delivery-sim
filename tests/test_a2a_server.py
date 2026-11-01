@@ -17,7 +17,7 @@ from delivery.db import connect
 
 def application(url=None):
     app = FastAPI()
-    for role in ("dispatcher", "customer_service"):
+    for role in ("dispatcher", "customer_service", "inventory", "fulfillment"):
         app.mount(f"/a2a/{role}", create_a2a_app(role, url=url))
     return app
 
@@ -51,7 +51,7 @@ async def call_agent(app, role, command):
         return json.loads(replies[0].message.parts[0].text)
 
 
-@pytest.mark.parametrize("role", ["dispatcher", "customer_service"])
+@pytest.mark.parametrize("role", ["dispatcher", "customer_service", "inventory", "fulfillment"])
 def test_real_sdk_discovers_and_calls_each_server_without_cloud(monkeypatch, role):
     received = []
 

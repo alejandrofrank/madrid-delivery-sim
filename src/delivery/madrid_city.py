@@ -39,7 +39,7 @@ class MadridCity(RunEnvironment):
         from delivery.simulation import generate
 
         row = conn.execute(
-            "SELECT seed,duration,sim_time,chaos_config FROM runs WHERE id=%s", (run,)
+            "SELECT seed,duration,sim_time,chaos_config,store_config FROM runs WHERE id=%s", (run,)
         ).fetchone()
         if row is None:
             raise ValueError("Unknown run")
@@ -50,8 +50,9 @@ class MadridCity(RunEnvironment):
         chaos = row["chaos_config"] is not None
         if chaos:
             physical_tick(conn, run, sim)
-        generate(conn, run, sim, row["seed"] if seed is None else seed,
-                 row["duration"] if duration is None else duration)
+        if not row.get("store_config") or sim % 60 == 0:
+            generate(conn, run, sim, row["seed"] if seed is None else seed,
+                     row["duration"] if duration is None else duration)
         if chaos:
             observe(conn, run, sim)
         return {"environment": self.name, "sim_time": sim, "chaos": chaos}

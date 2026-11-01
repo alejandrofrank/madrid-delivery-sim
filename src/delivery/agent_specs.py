@@ -47,6 +47,7 @@ class _RoleConfig(BaseModel):
     known_limits: tuple[str, ...] = ()
     tool_profiles: dict[str, tuple[str, ...]] = Field(default_factory=dict)
     service_events: dict[str, tuple[str, ...]] = Field(default_factory=dict)
+    environment_limits: dict[str, RoleLimits] = Field(default_factory=dict)
     recovery_tools: tuple[str, ...] = ()
     tool_descriptions: dict[str, str] = Field(default_factory=dict)
     version: str = Field(min_length=1, max_length=64)
@@ -68,6 +69,11 @@ class _RoleConfig(BaseModel):
                     trusted.get(field, {}).get(key, ())
                 ):
                     raise ValueError(f"{field} exceeds manifest authority")
+        for name, limits in self.environment_limits.items():
+            ceiling = trusted.get("environment_limits", {}).get(name)
+            if ceiling is None or any(value > ceiling.get(key, 0)
+                                      for key, value in limits.model_dump().items()):
+                raise ValueError("environment_limits exceeds manifest authority")
         if len(self.recovery_tools) != len(set(self.recovery_tools)) or not set(
             self.recovery_tools
         ) <= set(trusted.get("recovery_tools", ())):
@@ -115,6 +121,7 @@ class RoleSpec(_RoleConfig):
         for key in (
             "display_name", "mission", "why_it_exists", "design_decisions", "known_limits",
             "tool_profiles", "service_events", "recovery_tools", "tool_descriptions",
+            "environment_limits",
         ):
             if key not in self.model_fields_set:
                 definition.pop(key)

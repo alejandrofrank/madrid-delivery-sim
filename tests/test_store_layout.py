@@ -11,8 +11,11 @@ from delivery.store_layout import (
     stock_to_shelves,
 )
 
-PRODUCTS = [{"sku": "milk", "name": "Milk", "cold": True},
-            {"sku": "rice", "name": "Rice"}, {"sku": "apple", "name": "Apples"}]
+PRODUCTS = [
+    {"sku": "milk", "name": "Milk", "cold": True},
+    {"sku": "rice", "name": "Rice"},
+    {"sku": "apple", "name": "Apples"},
+]
 
 
 def test_layout_is_config_generated_and_order_independent() -> None:
@@ -22,8 +25,8 @@ def test_layout_is_config_generated_and_order_independent() -> None:
     assert all(s["zone"] == "cold" for s in layout["slots"] if s["sku"] == "milk")
     for slot in layout["slots"]:
         assert aisle_path(layout, layout["dock"]["node"], slot["access"])
-        assert f'{slot["x"]}:{slot["z"]}' not in layout["nodes"]
-    assert generate_layout(StoreLayoutConfig(bays=8), PRODUCTS)["depth"] > layout["depth"]
+        assert f"{slot['x']}:{slot['z']}" not in layout["nodes"]
+    assert generate_layout(StoreLayoutConfig(bays=10), PRODUCTS)["depth"] > layout["depth"]
 
 
 @pytest.mark.parametrize("quantities", [(0, 0, 0), (1, 3, 25), (250, 14, 32)])
@@ -42,10 +45,12 @@ def test_invalid_config_catalogue_and_stock_fail_closed() -> None:
     with pytest.raises(ValidationError):
         StoreLayoutConfig(aisles=0)
     with pytest.raises(ValueError, match="Unique"):
-        generate_layout(StoreLayoutConfig(), PRODUCTS+PRODUCTS)
+        generate_layout(StoreLayoutConfig(), PRODUCTS + PRODUCTS)
     with pytest.raises(ValueError, match="capacity"):
-        generate_layout(StoreLayoutConfig(bays=2, levels=1),
-                        [{"sku": str(i), "name": str(i), "cold": True} for i in range(20)])
+        generate_layout(
+            StoreLayoutConfig(bays=2, levels=1),
+            [{"sku": str(i), "name": str(i), "cold": True} for i in range(20)],
+        )
     layout = generate_layout(StoreLayoutConfig(), PRODUCTS)
     with pytest.raises(ValueError, match="Stock"):
         stock_to_shelves(layout, {"rice": -1})
@@ -53,8 +58,7 @@ def test_invalid_config_catalogue_and_stock_fail_closed() -> None:
 
 def test_picker_replans_from_observed_state_not_event_names() -> None:
     layout = generate_layout(StoreLayoutConfig(), PRODUCTS)
-    shelves = [{"slot": s["id"], "sku": s["sku"], "quantity": 1}
-               for s in layout["slots"]]
+    shelves = [{"slot": s["id"], "sku": s["sku"], "quantity": 1} for s in layout["slots"]]
     start = layout["packing"]["node"]
     first = plan_pick(layout, start, {"rice": 1, "milk": 1}, shelves)
     assert first["action"] == "pick" and first["sku"] == "rice"

@@ -28,7 +28,7 @@ def agent_names(url: str | None = None) -> list[str]:
                 "WHERE e.kind='restaurant' AND r.status IN ('ready','running')"
             ).fetchall()
         )
-    return ["dispatcher", "customer_service", *sorted(names)]
+    return ["dispatcher", "customer_service", "inventory", "fulfillment", *sorted(names)]
 
 
 class AgentEndpoint:

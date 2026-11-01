@@ -22,11 +22,16 @@ from delivery.telemetry import active, current_traceparent, order_span, traced_e
 PUBLISH: dict[str, set[str]] = {
     "lab_scenario": {"basket.requested", "shipment.delayed", "reservation.expire"},
     "generator": {"order.created", "complaint.created"},
+    "store_world": {"store.order.requested", "store.worker.arrived", "store.replan",
+                    "store.restock.arrived", "store.disruption", "store.courier.collected"},
     "lab_world": {"delivery.arrived", "delivery.failed"},
     "supply_ingress": {"household.intent"},
 }
 SUBSCRIBE: dict[str, set[str]] = {
     "inventory_audit": {"inventory.decided"},
+    "store_audit": {"store.pick.started", "store.item.picked", "store.packed",
+                    "store.dock.ready", "store.replanned", "store.restock.started",
+                    "store.disruption", "store.courier.collected", "inventory.decided"},
     "delivery_audit": {
         "delivery.assigned", "delivery.completed", "dispatch.noted", "recovery.requested"
     },
