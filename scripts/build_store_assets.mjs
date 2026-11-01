@@ -48,12 +48,13 @@ await writeFile(output+'/manifest.json', JSON.stringify(manifest,null,2)+'\n');
 await writeFile(output+'/NOTICE.txt', 'NVIDIA SimReady models, converted by codepawl. CC BY 4.0.\n'+manifest.dataset+'\n'+manifest.license_url+'\n'+manifest.modifications+'\nSee manifest.json for pinned originals and SHA-256 checksums.\n');
 const copies = {'build/three.module.js':'three.module.js','build/three.core.js':'three.core.js',
   'examples/jsm/loaders/GLTFLoader.js':'GLTFLoader.js','examples/jsm/controls/OrbitControls.js':'OrbitControls.js',
-  'examples/jsm/utils/BufferGeometryUtils.js':'BufferGeometryUtils.js','examples/jsm/libs/meshopt_decoder.module.js':'meshopt_decoder.module.js','LICENSE':'LICENSE'};
+  'examples/jsm/utils/BufferGeometryUtils.js':'BufferGeometryUtils.js','examples/jsm/libs/meshopt_decoder.module.js':'meshopt_decoder.module.js','examples/jsm/utils/SkeletonUtils.js':'SkeletonUtils.js','LICENSE':'LICENSE'};
 await mkdir('web/vendor/three',{recursive:true});
 for(const [from,to] of Object.entries(copies)) {
   let content=await readFile('node_modules/three/'+from,'utf8');
   content=content.replaceAll("from 'three'", "from './three.module.js'")
-    .replaceAll("from '../utils/BufferGeometryUtils.js'", "from './BufferGeometryUtils.js'");
+    .replaceAll("from '../utils/BufferGeometryUtils.js'", "from './BufferGeometryUtils.js'")
+    .replaceAll("from '../utils/SkeletonUtils.js'", "from './SkeletonUtils.js'");
   await writeFile('web/vendor/three/'+to,content);
 }
 await writeFile('web/vendor/three/version.json',JSON.stringify({version:'0.187.0',license:'MIT',source:'https://github.com/mrdoob/three.js/tree/r187'},null,2)+'\n');

@@ -2,6 +2,7 @@
 
 import hashlib
 import json
+import re
 import struct
 from pathlib import Path
 
@@ -13,7 +14,13 @@ def test_simready_assets_are_pinned_and_under_first_view_budget() -> None:
     assert manifest["author"] == "NVIDIA" and manifest["license"] == "CC-BY-4.0"
     assert len(manifest["revision"]) == 40
     assert {a["role"] for a in manifest["assets"]} == {
-        "shelving", "pallet", "cart", "forklift", "robot", "produce", "packaged"
+        "shelving",
+        "pallet",
+        "cart",
+        "forklift",
+        "robot",
+        "produce",
+        "packaged",
     }
     total = 0
     for asset in manifest["assets"]:
@@ -23,7 +30,7 @@ def test_simready_assets_are_pinned_and_under_first_view_budget() -> None:
         assert struct.unpack_from("<III", content) == (0x46546C67, 2, len(content))
         size, kind = struct.unpack_from("<II", content, 12)
         assert kind == 0x4E4F534A
-        gltf = json.loads(content[20:20+size])
+        gltf = json.loads(content[20 : 20 + size])
         assert gltf["meshes"]
         assert not any("uri" in image for image in gltf.get("images", []))
         assert not any("uri" in buffer for buffer in gltf.get("buffers", []))
@@ -44,3 +51,12 @@ def test_three_loader_uses_local_modules_only() -> None:
         assert "from './three.module.js'" in source
         assert "from 'three'" not in source
     assert (root / "meshopt_decoder.module.js").stat().st_size > 1000
+
+
+def test_local_module_import_graph_is_complete():
+    root = Path("web/vendor/three")
+    for module in root.glob("*.js"):
+        for relative in re.findall(
+            r"^.*(?:from|import) ['\"]([.][^'\"]+)['\"];?$", module.read_text(), re.MULTILINE
+        ):
+            assert (module.parent / relative).is_file(), (module.name, relative)
