@@ -1,0 +1,21 @@
+{
+  "schema_version": 1,
+  "version": "release-cohorts-v1",
+  "dev_directory": "evals/adk",
+  "heldout_directory": "evals/heldout",
+  "heldout_use": "release qualification only; not a private benchmark or a live-model quality claim",
+  "files": {
+    "evals/adk/chaos_customer.evalset.json": "3036c50f2a7f5c104b6d63b005c153648496a35deb98877d23789a357a8e5331",
+    "evals/adk/chaos_dispatcher.evalset.json": "e728590a76962d9c4090b7763959ff3c2f88a1a27825772c5da029bed2d0ddc1",
+    "evals/adk/chaos_restaurant.evalset.json": "b103af2641e91e8dd682188c583b35053c55d953466764493431a44414daed47",
+    "evals/adk/customer_policy.evalset.json": "562e164eded425cfbd4540c577e5eda53ac8533c9087e54d186039b3f891951e",
+    "evals/adk/customer_service.test.json": "f333f88e20bed562b2bb76ef5af962a045c7d9ec7385efee44209c86ebe11a7a",
+    "evals/adk/restaurant.evalset.json": "8cc9c528db16433c585f714557c4b55afe43428c98fd1488cc169dad0e862188",
+    "evals/heldout/chaos_customer.evalset.json": "42375391500a2a186faec0c891a5260bcb5579f587ce4574c719b4e7b5e64275",
+    "evals/heldout/chaos_dispatcher.evalset.json": "c4dfd8c71418c4f277ee480721d52fb35c2875746afe71fc7a5a12606ee43e88",
+    "evals/heldout/chaos_restaurant.evalset.json": "2579f320adc6c0ea0cf04d7f5ca5164170574d27098e5a3f75d8e4f8b384d39c",
+    "evals/heldout/customer_policy.evalset.json": "5ffd26aa2f4d8a630086b550fb359a9911f455109a67544643e1653abd0cf20c",
+    "evals/heldout/customer_service.test.json": "865e9dc6dd07ee56ee41dfe463e2efde19ef5b85f730dba4368432ee2861b189",
+    "evals/heldout/restaurant.evalset.json": "8ac69f4b7cd88de018dc2ffa2475a2774bd8849be29671bf6bdcd8f426bda5f8"
+  }
+}

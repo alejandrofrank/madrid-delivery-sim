@@ -1,0 +1,5 @@
+[
+  {"id": "repeat-reservation", "query": "Did we previously set aside the ingredients for this meal?", "status": "reserved"},
+  {"id": "repeat-stock-refusal", "query": "Was the last stock request turned down?", "status": "rejected"},
+  {"id": "repeat-expiry", "query": "Has the earlier ingredient reservation timed out?", "status": "expired"}
+]

@@ -2,7 +2,24 @@ name: Verify simulation
 on: [push, pull_request]
 permissions:
   contents: read
+concurrency:
+  group: verify-${{ github.head_ref || github.ref_name }}
+  cancel-in-progress: true
 jobs:
+  infrastructure:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: hashicorp/setup-terraform@b9cd54a3c349d3f38e8881555d616ced269862dd # v3
+        with:
+          terraform_version: 1.14.3
+      - name: Validate deployment and teardown without cloud credentials
+        run: |
+          terraform -chdir=infra/production fmt -check
+          terraform -chdir=infra/production init -backend=false
+          terraform -chdir=infra/production validate
+          terraform -chdir=infra/production test
+          bash -n scripts/production_session.sh
   test:
     runs-on: ubuntu-latest
     # The 42-courier network expands full-day route candidates; retain every check.
@@ -85,7 +102,7 @@ jobs:
           python3 -m pip install --no-deps -e .
       - name: Code checks before evaluation
         run: |
-          python3 -m pytest -q tests/test_eval_schema.py tests/test_eval_length.py tests/test_eval_invented_tool.py tests/test_trajectory_evals.py tests/test_eval_statistics.py tests/test_eval_gate.py tests/test_vertex_eval.py
+          python3 -m pytest -q tests/test_eval_schema.py tests/test_eval_length.py tests/test_eval_invented_tool.py tests/test_trajectory_evals.py tests/test_eval_statistics.py tests/test_eval_gate.py tests/test_vertex_eval.py tests/test_release_gate.py
       - name: Native ADK eval CLI and AgentEvaluator (network denied)
         run: python3 -m pytest -q tests/test_adk_evalsets.py
       - name: Collect fresh offline attempts

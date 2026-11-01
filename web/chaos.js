@@ -51,7 +51,8 @@ const ChaosUI = (() => {
   }
   function update(next) {
     current=next;
-    const chaos=next.chaos, run=next.run, open=Boolean(chaos&&["ready","running"].includes(run?.status));
+    const replay=Boolean(next.replay?.read_only);
+    const chaos=next.chaos, run=next.run, open=Boolean(!replay&&chaos&&["ready","running"].includes(run?.status));
     el("chaos-trigger").disabled=!open||sending;
     el("chaos-demo").disabled=run?.status==="running";
     if(lastRun!==run?.id){
@@ -62,6 +63,11 @@ const ChaosUI = (() => {
       el("chaos-controls-disclosure").open=Boolean(chaos&&!chaos.events.length);
     }
     if(chaos&&["complete","failed"].includes(run?.status))el("chaos-feedback").textContent="This run has ended. Start a new Chaos session to trigger events.";
+    if(replay) {
+      el("chaos-feedback").textContent="Recorded shift · events and agent decisions are read-only.";
+      el("chaos-demo").disabled=true;
+      el("chaos-controls-disclosure").hidden=true;
+    }
     scope();
     const events=chaos?.events||[], active=events.filter(e=>e.state==="active").length;
     el("chaos-status").textContent=chaos?`${active} active · ${events.length} events · ${run.status}`:"Off · enable in simulation controls";

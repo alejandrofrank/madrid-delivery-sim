@@ -26,9 +26,12 @@ from delivery.trajectory_evals import score_trajectory
 ROOT = Path(__file__).resolve().parents[2]
 
 
-async def evaluate_model_arms(repeat: int = 1) -> dict[str, Any]:
+async def evaluate_model_arms(repeat: int = 1, *, split: str = "dev") -> dict[str, Any]:
     if not 1 <= repeat <= 100:
         raise ValueError("repeat must be between 1 and 100")
+    if split not in {"dev", "heldout"}:
+        raise ValueError("Unknown evaluation split")
+    directory = ROOT / "evals" / ("adk" if split == "dev" else "heldout")
     rows = []
     fixture_hashes = {}
     for arm, filename, builder in (
@@ -39,7 +42,7 @@ async def evaluate_model_arms(repeat: int = 1) -> dict[str, Any]:
         ("adk-chaos-restaurant", "chaos_restaurant.evalset.json", chaos_restaurant),
         ("adk-chaos-customer", "chaos_customer.evalset.json", chaos_customer),
     ):
-        raw = json.loads((ROOT / "evals/adk" / filename).read_text(encoding="utf-8"))
+        raw = json.loads((directory / filename).read_text(encoding="utf-8"))
         fixture_hashes[arm] = digest(raw)
         dataset = EvalSet.model_validate(raw)
         for case in dataset.eval_cases:
@@ -119,6 +122,7 @@ async def evaluate_model_arms(repeat: int = 1) -> dict[str, Any]:
         "schema_version": 1,
         "kind": "model-evals",
         "mode": "scripted-offline",
+        "split": split,
         "fixture_hashes": fixture_hashes,
         "repeat": repeat,
         "rows": [r.model_dump() for r in rows],

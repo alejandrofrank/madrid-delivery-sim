@@ -152,7 +152,9 @@ def start_supply(body: StartSupply, tasks: BackgroundTasks) -> dict[str, str]:
     if body.revision != revision:
         raise HTTPException(409, "Blueprint changed; save or reload before starting")
     run = new_supply(config)
-    tasks.add_task(background, run)
+    from delivery.live_jobs import schedule
+
+    schedule(tasks, background, "supply", run)
     return {"id": run}
 
 

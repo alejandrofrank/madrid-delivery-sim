@@ -25,6 +25,7 @@ from delivery.documentation import router as documentation_router
 from delivery.health import router as health_router
 from delivery.history import history_catalogue, history_manifest
 from delivery.lab import create_lab, export_slice, lab_snapshot
+from delivery.live_jobs import schedule
 from delivery.mcp_server import create_mcp_server
 from delivery.protocol_api import agent_directory, agent_names
 from delivery.simulation import Simulation, create_run, initialize, snapshot
@@ -43,7 +44,7 @@ async def mcp_app(scope: Scope, receive: Receive, send: Send) -> None:
 @asynccontextmanager
 async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     global world
-    world = initialize()
+    world = World() if os.environ.get("DELIVERY_RUNTIME") == "live" else initialize()
     mcp_server = create_mcp_server()
     app.state.mcp_app = mcp_server.streamable_http_app(
         streamable_http_path="/",
@@ -129,7 +130,7 @@ def start_city(body: CitySettings, tasks: BackgroundTasks) -> dict[str, str]:
         raise HTTPException(
             422, "GCP AI requires a configured Terraform gateway and caller identity"
         ) from None
-    tasks.add_task(city_background, run)
+    schedule(tasks, city_background, "city", run)
     return {"id": run}
 
 
@@ -163,7 +164,7 @@ def start_delivery(body: StartDelivery, tasks: BackgroundTasks) -> dict[str, str
     from delivery.delivery_flow import new_delivery
 
     run = new_delivery(body.seed)
-    tasks.add_task(delivery_background, run, body.playback_seconds)
+    schedule(tasks, delivery_background, "delivery", run, body.playback_seconds)
     return {"id": run}
 
 
@@ -243,7 +244,7 @@ def start_lab(body: StartLab, tasks: BackgroundTasks) -> dict[str, str]:
         run = create_lab(seed=body.seed, catalogue_path=path, store_sources=store_sources)
     except ValueError:
         raise HTTPException(422, "Invalid catalogue snapshot") from None
-    tasks.add_task(lab_background, run, body.playback_seconds)
+    schedule(tasks, lab_background, "inventory", run, body.playback_seconds)
     return {"id": run}
 
 
@@ -260,12 +261,14 @@ async def local_mutations(
     request: Request, call_next: Callable[[Request], Awaitable[Response]]
 ) -> Response:
     origin = request.headers.get("origin")
-    if request.url.path.startswith(("/api/supply", "/api/health")) and request.url.hostname not in {
+    if (os.environ.get("DELIVERY_RUNTIME", "local") != "live"
+        and request.url.path.startswith(("/api/supply", "/api/health"))
+        and request.url.hostname not in {
         "localhost",
         "127.0.0.1",
         "::1",
         "testserver",
-    }:
+    }):
         return JSONResponse({"detail": "Operator endpoints are local-only"}, status_code=403)
     if (
         request.method in {"POST", "PUT", "PATCH", "DELETE"}
@@ -297,6 +300,11 @@ def health() -> dict[str, Any]:
     with connect() as conn:
         conn.execute("SELECT 1")
     return {"status": "ok", "graph_nodes": len(world.nodes)}
+
+
+@app.get("/api/runtime")
+def runtime_mode() -> dict[str, Any]:
+    return {"mode": os.environ.get("DELIVERY_RUNTIME", "local"), "read_only": False}
 
 
 @app.get("/api/world")
@@ -336,7 +344,7 @@ def start(body: StartRun, tasks: BackgroundTasks) -> dict[str, str]:
         )
     except ValueError as exc:
         raise HTTPException(422, str(exc)) from None
-    tasks.add_task(run_background, run)
+    schedule(tasks, run_background, "orders", run)
     return {"id": run}
 
 
@@ -395,3 +403,9 @@ def protocol_agents() -> dict[str, Any]:
 app.mount("/a2a", agent_directory())
 app.mount("/mcp", mcp_app)
 app.mount("/static", StaticFiles(directory="web"), name="static")
+
+# Fail closed even if an operator starts this module directly in live mode.
+if os.environ.get("DELIVERY_RUNTIME", "local") == "live":
+    from delivery.production_auth import AuthPolicy, ProductionAuth
+
+    app.add_middleware(ProductionAuth, policy=AuthPolicy.from_env())

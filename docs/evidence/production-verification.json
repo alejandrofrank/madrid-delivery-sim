@@ -1,0 +1,52 @@
+{
+  "verified_at_local_date": "2026-10-31",
+  "source_revision": "b3075f3bd2250d147e2a050afdd369ff951405c6",
+  "branch": "feat/production",
+  "local_checks": {
+    "full_pytest": {"passed": 957, "warnings": 53, "seconds": 646.39},
+    "additional_lifecycle_tests": {"passed": 6, "note": "Added after the full run collected tests; separately executed against real Bash with substituted cloud commands."},
+    "ruff": "passed",
+    "mypy": {"passed": true, "source_files": 80},
+    "courier_motion": {"passed": 6},
+    "terraform_mock_plans": {"passed": 7, "real_cloud_resources_created": false},
+    "workflow_yaml_and_bash_syntax": "passed",
+    "semantic_recall": "Real local BGE embeddings, pgvector, ADK turn nonce and immutable audit receipt verified."
+  },
+  "heldout": {
+    "arms": 6,
+    "cases": 72,
+    "attempts_per_case": 5,
+    "attempts": 360,
+    "passed": 360,
+    "pass_power_k": 1.0,
+    "case_bootstrap_ci95": [1.0, 1.0],
+    "local_baseline_revision": "3a241f2",
+    "comparison": "no_significant_regression",
+    "model_cost_usd": 0,
+    "limits": "Scripted offline ADK contract/policy evidence. Degenerate all-pass bootstrap intervals do not establish certainty on unseen workloads. Not live-model quality or production latency."
+  },
+  "cloud": {
+    "project_id": "madrid-delivery-sim-261030",
+    "region": "europe-west1",
+    "state": "off",
+    "replay_deployment": "passed HTTP and browser smoke, then removed through Terraform",
+    "tested_replay_image_digest": "sha256:ad452965fffa9bc735153e28b64a6eb7b63cd1c0edbeacf69ad4960cb474a407",
+    "later_local_fix": "Hide unavailable trace navigation; covered locally, not redeployed after teardown.",
+    "read_only_probes": "Deterministic independent playback at t=0 and t=60; completed shift; zero model calls; POST runs/chaos/A2A/MCP denied with 405.",
+    "final_inventory": {"cloud_run_services": 0, "cloud_run_jobs": 0, "cloud_sql_instances": 0, "artifact_repositories": 0, "vertex_indexes": 0, "vertex_endpoints": 0},
+    "cloud_run_cap": {"amount": 3, "currency": "EUR", "state": "CONFIGURED"},
+    "project_alert": {"amount": 4, "currency": "EUR"},
+    "retained": ["project and APIs", "service identities and WIF", "budgets and email channel", "private Terraform state bucket", "provider logs"],
+    "limits": "State/log storage can still cost money; the delayed Cloud Run cap does not bound total project charges. SQL, Vertex and private live workers were never activated."
+  },
+  "github": {
+    "production_environment": "configured; main branch only",
+    "wif": "repository and owner numeric IDs, exact main deployment workflow, production environment",
+    "release_workflow": "not executed: requires review/merge to main and an active bounded operator session"
+  },
+  "remaining": [
+    "Least-privilege live SQL controller bootstrap is an implementation blocker; broad role-management and blanket RLS grants were rejected and discarded.",
+    "Private Cloud SQL/Vertex, BigQuery query execution and a dashboard connection need a funded qualification session.",
+    "Interactive browser OAuth/IAP and crash-safe capability recovery remain follow-up work."
+  ]
+}

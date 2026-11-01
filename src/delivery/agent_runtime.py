@@ -257,7 +257,9 @@ class ScopedTools:
             else receive(self.__conn, self.scope.run, shipment, self.sim),
         }
 
-    def _recall(self, kinds: list[str] | None = None, limit: int = 8) -> list[dict[str, Any]]:
+    def _recall(
+        self, kinds: list[str] | None = None, limit: int = 8, query: str | None = None,
+    ) -> list[dict[str, Any]]:
         if (
             type(limit) is not int
             or not 1 <= limit <= 16
@@ -304,6 +306,31 @@ class ScopedTools:
                 ],
             }
         )
+        if self.role.memory is not None and self.role.memory.mode == "semantic":
+            from delivery.semantic_memory import backend, rank_facts
+
+            if len(self.calls) >= self.role.limits.tool_calls_per_event:
+                raise BudgetExceeded("Semantic recall requires a second fenced memory read")
+            self.calls.append("memory.read")
+            index = backend(self.__conn, self.event)
+            ids, audit = rank_facts(
+                facts, query or f"{self.role.name} {self.event.topic}",
+                {"run": self.scope.run, "store": self.scope.store, "role": self.role.name,
+                 "context_type": facts[0]["context_type"] if facts else "order",
+                 "context_id": facts[0]["context_id"] if facts else "",
+                 "subject": facts[0]["subject"] if facts else ""}, index,
+            )
+            # External ranking cannot grant a fact or outlive its lease/TTL/version.
+            current = self.__conn.execute(
+                "SELECT public.agent_memory_recall(%s,%s,%s,%s,%s) AS facts",
+                (self.event.id, self.event.token, self.event.attempts,
+                 Jsonb(kinds) if kinds is not None else None, limit),
+            ).fetchone()
+            assert current
+            fresh = {int(f["fact_id"]): f for f in current["facts"]}
+            facts = [fresh[i] for i in ids if i in fresh]
+            audit["returned_fact_ids"] = [f["fact_id"] for f in facts]
+            self.memory_reads[-1]["semantic"] = audit
         return facts
 
     def _remember(self, kind: str, body: dict[str, Any], ttl_seconds: int = 3600) -> None:

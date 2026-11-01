@@ -10,7 +10,7 @@ from typing import Any, Literal
 
 from pydantic import BaseModel, ConfigDict, Field
 
-MemoryMode = Literal["none", "text", "json", "typed"]
+MemoryMode = Literal["none", "text", "json", "typed", "semantic"]
 MemoryFacts = list[dict[str, Any]]
 MemoryProjection = MemoryFacts | str | dict[str, Any]
 
@@ -78,7 +78,7 @@ def project_memory(profile: MemoryProfile | None, facts: MemoryFacts) -> MemoryP
         return []
     scope = _same_scope(facts)
     candidates = facts[: profile.max_facts]
-    if profile.mode == "typed":
+    if profile.mode in {"typed", "semantic"}:
         selected: MemoryFacts = []
         for fact in candidates:
             if len(_json([*selected, fact]).encode("utf-8")) > profile.max_bytes:

@@ -18,6 +18,7 @@ const {createDisplayClock, courierPosition} = CourierMotion;
 const displayClock = createDisplayClock();
 let state = null, selected = null, runId = new URLSearchParams(location.search).get("run") || "", traceRows = [];
 let tab = "decisions", busy = false, pollCount = 0, traceBusy = false;
+let runtime = {mode:"local"}, replayStarted = performance.now();
 const narrowMap = matchMedia("(max-width:850px)");
 document.querySelector(".map-key").open = !narrowMap.matches;
 narrowMap.addEventListener("change",event=>{document.querySelector(".map-key").open=!event.matches;});
@@ -127,6 +128,11 @@ const human = (s) => String(s).replaceAll("_", " ");
 const measured = (value, unit, digits = 1) => Number.isFinite(value) ? value.toFixed(digits) + unit : "—";
 const activeRoute = (courier) => courier?.route || courier?.reposition_route;
 async function api(path, options) {
+  if(runtime.mode==="replay" && (path.startsWith("/api/state") || /\/trace\?|\/chaos$/.test(path))) {
+    const url=new URL(path,location.origin);
+    url.searchParams.set("t",String(Math.min(60,Math.floor((performance.now()-replayStarted)/1000))));
+    path=url.pathname+url.search;
+  }
   const response = await fetch(path, options);
   if (!response.ok) throw new Error(`Request failed (${response.status}). Check the local services.`);
   return response.json();
@@ -179,12 +185,17 @@ $("order-filter").onchange = () => {orderFilterTouched=true;if(state)renderLedge
 $("order-search").oninput = () => state && renderLedger();
 $("clear-selection").onclick = () => { selected = null; traceRows = []; renderInspector(); renderCouriers(); renderRoute(); $("agent-details").hidden=true; $("open-agent-details").setAttribute("aria-expanded","false"); };
 $("run-select").onchange = () => {
+  replayStarted=performance.now();
   runId = $("run-select").value; selected = null; traceRows = [];
   renderRoute();
   for (const marker of courierMarkers.values()) marker.remove();
   courierMarkers.clear(); poll();
 };
 $("start").onclick = async () => {
+  if(runtime.mode==="replay") {
+    replayStarted=performance.now();state=null;observations=[];lastObservationTime=-1;
+    await poll();setConsoleView("operations");return;
+  }
   $("start").disabled = true;
   try {
     const result = await api("/api/runs", {method:"POST", headers:{"Content-Type":"application/json"},
@@ -304,7 +315,7 @@ function renderMetrics() {
   $("kpi-queue").textContent = (q.ready || 0) + (q.leased || 0);
   $("kpi-dead").textContent = `${q.dead || 0} dead letters · ${q.done || 0} acknowledged`;
   $("run-info").textContent = `Run ${run.id.slice(0,8)} · seed ${run.seed} · ${(run.sim_time / run.duration * 100).toFixed(0)}% complete`;
-  $("start").disabled = run.status === "running" || run.status === "ready";
+  $("start").disabled = runtime.mode!=="replay" && (run.status === "running" || run.status === "ready");
   if (run.status === "failed") error(`Run stopped: ${run.error}. The state is preserved; resume from the CLI.`);
 }
 function renderCouriers() {
@@ -404,7 +415,7 @@ function renderInspector() {
   $("agent-count").textContent=state.couriers.length;
   $("fleet-activity").textContent=fleetCouriers().filter(c=>agentStatus(c)==="working").length+" working · "+fleetCouriers().length+" / "+state.couriers.length+" agents";
   $("open-agent-details").disabled=!selected;
-  $("selected-trace").hidden=selected?.kind!=="courier";
+  $("selected-trace").hidden=runtime.mode==="replay" || selected?.kind!=="courier";
   if(selected?.kind==="courier"){
     const c=state.couriers.find(c=>c.id===selected.id);
     if(c){
@@ -451,9 +462,10 @@ async function poll() {
       const courier=next.couriers?.find(c=>["to_pickup","delivering","repositioning"].includes(c.status))||next.couriers?.[0];
       selected=courier?{kind:"courier",id:courier.id}:null;
     }
-    state=next; displayClock.accept(state.run, performance.now());
+    state=next;
+    displayClock.accept(runtime.mode==="replay"&&state.run?{...state.run,id:state.run.id+":"+replayStarted}:state.run, performance.now());
     ChaosUI.update(state);
-    $("connection").className="dot online"; $("connection-text").textContent="Local services connected";
+    $("connection").className="dot online"; $("connection-text").textContent=runtime.mode==="replay"?"Recorded replay · no model calls":"Local services connected";
     if(state.run) { renderFleetControl();renderMetrics();renderCouriers();renderOrders();renderLedger();renderInspector();renderRoute();await refreshTrace(); }
     else $("fleet").innerHTML='<div class="empty"><strong>No session loaded</strong><p>Start a session to see the fleet, routes and orders.</p><button data-open-simulation>Set up simulation</button></div>';
     if(++pollCount%10===0) await refreshRuns();
@@ -462,6 +474,16 @@ async function poll() {
 }
 async function initialize() {
   try {
+    runtime=await api("/api/runtime");
+    if(runtime.mode==="replay") {
+      document.body.dataset.runtime="replay";
+      $("start").textContent="Replay shift";
+      for(const id of ["seed","duration","dispatch-strategy","reposition-policy","chaos-mode"])
+        $(id).disabled=true;
+      $("duration").value="60";$("chaos-mode").value="demo";
+      document.querySelectorAll(".workspace-navigation a").forEach(a=>{if(new URL(a.href).pathname!=="/")a.hidden=true;});
+      const label=document.querySelector(".workspace-local");if(label)label.textContent="Public replay · synthetic";
+    }
     const [city,network]=await Promise.all([api("/api/world"),api("/api/roads")]);
     ChaosUI.setWorld(city, map);
     L.geoJSON(network,{style:{color:"#426078",weight:.65,opacity:.42},interactive:false}).addTo(roads);

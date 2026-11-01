@@ -5,6 +5,11 @@ ENV RUFF_CACHE_DIR=/tmp/ruff-cache MYPY_CACHE_DIR=/tmp/mypy-cache
 WORKDIR /app
 COPY requirements.lock ./
 RUN pip install --no-cache-dir -r requirements.lock
+COPY requirements-memory.lock ./
+RUN pip install --no-cache-dir -r requirements-memory.lock && pip check
+ENV DELIVERY_EMBEDDING_CACHE=/opt/mds-models
+# Download once at build time. Agent turns only use the frozen local cache.
+RUN python -c "from fastembed import TextEmbedding; TextEmbedding('BAAI/bge-small-en-v1.5', cache_dir='/opt/mds-models', threads=1)"
 COPY pyproject.toml ./
 COPY src ./src
 RUN pip install --no-deps -e . && useradd -m -u 10001 sim
@@ -22,6 +27,7 @@ COPY infra/gcp-ai/STATE-MIGRATION.md ./infra/gcp-ai/
 COPY infra/gcp-ai/sql ./infra/gcp-ai/sql
 COPY infra/gcp-ai/schemas ./infra/gcp-ai/schemas
 COPY infra/gcp-ai/tests ./infra/gcp-ai/tests
+COPY infra/production ./infra/production
 COPY compose*.yml compose*.yaml AGENTS.md ./
 COPY scripts ./scripts
 COPY Makefile Dockerfile ./

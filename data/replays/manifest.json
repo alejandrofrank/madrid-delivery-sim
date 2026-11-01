@@ -1,0 +1,13 @@
+{
+  "schema_version": 1,
+  "recordings": [
+    {
+      "file": "chaos-42.json.gz",
+      "sha256": "4621d063367f7630404cf70bdac4c1165f755e5273b6b4679022ec9f76bbf157"
+    },
+    {
+      "file": "chaos-73.json.gz",
+      "sha256": "58975d538e2ef4289fcea32975703ddbf8b8bc341b2ab062dfc01304785ee95d"
+    }
+  ]
+}

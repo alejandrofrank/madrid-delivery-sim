@@ -110,11 +110,28 @@ class RestaurantTurn:
         """Find open markets' public fee and estimated lead-time quotes, without private stock."""
         return list(self.invoke("restaurant.suppliers"))
 
-    def recall_order_memory(self) -> Any:
-        """Recall only current, unexpired typed restaurant facts for this order."""
+    def recall_order_memory(self, query: str = "") -> Any:
+        """Recall current facts for this order; an optional query ranks semantic profiles."""
         from delivery.memory_profiles import project_memory
 
-        return project_memory(self.agent.role.memory, list(self.invoke("memory.read")))
+        profile = self.agent.role.memory
+        facts = list(self.invoke("memory.read"))
+        if profile is not None and profile.mode == "semantic":
+            from delivery.semantic_memory import backend, rank_facts
+
+            with connect(self.agent.dsn) as conn:
+                ids, audit = rank_facts(
+                    facts, query or f"restaurant {self.event.topic}",
+                    {"run": self.agent.scope.run, "store": self.agent.scope.store,
+                     "role": "restaurant", "context_type": "order",
+                     "context_id": facts[0]["context_id"] if facts else "",
+                     "subject": facts[0]["subject"] if facts else ""},
+                    backend(conn, self.event),
+                )
+            # This SQL boundary rechecks the turn nonce and performs a fresh charged
+            # recall after network I/O. Its receipt becomes the final ADK memory audit.
+            facts = list(self.sql("restaurant_semantic_recall", Jsonb(ids), Jsonb(audit)))
+        return project_memory(profile, facts)
 
     def search_ingredients(self, query: str) -> dict[str, Any]:
         """Classify ingredient matches in this restaurant's index; never reserve stock.

@@ -33,6 +33,8 @@ codex_run.log
 *.tfvars
 *.tfvars.json
 .terraform/
+gha-creds-*.json
+infra/production/bootstrap_override.tf
 
 # ADK local evaluation histories are artifacts, not fixtures.
 .adk/

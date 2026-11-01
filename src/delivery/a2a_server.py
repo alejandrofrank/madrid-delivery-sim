@@ -18,7 +18,19 @@ from a2a.server.events import EventQueue
 from a2a.server.request_handlers import DefaultRequestHandler
 from a2a.server.routes import create_agent_card_routes, create_jsonrpc_routes
 from a2a.server.tasks import InMemoryTaskStore
-from a2a.types import AgentCapabilities, AgentCard, AgentInterface, AgentSkill, Message, Part, Role
+from a2a.types import (
+    AgentCapabilities,
+    AgentCard,
+    AgentInterface,
+    AgentSkill,
+    HTTPAuthSecurityScheme,
+    Message,
+    Part,
+    Role,
+    SecurityRequirement,
+    SecurityScheme,
+    StringList,
+)
 from a2a.utils.errors import InvalidParamsError, UnsupportedOperationError
 from pydantic import BaseModel, ConfigDict, Field, ValidationError
 from starlette.applications import Starlette
@@ -205,7 +217,8 @@ class QueueAgentExecutor(AgentExecutor):
 
 class LocalA2ABoundary(BaseHTTPMiddleware):
     async def dispatch(self, request: Request, call_next: RequestResponseEndpoint) -> Response:
-        if request.url.hostname not in {"localhost", "127.0.0.1", "::1", "testserver"}:
+        if (os.environ.get("DELIVERY_RUNTIME", "local") != "live"
+                and request.url.hostname not in {"localhost", "127.0.0.1", "::1", "testserver"}):
             return JSONResponse({"detail": "A2A demo is local-only"}, status_code=403)
         origin = request.headers.get("origin")
         if origin and origin != f"{request.url.scheme}://{request.url.netloc}":
@@ -238,7 +251,13 @@ def create_a2a_app(
         else os.environ.get("DELIVERY_A2A_BASE_URL", f"http://localhost:{Settings().app_port}")
     )
     parsed = urlsplit(origin)
-    if parsed.scheme != "http" or parsed.hostname not in {"localhost", "127.0.0.1", "::1"}:
+    cloud = os.environ.get("DELIVERY_RUNTIME", "local") == "live"
+    if cloud and (parsed.scheme != "https" or parsed.username or parsed.query or parsed.fragment
+                  or parsed.path not in {"", "/"}):
+        raise ValueError("Cloud Agent Card requires an HTTPS service origin")
+    if not cloud and (parsed.scheme != "http" or parsed.hostname not in {
+        "localhost", "127.0.0.1", "::1"
+    }):
         raise ValueError("The demo agent card requires a local HTTP origin")
     endpoint = f"{origin.rstrip('/')}/a2a/{role}/"
     description = (
@@ -262,6 +281,15 @@ def create_a2a_app(
         default_input_modes=["text/plain"],
         default_output_modes=["text/plain"],
         capabilities=AgentCapabilities(streaming=False, push_notifications=False),
+        security_schemes={"google_id_token": SecurityScheme(
+            http_auth_security_scheme=HTTPAuthSecurityScheme(
+                scheme="bearer", bearer_format="JWT",
+                description="Google-signed ID token for this Cloud Run service audience",
+            )
+        )} if cloud else {},
+        security_requirements=[SecurityRequirement(
+            schemes={"google_id_token": StringList(list=[])}
+        )] if cloud else [],
         skills=[
             AgentSkill(
                 id=role,
