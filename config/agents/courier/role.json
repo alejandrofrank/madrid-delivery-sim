@@ -26,5 +26,34 @@
     "model_calls": 0,
     "model_tokens": 0,
     "model_usd": 0
+  },
+  "display_name": "Courier",
+  "mission": "Accept a delivery and carry it along the planned street route.",
+  "why_it_exists": "Assignments need acknowledgement and measurable movement.",
+  "design_decisions": [
+    "Regular and contractor fleets share the same safety boundaries.",
+    "Fleet-specific communication changes receipts, not permissions."
+  ],
+  "known_limits": [
+    "Movement and contractor behavior are simulated."
+  ],
+  "service_events": {
+    "accepts": [
+      "courier.assigned",
+      "courier.briefed",
+      "courier.reposition"
+    ],
+    "emits": [
+      "courier.accepted",
+      "courier.available",
+      "order.delivered"
+    ]
+  },
+  "tool_descriptions": {
+    "courier.accept": "Acknowledge this courier’s assignment.",
+    "courier.read": "Read the briefing addressed to this courier.",
+    "memory.read": "Recall evidence inside the current run, role and order scope.",
+    "memory.write": "Append a bounded memory observation with provenance.",
+    "queue.publish": "Publish an allowed topic to a permitted recipient."
   }
 }

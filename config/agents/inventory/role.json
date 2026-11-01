@@ -34,5 +34,25 @@
     "model_calls": 0,
     "model_tokens": 0,
     "model_usd": 0
+  },
+  "display_name": "Inventory",
+  "mission": "Reserve real stock without overselling.",
+  "why_it_exists": "Concurrent baskets compete for the last available unit.",
+  "design_decisions": [
+    "Reservations and event receipts commit together.",
+    "A per-store SQL identity fences every action."
+  ],
+  "known_limits": [
+    "No purchasing authority or direct agent calls."
+  ],
+  "tool_descriptions": {
+    "inventory.read": "Read stock and reservations in this store.",
+    "inventory.reserve": "Reserve available units atomically for a basket.",
+    "inventory.release": "Release this basket’s reserved stock.",
+    "inventory.delay": "Record a shipment delay without inventing stock.",
+    "inventory.receive": "Receive the confirmed shipment into physical stock.",
+    "memory.read": "Recall evidence inside the current run, role and order scope.",
+    "memory.write": "Append a bounded memory observation with provenance.",
+    "queue.publish": "Publish an allowed topic to a permitted recipient."
   }
 }

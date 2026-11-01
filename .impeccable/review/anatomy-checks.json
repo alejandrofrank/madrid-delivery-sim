@@ -1,0 +1,30 @@
+{
+  "checked_at": "2026-11-01T21:13:13.645Z",
+  "agents": 9,
+  "panels": 99,
+  "keyboard": true,
+  "source_dialog": true,
+  "card": true,
+  "finite_animation": true,
+  "reduced_motion": true,
+  "retry": true,
+  "aligned_handoffs": true,
+  "no_horizontal_page_overflow": true,
+  "captures": [
+    {
+      "name": "desktop",
+      "width": 1440,
+      "height": 1000
+    },
+    {
+      "name": "mobile",
+      "width": 390,
+      "height": 844
+    },
+    {
+      "name": "user-1916",
+      "width": 1916,
+      "height": 1244
+    }
+  ]
+}

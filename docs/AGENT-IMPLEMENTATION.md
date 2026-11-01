@@ -24,7 +24,7 @@ environment for those boundaries; running a city is not itself an LLM workload.
 
 | Building block | Actual implementation | What it guarantees |
 | --- | --- | --- |
-| Definition | `RoleSpec`, `RoleLimits`, server-owned `AUTHORITY` in [agent_specs.py](../src/delivery/agent_specs.py) | Strict fields, frozen objects, bounded limits and supported tool/topic subsets |
+| Definition | Canonical `role.json` manifests, [JSON Schema](../config/agents/role.schema.json), `RoleSpec` and `RoleLimits` in [agent_specs.py](../src/delivery/agent_specs.py) | Strict fields, frozen objects, bounded limits and manifest-owned tool/topic subsets |
 | Provisioning | `inventory_access`, `role_access`, `supply_access` in [agent_access.py](../src/delivery/agent_access.py) | Trusted controller creates a login, binds its scope and snapshots definition/hash |
 | Factory | `create_agent` in [agent_runtime.py](../src/delivery/agent_runtime.py) | Reads scope from authenticated SQL functions and checks the saved definition hash |
 | Work delivery | `Queue` and [queue capability migration](../sql/migrations/014_queue_capability.sql) | Addressed claims, lease fencing, priorities, due time, retry/backoff and dead letters |
@@ -35,8 +35,10 @@ environment for those boundaries; running a city is not itself an LLM workload.
 ## From editable definition to an authenticated worker
 
 1. The operator edits a supported role's `role.json` and `SOUL.md`, or a supply
-   blueprint's agent/entity definitions. `AUTHORITY` is application code; an edit
-   cannot add a role kind, new tool implementation or new allowed topic.
+   blueprint's agent/entity definitions. The canonical `role.json` is the only
+   permission ceiling; blueprint and runtime profiles can narrow its grants.
+   Editing a manifest cannot create a new tool implementation. SOUL text never
+   grants permissions.
 2. The loader validates the definition and resolves SOUL text. `RoleSpec.digest`
    hashes its canonical resolved JSON, including that text. Role-file SOUL paths
    are constrained to the supported definition directory.
@@ -114,7 +116,8 @@ are separate from the GCP judge.
 Examples of the actual queue contracts are inventory `basket.requested` →
 `basket.reserved`, fulfillment → `basket.ready`, dispatcher → `courier.briefed`,
 courier → `courier.accepted`, and failed delivery → judge `recovery.reviewed`.
-Complete accepted/emitted sets live in `AUTHORITY`, not in this abbreviated list.
+Complete accepted/emitted sets live in each canonical `role.json`; the Madrid
+service's queue topics are recorded in its `service_events` profile.
 No role exposes a direct agent-call tool. Simulated phone calls are typed queued
 messages, not telephony sessions or free-form LLM conversations.
 

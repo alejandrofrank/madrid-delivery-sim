@@ -12,64 +12,32 @@ from uuid import UUID, uuid4
 from psycopg.errors import ProgramLimitExceeded
 from psycopg.types.json import Jsonb
 
-from delivery.agent_specs import SUPPLY_ACCEPTS, SUPPLY_EMITS
+from delivery.agent_specs import load_role
 from delivery.db import Connection, connect
+from delivery.role_manifest import manifest_names
 from delivery.telemetry import active, current_traceparent, order_span, traced_event
 
+# Infrastructure publishers/observers are not agent roles. Agent permissions below
+# come exclusively from role.json (including the legacy Madrid service events).
 PUBLISH: dict[str, set[str]] = {
     "lab_scenario": {"basket.requested", "shipment.delayed", "reservation.expire"},
-    "inventory": {"inventory.decided", "shipment.received", "basket.reserved"},
     "generator": {"order.created", "complaint.created"},
-    "dispatcher": {
-        "courier.assigned",
-        "courier.reposition",
-        "delivery.assigned",
-        "delivery.completed",
-        "courier.briefed",
-        "recovery.requested",
-        "dispatch.retry",
-        "dispatch.noted",
-    },
-    "fulfillment": {"basket.ready"},
     "lab_world": {"delivery.arrived", "delivery.failed"},
-    "judge": {"recovery.reviewed"},
-    "courier": {"order.delivered", "courier.available", "courier.accepted"},
-    "customer_service": {"complaint.resolved", "approval.requested"},
+    "supply_ingress": {"household.intent"},
 }
 SUBSCRIBE: dict[str, set[str]] = {
-    "inventory": {
-        "basket.requested",
-        "shipment.delayed",
-        "shipment.received",
-        "reservation.expire",
-    },
     "inventory_audit": {"inventory.decided"},
-    "dispatcher": {
-        "order.created",
-        "courier.available",
-        "basket.ready",
-        "delivery.arrived",
-        "dispatch.retry",
-        "recovery.reviewed",
-        "courier.accepted",
-    },
-    "fulfillment": {"basket.reserved"},
     "delivery_audit": {
-        "delivery.assigned",
-        "delivery.completed",
-        "dispatch.noted",
-        "recovery.requested",
+        "delivery.assigned", "delivery.completed", "dispatch.noted", "recovery.requested"
     },
-    "judge": {"delivery.failed"},
-    "courier": {"courier.assigned", "courier.briefed", "courier.reposition"},
-    "customer_service": {"complaint.created"},
     "audit": {"order.delivered", "complaint.resolved", "approval.requested"},
 }
-
-
-PUBLISH.update({role: set(topics) for role, topics in SUPPLY_EMITS.items()})
-PUBLISH["supply_ingress"] = {"household.intent"}
-SUBSCRIBE.update({role: set(topics) for role, topics in SUPPLY_ACCEPTS.items()})
+for _name in manifest_names():
+    if _name == "judge-gcp":
+        continue
+    _role = load_role(_name)
+    PUBLISH[_name] = set(_role.service_events.get("emits", _role.emits))
+    SUBSCRIBE[_name] = set(_role.service_events.get("accepts", _role.accepts))
 
 
 class Backpressure(RuntimeError):

@@ -26,5 +26,22 @@
     "model_calls": 6,
     "model_tokens": 50688,
     "model_usd": 0
+  },
+  "display_name": "Recovery judge",
+  "mission": "Review failed deliveries before another attempt.",
+  "why_it_exists": "Blind retries can spend resources without fixing the cause.",
+  "design_decisions": [
+    "Deterministic review is the default.",
+    "The optional GCP profile has a bounded model budget."
+  ],
+  "known_limits": [
+    "A verdict cannot dispatch a courier or change stock."
+  ],
+  "tool_descriptions": {
+    "judge.read": "Inspect failed delivery evidence and recovery candidates.",
+    "judge.review": "Approve or reject a proposed recovery; cannot dispatch it.",
+    "memory.read": "Recall evidence inside the current run, role and order scope.",
+    "memory.write": "Append a bounded memory observation with provenance.",
+    "queue.publish": "Publish an allowed topic to a permitted recipient."
   }
 }

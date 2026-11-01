@@ -26,5 +26,22 @@
     "model_calls": 0,
     "model_tokens": 0,
     "model_usd": 0
+  },
+  "display_name": "Fulfillment",
+  "mission": "Turn a reserved basket into a ready pickup.",
+  "why_it_exists": "Dispatch must wait for a real, prepared basket.",
+  "design_decisions": [
+    "Only reserved baskets enter picking.",
+    "Repeated queue deliveries cannot pick twice."
+  ],
+  "known_limits": [
+    "Picking time is simulated; there is no warehouse integration."
+  ],
+  "tool_descriptions": {
+    "fulfillment.pick": "Pick a reserved basket once and signal readiness.",
+    "fulfillment.read": "Inspect a reserved basket and its picking state.",
+    "memory.read": "Recall evidence inside the current run, role and order scope.",
+    "memory.write": "Append a bounded memory observation with provenance.",
+    "queue.publish": "Publish an allowed topic to a permitted recipient."
   }
 }

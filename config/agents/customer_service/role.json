@@ -1,0 +1,43 @@
+{
+  "schema_version": 1,
+  "role": "customer_service",
+  "version": "1",
+  "policy": "adk",
+  "soul_file": "SOUL.md",
+  "accepts": [
+    "complaint.created"
+  ],
+  "emits": [
+    "approval.requested",
+    "complaint.resolved"
+  ],
+  "tools": [],
+  "limits": {
+    "events_per_run": 500,
+    "tool_calls_per_event": 5,
+    "tool_calls_per_run": 2000,
+    "memory_entries": 64,
+    "memory_bytes": 16384,
+    "model_calls": 0,
+    "model_tokens": 0,
+    "model_usd": 0
+  },
+  "display_name": "Customer service",
+  "mission": "Explain delivery problems and apply bounded refunds or escalation.",
+  "why_it_exists": "Customers need an answer when the delivery plan changes.",
+  "design_decisions": [
+    "ADK classifies; deterministic policy owns refund authority.",
+    "Paid calls are reserved durably before inference."
+  ],
+  "known_limits": [
+    "The classifier has no business tools.",
+    "Proactive contacts are recorded simulation messages, not real emails."
+  ],
+  "tool_descriptions": {},
+  "recovery_tools": [
+    "read_context",
+    "contact_customer",
+    "refund_customer",
+    "escalate"
+  ]
+}

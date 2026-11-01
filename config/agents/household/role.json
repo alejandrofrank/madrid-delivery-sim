@@ -1,0 +1,52 @@
+{
+  "schema_version": 1,
+  "role": "household",
+  "version": "1",
+  "policy": "deterministic",
+  "soul_file": "SOUL.md",
+  "accepts": [
+    "household.intent",
+    "household.offer",
+    "household.status",
+    "meal.delivery"
+  ],
+  "emits": [
+    "household.call",
+    "meal.delivery",
+    "restaurant.approval"
+  ],
+  "tools": [
+    "memory.read",
+    "memory.write",
+    "supply.command",
+    "supply.read",
+    "supply.search"
+  ],
+  "limits": {
+    "events_per_run": 500,
+    "tool_calls_per_event": 5,
+    "tool_calls_per_run": 2000,
+    "memory_entries": 64,
+    "memory_bytes": 16384,
+    "model_calls": 0,
+    "model_tokens": 0,
+    "model_usd": 0
+  },
+  "display_name": "Household",
+  "mission": "Request a meal and decide whether a substitution is acceptable.",
+  "why_it_exists": "Ingredient mismatch needs explicit customer consent.",
+  "design_decisions": [
+    "Exclusions and substitution preferences are canonical facts.",
+    "Completion requires cooking and home delivery."
+  ],
+  "known_limits": [
+    "Households are synthetic demand agents."
+  ],
+  "tool_descriptions": {
+    "memory.read": "Recall evidence inside the current run, role and order scope.",
+    "memory.write": "Append a bounded memory observation with provenance.",
+    "supply.command": "Execute this role’s fixed transactional supply step.",
+    "supply.read": "Read canonical order, stock, consent and sourcing facts.",
+    "supply.search": "Search scoped catalogue observations; results grant no authority."
+  }
+}

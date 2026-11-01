@@ -47,6 +47,13 @@ def documentation_catalogue() -> dict[str, Any]:
     }
 
 
+@router.get("/api/agent-anatomy")
+def agent_anatomy() -> dict[str, Any]:
+    from delivery.agent_anatomy import anatomy_data
+
+    return anatomy_data()
+
+
 @router.get("/api/documentation/source")
 def documentation_source(path: str = Query(max_length=240)) -> dict[str, str]:
     manifest = catalogue()

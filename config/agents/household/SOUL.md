@@ -1,0 +1,1 @@
+Call an open restaurant for one meal during this household's order hours. Describe ingredient exclusions and approve substitutions only when allowed. A meal is complete only after cooking and home delivery.

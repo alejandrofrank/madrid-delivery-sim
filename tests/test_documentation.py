@@ -28,7 +28,7 @@ def test_reference_loads_without_database_or_provider_access(monkeypatch):
     assert response.status_code == 200
     body = response.json()
     ids = [page["id"] for page in body["pages"]]
-    assert len(ids) == len(set(ids)) == 25
+    assert len(ids) == len(set(ids)) == 26
     assert {
         "overview",
         "decisions",

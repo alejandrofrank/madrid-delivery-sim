@@ -1,4 +1,4 @@
-"""Immutable, local inventory role data bounded by server-owned authority."""
+"""Schema-validated role snapshots bounded by repository-owned role.json grants."""
 
 import hashlib
 import json
@@ -7,121 +7,9 @@ from typing import Literal
 
 from pydantic import BaseModel, ConfigDict, Field, ValidationInfo, field_validator, model_validator
 
-from delivery.adk_contracts import RESTAURANT_TOOLS, RestaurantBrain
+from delivery.adk_contracts import RestaurantBrain
 from delivery.memory_profiles import MemoryProfile
-
-INVENTORY_ACCEPTS = frozenset(
-    {"basket.requested", "shipment.delayed", "shipment.received", "reservation.expire"}
-)
-INVENTORY_EMITS = frozenset({"inventory.decided", "shipment.received", "basket.reserved"})
-INVENTORY_TOOLS = frozenset(
-    {
-        "inventory.read",
-        "inventory.reserve",
-        "inventory.release",
-        "inventory.delay",
-        "inventory.receive",
-        "memory.read",
-        "memory.write",
-        "queue.publish",
-    }
-)
-
-
-AUTHORITY = {
-    "inventory": {"accepts": INVENTORY_ACCEPTS, "emits": INVENTORY_EMITS, "tools": INVENTORY_TOOLS},
-    "fulfillment": {
-        "accepts": frozenset({"basket.reserved"}),
-        "emits": frozenset({"basket.ready"}),
-        "tools": frozenset(
-            {"fulfillment.read", "fulfillment.pick", "memory.read", "memory.write", "queue.publish"}
-        ),
-    },
-    "dispatcher": {
-        "accepts": frozenset(
-            {
-                "basket.ready",
-                "delivery.arrived",
-                "dispatch.retry",
-                "recovery.reviewed",
-                "courier.accepted",
-            }
-        ),
-        "emits": frozenset(
-            {
-                "delivery.assigned",
-                "delivery.completed",
-                "courier.briefed",
-                "recovery.requested",
-                "dispatch.retry",
-                "dispatch.noted",
-            }
-        ),
-        "tools": frozenset(
-            {
-                "dispatch.read",
-                "dispatch.assign",
-                "dispatch.complete",
-                "dispatch.recover",
-                "dispatch.defer",
-                "memory.read",
-                "memory.write",
-                "queue.publish",
-            }
-        ),
-    },
-}
-
-AUTHORITY["courier"] = {
-    "accepts": frozenset({"courier.briefed"}),
-    "emits": frozenset({"courier.accepted"}),
-    "tools": frozenset(
-        {"courier.read", "courier.accept", "memory.read", "memory.write", "queue.publish"}
-    ),
-}
-AUTHORITY["judge"] = {
-    "accepts": frozenset({"delivery.failed"}),
-    "emits": frozenset({"recovery.reviewed"}),
-    "tools": frozenset(
-        {"judge.read", "judge.review", "memory.read", "memory.write", "queue.publish"}
-    ),
-}
-
-# Supply-chain agents share the same runtime. Their command publishes a fixed,
-# transactional outbox; a prompt cannot choose arbitrary recipients or tools.
-SUPPLY_ACCEPTS = {
-    "household": {"household.intent", "household.offer", "household.status", "meal.delivery"},
-    "restaurant": {
-        "household.call",
-        "ingredient.shortage",
-        "ingredient.arrived",
-        "restaurant.approval",
-        "restaurant.cook",
-    },
-    "market": {"market.request", "market.transfer"},
-}
-SUPPLY_EMITS = {
-    "household": {"household.call", "restaurant.approval", "meal.delivery"},
-    "restaurant": {
-        "market.request",
-        "household.offer",
-        "household.status",
-        "restaurant.cook",
-        "basket.ready",
-        "meal.delivery",
-    },
-    "market": {"market.request", "market.transfer", "ingredient.shortage", "ingredient.arrived"},
-}
-for _supply_role, _topics in SUPPLY_ACCEPTS.items():
-    AUTHORITY[_supply_role] = {
-        "accepts": frozenset(_topics),
-        "emits": frozenset(SUPPLY_EMITS[_supply_role]),
-        "tools": frozenset(
-            {"supply.read", "supply.command", "supply.search", "memory.read", "memory.write"}
-        ),
-    }
-
-AUTHORITY["restaurant"]["tools"] |= RESTAURANT_TOOLS
+from delivery.role_manifest import ROOT, manifest_data, manifest_names
 
 
 class RoleLimits(BaseModel):
@@ -150,7 +38,17 @@ class _RoleConfig(BaseModel):
         "household",
         "restaurant",
         "market",
+        "customer_service",
     ]
+    display_name: str = Field(default="", max_length=80)
+    mission: str = Field(default="", max_length=300)
+    why_it_exists: str = Field(default="", max_length=500)
+    design_decisions: tuple[str, ...] = ()
+    known_limits: tuple[str, ...] = ()
+    tool_profiles: dict[str, tuple[str, ...]] = Field(default_factory=dict)
+    service_events: dict[str, tuple[str, ...]] = Field(default_factory=dict)
+    recovery_tools: tuple[str, ...] = ()
+    tool_descriptions: dict[str, str] = Field(default_factory=dict)
     version: str = Field(min_length=1, max_length=64)
     policy: Literal["deterministic", "gcp_ai", "adk"]
     brain: RestaurantBrain | None = None
@@ -163,10 +61,23 @@ class _RoleConfig(BaseModel):
 
     @model_validator(mode="after")
     def model_authority(self) -> "_RoleConfig":
+        trusted = manifest_data(self.role)
+        for field in ("tool_profiles", "service_events"):
+            for key, values in getattr(self, field).items():
+                if len(values) != len(set(values)) or not set(values) <= set(
+                    trusted.get(field, {}).get(key, ())
+                ):
+                    raise ValueError(f"{field} exceeds manifest authority")
+        if len(self.recovery_tools) != len(set(self.recovery_tools)) or not set(
+            self.recovery_tools
+        ) <= set(trusted.get("recovery_tools", ())):
+            raise ValueError("recovery_tools exceeds manifest authority")
         if self.policy == "adk":
-            if self.role != "restaurant" or self.brain is None:
+            if self.role == "customer_service" and self.brain is None and not self.tools:
+                pass  # Classifier only; recovery permissions are a separate turn.
+            elif self.role != "restaurant" or self.brain is None:
                 raise ValueError("ADK requires a restaurant template")
-            if set(self.tools) != set(self.brain.tools) or "supply.command" in self.tools:
+            elif set(self.tools) != set(self.brain.tools) or "supply.command" in self.tools:
                 raise ValueError("ADK tools must match the frozen granular template")
         elif self.brain is not None:
             raise ValueError("A reasoning template requires ADK policy")
@@ -181,7 +92,7 @@ class _RoleConfig(BaseModel):
     @classmethod
     def enforce_authority(cls, value: tuple[str, ...], info: ValidationInfo) -> tuple[str, ...]:
         assert info.field_name is not None
-        authority = AUTHORITY[str(info.data["role"])][info.field_name]
+        authority = manifest_data(str(info.data["role"]))[info.field_name]
         if len(value) != len(set(value)) or not set(value).issubset(authority):
             raise ValueError(f"{info.field_name} exceeds server authority or contains duplicates")
         return value
@@ -199,6 +110,14 @@ class RoleSpec(_RoleConfig):
     @property
     def digest(self) -> str:
         definition = self.model_dump(mode="json")
+        # Frozen runs created before the explanation fields keep their original
+        # identity hash; new manifests include and hash the new fields normally.
+        for key in (
+            "display_name", "mission", "why_it_exists", "design_decisions", "known_limits",
+            "tool_profiles", "service_events", "recovery_tools", "tool_descriptions",
+        ):
+            if key not in self.model_fields_set:
+                definition.pop(key)
         if self.brain is None:
             definition.pop("brain")  # Preserve hashes of previously frozen definitions.
         if self.memory is None:
@@ -207,7 +126,7 @@ class RoleSpec(_RoleConfig):
         return hashlib.sha256(payload.encode("utf-8")).hexdigest()
 
 
-def load_inventory_role(root: Path = Path("config/agents/inventory")) -> RoleSpec:
+def load_inventory_role(root: Path = ROOT / "inventory") -> RoleSpec:
     """Load only role.json and the fixed SOUL.md file; validate before reading SOUL."""
     config = _RoleConfig.model_validate_json((root / "role.json").read_text(encoding="utf-8"))
     soul_path = root / "SOUL.md"
@@ -217,9 +136,14 @@ def load_inventory_role(root: Path = Path("config/agents/inventory")) -> RoleSpe
 
 
 def load_role(name: str) -> RoleSpec:
-    if name not in AUTHORITY and name != "judge-gcp":
+    if name not in manifest_names():
         raise ValueError("Unknown role")
-    role = load_inventory_role(Path("config/agents") / name)
+    role = load_inventory_role(ROOT / name)
     if role.name != ("judge" if name == "judge-gcp" else name):
         raise ValueError("Role directory does not match role identity")
     return role
+
+
+def role_schema() -> dict:
+    """Published JSON Schema generated from the same Pydantic runtime validator."""
+    return _RoleConfig.model_json_schema()
