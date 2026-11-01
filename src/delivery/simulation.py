@@ -30,7 +30,7 @@ from delivery.dark_store import DarkStore
 from delivery.db import Connection, connect, migrate
 from delivery.dispatch_policy import DispatchPolicy, load_policy
 from delivery.madrid_city import MadridCity
-from delivery.queue import Queue, publish
+from delivery.queue import SUBSCRIBE, Queue, publish
 from delivery.store_layout import StoreConfig
 from delivery.store_setup import attach_store_order, initialize_stores
 from delivery.telemetry import active, order_span
@@ -402,8 +402,20 @@ class Simulation:
         store_roles = ("inventory", "fulfillment") if state and state["store_config"] else ()
         for _ in range(500):  # hard loop bound; cycles cannot monopolize a tick
             progress = False
+            pending_topics: set[str] | None = None
+            if store_roles:
+                # Skip empty A2A polls; receivers still claim and fence their events.
+                # New outbox events are picked up on the next pass.
+                with connect(self.url) as conn:
+                    pending_topics = {e["topic"] for e in conn.execute(
+                        "SELECT DISTINCT topic FROM events WHERE run_id=%s AND due_sim<=%s "
+                        "AND available_at<=clock_timestamp() AND (state='ready' OR "
+                        "(state='leased' AND lease_until<clock_timestamp()))", (run,sim)
+                    )}
             for role in (*store_roles, "dispatcher", "courier", "customer_service", "audit",
                          *(("store_audit",) if store_roles else ())):
+                if pending_topics is not None and not pending_topics.intersection(SUBSCRIBE[role]):
+                    continue
                 if role in {"dispatcher", "customer_service", *store_roles}:
                     receipt = self.transport.invoke(
                         role,

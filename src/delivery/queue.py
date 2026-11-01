@@ -256,8 +256,15 @@ class Queue:
             raise PermissionError("Consumer topics exceed role authority")
         token = uuid4()
         with connect(self.url) as conn:
-            scope = conn.execute("SELECT public.agent_scope() AS scope").fetchone()
+            scope = conn.execute(
+                "SELECT public.agent_scope() AS scope,"
+                "public.agent_definition()->'accepts' AS accepts"
+            ).fetchone()
             if scope and scope["scope"]:
+                # A bound lab identity keeps its frozen subscription even when
+                # the same role also serves another environment through A2A.
+                if accepted_topics is None:
+                    topics = set(scope["accepts"])
                 claimed = conn.execute(
                     "SELECT public.agent_queue_claim(%s,%s,%s,%s) AS event",
                     (role, run_id, sorted(topics), self.lease_seconds),
