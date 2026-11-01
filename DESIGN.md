@@ -205,7 +205,7 @@ The dark ground reads as deep blue graphite, with pale ink and one cyan accent. 
 - **Pale ink** (`ink`): main text. **Muted ink** (`muted`): labels and supporting evidence. **Faint ink** (`faint`): tertiary annotations and disabled text.
 - **Fine rule** (`line`): panel boundaries, rows and dividers. **Strong rule** (`strong-line`): field outlines and stronger technical boundaries.
 
-The map-ground, map-chrome, map-rule and map-ink tokens record the recurring cartographic background and overlay materials from `web/style.css`. Madrid's working-fill, working-ink and working-line tokens describe its brighter active state pills; shared Delivery/Restaurant chips retain their existing treatment. These component colors do not replace the global accent.
+The map-ground, map-chrome, map-rule and map-ink tokens record the recurring cartographic background and overlay materials from `web/style.css`. Madrid's working-fill, working-ink and working-line tokens describe its brighter active state pills; shared Restaurant chips retain their existing treatment. These component colors do not replace the global accent.
 
 Positive, negative, warning and information tokens represent outcomes, attention and assignment states. Pair them with visible text or symbols. Their distinct hues are semantic exceptions to the single-accent strategy.
 
@@ -238,7 +238,7 @@ The desktop roster uses a compact toolbar followed by Agent, Role, Status, Curre
 
 Madrid stacks at 850px with agents before the map. Its mobile map is a 400px high region; the collapsible legend sits in normal flow below it, so open and closed legend states do not cover the selected courier. The toolbar stays within the map's top-left working area, with zoom controls at the top-right. The selected summary reduces to identity/task while keeping trace access.
 
-Delivery retains a 380px minimum roster and 0.9/1.1 ratio; Restaurants uses a 340px minimum and the same ratio. Both have a 16px gap and stack at 900px. Delivery's narrow zoom/Fit city controls now participate in normal layout after the wrapping entity filters, rather than overlaying Find customer.
+Restaurants retains a 340px minimum roster, a 0.9/1.1 ratio, a 16px gap and stacks at 900px. The older Delivery grid workspace has been retired; Operations is the single delivery overview.
 
 Global navigation becomes a menu at 1080px, with three columns of links when opened and two below 600px. Its links stay ordinary anchors, and Escape restores focus to the menu button. Shared narrow controls have a 44px minimum target and text inputs use 16px type; Madrid's compact roster/map controls and other page-specific overrides are explicit exceptions, not a universal target-size promise.
 
@@ -276,11 +276,11 @@ Use one panel boundary around a coherent working region. Separate its heading an
 
 ### Navigation
 
-The global shell contains seven workspaces: Operations, Delivery, Restaurants, Inventory, Health, Traces and Architecture. A cyan underline and cyan text identify the current workspace. Local view tabs retain their implementation-specific active border or raised selected state. A skip link reaches the main workspace; mobile disclosure preserves the same destinations and keyboard behavior.
+The global shell contains six workspaces: Operations, Restaurants, Inventory, Health, Traces and Architecture. A cyan underline and cyan text identify the current workspace. Local view tabs retain their implementation-specific active border or raised selected state. A skip link reaches the main workspace; mobile disclosure preserves the same destinations and keyboard behavior.
 
 ### Agent roster and selected evidence
 
-The roster combines reusable SVG role symbols with actual identity, task, state and throughput. Madrid separates role, status, current task, delivered total and rate into comparison columns; narrower widths remove secondary columns without changing the data. Restaurants also exposes its technical ID separately. Selected rows use a soft cyan fill and a thin inset accent edge: 1px in Madrid, 2px in the shared Delivery/Restaurant roster. A summary remains compact; detail opens on request. Empty and filtered states explain why no agents are visible.
+The roster combines reusable SVG role symbols with actual identity, task, state and throughput. Madrid separates role, status, current task, delivered total and rate into comparison columns; narrower widths remove secondary columns without changing the data. Restaurants also exposes its technical ID separately. Selected rows use a soft cyan fill and a thin inset accent edge: 1px in Madrid, 2px in the shared Restaurant roster. A summary remains compact; detail opens on request. Empty and filtered states explain why no agents are visible.
 
 Curves represent observed samples, not decoration. The shared helper requires at least two finite samples; roster history is limited to the current visit and records activity per simulated minute. A completed run without captured history says so. Totals and rates remain separately labeled.
 
@@ -290,7 +290,7 @@ Madrid uses a locally vendored OpenFreeMap vector basemap rendered by MapLibre t
 
 Dragging, mouse-wheel zoom, touch zoom and keyboard navigation are enabled from the initial view. Escape releases wheel input to page scrolling; the Scroll zoom toggle restores wheel zoom. Fit network and Locate agent reserve space below the toolbar; selection framing keeps real coordinates and genuine route lengths. Selected-label placement considers control geometry, and a ResizeObserver synchronizes Leaflet dimensions with the MapLibre camera before repositioning the label. These are implementation behaviors; the recorded review/capture evidence determines whether their specific states are verified.
 
-Other simulation maps remain explicitly fictional grids. Symbols distinguish couriers, pickups and destinations; text and line styles distinguish planned and traveled routes. Do not replace synthetic service geometry with Madrid cartography or stretch a real route to imitate an illustrative comp.
+Operations is the single geographic overview. Restaurants uses a searchable agent roster and adjacent inspector; Inventory uses a store selector and stock table. The retired fictional grid renderers are removed. On the Madrid map, symbols distinguish couriers, pickups and destinations; text and line styles distinguish planned and traveled routes. Do not replace synthetic service geometry with Madrid cartography or stretch a real route to imitate an illustrative comp.
 
 Eight source-backed D2 diagrams retain their existing graphite/teal palette and locally embedded IBM Plex fonts. Their hard-coded palette has not been regenerated to exactly match the new shared cyan tokens; this is a documented retained exception. The initial image shows the complete diagram within its frame; Expand provides readable inspection, pan and zoom, and Fit restores a complete overview. Architecture's four-stage lifecycle animation is finite and replayable, labeled as an illustration, and disabled under reduced motion.
 

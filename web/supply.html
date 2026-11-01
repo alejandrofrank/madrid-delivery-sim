@@ -6,22 +6,23 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Restaurant supply lab · madrid-delivery-sim</title>
     <link rel="icon" href="data:," />
-    <link rel="stylesheet" href="/static/supply.css?v=2a81fee96c56" />
+    <link rel="stylesheet" href="/static/supply.css?v=444ea529a62d" />
     <link rel="stylesheet" href="/static/workspace.css?v=ae6b1f54d770" />
-    <script defer src="/static/workspace.js?v=b421ae9871b2"></script>
+    <script defer src="/static/workspace.js?v=c15572cc77d2"></script>
     <link rel="stylesheet" href="/static/agents.css?v=641951871aa8">
-    <script defer src="/static/console.js?v=6976b690ad39"></script>
-    <script defer src="/static/supply.js?v=b0be49acdc6e"></script>
+    <script defer src="/static/console.js?v=dc8d49d69730"></script>
+    <script defer src="/static/supply.js?v=1acc76a03a53"></script>
   </head>
   <body data-page="restaurants">
     <div id="workspace-shell">
       <noscript
         ><nav class="workspace-noscript" aria-label="Workspaces">
-          <a href="/restaurant-lab">Restaurants</a
-          ><a href="/delivery-lab">Delivery</a><a href="/lab">Inventory</a
-          ><a href="/health">Health &amp; evals</a
-          ><a href="/architecture">Architecture</a
-          ><a href="/">Madrid baseline</a>
+          <a href="/">Operations</a>
+          <a href="/restaurant-lab">Restaurants</a>
+          <a href="/lab">Inventory</a>
+          <a href="/health">Health</a>
+          <a href="/agent-traces">Traces</a>
+          <a href="/architecture">Architecture</a>
         </nav></noscript
       >
     </div>
@@ -32,7 +33,7 @@
           <h1>Restaurant operations</h1>
           <p>Household calls, kitchen stock and supermarket supply.</p>
         </div>
-        <span class="page-context">32 × 32 city · local execution</span>
+        <span class="page-context">Synthetic supply · local execution</span>
       </div>
       <nav class="console-views" aria-label="Restaurant views"><button id="supply-operations" aria-pressed="true">Operations</button><button id="supply-simulation" aria-pressed="false">Simulation &amp; definitions</button></nav>
       <section id="supply-controls" hidden class="toolbar" aria-label="Simulation controls">
@@ -159,48 +160,14 @@
         class="metrics"
         aria-label="Supply network metrics"
       ></section>
+      <p id="entity-source" class="entity-source">Next-run blueprint</p>
       <div class="workspace">
         <section id="supply-agents" class="live-agents" aria-label="Restaurant agents"></section>
-        <section class="map-panel panel" aria-labelledby="map-title">
-          <div class="panel-heading">
-            <div>
-              <h2 id="map-title">City network</h2>
-              <p id="map-context">32 × 32 fictional grid</p>
-            </div>
-            <label class="inline-label"
-              >Show<select id="map-filter">
-                <option value="all">All entities</option>
-                <option value="household">Households</option>
-                <option value="restaurant">Restaurants</option>
-                <option value="market">Supermarkets</option>
-              </select></label
-            >
-          </div>
-          <div class="map-wrap">
-            <svg
-              id="city-map"
-              viewBox="-1.3 -1.3 33.6 33.6"
-              role="group"
-              aria-label="32 by 32 city. Arrow keys move between markers; Enter selects a household, restaurant, or supermarket."
-            ></svg>
-            <div class="map-key" aria-label="Map legend">
-              <span><i class="key household"></i>Household</span
-              ><span><i class="key restaurant"></i>Restaurant</span
-              ><span><i class="key market"></i>Supermarket</span
-              ><span><i class="key activity"></i>Message in flight</span>
-            </div>
-            <div id="map-empty" class="map-empty">Loading local city…</div>
-          </div>
-          <div class="map-footer">
-            <span id="map-counts">Loading entities</span
-            ><span id="map-source">Next-run blueprint</span>
-          </div>
-        </section>
         <aside id="supply-inspector" hidden class="inspector panel" aria-labelledby="inspector-title">
           <div class="panel-heading">
             <div>
               <h2 id="inspector-title">Entity inspector</h2>
-              <p id="entity-context">Select a place on the map</p>
+              <p id="entity-context">Select an agent from the list</p>
             </div>
             <span id="entity-kind" class="pill"></span>
           </div>
@@ -248,23 +215,13 @@
                   maxlength="100"
                   required
               /></label>
-              <div class="field-pair">
-                <label
-                  >Grid node<input
-                    id="entity-node"
-                    type="number"
-                    min="0"
-                    max="1023"
-                    step="1"
-                    required /></label
-                ><label
+              <label
                   >Opening hours<input
                     id="entity-opening"
                     placeholder="0–24"
                     pattern="[0-9]{1,2}\s*(?:-|–)\s*[0-9]{1,2}"
                     required
                 /></label>
-              </div>
               <label
                 >Recipe IDs<input
                   id="entity-recipes"

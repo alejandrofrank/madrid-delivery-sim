@@ -878,7 +878,9 @@ function renderCity() {
   const run = city.runs.find((r) => r.id === selected.id);
   if (run) {
     const link = el("a", "Open simulation evidence");
-    link.href = `/${run.kind === "restaurant" ? "restaurant-lab" : run.kind === "delivery" ? "delivery-lab" : ""}?run=${run.id}`;
+    link.href = run.kind === "delivery"
+      ? `/api/lab/delivery-runs/${encodeURIComponent(run.id)}`
+      : `/${run.kind === "restaurant" ? "restaurant-lab" : ""}?run=${encodeURIComponent(run.id)}`;
     root.append(link);
   }
 }

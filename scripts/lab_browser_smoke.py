@@ -38,7 +38,8 @@ with sync_playwright() as p:
     assert page.locator("#available").inner_text() == "6"
     assert page.locator("#invariants").inner_text() == "PASS"
     assert page.locator("#error").is_hidden()
-    assert page.locator("#city line").count() == 360
+    assert page.locator("#store option").count() == 5
+    assert page.locator("#stock tr").count() > 0
     assert "inventory:store-1" in page.locator("#agent-scope").inner_text()
     assert "model budget $0" in page.locator("#agent-budget").inner_text()
     if args.sample_date:

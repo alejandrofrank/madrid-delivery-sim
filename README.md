@@ -4,7 +4,7 @@ Queue-driven delivery agents on Madrid streets, with Google ADK, real A2A endpoi
 
 ![Live agent operations](docs/media/ui-demo.gif)
 
-The redesigned console spans seven workspaces. Run `make setup` and open
+The redesigned console spans six workspaces. Run `make setup` and open
 **[localhost:8010](http://localhost:8010/)**. This is the single development instance;
 the consolidated instance runs from the main checkout under the existing Compose
 project name. Keep one instance when switching a development checkout.
@@ -392,25 +392,26 @@ Imported data stays in ignored `artifacts/`; the UI offers it when that snapshot
 Prices retain their observed dates; catalogue listings do not establish real stock.
 See [M2 validation](docs/M2-VALIDATION.md) for guarantees and current limits.
 
-### Running city
+### Operations and specialist labs
 
-Open **http://localhost:8010/delivery-lab** for the map-first city. Click a store to
-configure its opening stock, demand weight and home couriers. Global controls set
-order intensity, traffic, dropout rates, duration and seed. Orders arrive over time.
-Click a store's team member or a courier to inspect its parameters and private memory.
-Settings apply to the next session; each run keeps its frozen starting configuration.
+Open **http://localhost:8010/** for Madrid operations: the real street map,
+courier fleets, orders, delivery performance and chaos controls. Simulation setup
+is under **Simulation & diagnostics** on the same page.
 
-See [running city controls and limits](docs/RUNNING-CITY.md). All agents retain their
-separate database identities, scoped tools, budgets and queued handoffs. Everything
-runs locally by default with no model/provider calls. Optional GCP mode uses a bounded,
-IAM-protected judge with only a synthetic seven-meal supermarket snapshot and
-numeric recovery facts. See [live GCP verification](docs/GCP-VERIFICATION.md) and
-[enterprise design tradeoffs](docs/ENTERPRISE-GCP.md).
+The older **Delivery** workspace and its fictional grid-city UI have been retired.
+`/delivery-lab` redirects to Operations. Its separate run IDs are not forwarded to
+the Madrid engine. The [running-city backend](docs/RUNNING-CITY.md), delivery APIs,
+CLI regression scenarios and retained evidence remain available for testing;
+Health links legacy delivery runs directly to their recorded JSON evidence.
+Restaurants and Inventory also retire their fictional grid maps: select agents
+from the restaurant roster and stores from the inventory selector. Stock,
+reservations, run inspection and replay evidence remain available. The real
+Madrid street map in Operations is the single geographic overview.
 
 The [restaurant supply lab](http://localhost:8010/restaurant-lab) adds scheduled
 household meal calls, seven restaurants, nearby ingredient markets, reservations,
 substitution consent, cooking and courier handoff. Edit entity/agent definitions
-on the map; inspect private memory and replay recorded business facts. It runs
+from the searchable agent list; inspect private memory and replay recorded business facts. It runs
 locally with zero provider calls by default. Optional scoped Jev relevance search
 has separate opt-in and budgets. ADK restaurants also support Jev-first decisions
 with selective Gemini escalation, and each agent can select no recall, short text,

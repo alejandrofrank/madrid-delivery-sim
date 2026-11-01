@@ -1,7 +1,6 @@
 "use strict";
 const $ = id => document.getElementById(id);
 let live = null, evidence = null, runId = new URLSearchParams(location.search).get("run") || "", activeStore = "", polling = false;
-let drawnCity = "";
 let catalogueChosen = false;
 const productKey = p => `${p.source}:${p.listing_id}`;
 function el(tag, text, cls) {
@@ -16,51 +15,6 @@ async function api(path, options) {
   return response.json();
 }
 function row(values) { const tr = el("tr"); values.forEach(v => tr.append(el("td", String(v)))); return tr; }
-function drawCity(state) {
-  const renderKey = `${state.city.sha256}:${activeStore}`;
-  if (renderKey === drawnCity) return;
-  drawnCity = renderKey;
-  const svg = $("city"), ns = "http://www.w3.org/2000/svg";
-  svg.replaceChildren();
-  function shape(tag, attrs, text) {
-    const node = document.createElementNS(ns, tag);
-    Object.entries(attrs).forEach(([key, value]) => node.setAttribute(key, String(value)));
-    if (text) node.textContent = text;
-    return node;
-  }
-  const nodes = new Map(state.city.nodes.map(n => [n.id, n]));
-  const points = [...nodes.values()];
-  const minX = Math.min(...points.map(n => n.x)), maxX = Math.max(...points.map(n => n.x));
-  const minY = Math.min(...points.map(n => n.y)), maxY = Math.max(...points.map(n => n.y));
-  const extent = Math.max(maxX - minX, maxY - minY, 500);
-  const scale = extent / 1500;
-  const padding = 200 * scale;
-  svg.setAttribute("viewBox", `${minX-padding} ${minY-padding} ${maxX-minX+2*padding} ${maxY-minY+2*padding}`);
-  function label(x, y, text, anchor = "start") {
-    return shape("text", {x,y,"text-anchor":anchor,style:`font-size:${40*scale}px;paint-order:stroke;stroke:#101518;fill:#e7edf0;stroke-width:${8*scale}px;stroke-linejoin:round`}, text);
-  }
-  state.city.edges.forEach(edge => {
-    const a = nodes.get(edge.from), b = nodes.get(edge.to);
-    svg.append(shape("line", {x1:a.x,y1:a.y,x2:b.x,y2:b.y,stroke:"#3c515b","stroke-width":6*scale}));
-  });
-  state.city.stores.forEach(store => {
-    const point = nodes.get(store.node);
-    const group = shape("g", {class:"store",tabindex:0,role:"button","aria-label":`Inspect ${store.name}`});
-    group.append(shape("circle", {cx:point.x,cy:point.y,r:24*scale,fill:store.id===activeStore?"#63d5c5":"#a8b7c0"}));
-    const anchor = point.x > (minX+maxX)/2 ? "end" : "start";
-    group.append(label(point.x, point.y-45*scale, store.name, anchor));
-    function choose() { activeStore = store.id; render(); }
-    group.onclick = choose;
-    group.onkeydown = event => { if(event.key==="Enter" || event.key===" "){event.preventDefault();choose();} };
-    svg.append(group);
-  });
-  state.city.facilities.forEach(facility => {
-    const point = nodes.get(facility.node);
-    svg.append(shape("rect", {x:point.x-15*scale,y:point.y-15*scale,width:30*scale,height:30*scale,fill:"#81949f"}));
-    const anchor = point.x > (minX+maxX)/2 ? "end" : "start";
-    svg.append(label(point.x+(anchor === "end" ? -30 : 30)*scale, point.y+15*scale, facility.kind, anchor));
-  });
-}
 function render() {
   if (!live?.run) return;
   $("inventory-empty").hidden = true;
@@ -107,7 +61,6 @@ function render() {
   $("recovery").textContent = evidence ? `Real process exit ${evidence.crash.exit_code}; reclaimed on attempt ${evidence.crash.recovered_attempts}. Inspect the first checkpoint to see the rolled-back write and leased event.` : "Crash after stock write, before commit: the leased event survives while stock writes roll back. Recovery waits for the wall-clock lease.";
   $("run-info").textContent = `Run ${state.run.id} · seed ${state.run.seed} · stock quantities and city are simulated`;
   if (live.run.status==="failed") { $("error").hidden=false; $("error").textContent=`Scenario failed: ${live.run.error}. State remains inspectable.`; }
-  drawCity(state);
 }
 async function poll() {
   if(polling) return;

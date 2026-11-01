@@ -52,28 +52,3 @@ Ops.createRoster = function(mount,onSelect,options={}){
    render();
  },reset(){histories=new Map();previous=new Map();lastKey=null;}};
 };
-
-/* One map tab stop; arrows reach every marker without trapping page navigation. */
-Ops.enableMapKeyboard = function(svg) {
- let current = null;
- const markers = () => [...svg.querySelectorAll('[role="button"]')];
- function sync() {
-   const nodes=markers();
-   const selected=nodes.find(n=>n.getAttribute('aria-label')===current)||nodes[0];
-   nodes.forEach(n=>n.tabIndex=n===selected?0:-1);
- }
- svg.addEventListener('focusin',event=>{
-   const marker=event.target.closest('[role="button"]');
-   if(marker){current=marker.getAttribute('aria-label');sync();}
- });
- svg.addEventListener('keydown',event=>{
-   if(!['ArrowDown','ArrowRight','ArrowUp','ArrowLeft','Home','End'].includes(event.key))return;
-   const nodes=markers(),index=nodes.indexOf(document.activeElement);
-   if(index<0)return;
-   event.preventDefault();
-   const next=event.key==='Home'?0:event.key==='End'?nodes.length-1:(index+(['ArrowRight','ArrowDown'].includes(event.key)?1:-1)+nodes.length)%nodes.length;
-   nodes[next].focus();
- });
- new MutationObserver(sync).observe(svg,{childList:true,subtree:true});
- sync();
-};

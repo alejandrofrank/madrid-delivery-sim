@@ -39,7 +39,7 @@ invoice or project-wide cost cap. [Google pricing](https://cloud.google.com/gemi
 
 ## End-to-end UI switch
 
-The explicit live-cloud script `scripts/verify_gcp_switch.py --live-cloud` configured
+The former live-cloud script (retired with the Delivery grid UI) configured
 seed 71, 15 minutes of demand, four orders/hour, traffic 1, dropout intensity 0.4,
 and three couriers based at one shop. The seed naturally withdraws bike-1 at
 simulated second 694; no incident was injected after session creation.

@@ -4,7 +4,6 @@
   if (!mount) return;
   const pages = [
     ["/", "Operations"],
-    ["/delivery-lab", "Delivery"],
     ["/restaurant-lab", "Restaurants"],
     ["/lab", "Inventory"],
     ["/health", "Health"],

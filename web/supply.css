@@ -293,77 +293,6 @@
   margin-top: 4px;
   overflow-wrap: anywhere;
 }
-:where(body[data-page="restaurants"]) .map-wrap {
-  position: relative;
-  background: var(--bg);
-  isolation: isolate;
-}
-:where(body[data-page="restaurants"]) .map-wrap svg {
-  display: block;
-  width: 100%;
-  height: clamp(440px, calc(100dvh - 344px), 760px);
-}
-:where(body[data-page="restaurants"]) .map-key {
-  position: absolute;
-  bottom: 12px;
-  left: 12px;
-  right: 12px;
-  display: flex;
-  gap: 16px;
-  flex-wrap: wrap;
-  pointer-events: none;
-  font-size: 12px;
-  color: var(--text);
-  background: var(--panel);
-  padding: 8px 12px;
-  border: 1px solid var(--line);
-  border-radius: var(--ui-radius);
-  width: fit-content;
-  max-width: calc(100% - 24px);
-}
-:where(body[data-page="restaurants"]) .map-key span {
-  display: flex;
-  gap: 8px;
-  align-items: center;
-}
-:where(body[data-page="restaurants"]) .key {
-  display: inline-block;
-  width: 8px;
-  height: 8px;
-  border-radius: var(--ui-radius);
-}
-:where(body[data-page="restaurants"]) .key.household {
-  background: var(--muted);
-}
-:where(body[data-page="restaurants"]) .key.restaurant {
-  background: var(--orange);
-}
-:where(body[data-page="restaurants"]) .key.market {
-  background: var(--green);
-}
-:where(body[data-page="restaurants"]) .key.activity {
-  background: var(--blue);
-  border-radius: var(--ui-radius);
-}
-:where(body[data-page="restaurants"]) .map-empty {
-  position: absolute;
-  inset: 0;
-  display: grid;
-  place-items: center;
-  color: var(--muted);
-  pointer-events: none;
-}
-:where(body[data-page="restaurants"]) .map-footer {
-  display: flex;
-  justify-content: space-between;
-  gap: 12px;
-  padding: 12px 16px;
-  color: var(--muted);
-  font-size: 12px;
-  border-top: 1px solid var(--line);
-  flex-wrap: wrap;
-  overflow-wrap: anywhere;
-}
 :where(body[data-page="restaurants"]) .inspector {
   max-height: calc(100dvh - 96px);
   min-height: 0;
@@ -728,60 +657,12 @@
   line-height: 1.7;
   overflow-wrap: anywhere;
 }
-:where(body[data-page="restaurants"]) svg .entity {
-  cursor: pointer;
-}
-:where(body[data-page="restaurants"]) svg .entity:focus {
-  outline: none;
-}
-:where(body[data-page="restaurants"]) svg .entity:focus .marker-body {
-  stroke: var(--text);
-  stroke-width: 0.18;
-}
-:where(body[data-page="restaurants"]) svg .selected-ring {
-  fill: none;
-  stroke: var(--blue);
-  stroke-width: 0.1;
-  stroke-dasharray: 0.2 0.11;
-}
-:where(body[data-page="restaurants"]) svg .entity-label {
-  font-size: 0.37px;
-  fill: var(--text);
-  paint-order: stroke;
-  stroke: var(--bg);
-  stroke-width: 0.12;
-  pointer-events: none;
-}
-:where(body[data-page="restaurants"]) svg .district-label {
-  font-size: 0.58px;
-  font-weight: 600;
-  letter-spacing: 0.09px;
-  fill: var(--ui-muted);
-  pointer-events: none;
-}
-:where(body[data-page="restaurants"]) svg .activity-route {
-  fill: none;
-  stroke: var(--blue);
-  stroke-width: 0.055;
-  stroke-dasharray: 0.13 0.2;
-  opacity: 0.65;
-  pointer-events: none;
-}
-:where(body[data-page="restaurants"]) svg .activity-dot {
-  fill: var(--blue);
-  stroke: var(--panel);
-  stroke-width: 0.06;
-  pointer-events: none;
-}
 :where(body[data-page="restaurants"]) [hidden] {
   display: none !important;
 }
 @media (min-width: 1600px) {
   :where(body[data-page="restaurants"]) .workspace {
     grid-template-columns: minmax(0, 1fr) 340px;
-  }
-  :where(body[data-page="restaurants"]) .map-wrap svg {
-    height: clamp(550px, calc(100dvh - 315px), 850px);
   }
 }
 @media (max-width: 1050px) {
@@ -828,20 +709,9 @@
   :where(body[data-page="restaurants"]) .settings-grid label {
     font-size: 12px;
   }
-  :where(body[data-page="restaurants"]) .map-wrap svg {
-    height: 600px;
-  }
   :where(body[data-page="restaurants"]) .inspector {
     max-height: 690px;
     min-height: 0;
-  }
-  :where(body[data-page="restaurants"]) .map-key {
-    gap: 8px;
-    font-size: 12px;
-    color: var(--text);
-    background: var(--panel);
-    max-width: calc(100% - 24px);
-    bottom: 12px;
   }
   :where(body[data-page="restaurants"]) .evidence-tabs {
     overflow-x: auto;
@@ -873,17 +743,11 @@
     max-height: none;
     min-height: 0;
   }
-  :where(body[data-page="restaurants"]) .map-wrap svg {
-    height: 520px;
-  }
   :where(body[data-page="restaurants"]) .settings-grid {
     grid-template-columns: repeat(2, 1fr);
   }
   :where(body[data-page="restaurants"]) .metrics {
     margin-bottom: 12px;
-  }
-  :where(body[data-page="restaurants"]) .map-panel .panel-heading {
-    padding: 12px 12px;
   }
   :where(body[data-page="restaurants"]) .toolbar #run-state {
     margin-left: 0;
@@ -909,11 +773,6 @@
   :where(body[data-page="restaurants"]) .evidence-content {
     max-height: 420px;
   }
-  :where(body[data-page="restaurants"]) .map-footer {
-    font-size: 12px;
-    flex-wrap: wrap;
-    overflow-wrap: anywhere;
-  }
   :where(body[data-page="restaurants"]) footer {
     display: block;
     overflow-wrap: anywhere;
@@ -927,15 +786,7 @@
     margin-left: 16px;
   }
 }
-@media (max-width: 760px) {
-  :where(body[data-page="restaurants"]) .map-wrap svg {
-    height: auto;
-    aspect-ratio: 1;
-  }
-}
-:where(body[data-page="restaurants"]) svg .entity {
-  pointer-events: bounding-box;
-}
+
 :where(body[data-page="restaurants"]) .call-transcript {
   margin-top: 8px;
   max-width: 390px;
@@ -1557,44 +1408,26 @@
   :where(body[data-page="restaurants"]) .metrics .metric:nth-child(-n + 4) {
     border-bottom: 1px solid var(--line);
   }
-  :where(body[data-page="restaurants"]) .map-panel .panel-heading {
-    flex-wrap: wrap;
-  }
-  :where(body[data-page="restaurants"])
-    .map-panel
-    .panel-heading
-    > div:first-child {
-    flex-basis: 100%;
-  }
-  :where(body[data-page="restaurants"]) .map-panel .inline-label {
-    width: 100%;
-  }
-  :where(body[data-page="restaurants"]) .map-panel .inline-label select {
-    flex: 1;
-  }
 }
 
-/* The network and its agents stay together; definitions open on request. */
+/* Select an agent to open its inspector alongside the roster. */
 .console-views {display:flex;gap:6px;border-bottom:1px solid var(--line);padding:0 0 10px;margin-bottom:16px}
 .console-views button {background:transparent;border-color:transparent}
 .console-views button[aria-pressed="true"] {background:var(--ui-raised);border-color:var(--ui-strong-line);color:var(--ui-ink)}
 [hidden] {display:none!important}
 .metrics {grid-template-columns:repeat(4,minmax(0,1fr));margin:16px 0}
-.workspace {display:grid;grid-template-columns:minmax(340px,.9fr) minmax(0,1.1fr);gap:16px;align-items:start}
+.workspace {display:grid;grid-template-columns:minmax(0,1fr);gap:16px;align-items:start}
+.workspace:has(#supply-inspector:not([hidden])) {grid-template-columns:minmax(340px,.9fr) minmax(0,1.1fr)}
+.entity-source {margin:0 0 12px;font-size:12px;color:var(--muted)}
 #supply-agents {grid-column:1;grid-row:1}
 #supply-agents .roster-list {height:452px}
-.map-panel {grid-column:2;grid-row:1}
-.map-wrap {height:530px;min-height:0;background:var(--bg)}
-#city-map {height:100%;width:100%}
-#supply-inspector {grid-column:1/-1;max-height:none}
+#supply-inspector {grid-column:2;grid-row:1;max-height:none}
 .inspector-actions {display:flex;justify-content:space-between;align-items:center;padding:12px 16px;border-bottom:1px solid var(--line)}
 .editor-form {max-width:900px}
-.entity-label {fill:var(--ui-ink);stroke:var(--bg)}
-.district-label {fill:var(--muted)}
-.activity-route {stroke:var(--ui-accent)}
-.activity-dot {fill:var(--ui-accent)}
-.selected-ring {stroke:var(--ui-accent);fill:none}
-.key.household,.key.restaurant,.key.market {background:var(--muted)}
-.key.activity {background:var(--ui-accent)}
-@media(max-width:900px) {.workspace{grid-template-columns:minmax(0,1fr)}#supply-agents,.map-panel,#supply-inspector{grid-column:1;grid-row:auto}.map-wrap{height:430px}#supply-agents .roster-list{height:320px}}
+@media(max-width:900px) {.workspace{grid-template-columns:minmax(0,1fr)}#supply-agents .roster-list{height:320px}}
 @media(max-width:520px) {.metrics{grid-template-columns:repeat(2,minmax(0,1fr))}.console-views{flex-wrap:wrap}}
+
+@media(max-width:900px) {
+  .workspace:has(#supply-inspector:not([hidden])) {grid-template-columns:minmax(0,1fr)}
+  #supply-agents,#supply-inspector {grid-column:1;grid-row:auto}
+}

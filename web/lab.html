@@ -6,20 +6,21 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Inventory operations · madrid-delivery-sim</title>
     <link rel="icon" href="data:," />
-    <link rel="stylesheet" href="/static/lab.css?v=bed7e16a28dd" />
+    <link rel="stylesheet" href="/static/lab.css?v=f04d93c0e690" />
     <link rel="stylesheet" href="/static/workspace.css?v=ae6b1f54d770" />
-    <script defer src="/static/workspace.js?v=b421ae9871b2"></script>
-    <script defer src="/static/lab.js?v=04c54c1daf44"></script>
+    <script defer src="/static/workspace.js?v=c15572cc77d2"></script>
+    <script defer src="/static/lab.js?v=498805d3ee67"></script>
   </head>
   <body data-page="inventory">
     <div id="workspace-shell">
       <noscript
         ><nav class="workspace-noscript" aria-label="Workspaces">
-          <a href="/restaurant-lab">Restaurants</a
-          ><a href="/delivery-lab">Delivery</a><a href="/lab">Inventory</a
-          ><a href="/health">Health &amp; evals</a
-          ><a href="/architecture">Architecture</a
-          ><a href="/">Madrid baseline</a>
+          <a href="/">Operations</a>
+          <a href="/restaurant-lab">Restaurants</a>
+          <a href="/lab">Inventory</a>
+          <a href="/health">Health</a>
+          <a href="/agent-traces">Traces</a>
+          <a href="/architecture">Architecture</a>
         </nav></noscript
       >
     </div>
@@ -84,23 +85,9 @@
         <span id="clock">Simulation minute 0</span
         ><a id="download" hidden>Download evidence JSON ↗</a>
       </section>
-      <div class="workspace">
+      <div class="workspace inventory-stock">
         <section class="panel">
-          <h2>Fictional service area</h2>
-          <p>
-            Three supermarkets, two retail stores. Select a store to inspect its
-            stock. Roads are a generated fixture; traffic and courier movement
-            are later milestones.
-          </p>
           <p id="inventory-empty" class="inventory-empty">No inventory run yet. Start the last-unit scenario to inspect stock, reservations and recovery.</p>
-          <svg
-            id="city"
-            viewBox="-160 -160 1900 1900"
-            role="img"
-            aria-label="Fictional city and five stores"
-          ></svg>
-        </section>
-        <section class="panel">
           <h2>Availability by product</h2>
           <label
             >Store

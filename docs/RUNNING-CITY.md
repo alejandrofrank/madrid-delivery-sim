@@ -1,8 +1,11 @@
 # Configurable local city sessions
 
-Open `/delivery-lab`. The 32×32 city map loads before a simulation starts. Select a
-shop to configure it; select a courier or a shop's team member to inspect that agent.
-Pan or zoom the map to follow deliveries. Run evidence stays in a collapsed drawer.
+The Delivery workspace and its 32×32 grid-city screen are retired. Use Operations
+at `/` for the Madrid map and fleets; `/delivery-lab` redirects there. This document
+records the retained running-city backend and the former controls. Configure a
+session with `POST /api/lab/city-runs`, inspect its state with
+`GET /api/lab/delivery-runs/{run}`, and inspect a scoped agent with
+`GET /api/lab/city-runs/{run}/agents/{agent_id}`. These runs are separate from Madrid.
 
 ## Controls
 
@@ -69,25 +72,16 @@ an agent's role permissions.
 
 ## Verification
 
-The full Linux suite passes **91 tests**, Ruff and mypy. Coverage includes settings
+The original running-city release passed **91 tests**, Ruff and mypy. Coverage includes settings
 limits, repeatable demand, timed/idempotent release, configured stock/staffing,
 fractional traffic recomputation, immutable run settings and selected-agent memory
 isolation, plus the existing fleet, crash and Madrid regressions.
 
-```sh
-python scripts/city_browser_smoke.py
-python scripts/flow_browser_smoke.py
-```
-
-The first checks map-first configuration, store/team interactions, timed arrivals,
-memory inspection, desktop/mobile layout and reload. The second retains the fixed
-fleet recovery scenario through its API and verifies its saved run in the map UI.
-Screenshots and evidence stay in ignored `artifacts/`.
-
-The fixed `delivery delivery-demo` remains the deterministic chaos regression,
-documented in [fleet recovery](FLEET-RECOVERY.md). Configured sessions run locally
-through the UI. Controller restart recovery, live mutation of physical settings,
-arbitrary stores, recurring replenishment and longer continuous services are deferred.
+The obsolete grid browser smoke scripts have been removed. Backend regressions
+remain in `tests/test_running_city.py`, `tests/test_delivery_api.py` and the fleet
+suite. The fixed `delivery delivery-demo` remains the deterministic recovery
+regression documented in [fleet recovery](FLEET-RECOVERY.md). Controller restart
+recovery, arbitrary stores and longer continuous services remain deferred.
 
 ## Households, assortment and streets
 
