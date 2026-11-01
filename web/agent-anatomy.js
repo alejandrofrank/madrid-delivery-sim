@@ -171,6 +171,7 @@
     const status = node("span", "", "sr-only"); status.setAttribute("role", "status");
     workbench.append(drawing, inspector); detail.append(workbench, status); host.append(detail);
     select.onchange = () => choose(selected.id, select.value);
+    let environment = "all";
     const footer = node("p", undefined, "anatomy-provenance");
     footer.append(document.createTextNode("Generated from repository files · definition fingerprint "), node("code", data.input_fingerprint.slice(0, 12)), document.createTextNode(" · "), sourceLink("docs/evidence/heldout-release.json"));
     host.append(footer);
@@ -189,9 +190,22 @@
       illustration.querySelectorAll('[role="button"]').forEach(g => g.setAttribute("aria-pressed", String(g.dataset.part === part)));
       select.replaceChildren(...selected.panels.map(p => { const option = node("option", `${p.title} · ${p.part}`); option.value = p.id; return option; }));
       select.value = part;
-      const panel = selected.panels.find(p => p.id === part);
+      const basePanel = selected.panels.find(p => p.id === part);
+      const variant = basePanel.environments?.[environment];
+      const panel = variant ? {...basePanel,...variant} : basePanel;
       const title = node("h3", panel.title); title.id = "anatomy-panel-title";
       inspector.replaceChildren(title, node("p", panel.summary, "anatomy-summary"));
+      if(basePanel.environments){
+        const label=node("label","Environment","anatomy-part-picker");
+        const environmentSelect=node("select");environmentSelect.id="anatomy-environment";
+        const all=node("option","All environments");all.value="all";environmentSelect.append(all);
+        Object.entries(basePanel.environments).forEach(([id,view])=>{const option=node("option",view.label);option.value=id;environmentSelect.append(option);});
+        environmentSelect.value=environment;
+        environmentSelect.onchange=()=>{environment=environmentSelect.value;choose(selected.id,part);};
+        label.append(environmentSelect);inspector.insertBefore(label,title);
+        const wheels=illustration.querySelector('[data-part="environment"]');
+        wheels?.setAttribute("data-environment",environment);
+      }
       const numbers = node("dl", undefined, "anatomy-numbers");
       Object.entries(panel.numbers).forEach(([label, value]) => {
         const row = node("div"); row.append(node("dt", label.replaceAll("_", " ")), node("dd", String(value))); numbers.append(row);

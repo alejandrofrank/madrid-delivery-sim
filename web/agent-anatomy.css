@@ -104,3 +104,5 @@
   .anatomy-team { min-width: 0; }
   .anatomy-drawing { position: static; }
 }
+
+[data-part="environment"][data-environment="dark_store"]{stroke-dasharray:3 2}

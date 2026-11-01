@@ -19,6 +19,14 @@
       "status": "Implemented + roadmap"
     },
     {
+      "id": "dark-store",
+      "title": "Shelf to doorstep",
+      "group": "Start here",
+      "file": "docs/DARK-STORE.md",
+      "summary": "Follow an order through real stock, aisle routes, packing and Madrid courier handoff.",
+      "status": "Implemented locally"
+    },
+    {
       "id": "google-stack",
       "title": "Google stack demonstration",
       "group": "Start here",
@@ -219,7 +227,9 @@
     "README.md",
     "docs/PUBLIC-READINESS.md",
     "docs/ARCHITECTURE-OBSERVABILITY.md",
-    "infra/gcp-ai/STATE-MIGRATION.md"
+    "infra/gcp-ai/STATE-MIGRATION.md",
+    "evals/store/scenarios.json",
+    "web/vendor/simready/manifest.json"
   ],
   "sources": [
     "compose.tracing-gcp.yaml",
@@ -317,13 +327,16 @@
     "src/delivery/cloud_ai.py",
     "src/delivery/config.py",
     "src/delivery/customer_service.py",
+    "src/delivery/dark_store.py",
     "src/delivery/dispatch_optimizer.py",
     "src/delivery/dispatch_policy.py",
     "src/delivery/dispatch_reposition.py",
     "src/delivery/durable_inference.py",
+    "src/delivery/environment.py",
     "src/delivery/fleet_policy.py",
     "src/delivery/health.py",
     "src/delivery/jev_routing.py",
+    "src/delivery/madrid_city.py",
     "src/delivery/mcp_server.py",
     "src/delivery/memory_profiles.py",
     "src/delivery/queue.py",
@@ -333,6 +346,10 @@
     "src/delivery/scenario_report.py",
     "src/delivery/semantic_memory.py",
     "src/delivery/simulation.py",
+    "src/delivery/store_agents.py",
+    "src/delivery/store_evals.py",
+    "src/delivery/store_layout.py",
+    "src/delivery/store_tools.py",
     "src/delivery/supply.py",
     "src/delivery/supply_api.py",
     "src/delivery/supply_models.py",

@@ -29,6 +29,14 @@ const out = '.impeccable/review';
         panels++;
       }
     }
+    await page.locator('.team-agent[data-agent="fulfillment"]').click();
+    await page.locator('#anatomy-part-select').selectOption('environment');
+    const wheels=data.agents.find(a=>a.id==='fulfillment').panels.find(p=>p.id==='environment');
+    for(const [id,variant] of Object.entries(wheels.environments)){
+      await page.locator('#anatomy-environment').selectOption(id);
+      assert.equal(await page.locator('.anatomy-summary').innerText(),variant.summary);
+    }
+    await page.locator('#anatomy-environment').selectOption('all');
     await page.locator('.team-agent[data-agent="restaurant"]').click();
     const engine = page.locator('.anatomy-illustration [data-part="model"]');
     await engine.focus(); await page.keyboard.press('Enter');
@@ -81,6 +89,14 @@ const out = '.impeccable/review';
     await page.locator('#anatomy-inspector').evaluate(el => scrollTo(0, el.getBoundingClientRect().top + scrollY - 145));
     await page.screenshot({path:`${out}/mobile-evals.png`});
     assert(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1));
+    await page.locator('.team-agent[data-agent="fulfillment"]').click();
+    await page.locator('#anatomy-part-select').selectOption('environment');
+    await page.locator('#anatomy-environment').selectOption('dark_store');
+    for(const [name,width,height] of [['desktop',1440,1000],['mobile',390,844]]){
+      await page.setViewportSize({width,height});
+      await page.evaluate(()=>scrollTo(0,0));
+      await page.screenshot({path:out+'/store-environment-'+name+'.png',fullPage:true});
+    }
     // A failed read has a usable retry and never produces an empty diagram.
     await page.route('**/api/agent-anatomy', route => route.fulfill({status:503,body:'Unavailable'}));
     await page.goto(base + '/architecture');
