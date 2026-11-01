@@ -1,0 +1,372 @@
+{
+  "schema_version": 1,
+  "kind": "model-evals",
+  "mode": "scripted-offline",
+  "split": "heldout",
+  "repeat": 5,
+  "source_revision": "production-main-consolidation-candidate",
+  "verified_commit": "751b2d5f8a9c3b33b8301e37680809a452a99d8c",
+  "created_at": "2026-11-01T19:49:28.873762+00:00",
+  "limitations": "Scripted contract evidence; not live-model reliability or latency. Bootstrap resamples distinct cases. Repeated fixed outputs do not add independent cases.",
+  "fixture_hashes": {
+    "adk-offline-restaurant": "f0a42c64817007c2a302eadea95bfab4b65c719964d2020f077e4108792bb90d",
+    "adk-offline-customer": "d87981aefcda2e93691299c76ccf442800d853403b864ed7aab8da1a64a6a4cb",
+    "adk-customer-policy": "0710809e29e57367415324a555050d2d9bdac9a6a66744cf203fcccc1f9747f4",
+    "adk-chaos-dispatcher": "87e70a420fc30555a23320cd370864ec7b9a9715bce74713bdf70e06fadc8f47",
+    "adk-chaos-restaurant": "a78f15df7bf620def8d449a036eb7fadd13d3516b1f98695c54a484329e854ef",
+    "adk-chaos-customer": "7a41915bbcc20772c2018d7f23aaa5a9527d4f15a9a3ea8a68c87fdd2f504e37"
+  },
+  "summary": {
+    "adk-chaos-customer": {
+      "cases": 12,
+      "attempts": 60,
+      "repeat": 5,
+      "pass_rate": 1.0,
+      "pass_rate_ci95": [
+        1.0,
+        1.0
+      ],
+      "pass_power_k": 1.0,
+      "pass_power_k_ci95": [
+        1.0,
+        1.0
+      ],
+      "pass_power_k_definition": "fraction of cases passing all k independent attempts",
+      "known_cost_usd": 0,
+      "unknown_cost_attempts": 0,
+      "cost_per_success_usd": 0.0,
+      "reserved_cost_per_success_usd": 0.0,
+      "p95_latency_ms": 15.692196020972913,
+      "categories": {
+        "schema": {
+          "pass_rate": 1.0,
+          "ci95": [
+            1.0,
+            1.0
+          ]
+        },
+        "length": {
+          "pass_rate": 1.0,
+          "ci95": [
+            1.0,
+            1.0
+          ]
+        },
+        "invented_tool": {
+          "pass_rate": 1.0,
+          "ci95": [
+            1.0,
+            1.0
+          ]
+        },
+        "task": {
+          "pass_rate": 1.0,
+          "ci95": [
+            1.0,
+            1.0
+          ]
+        },
+        "trajectory": {
+          "pass_rate": 1.0,
+          "ci95": [
+            1.0,
+            1.0
+          ]
+        }
+      }
+    },
+    "adk-chaos-dispatcher": {
+      "cases": 12,
+      "attempts": 60,
+      "repeat": 5,
+      "pass_rate": 1.0,
+      "pass_rate_ci95": [
+        1.0,
+        1.0
+      ],
+      "pass_power_k": 1.0,
+      "pass_power_k_ci95": [
+        1.0,
+        1.0
+      ],
+      "pass_power_k_definition": "fraction of cases passing all k independent attempts",
+      "known_cost_usd": 0,
+      "unknown_cost_attempts": 0,
+      "cost_per_success_usd": 0.0,
+      "reserved_cost_per_success_usd": 0.0,
+      "p95_latency_ms": 18.573624073178504,
+      "categories": {
+        "schema": {
+          "pass_rate": 1.0,
+          "ci95": [
+            1.0,
+            1.0
+          ]
+        },
+        "length": {
+          "pass_rate": 1.0,
+          "ci95": [
+            1.0,
+            1.0
+          ]
+        },
+        "invented_tool": {
+          "pass_rate": 1.0,
+          "ci95": [
+            1.0,
+            1.0
+          ]
+        },
+        "task": {
+          "pass_rate": 1.0,
+          "ci95": [
+            1.0,
+            1.0
+          ]
+        },
+        "trajectory": {
+          "pass_rate": 1.0,
+          "ci95": [
+            1.0,
+            1.0
+          ]
+        }
+      }
+    },
+    "adk-chaos-restaurant": {
+      "cases": 12,
+      "attempts": 60,
+      "repeat": 5,
+      "pass_rate": 1.0,
+      "pass_rate_ci95": [
+        1.0,
+        1.0
+      ],
+      "pass_power_k": 1.0,
+      "pass_power_k_ci95": [
+        1.0,
+        1.0
+      ],
+      "pass_power_k_definition": "fraction of cases passing all k independent attempts",
+      "known_cost_usd": 0,
+      "unknown_cost_attempts": 0,
+      "cost_per_success_usd": 0.0,
+      "reserved_cost_per_success_usd": 0.0,
+      "p95_latency_ms": 23.93539336626418,
+      "categories": {
+        "schema": {
+          "pass_rate": 1.0,
+          "ci95": [
+            1.0,
+            1.0
+          ]
+        },
+        "length": {
+          "pass_rate": 1.0,
+          "ci95": [
+            1.0,
+            1.0
+          ]
+        },
+        "invented_tool": {
+          "pass_rate": 1.0,
+          "ci95": [
+            1.0,
+            1.0
+          ]
+        },
+        "task": {
+          "pass_rate": 1.0,
+          "ci95": [
+            1.0,
+            1.0
+          ]
+        },
+        "trajectory": {
+          "pass_rate": 1.0,
+          "ci95": [
+            1.0,
+            1.0
+          ]
+        }
+      }
+    },
+    "adk-customer-policy": {
+      "cases": 12,
+      "attempts": 60,
+      "repeat": 5,
+      "pass_rate": 1.0,
+      "pass_rate_ci95": [
+        1.0,
+        1.0
+      ],
+      "pass_power_k": 1.0,
+      "pass_power_k_ci95": [
+        1.0,
+        1.0
+      ],
+      "pass_power_k_definition": "fraction of cases passing all k independent attempts",
+      "known_cost_usd": 0,
+      "unknown_cost_attempts": 0,
+      "cost_per_success_usd": 0.0,
+      "reserved_cost_per_success_usd": 0.0,
+      "p95_latency_ms": 2.4913745146477595,
+      "categories": {
+        "schema": {
+          "pass_rate": 1.0,
+          "ci95": [
+            1.0,
+            1.0
+          ]
+        },
+        "length": {
+          "pass_rate": 1.0,
+          "ci95": [
+            1.0,
+            1.0
+          ]
+        },
+        "invented_tool": {
+          "pass_rate": 1.0,
+          "ci95": [
+            1.0,
+            1.0
+          ]
+        },
+        "task": {
+          "pass_rate": 1.0,
+          "ci95": [
+            1.0,
+            1.0
+          ]
+        },
+        "trajectory": {
+          "pass_rate": 1.0,
+          "ci95": [
+            1.0,
+            1.0
+          ]
+        }
+      }
+    },
+    "adk-offline-customer": {
+      "cases": 12,
+      "attempts": 60,
+      "repeat": 5,
+      "pass_rate": 1.0,
+      "pass_rate_ci95": [
+        1.0,
+        1.0
+      ],
+      "pass_power_k": 1.0,
+      "pass_power_k_ci95": [
+        1.0,
+        1.0
+      ],
+      "pass_power_k_definition": "fraction of cases passing all k independent attempts",
+      "known_cost_usd": 0,
+      "unknown_cost_attempts": 0,
+      "cost_per_success_usd": 0.0,
+      "reserved_cost_per_success_usd": 0.0,
+      "p95_latency_ms": 2.474949942552484,
+      "categories": {
+        "schema": {
+          "pass_rate": 1.0,
+          "ci95": [
+            1.0,
+            1.0
+          ]
+        },
+        "length": {
+          "pass_rate": 1.0,
+          "ci95": [
+            1.0,
+            1.0
+          ]
+        },
+        "invented_tool": {
+          "pass_rate": 1.0,
+          "ci95": [
+            1.0,
+            1.0
+          ]
+        },
+        "task": {
+          "pass_rate": 1.0,
+          "ci95": [
+            1.0,
+            1.0
+          ]
+        },
+        "trajectory": {
+          "pass_rate": 1.0,
+          "ci95": [
+            1.0,
+            1.0
+          ]
+        }
+      }
+    },
+    "adk-offline-restaurant": {
+      "cases": 12,
+      "attempts": 60,
+      "repeat": 5,
+      "pass_rate": 1.0,
+      "pass_rate_ci95": [
+        1.0,
+        1.0
+      ],
+      "pass_power_k": 1.0,
+      "pass_power_k_ci95": [
+        1.0,
+        1.0
+      ],
+      "pass_power_k_definition": "fraction of cases passing all k independent attempts",
+      "known_cost_usd": 0,
+      "unknown_cost_attempts": 0,
+      "cost_per_success_usd": 0.0,
+      "reserved_cost_per_success_usd": 0.0,
+      "p95_latency_ms": 17.839013095363036,
+      "categories": {
+        "schema": {
+          "pass_rate": 1.0,
+          "ci95": [
+            1.0,
+            1.0
+          ]
+        },
+        "length": {
+          "pass_rate": 1.0,
+          "ci95": [
+            1.0,
+            1.0
+          ]
+        },
+        "invented_tool": {
+          "pass_rate": 1.0,
+          "ci95": [
+            1.0,
+            1.0
+          ]
+        },
+        "task": {
+          "pass_rate": 1.0,
+          "ci95": [
+            1.0,
+            1.0
+          ]
+        },
+        "trajectory": {
+          "pass_rate": 1.0,
+          "ci95": [
+            1.0,
+            1.0
+          ]
+        }
+      }
+    }
+  },
+  "status": "baseline_missing",
+  "origin": "Summary of the retained main-consolidation held-out run; not a fresh current-checkout evaluation.",
+  "report_sha256": "d8ea45dab2255f689126d3d6fc25c1927cdb368866d5e5f7d22740f98ed04c52"
+}

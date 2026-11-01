@@ -235,12 +235,12 @@ class LocalA2ABoundary(BaseHTTPMiddleware):
         return await call_next(request)
 
 
-def create_a2a_app(
+def agent_card(
     role: AgentRole,
     *,
     base_url: str | None = None,
-    url: str | None = None,
-) -> Starlette:
+    live: bool | None = None,
+) -> AgentCard:
     if role not in {"dispatcher", "customer_service"} and not re.fullmatch(
         r"restaurant-[a-z0-9_-]{1,80}", role
     ):
@@ -251,7 +251,7 @@ def create_a2a_app(
         else os.environ.get("DELIVERY_A2A_BASE_URL", f"http://localhost:{Settings().app_port}")
     )
     parsed = urlsplit(origin)
-    cloud = os.environ.get("DELIVERY_RUNTIME", "local") == "live"
+    cloud = os.environ.get("DELIVERY_RUNTIME", "local") == "live" if live is None else live
     if cloud and (parsed.scheme != "https" or parsed.username or parsed.query or parsed.fragment
                   or parsed.path not in {"", "/"}):
         raise ValueError("Cloud Agent Card requires an HTTPS service origin")
@@ -267,7 +267,7 @@ def create_a2a_app(
         if role.startswith("restaurant-")
         else "ADK customer service; policy-checked advice and proactive recovery tools."
     )
-    card = AgentCard(
+    return AgentCard(
         name=f"Madrid {role.replace('_', ' ')}",
         description=description,
         version="1.0.0",
@@ -307,6 +307,12 @@ def create_a2a_app(
             )
         ],
     )
+
+
+def create_a2a_app(
+    role: AgentRole, *, base_url: str | None = None, url: str | None = None,
+) -> Starlette:
+    card = agent_card(role, base_url=base_url)
     handler = DefaultRequestHandler(
         agent_executor=QueueAgentExecutor(QueuedAgentService(role, url)),
         task_store=InMemoryTaskStore(),

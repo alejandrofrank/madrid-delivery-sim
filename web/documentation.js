@@ -511,6 +511,8 @@ async function showPage(id, resetScroll = false) {
     return;
   }
   currentPage = catalogue.pages[index];
+  document.body.classList.toggle("anatomy-mode", currentPage.id === "agent-anatomy");
+  $("#agent-anatomy").hidden = currentPage.id !== "agent-anatomy";
   const version = ++renderVersion;
   $("#error").hidden = true;
   $("#document").hidden = false;
@@ -519,7 +521,9 @@ async function showPage(id, resetScroll = false) {
   $("#chapter-title").textContent = currentPage.title;
   $("#chapter-summary").textContent = currentPage.summary;
   $("#chapter-status").textContent = currentPage.status;
-  $("#review-date").textContent = `Reference review · ${catalogue.reviewed_at}`;
+  $("#review-date").textContent = currentPage.id === "agent-anatomy"
+    ? "Generated on request · dated evidence"
+    : `Reference review · ${catalogue.reviewed_at}`;
   $("#reading-time").textContent =
     `${Math.max(1, Math.ceil(currentPage.body.split(/\s+/).length / 220))} min read`;
   $("#markdown-link").href = sourceURL(currentPage.file);
@@ -545,6 +549,7 @@ async function showPage(id, resetScroll = false) {
   enhanceBlocks();
   pagination(index);
   if (currentPage.id === "overview") selectComponent("agents");
+  if (currentPage.id === "agent-anatomy") await window.AgentAnatomy.mount($("#agent-anatomy"));
   if (resetScroll) window.scrollTo({ top: 0, behavior: "instant" });
   await renderDiagrams(version);
   if (version !== renderVersion) return;
@@ -671,7 +676,7 @@ document.addEventListener("click", async (event) => {
     return;
   }
   if ($("#source-dialog").open) $("#source-dialog").close();
-  const id = url.searchParams.get("page") || "overview";
+  const id = url.searchParams.get("page") || "agent-anatomy";
   const changed = id !== currentPage?.id;
   history.pushState({}, "", url.pathname + url.search + url.hash);
   $(".sidebar").classList.remove("expanded");
@@ -690,7 +695,7 @@ window.addEventListener("popstate", async () => {
   if (!catalogue) return;
   const routeURL = location.href;
   const params = new URLSearchParams(location.search);
-  const id = params.get("page") || "overview";
+  const id = params.get("page") || "agent-anatomy";
   if (id !== currentPage?.id) await showPage(id, true);
   else if (location.hash)
     document
@@ -750,7 +755,7 @@ window.addEventListener("resize", () => {
     catalogue = await getJSON("/api/documentation");
     buildNavigation();
     await showPage(
-      new URLSearchParams(location.search).get("page") || "overview",
+      new URLSearchParams(location.search).get("page") || "agent-anatomy",
     );
     const params = new URLSearchParams(location.search);
     if (params.has("source"))
