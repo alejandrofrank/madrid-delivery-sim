@@ -248,3 +248,25 @@ def test_cancel_releases_only_remaining_units(db_url, store_run):
             (store_run, order["store"], sku),
         ).fetchone()
         assert stock["reserved"] == 0 and stock["on_hand"] == 23
+
+
+def test_finishing_a_store_shift_releases_unpicked_stock(db_url, store_world, store_run):
+    from delivery.simulation import finish_run
+
+    simulation = Simulation(store_world, db_url)
+    simulation.step(store_run, 0, 42, 0)
+    with connect(db_url) as conn:
+        assert conn.execute(
+            "SELECT sum(reserved) n FROM lab_stock WHERE run_id=%s", (store_run,)
+        ).fetchone()["n"] > 0
+    finish_run(store_run, db_url, store_enabled=True)
+    finish_run(store_run, db_url, store_enabled=True)
+    with connect(db_url) as conn:
+        assert conn.execute(
+            "SELECT sum(reserved) n FROM lab_stock WHERE run_id=%s", (store_run,)
+        ).fetchone()["n"] == 0
+        row = conn.execute(
+            "SELECT s.stage,o.status FROM store_orders s JOIN orders o "
+            "ON o.run_id=s.run_id AND o.id=s.order_id WHERE s.run_id=%s", (store_run,)
+        ).fetchone()
+        assert row == {"stage": "cancelled", "status": "unserved"}

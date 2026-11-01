@@ -39,7 +39,7 @@ from delivery.world import World, seed_locations
 STEP_SECONDS = 60
 
 
-def finish_run(run: str, url: str | None = None) -> None:
+def finish_run(run: str, url: str | None = None, *, store_enabled: bool = False) -> None:
     """Commit the final run state before exporting orders that had no worker ACK."""
     observe = active()
     returning = (
@@ -61,16 +61,17 @@ def finish_run(run: str, url: str | None = None) -> None:
             "(SELECT 1 FROM runs WHERE id=%s AND chaos_config IS NOT NULL)",
             (run, run),
         )
-        from delivery.store_agents import cancel_order
+        if store_enabled:
+            from delivery.store_agents import cancel_order
 
-        for stored in conn.execute(
-            "SELECT s.* FROM store_orders s JOIN orders o ON o.run_id=s.run_id "
-            "AND o.id=s.order_id WHERE s.run_id=%s AND o.status='unserved' "
-            "AND s.stage NOT IN ('cancelled','handed_off')", (run,)
-        ).fetchall():
-            clock = conn.execute("SELECT sim_time FROM runs WHERE id=%s",(run,)).fetchone()
-            assert clock
-            cancel_order(conn,run,stored,clock["sim_time"])
+            for stored in conn.execute(
+                "SELECT s.* FROM store_orders s JOIN orders o ON o.run_id=s.run_id "
+                "AND o.id=s.order_id WHERE s.run_id=%s AND o.status='unserved' "
+                "AND s.stage NOT IN ('cancelled','handed_off')", (run,)
+            ).fetchall():
+                clock = conn.execute("SELECT sim_time FROM runs WHERE id=%s",(run,)).fetchone()
+                assert clock
+                cancel_order(conn,run,stored,clock["sim_time"])
     try:
         for order in unserved:
             attributes: dict[str, Any] = {
@@ -517,7 +518,7 @@ class Simulation:
                 remaining = target - time.monotonic()
                 if remaining > 0:
                     time.sleep(remaining)
-            finish_run(run, self.url)
+            finish_run(run, self.url, store_enabled=bool(row["store_config"]))
         except Exception as exc:
             with connect(self.url) as conn:
                 conn.execute(

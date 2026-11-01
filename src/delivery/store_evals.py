@@ -59,7 +59,7 @@ def run_case(kind: str, seed: int, url: str) -> dict[str, Any]:
         # Ten-second physics in the store, then the unchanged city clock.
         for sim in (*range(10, 901, 10), *range(960, 1801, 60)):
             simulation.step(run, sim, seed, 0)
-        finish_run(run, url)
+        finish_run(run, url, store_enabled=True)
         with connect(url) as conn:
             order = required(
                 conn.execute(
