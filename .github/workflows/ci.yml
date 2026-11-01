@@ -54,6 +54,7 @@ jobs:
         if: always()
         with:
           name: simulation-results
+          include-hidden-files: true
           path: |
             artifacts/run-*.json
             artifacts/lab-*.json

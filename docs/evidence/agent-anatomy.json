@@ -1,0 +1,68 @@
+{
+  "schema_version": 1,
+  "verified_at": "2026-11-01T21:36:57Z",
+  "scope": "Manifest capability authority and interactive agent anatomy",
+  "head_revision": "d04d50aa168ddf546d2e893ae5c424d16413bf90",
+  "tested_pr_merge_revision": "55cb73b5a849cfdbe8cbde7b1ee4f1cd45bb92da",
+  "source_fingerprint": "6069e3338fbf93d9f0d7e53f0badb1b8adffbde97e724277c328d6121d7c7fab",
+  "source_changed_during_checks": false,
+  "ci_run": "https://github.com/alejandrofrank/madrid-delivery-sim/actions/runs/41351258460",
+  "ci_status": "success",
+  "checks": {
+    "pytest": {"passed": 998, "failed": 0, "skipped": 0, "seconds": 566.01185},
+    "ruff": "passed",
+    "mypy": {"passed": true, "source_files": 82},
+    "agent_scenarios": {"cases": 12, "repetitions": 2, "matching_hashes": true},
+    "courier_motion": {"passed": 6},
+    "browser": {
+      "agents": 9,
+      "panels": 99,
+      "viewports": ["1440x1000", "390x844", "1916x1244"],
+      "keyboard": true,
+      "source_dialog": true,
+      "agent_card": true,
+      "reduced_motion": true,
+      "finite_animation": true,
+      "failed_read_retry": true,
+      "handoff_alignment": true,
+      "no_page_overflow": true,
+      "local_receipt": ".impeccable/review/anatomy-checks.json",
+      "hosted_browser_step": "passed"
+    },
+    "infrastructure_job": "passed",
+    "javascript_syntax": "Passed with local Node and hosted browser execution; Node is unavailable inside the Python image's health-check step."
+  },
+  "evals": {
+    "development_attempts": 144,
+    "attempts_per_case": 3,
+    "arms": 6,
+    "baseline_revision": "ceac3d0c135991ed560031a394b8051cb0af44c2",
+    "gate": "no_significant_regression",
+    "chaos_recovery_policy_and_replay": "passed",
+    "qualification": "The small customer-policy arm is reported as insufficient_evidence, not proof of equivalence. The overall configured gate passes.",
+    "mode": "scripted-offline",
+    "heldout_scores": "Retained separately in heldout-release.json with their original source and date; not relabelled as a fresh evaluation."
+  },
+  "end_to_end": {
+    "seed": 42,
+    "orders": 247,
+    "delivered": 247,
+    "on_time": 247,
+    "unserved": 0,
+    "pending": 0,
+    "active": 0,
+    "synthetic_cost_per_delivery_eur": 1.6175,
+    "crash_exit_code": 73,
+    "recovered_attempt": 2,
+    "stock_conserved": true,
+    "nonnegative_available_stock": true,
+    "agent_budgets_within_caps": true
+  },
+  "review": {
+    "finish": "Initial fix disposition for missing README screenshot; same reviewer scored it resolved and returned ship at that fix scope.",
+    "documentation": "Existing DESIGN.md and design sidecar preserved; extension compared against source and screenshots.",
+    "report": ".impeccable/review/agent-anatomy-finish.md"
+  },
+  "local_note": "The slower duplicate full local run was stopped after the exact-code hosted full suite and end-to-end jobs passed. Local focused tests and browser checks also passed; the interrupted local run is not counted as a completed full run.",
+  "cost_note": "No paid model calls or cloud services were used. Operating cost is a simulation ledger, not real billing."
+}

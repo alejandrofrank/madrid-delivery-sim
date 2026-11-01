@@ -2,6 +2,45 @@
 
 Queue-driven delivery agents on Madrid streets, with Google ADK, real A2A endpoints, distributed traces, and auditable BigQuery run evidence.
 
+**[Meet the agents — interactive anatomy](http://localhost:8010/architecture)** ·
+[Read the same guide in the repository](docs/AGENT-ANATOMY.md)
+
+[![Agent team and interactive machine anatomy](docs/media/agent-anatomy.png)](http://localhost:8010/architecture)
+
+## 60 second tour
+
+Synthetic households order meals on Madrid's real street graph. Kitchens source
+ingredients, couriers deliver, and disruptions force the team to reconsider its
+plans. Open the **Architecture** workspace, choose a robot, and inspect its parts.
+
+| Agent | Its job |
+| --- | --- |
+| Household | Request a meal and decide whether a substitution is acceptable. |
+| Restaurant | Prepare a feasible meal or explain why it cannot be made. |
+| Market | Supply confirmed ingredient quantities from physical stock. |
+| Inventory | Reserve real stock without overselling. |
+| Fulfillment | Turn a reserved basket into a ready pickup. |
+| Dispatcher | Match ready orders to available couriers and recover disrupted deliveries. |
+| Courier | Accept a delivery and carry it along the planned street route. |
+| Customer service | Explain delivery problems and apply bounded refunds or escalation. |
+| Recovery judge | Review failed deliveries before another attempt. |
+
+The hard part is **reliable effects around uncertain decisions**: no overselling,
+no duplicate refunds after retries, no cooking from promised ingredients, and no
+memory leaking across orders or roles. ADK proposes through granular tools;
+scoped SQL, durable queues and authenticated A2A boundaries enforce the contract.
+Routine policies can run without a model.
+
+Verified evidence: **998 Python tests passing**, plus all **99 anatomy panels**
+checked in the browser ([verification receipt](docs/evidence/agent-anatomy.json));
+**pass^5 = 1.000 across 72 held-out cases** (360 attempts), with an all-pass
+bootstrap interval of [1, 1] in the [release receipt](docs/evidence/heldout-release.json).
+One [seeded Chaos shift](docs/evidence/a2a-chaos-local.json) delivered 71/71 orders
+at **€1.7215 synthetic operating cost per delivery** and recovered its disruption
+cohorts in **1,148–1,765 simulated seconds**, with zero lost orders. Recovery includes
+delivery completion. These are dated offline checks, not live-model quality,
+production latency or real courier prices; all-pass fixtures do not prove certainty.
+
 ![Live agent operations](docs/media/ui-demo.gif)
 
 The redesigned console spans six workspaces. Run `make setup` and open

@@ -1,0 +1,38 @@
+[
+  {
+    "antipattern": "design-system-font-size",
+    "name": "Font size outside DESIGN.md",
+    "description": "A literal font-size is off the type ramp documented in DESIGN.md typography. Use a documented size step or update the design system if the new step is intentional.",
+    "severity": "advisory",
+    "category": "quality",
+    "file": "/mnt/wsl/docker-desktop-bind-mounts/Ubuntu/07df76e93ac5045d43373466fa2b980b6570292465b4a6150f07e29cc2b47fb8/web/agent-anatomy.css",
+    "line": 9,
+    "snippet": "font-size: 18px is off the DESIGN.md type ramp",
+    "advisory": true,
+    "ignoreValue": "18px"
+  },
+  {
+    "antipattern": "design-system-font-size",
+    "name": "Font size outside DESIGN.md",
+    "description": "A literal font-size is off the type ramp documented in DESIGN.md typography. Use a documented size step or update the design system if the new step is intentional.",
+    "severity": "advisory",
+    "category": "quality",
+    "file": "/mnt/wsl/docker-desktop-bind-mounts/Ubuntu/07df76e93ac5045d43373466fa2b980b6570292465b4a6150f07e29cc2b47fb8/web/agent-anatomy.css",
+    "line": 95,
+    "snippet": "font-size: 16px is off the DESIGN.md type ramp",
+    "advisory": true,
+    "ignoreValue": "16px"
+  },
+  {
+    "antipattern": "design-system-color",
+    "name": "Color outside DESIGN.md",
+    "description": "A literal color is outside the DESIGN.md palette and sidecar tonal ramps. This may be legitimate, but it should be an intentional design-system addition rather than drift.",
+    "severity": "advisory",
+    "category": "quality",
+    "file": "/mnt/wsl/docker-desktop-bind-mounts/Ubuntu/07df76e93ac5045d43373466fa2b980b6570292465b4a6150f07e29cc2b47fb8/web/documentation.html",
+    "line": 0,
+    "snippet": "text color rgb(0, 0, 0) on span \"Search chapters\" is outside DESIGN.md colors",
+    "advisory": true,
+    "ignoreValue": "rgb(0, 0, 0)"
+  }
+]
