@@ -1,0 +1,23 @@
+{
+  "source": "Actual local browser recording; scripts/record_store_demo.cjs",
+  "run": "a07f8e61-ac4a-4246-9d55-42e50d56bd0a",
+  "seed": 42,
+  "chaos": "robot_breakdown",
+  "delivered": true,
+  "frame_count": 21,
+  "frame_interval_ms": 1000,
+  "endpoint_holds_ms": [
+    1500,
+    2500
+  ],
+  "size": [
+    1080,
+    760
+  ],
+  "render": {
+    "calls": 167,
+    "triangles": 316195
+  },
+  "asset_credit": "NVIDIA SimReady, converted by codepawl, CC BY 4.0",
+  "asset_manifest": "web/vendor/simready/manifest.json"
+}

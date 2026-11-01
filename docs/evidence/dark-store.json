@@ -1,0 +1,81 @@
+{
+  "recorded_date": "2026-11-02",
+  "scope": "Local deterministic offline A2A SDK integration; not live-model quality",
+  "fixture_hash": "b8a3358358c85d1513fb7f4ba6499afebd2f34cbdbcd27b5869f6e2e1bd76084",
+  "rows": [
+    {
+      "case": "blocked_aisle",
+      "attempts": 2,
+      "delivered": true,
+      "dock_recovery_seconds": 160,
+      "delivery_seconds": 447,
+      "stock_conserved": true,
+      "reserved": 0,
+      "dead_events": 0,
+      "model_calls": 0,
+      "model_cost_usd": 0.0,
+      "repeats_match": true
+    },
+    {
+      "case": "shelf_out_of_stock",
+      "attempts": 2,
+      "delivered": true,
+      "dock_recovery_seconds": 200,
+      "delivery_seconds": 487,
+      "stock_conserved": true,
+      "reserved": 0,
+      "dead_events": 0,
+      "model_calls": 0,
+      "model_cost_usd": 0.0,
+      "repeats_match": true
+    },
+    {
+      "case": "robot_breakdown",
+      "attempts": 2,
+      "delivered": true,
+      "dock_recovery_seconds": 190,
+      "delivery_seconds": 477,
+      "stock_conserved": true,
+      "reserved": 0,
+      "dead_events": 0,
+      "model_calls": 0,
+      "model_cost_usd": 0.0,
+      "repeats_match": true
+    },
+    {
+      "case": "late_restock_truck",
+      "attempts": 2,
+      "delivered": true,
+      "dock_recovery_seconds": 160,
+      "delivery_seconds": 447,
+      "stock_conserved": true,
+      "reserved": 0,
+      "dead_events": 0,
+      "model_calls": 0,
+      "model_cost_usd": 0.0,
+      "repeats_match": true
+    }
+  ],
+  "browser": {
+    "passed": true,
+    "run": "04cdaaf5-d7ef-444a-9134-63f7e5253099",
+    "lazy": true,
+    "keyboard": true,
+    "mobile": true,
+    "fallback": true,
+    "delivered": true,
+    "errors": []
+  },
+  "render": {
+    "calls": 167,
+    "triangles": 316195
+  },
+  "validation": {
+    "focused_regressions": "50 passed",
+    "anatomy_panels": 99,
+    "terraform_tests": 7,
+    "ruff": "passed",
+    "mypy_modules": 94,
+    "full_suite": "Pending final PR gate"
+  }
+}

@@ -23,7 +23,7 @@ jobs:
   test:
     runs-on: ubuntu-latest
     # The 42-courier network expands full-day route candidates; retain every check.
-    timeout-minutes: 30
+    timeout-minutes: 45
     env:
       LOCAL_UID: "1001"
       LOCAL_GID: "1001"
@@ -44,6 +44,7 @@ jobs:
           npm ci --ignore-scripts
           node node_modules/playwright/cli.js install --with-deps chromium
           node scripts/check_agent_anatomy.cjs
+          node scripts/check_store_view.cjs
       - name: Full seeded day without paid calls
         run: docker compose exec -T app delivery demo --wall-seconds 0
       - name: Verify demo invariants
@@ -61,6 +62,7 @@ jobs:
             artifacts/health/*.json
             artifacts/health/runs/*.json
             .impeccable/review/anatomy-checks.json
+            artifacts/dark-store/browser-checks.json
       - name: Show service logs after failure
         if: failure()
         run: docker compose logs --no-color --tail 150 app postgres redis
@@ -116,6 +118,8 @@ jobs:
         run: python3 scripts/eval_agents.py --suite adk --repeat 3 --record-only
       - name: Measure seeded A2A recovery twice with policy gates
         run: python3 scripts/eval_chaos.py
+      - name: Measure physical store recovery twice over A2A
+        run: python3 scripts/eval_stores.py
       - name: Find stored artifact from the PR's exact main base
         if: github.event_name == 'pull_request'
         id: baseline
@@ -161,10 +165,10 @@ jobs:
             args+=(--baseline artifacts/evals/main/candidate.json --baseline-revision "$BASELINE_REVISION")
             args+=(--thresholds artifacts/evals/main/eval-gate.json)
           fi
-          python3 scripts/eval_gate.py --candidate artifacts/evals/candidate.json --chaos-candidate artifacts/evals/chaos.json "${args[@]}"
+          python3 scripts/eval_gate.py --candidate artifacts/evals/candidate.json --chaos-candidate artifacts/evals/chaos.json --store-candidate artifacts/evals/stores.json "${args[@]}"
       - name: Gate main recovery evidence before storing a baseline
         if: github.ref == 'refs/heads/main'
-        run: python3 scripts/eval_gate.py --candidate artifacts/evals/candidate.json --chaos-candidate artifacts/evals/chaos.json
+        run: python3 scripts/eval_gate.py --candidate artifacts/evals/candidate.json --chaos-candidate artifacts/evals/chaos.json --store-candidate artifacts/evals/stores.json
       - name: Red or green PR evaluation comment
         if: always() && github.event_name == 'pull_request'
         uses: actions/github-script@v7
