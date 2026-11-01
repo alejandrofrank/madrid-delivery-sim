@@ -1,0 +1,9 @@
+{
+  "version": 1,
+  "seed": 42,
+  "mode": "deterministic-policy-over-a2a",
+  "cases": ["blocked_aisle", "shelf_out_of_stock", "robot_breakdown", "late_restock_truck"],
+  "criteria": {"max_dock_recovery_seconds": 900, "max_lost_orders": 0,
+    "max_late_orders": 0, "stock_conservation": true, "max_model_calls": 0},
+  "description": "Each scenario executes twice over official A2A. Stock, custody, receipt timing, delivery and output equality are checked from database outcomes."
+}

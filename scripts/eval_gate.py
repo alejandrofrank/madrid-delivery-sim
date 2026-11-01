@@ -17,6 +17,7 @@ def main() -> int:
     parser.add_argument("--baseline", type=Path)
     parser.add_argument("--baseline-revision")
     parser.add_argument("--chaos-candidate", type=Path)
+    parser.add_argument("--store-candidate", type=Path)
     parser.add_argument("--thresholds", type=Path, default=ROOT / "config/eval-gate.json")
     parser.add_argument("--output", type=Path, default=ROOT / "artifacts/evals/gate.json")
     args = parser.parse_args()
@@ -47,6 +48,13 @@ def main() -> int:
             result["note"] += " Chaos recovery, policy and deterministic replay: " + (
                 "passed." if valid else "FAILED."
             )
+            if not valid:
+                result["status"] = "regression"
+        if args.store_candidate:
+            from delivery.store_evals import validate as validate_store
+            valid = validate_store(json.loads(args.store_candidate.read_text()))
+            result["store_passed"] = valid
+            result["note"] += " Store recovery and policy: " + ("passed." if valid else "FAILED.")
             if not valid:
                 result["status"] = "regression"
     except (ValueError, KeyError, TypeError, OSError) as exc:
