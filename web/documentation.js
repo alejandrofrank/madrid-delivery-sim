@@ -192,8 +192,8 @@ function slug(text) {
     .replace(/\s+/g, "-");
 }
 
-function rewriteLinks(page) {
-  reader.querySelectorAll("a").forEach((link) => {
+function rewriteLinks(page, root = reader) {
+  root.querySelectorAll("a").forEach((link) => {
     const href = link.getAttribute("href") || "";
     if (href.startsWith("#")) {
       link.href = pageURL(page.id, href);
@@ -280,8 +280,8 @@ function buildHeadings() {
     .forEach((heading) => headingObserver.observe(heading));
 }
 
-function enhanceBlocks() {
-  reader.querySelectorAll("table").forEach((table) => {
+function enhanceBlocks(root = reader) {
+  root.querySelectorAll("table").forEach((table) => {
     const wrap = element("div", undefined, "table-wrap");
     wrap.tabIndex = 0;
     wrap.setAttribute("role", "region");
@@ -289,7 +289,7 @@ function enhanceBlocks() {
     table.replaceWith(wrap);
     wrap.append(table);
   });
-  reader.querySelectorAll("pre").forEach((pre) => {
+  root.querySelectorAll("pre").forEach((pre) => {
     const code = pre.querySelector("code");
     if (!code || code.classList.contains("language-mermaid")) return;
     const wrap = element("div", undefined, "code-block");
@@ -316,10 +316,9 @@ function loadDiagrams() {
   return diagramManifest;
 }
 
-async function renderDiagrams(version) {
-  const blocks = Array.from(reader.querySelectorAll("code.language-mermaid"));
+async function renderDiagrams(version, root = reader, page = currentPage) {
+  const blocks = Array.from(root.querySelectorAll("code.language-mermaid"));
   if (!blocks.length) return;
-  const page = currentPage;
   const cards = blocks.map((block, index) => {
     const source = block.textContent;
     const card = element("figure", undefined, "diagram-card");
@@ -495,6 +494,64 @@ function pagination(index) {
     nav.append(link);
   });
 }
+
+// Anatomy is a complete reading surface. Related references stay beside the robot.
+window.AgentReference = {
+  mount(host, initialId) {
+    function show(id, hash = "") {
+      const page = catalogue?.pages.find(p => p.id === id);
+      if (!page) {
+        host.replaceChildren(element("p", "This reference is unavailable. Close and reopen the component to retry."));
+        return;
+      }
+      const article = element("article", undefined, "anatomy-inline-article");
+      article.innerHTML = DOMPurify.sanitize(marked.parse(page.body, {gfm: true}), {
+        USE_PROFILES: {html: true},
+        FORBID_TAGS: ["style", "iframe", "form", "input", "button", "img"],
+        FORBID_ATTR: ["style"],
+      });
+      article.querySelector("h1")?.remove();
+      rewriteLinks(page, article);
+      const heading = element("h4", page.title);
+      const jump = element("select");
+      jump.setAttribute("aria-label", "Jump to reference section");
+      const first = element("option", "Choose a section"); first.value = ""; jump.append(first);
+      const counts = new Map();
+      const sections = new Map();
+      article.querySelectorAll("h2,h3").forEach((h, index) => {
+        const base = slug(h.textContent), count = counts.get(base) || 0;
+        counts.set(base, count + 1);
+        const key = base + (count ? "-" + count : "");
+        h.id = "inline-reference-" + index;
+        sections.set(key, h);
+        const option = element("option", h.textContent); option.value = key; jump.append(option);
+      });
+      function scroll(key) { sections.get(key)?.scrollIntoView({block: "nearest", behavior: "instant"}); }
+      jump.onchange = () => scroll(jump.value);
+      host.replaceChildren(heading, jump, article);
+      if (id !== initialId) {
+        const back = element("button", "Back to component reference", "anatomy-reference-back");
+        back.onclick = () => show(initialId);
+        host.prepend(back);
+      }
+      article.onclick = event => {
+        const a = event.target.closest("a");
+        if (!a || event.ctrlKey || event.metaKey || event.shiftKey || event.altKey || event.button !== 0) return;
+        const url = new URL(a.href);
+        if (a.dataset.source || url.searchParams.has("source")) return;
+        if (url.origin !== location.origin || url.pathname !== "/architecture") return;
+        event.preventDefault(); event.stopPropagation();
+        const target = url.searchParams.get("page") || initialId;
+        if (target === id) scroll(decodeURIComponent(url.hash.slice(1)));
+        else show(target, url.hash);
+      };
+      enhanceBlocks(article);
+      renderDiagrams(renderVersion, article, page);
+      if (hash) scroll(decodeURIComponent(hash.slice(1)));
+    }
+    show(initialId);
+  },
+};
 
 async function showPage(id, resetScroll = false) {
   window.AgentAnatomy?.unmount();

@@ -264,7 +264,9 @@
         const dl=node("dl",undefined,"anatomy-numbers");
         entries.forEach(([label,value])=>{const row=node("div");row.append(node("dt",label.replaceAll("_"," ")),node("dd",String(value)));dl.append(row);});return dl;
       }
-      const entries=Object.entries(panel.numbers);inspector.append(numbers(entries.slice(0,2)));
+      const entries=Object.entries(panel.numbers);
+      if(panel.reference){const memory=node("div");inspector.append(memory);window.AgentMemory.mount(memory,panel.reference);}
+      else inspector.append(numbers(entries.slice(0,2)));
       const technical=node("details",undefined,"anatomy-technical");technical.append(node("summary","Details & source"));
       technical.append(numbers(entries.slice(2)));
       const details=node("div",undefined,"anatomy-explanation");panel.details.forEach(text=>details.append(node("p",text)));technical.append(details);
@@ -285,8 +287,12 @@
       }
       const links=node("nav",undefined,"anatomy-sources");links.setAttribute("aria-label","Evidence for this part");
       panel.sources.forEach(path=>{const link=sourceLink(path);link.textContent=path.split("/").slice(-2).join("/");link.title=path;links.append(link);});
-      const chapter=node("a","Read the docs chapter");chapter.href="/architecture?page="+panel.chapter;links.append(chapter);technical.append(links);
-      inspector.append(technical);
+      technical.append(links);
+      const reference=node("details",undefined,"anatomy-full-reference");
+      reference.append(node("summary","Full reference \u00b7 read here"));
+      const article=node("div");reference.append(article);
+      reference.ontoggle=()=>{if(reference.open&&!article.childElementCount)window.AgentReference.mount(article,panel.chapter);};
+      inspector.append(technical,reference);
     }
     function fallback(){
       if(disposed)return;
