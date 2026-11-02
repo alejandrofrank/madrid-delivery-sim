@@ -21,8 +21,8 @@ window.StoreUI=(()=>{
   $('store-demo').disabled=true;$('store-follow-note').textContent='Starting a seeded store order…';
   try{
    const result=await hooks.api('/api/stores/demo',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({seed:42,wall_seconds:60,chaos:$('store-demo-chaos').checked})});
+   await hooks.selectRun(result.id);
    run=result.id;storeId=result.store;orderId=result.order;follow=orderId;
-   await hooks.selectRun(run);
    await refresh();
    $("chaos-panel").open=false;
    await open(storeId,orderId);

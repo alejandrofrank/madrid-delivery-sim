@@ -5,7 +5,10 @@ const base=process.env.STORE_UI_BASE||'http://localhost:8010';
 (async()=>{
  const browser=await chromium.launch({headless:true,args:['--enable-unsafe-swiftshader','--use-angle=swiftshader']});
  const path='artifacts/dark-store';await fs.mkdir(path,{recursive:true});
- let page=await browser.newPage({viewport:{width:1916,height:1244}});
+ const page=await browser.newPage({viewport:{width:1916,height:1244}});
+ // CI asserts rendered geometry and behavior. Routine screenshots are local
+ // review evidence, not image comparisons; software-GPU readback can stall CI.
+ const capture=(tab,options)=>process.env.CI?Promise.resolve():tab.screenshot(options);
  const errors=[],requests=[];page.on('pageerror',e=>errors.push(e.message));page.on('request',r=>requests.push(r.url()));
  try{
   await page.goto(base+'/');await page.locator('#store-demo').waitFor();
@@ -45,7 +48,7 @@ const base=process.env.STORE_UI_BASE||'http://localhost:8010';
   await workerLabel.focus();await page.keyboard.press('Enter');
   assert.equal(await workerLabel.getAttribute('aria-pressed'),'true');
   await page.locator('#store-fit').click();
-  await page.screenshot({path:path+'/store-desktop.png',fullPage:false});
+  await capture(page,{path:path+'/store-desktop.png',fullPage:false});
   await canvas.focus();await page.keyboard.press('ArrowLeft');await page.keyboard.press('+');
 
   // Losing a graphics context must retain the live floor plan and order controls.
@@ -61,7 +64,7 @@ const base=process.env.STORE_UI_BASE||'http://localhost:8010';
   // entire container to be stable before scrolling; actual controls remain checked.
   await page.locator('#store-view').evaluate(el=>el.scrollIntoView({behavior:'instant',block:'start'}));
   await page.waitForFunction(()=>{const el=document.querySelector('#store-stage canvas');if(!el?.dataset.overviewBounds)return false;const bounds=JSON.parse(el.dataset.overviewBounds);return bounds.x<=.91&&bounds.y<=.91;});
-  await page.screenshot({path:path+'/store-mobile.png',fullPage:false});
+  await capture(page,{path:path+'/store-mobile.png',fullPage:false});
   assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth));
   assert(await page.evaluate(()=>document.querySelector('#store-incident').getBoundingClientRect().bottom<=document.querySelector('.store-footer').getBoundingClientRect().top),'Mobile disruption action must remain above the footer');
   await page.setViewportSize({width:1280,height:900});
@@ -73,7 +76,7 @@ const base=process.env.STORE_UI_BASE||'http://localhost:8010';
   await fallback.locator('#store-open').click();
   await fallback.locator('#store-floor').waitFor({state:'visible'});
   assert.equal(await fallback.locator('#store-stage canvas').count(),0);
-  await fallback.screenshot({path:path+'/store-fallback.png'});
+  await capture(fallback,{path:path+'/store-fallback.png'});
   await fallback.locator('#store-back').focus();await fallback.keyboard.press('Escape');
   assert(!(await fallback.locator('#store-view').isVisible()));
   await fallback.close();
@@ -85,12 +88,19 @@ const base=process.env.STORE_UI_BASE||'http://localhost:8010';
   await missing.close();
   // A separate, untouched 60-second demo checks automatic handoff. All heavy
   // screenshots and resizing are finished before following this fresh live order.
-  // A new browser context also isolates the inspection request's long-running
-  // HTTP connection from the untouched public-demo request.
-  await page.close();page=await browser.newPage({viewport:{width:1280,height:900}});
-  page.on('pageerror',e=>errors.push(e.message));
-  await page.goto(base+'/');await page.locator('#store-demo-chaos').check();
-  await page.locator('#store-demo').click();
+  await page.locator('#store-back').click();
+  // Hold an old run response across selection of the new run. It must not
+  // reset order following or replace the newly selected run's store data.
+  const oldPending=page.waitForRequest(request=>request.url()===base+'/api/state?run='+inspectionRun);
+  let releaseOld;
+  const holdOld=new Promise(resolve=>{releaseOld=resolve;});
+  await page.route('**/api/state?run='+inspectionRun,async route=>{
+   const response=await route.fetch();await holdOld;
+   await route.fulfill({response});
+  },{times:1});
+  await oldPending;
+  const started=page.waitForResponse(response=>response.url().endsWith('/api/stores/demo')&&response.request().method()==='POST');
+  await page.locator('#store-demo').click();await started;releaseOld();
   await page.locator('#store-follow[aria-pressed="true"]').waitFor();
   const run=new URL(page.url()).searchParams.get('run');assert(run&&run!==inspectionRun);
   const beforeHandoff=await (await page.request.get(base+'/api/runs/'+run+'/stores')).json();
@@ -107,7 +117,7 @@ const base=process.env.STORE_UI_BASE||'http://localhost:8010';
   const timeline=await page.locator('#chaos-timeline').innerText();
   assert(timeline.includes('Robot breakdown'),'Store incidents must have readable city timeline labels');
   assert(!timeline.includes('undefined'));
-  await page.screenshot({path:path+'/store-delivered.png',fullPage:false});
+  await capture(page,{path:path+'/store-delivered.png',fullPage:false});
   const trace=await browser.newPage();
   await trace.goto(base+'/agent-traces?source=madrid&run='+run+'&order=DS-0001');
   await trace.getByText('Order DS-0001',{exact:false}).first().waitFor();
