@@ -15,6 +15,9 @@ MANIFEST = ROOT / "config/documentation.json"
 LINK = re.compile(r"\[[^\]]*\]\(([^\s)]+)(?:\s+[^)]*)?\)")
 PUBLIC_PREFIXES = ("src/", "tests/", "sql/", "config/", "scripts/", "docs/evidence/")
 PUBLIC_FILES = {
+    "evals/memory/recall.json",
+    "infra/production/live.tf",
+    "infra/production/vector.tf",
     "compose.yaml",
     "compose.yml",
     "compose.gcp-ai.yml",

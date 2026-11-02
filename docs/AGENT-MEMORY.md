@@ -1,4 +1,4 @@
-# Agent memory: implementation and next steps
+# Agent memory: records, recall and storage
 
 The durable memory boundary is implemented in Python/Postgres. The optional
 [restaurant ADK adapter](ADK-RESTAURANT.md) uses this typed recall through a scoped
@@ -51,8 +51,8 @@ the capacity limit itself is unchanged.
 them from the authenticated session and current leased event. Supermarkets recall
 only the current ingredient request; couriers only the addressed assignment
 attempt. Results include source events, observation/expiry times and revision IDs,
-with a maximum of 16 facts and 8 KiB for the full result envelopes. These are exact
-indexed filters, not semantic/vector search. A newer expired revision suppresses
+with a maximum of 16 facts and 8 KiB for the full result envelopes. These canonical reads use exact indexed filters. An explicit semantic profile
+adds ranking after this authorization step and rechecks SQL before returning facts. A newer expired revision suppresses
 older revisions even if their original TTL has not elapsed. Repeatable-read and
 serializable transactions are rejected so old snapshots cannot revive history.
 
@@ -88,13 +88,15 @@ with these bounded choices:
 | `text` | Concise factual lines with source, version and expiry references | A few observations fit naturally in a short prompt |
 | `json` | Compact structured facts with a scope envelope and provenance | A small machine-readable record is sufficient |
 | `typed` | Canonical typed fact envelopes | Decisions need explicit revisions, relationships and expiry |
+| `semantic` | Authorized facts ranked by meaning, returned as typed envelopes | Relevant prior observations need ranking within the same order |
 
 All modes keep canonical typed writes and revision history for audit. `none`
 disables recall, not evidence retention. Text and JSON are projections of scoped
 facts, not an unrestricted scratchpad or a second source of truth. The model
 cannot pick a foreign namespace, write arbitrary JSON, fetch the whole chat or
-turn a memory statement into inventory authority. No vector database, embeddings,
-LLM summarizer or managed Memory Bank is provisioned by selecting a mode.
+turn a memory statement into inventory authority. Selecting a mode does not provision infrastructure. Semantic mode needs the
+packaged local embedding model and pgvector, or explicitly configured Vertex
+Vector Search. No summarizer or managed Memory Bank is used.
 
 Profiles cap the number of facts (1–8), complete UTF-8 representation bytes
 (256–8,192), and maximum fact lifetime (60–86,400 simulated seconds). Defaults are
@@ -114,7 +116,88 @@ Sources: [memory profile and projections](../src/delivery/memory_profiles.py),
 [database profile enforcement](../sql/migrations/024_agent_memory_modes.sql),
 [profile and isolation checks](../tests/test_memory_profiles.py).
 
-## Current profile verification
+## What a memory is
+
+A memory is a row in PostgreSQL's `agent_memory_facts`, with typed identity and
+scope columns and a `body` stored as JSONB. It is not a CSV, a separate file per
+agent or an unrestricted chat transcript. `agent_memory_types` holds the accepted
+body schemas. The `agent_memory_current` view selects the latest revision.
+The Anatomy storage tank renders a synthetic example for the selected role,
+validates its body with the real schema, and formats each view with the actual
+`project_memory` function. It never reads private run memory.
+
+Scope (run, store/entity, role, context and subject) and history (row ID, version,
+source event, observation time, expiry and previous revision) are server assigned.
+`fact_id` in recall corresponds to the SQL row's `id`. Simulation seconds govern
+expiry. One JSONB body can occupy at most 2,048 SQL-serialized bytes; this is
+distinct from the whole recall envelope's 8 KiB limit. Role manifests separately
+cap live entries and body bytes across the entity.
+
+## Semantic recall and the core
+
+The worker first gets canonical candidates through its fenced SQL recall.
+Semantic mode embeds the query and those candidates locally using
+`BAAI/bge-small-en-v1.5` (384 dimensions), then ranks only that authorized set.
+Queries are bounded to 512 UTF-8 bytes and the candidate set to eight facts.
+The SQL gate runs again after ranking: invented, foreign, stale or expired IDs
+cannot become agent input. This costs two fenced memory reads, so both tool
+slots must be available. Missing dependencies and invalid embeddings fail closed.
+
+An ADK restaurant receives the selected projection through its scoped tool
+response. Deterministic policies retain canonical facts for decision provenance;
+selecting a profile does not turn them into model-driven agents. The customer
+service classifier has fresh complaint sessions, no persistent recall contract,
+and durable inference receipts for billing/idempotency. Its chaos turns see only
+affected-order facts. Repeated customer complaints across different orders are
+**not** supported by this memory scope.
+
+The three checked-in recall cases exercise repeated reservation, stock refusal
+and expiry within one order, against a no-memory baseline. Tests cover real local
+embeddings/pgvector and isolation. Vertex HTTP payloads and filters use a mock;
+there is no live Vertex quality benchmark or published memory-specific pass-rate,
+latency or cost receipt. Audit includes backend, model, query hash and returned
+fact IDs. Zero paid embedding API calls does not imply free infrastructure.
+
+## Local and Google Cloud storage
+
+Locally, Compose's `postgres-data` volume retains canonical facts. The optional
+`agent_semantic_vectors` cache stores JSONB numeric arrays keyed by fact ID and
+model; SQL casts them to pgvector for exact cosine ranking. It is not a global
+unfiltered nearest-neighbor index.
+
+The optional GCP live path keeps canonical facts in Cloud SQL PostgreSQL 17.
+Cloud Run uses scoped database logins and role service accounts. Terraform requires
+`active` and `enable_live` for storage, plus `live_ready` after migrations, logins
+and secret versions before starting services.
+
+With `enable_vector_search`, Vertex stores 384-number vectors, model-prefixed
+fact IDs, opaque scope/model hashes and expiry metadata. No raw fact body or
+query text is sent to Vertex; the query vector is sent. Embeddings are derived
+data, and hashes are filters rather than encryption. The public-network endpoint
+requires authenticated API calls through Application Default Credentials.
+Terraform grants the configured api, restaurant and dispatcher identities
+bounded index-update/query permissions.
+
+Cloud SQL and the single-replica Vertex deployment have idle costs. The public
+replay needs neither. `active=false` removes these resources; documentation never
+starts them or claims a deployment is running. The lab Terraform currently
+disables SQL backups and deletion protection. TTL removes recall eligibility,
+not history or Vertex datapoints. There is no automatic Vertex TTL deletion or
+archival pipeline. Teardown can remove retained audit data.
+
+Implementation: [typed contracts](../src/delivery/typed_memory.py),
+[generated public reference](../src/delivery/memory_reference.py),
+[scoped runtime](../src/delivery/agent_runtime.py),
+[ADK tool projection](../src/delivery/adk_restaurant.py),
+[typed SQL](../sql/migrations/015_typed_memory.sql),
+[semantic interface](../src/delivery/semantic_memory.py),
+[semantic SQL](../sql/migrations/031_semantic_memory.sql),
+[Cloud SQL and live workers](../infra/production/live.tf),
+[Vertex infrastructure](../infra/production/vector.tf),
+[semantic tests](../tests/test_semantic_memory.py),
+[recall cases](../evals/memory/recall.json).
+
+## Historical profile verification
 
 Verified 2026-10-29: 38 memory-profile checks passed, including all four views,
 mixed-scope rejection, byte/fact bounds, TTL clamping, retained history, legacy
@@ -171,8 +254,8 @@ business outcomes.
 
 ## Next slices
 
-1. **Recall evaluation.** Measure this exact-filter baseline before comparing
-   local full-text search or optional local embeddings/pgvector. Jev ingredient
+1. **Broader recall evaluation.** Extend the implemented three-case local
+   semantic-recall comparison to more roles and measured model outcomes. Jev ingredient
    search is a separate capability, not a memory search engine. New fact schemas
    need reviewed migrations and compatibility tests, not edits to old records.
 2. **Small handoff records.** Queue an explicit brief with the order, current
