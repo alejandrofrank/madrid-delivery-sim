@@ -265,13 +265,13 @@ def anatomy_data() -> dict[str, Any]:
                 sources=[manifest],
             ),
             "persona": dict(
-                summary="SOUL describes behavior; it never grants permissions.",
+                summary="Defines the agent's character and working style, within its permissions.",
                 details=[role.soul.strip()],
                 numbers={"Permission grants from SOUL": 0},
                 sources=[soul],
             ),
             "tools": dict(
-                summary="Each tool performs one bounded action inside this role's scope.",
+                summary="Uses approved tools to act, with each action limited by its role.",
                 details=tool_details or ["No business tools in this profile."],
                 numbers={
                     "Manifest tool ceiling": len(role.tools),
@@ -280,7 +280,11 @@ def anatomy_data() -> dict[str, Any]:
                 sources=[manifest, "src/delivery/agent_runtime.py", "src/delivery/chaos_agents.py"],
             ),
             "memory": dict(
-                summary="Recall is scoped evidence, never shared unrestricted chat.",
+                summary=(
+                    "Uses only the current complaint's context; it keeps no long-term recall."
+                    if name == "customer_service"
+                    else "Recalls relevant facts within its permitted role and order scope."
+                ),
                 details=memory_details,
                 numbers=(
                     {"Persistent classifier recall": 0}
@@ -290,7 +294,7 @@ def anatomy_data() -> dict[str, Any]:
                 sources=["src/delivery/memory_profiles.py", "src/delivery/semantic_memory.py"],
             ),
             "policy": dict(
-                summary="The model may propose; scoped code validates every effect.",
+                summary="Checks every proposed action against permissions and policy.",
                 details=policy_details,
                 numbers=policy_numbers,
                 sources=[
@@ -300,7 +304,7 @@ def anatomy_data() -> dict[str, Any]:
                 ],
             ),
             "limits": dict(
-                summary="Work stops when the reserved event, tool or model budget runs out.",
+                summary="Stops work when its event, tool or model budget runs out.",
                 details=[
                     "Shown are checked-in defaults, not a running agent's remaining "
                     "balance. Supply dispatch can use a bounded run profile; ADK "
@@ -322,9 +326,9 @@ def anatomy_data() -> dict[str, Any]:
             ),
             "protocols": dict(
                 summary=(
-                    "A2A advertises a typed command boundary for this role."
+                    "A2A lets this agent exchange structured requests with other agents."
                     if card
-                    else "This role cooperates through the durable queue; it has no A2A server."
+                    else "Shares work through queued events; this role has no A2A server."
                 ),
                 details=[
                     (
@@ -350,7 +354,7 @@ def anatomy_data() -> dict[str, Any]:
                 card=card,
             ),
             "events": dict(
-                summary="Typed inputs and outputs make handoffs inspectable and retryable.",
+                summary="Receives work, passes results on and leaves a record of each handoff.",
                 details=[
                     "Incoming: " + ", ".join(accepted),
                     "Outgoing: " + ", ".join(emitted),
@@ -362,10 +366,10 @@ def anatomy_data() -> dict[str, Any]:
             ),
             "evals": dict(
                 summary=(
-                    "Recorded held-out results cover this role's ADK contracts."
+                    "Recorded tests check how this role follows its ADK contracts."
                     if eval_rows
-                    else "Deterministic workflow coverage; no role-specific "
-                    "held-out ADK score is recorded."
+                    else "Tested through deterministic workflows; no separate "
+                    "held-out ADK score is recorded for this role."
                 ),
                 details=eval_details,
                 numbers={"Recorded Python suite passes": verified["checks"]["pytest"]["passed"]},
@@ -376,7 +380,7 @@ def anatomy_data() -> dict[str, Any]:
                 ],
             ),
             "environment": dict(
-                summary="Runs locally in the Python service with scoped PostgreSQL state.",
+                summary="Runs in the local simulation, with its data kept in PostgreSQL.",
                 details=[
                     "Compose supplies the application, PostgreSQL and Redis. "
                     "The default demonstration makes no paid model calls.",

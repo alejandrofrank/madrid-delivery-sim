@@ -25,7 +25,7 @@ export function createAgentScene(host, {onPart, onFailure, buttons}) {
   const camera=new THREE.PerspectiveCamera(34,1,.1,60);
   const controls=new OrbitControls(camera,canvas);
   controls.enablePan=false; controls.enableDamping=false;
-  controls.minDistance=4; controls.maxDistance=15;
+  controls.minDistance=4; controls.maxDistance=20;
   controls.minPolarAngle=.45; controls.maxPolarAngle=1.55;
   controls.enableZoom=false; // Page scrolling remains native; explicit buttons/keys zoom.
   const resources=new Set(), parts=new Map(), root=new THREE.Group(), rig=new THREE.Group();
@@ -190,21 +190,44 @@ export function createAgentScene(host, {onPart, onFailure, buttons}) {
     if(obj.isMesh){obj.material=obj.material.clone();resources.add(obj.material);ownedMaterials.add(obj.material);
       obj.userData.originalEmissive=obj.material.emissive.clone();obj.userData.originalIntensity=obj.material.emissiveIntensity;}
   });
-  let disposed=false,selected=null,hovered=null,motion=true,visible=true,tween=null,last=0,clock=0;
+  let disposed=false,selected=null,hovered=null,motion=true,visible=true,last=0,clock=0;
   let dirty=true,frames=0,totalMs=0,fps=30,raf=0,viewWidth=0,viewHeight=0;
-  const baseTarget=new THREE.Vector3(0,2.05,0),basePosition=new THREE.Vector3(5.6,3.7,8.6);
-  function go(position,target){
-    tween={from:camera.position.clone(),to:position.clone(),fromTarget:controls.target.clone(),target:target.clone(),at:performance.now()};
-    if(reduced.matches){camera.position.copy(position);controls.target.copy(target);tween=null;}
-    dirty=true;
+  const bodyBox=new THREE.Box3().setFromObject(rig);
+  const baseTarget=bodyBox.getCenter(new THREE.Vector3());
+  const baseDirection=new THREE.Vector3(5.6,1.65,8.6).normalize();
+  const basePosition=baseTarget.clone().addScaledVector(baseDirection,10);
+  const corners=box=>{
+    const points=[];
+    for(const x of [box.min.x,box.max.x])for(const y of [box.min.y,box.max.y])
+      for(const z of [box.min.z,box.max.z])points.push(new THREE.Vector3(x,y,z));
+    return points;
+  };
+  // Fit the actual body, excluding the floor, for this orbit and viewport.
+  // Selection never changes the camera; resizing and orbiting retain a safe margin.
+  function fitFrame(exact=false){
+    scene.updateMatrixWorld(true);
+    const direction=camera.position.clone().sub(baseTarget).normalize();
+    const right=new THREE.Vector3().crossVectors(camera.up,direction).normalize();
+    const up=new THREE.Vector3().crossVectors(direction,right);
+    const vertical=Math.tan(THREE.MathUtils.degToRad(camera.fov)/2),horizontal=vertical*camera.aspect;
+    let distance=0;
+    for(const corner of corners(new THREE.Box3().setFromObject(rig))){
+      const v=corner.sub(baseTarget),depth=v.dot(direction);
+      distance=Math.max(distance,Math.abs(v.dot(right))/horizontal+depth,Math.abs(v.dot(up))/vertical+depth);
+    }
+    distance*=1.1;
+    controls.minDistance=distance;controls.maxDistance=distance*1.4;
+    const radius=exact?distance:Math.max(distance,Math.min(controls.maxDistance,camera.position.distanceTo(baseTarget)));
+    camera.position.copy(baseTarget).addScaledVector(direction,radius);
+    controls.target.copy(baseTarget);
   }
-  function reset(){selected=null;root.rotation.y=0;go(basePosition.clone().multiplyScalar(Math.max(1,.85/camera.aspect)),baseTarget);highlight();}
+  function reset(){
+    selected=null;root.rotation.y=0;delete canvas.dataset.viewWidth;
+    camera.position.copy(basePosition);controls.target.copy(baseTarget);fitFrame(true);
+    highlight();
+  }
   function focus(id){
-    selected=id;root.rotation.y=0;
-    if(!id){reset();return;}
-    const target=new THREE.Vector3(...anchors[id]);
-    const offset=id==='environment'?new THREE.Vector3(3.8,2.2,5.5):new THREE.Vector3(2.4,1.1,5.2);
-    go(target.clone().add(offset),target);highlight();
+    selected=id;delete canvas.dataset.viewWidth;highlight();
   }
   function highlight(){
     for(const [id,p] of parts)p.traverse(obj=>{
@@ -225,7 +248,7 @@ export function createAgentScene(host, {onPart, onFailure, buttons}) {
     return obj?.userData.part||null;
   };
   let down=null;
-  canvas.addEventListener('pointerdown',event=>{down=[event.clientX,event.clientY];tween=null;});
+  canvas.addEventListener('pointerdown',event=>{down=[event.clientX,event.clientY];});
   canvas.addEventListener('pointermove',event=>{const next=hit(event);if(next!==hovered){hovered=next;highlight();canvas.style.cursor=next?'pointer':'grab';}});
   canvas.addEventListener('pointerleave',()=>{hovered=null;highlight();});
   canvas.addEventListener('pointerup',event=>{
@@ -234,30 +257,32 @@ export function createAgentScene(host, {onPart, onFailure, buttons}) {
   });
   canvas.addEventListener('keydown',event=>{
     if(['ArrowLeft','ArrowRight','ArrowUp','ArrowDown','+','=','-'].includes(event.key)){
-      event.preventDefault();tween=null;
+      event.preventDefault();delete canvas.dataset.viewWidth;
       const v=camera.position.clone().sub(controls.target),s=new THREE.Spherical().setFromVector3(v);
       if(event.key==='ArrowLeft')s.theta-=.12;if(event.key==='ArrowRight')s.theta+=.12;
       if(event.key==='ArrowUp')s.phi=Math.max(.45,s.phi-.1);if(event.key==='ArrowDown')s.phi=Math.min(1.55,s.phi+.1);
-      if(event.key==='+'||event.key==='=')s.radius=Math.max(4,s.radius*.9);if(event.key==='-')s.radius=Math.min(15,s.radius*1.1);
+      if(event.key==='+'||event.key==='=')s.radius=Math.max(controls.minDistance,s.radius*.9);if(event.key==='-')s.radius=Math.min(controls.maxDistance,s.radius*1.1);
       camera.position.copy(controls.target).add(new THREE.Vector3().setFromSpherical(s));dirty=true;
     }
   });
-  controls.addEventListener('change',()=>{dirty=true;});
-  controls.addEventListener('start',()=>{tween=null;});
+  controls.addEventListener('change',()=>{fitFrame();dirty=true;});
   function resize(){
     const w=host.clientWidth,h=host.clientHeight;if(!w||!h)return;
     if(w===viewWidth&&h===viewHeight)return;
     viewWidth=w;viewHeight=h;delete canvas.dataset.viewWidth;delete canvas.dataset.viewHeight;
     camera.aspect=w/h;camera.updateProjectionMatrix();renderer.setSize(w,h,false);
-    // Frame the same physical object on narrow screens without shrinking its height.
-    const distance=Math.max(1,.85/camera.aspect);
-    if(!selected)go(basePosition.clone().multiplyScalar(distance),baseTarget);
+    fitFrame(true);
     dirty=true;
   }
   const resizeObserver=new ResizeObserver(resize);resizeObserver.observe(host);
   const intersection=new IntersectionObserver(entries=>{visible=entries[0]?.isIntersecting;dirty=true;});intersection.observe(host);
   function project(){
     scene.updateMatrixWorld(true);camera.updateMatrixWorld();
+    const projected=corners(new THREE.Box3().setFromObject(rig)).map(p=>p.project(camera));
+    canvas.dataset.bodyBounds=JSON.stringify({
+      left:Math.min(...projected.map(p=>(p.x+1)/2)),right:Math.max(...projected.map(p=>(p.x+1)/2)),
+      top:Math.min(...projected.map(p=>(1-p.y)/2)),bottom:Math.max(...projected.map(p=>(1-p.y)/2)),
+    });
     for(const [id,button] of Object.entries(buttons)){
       const point=rig.localToWorld(new THREE.Vector3(...anchors[id])).project(camera);
       const x=(point.x+1)/2*host.clientWidth,y=(1-point.y)/2*host.clientHeight;
@@ -267,7 +292,7 @@ export function createAgentScene(host, {onPart, onFailure, buttons}) {
   }
   const onLost=event=>{event.preventDefault();dispose();onFailure();};
   canvas.addEventListener('webglcontextlost',onLost);
-  const onReduced=()=>{if(reduced.matches){tween=null;root.rotation.y=0;rig.position.y=0;}dirty=true;};
+  const onReduced=()=>{if(reduced.matches){root.rotation.y=0;rig.position.y=0;}dirty=true;};
   reduced.addEventListener('change',onReduced);
   function draw(now){
     if(disposed)return;
@@ -276,11 +301,6 @@ export function createAgentScene(host, {onPart, onFailure, buttons}) {
     resize(); // Layout may change before ResizeObserver delivers its callback.
     const dt=Math.min((now-last)/1000,.08);last=now;
     const animate=motion&&!reduced.matches;
-    if(tween){
-      const t=Math.min(1,(now-tween.at)/650),e=1-Math.pow(1-t,4);
-      camera.position.lerpVectors(tween.from,tween.to,e);controls.target.lerpVectors(tween.fromTarget,tween.target,e);
-      if(t===1)tween=null;dirty=true;
-    }
     if(animate){
       clock+=dt;rig.position.y=Math.sin(clock*1.2)*.018;
       fan.rotation.z=clock*.22;

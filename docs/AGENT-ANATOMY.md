@@ -1,23 +1,31 @@
 # Agent anatomy
 
-Choose a role, rotate its 3D machine, and select a physical component. The camera
-focuses on that part and reveals one short explanation with two source-backed
-numbers. **Details & source** opens the full policy, limits, evidence and source
-links. **Whole agent** restores the full machine; **Team connections** shows the
+Choose a role, rotate its 3D machine, and select a physical component. The whole
+robot stays visible while the component highlights and its explanation appears.
+Every hotspot stays available, so you can move directly between parts without
+resetting your view. **Details & source** opens the full policy, limits, evidence
+and source links. **Reset view** restores the starting angle; **Team connections** shows the
 permitted handoffs. **Read guide** opens this chapter and **Chapters** opens navigation.
 
 The robot is an illustration of code, not a live actor or activity meter. Its
 cab, tank, engine, arms and other parts map to the same manifest-backed panels.
 The local Three.js renderer uses authored geometry, studio lighting and shadows;
 there are no external models or network asset requests. **Pause motion** stops
-the idle animation. Reduced motion also removes camera tweening. Hidden views
+the idle animation. Reduced motion disables idle movement and handoff animation. Hidden views
 stop rendering, and leaving the chapter disposes the scene.
 
 Keyboard users can Tab through component controls, use arrows between them,
 and activate with Enter or Space. On the focused 3D canvas, arrows rotate and
-plus/minus zoom. A native component selector provides the same information.
+plus/minus zoom within bounds that keep the body visible. A native component selector provides the same information.
 If WebGL is unavailable or loses its context, the labelled SVG machine remains
 fully usable. On a phone, the model stays above the selected component's details.
+The desktop inspector has a reserved width, so opening or closing it never shifts
+the machine. The physical part name leads each panel, followed by its code topic,
+a short plain-language explanation and two real values.
+
+Local Oxanium headings echo the machine's geometric form. The rest of the page
+keeps IBM Plex text and numeric evidence; the shared UI typography is unchanged.
+Font attribution and license are in web/fonts/README.md.
 
 ## What is technically hard
 

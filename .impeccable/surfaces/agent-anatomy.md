@@ -6,101 +6,79 @@ related_targets: [web/agent-anatomy.css, web/agent-anatomy-3d.js, web/documentat
 ---
 
 # Agent anatomy
-Mode: Experience with source-backed reading on demand. User direction: a Dota-style
-character/skin inspection, less text, genuine 3D depth, animation as protagonist.
-The existing graphite/Plex/cyan system remains authoritative outside this surface.
-No permissions, role facts, model decisions or evidence are authored in the renderer.
+
+Mode: Experience with source-backed reading on demand. This local correction
+implements the user's later preference: keep the whole robot visible, keep
+other parts clickable, and make the text fit the futuristic machine.
+It supersedes the earlier camera-zoom and hidden-hotspot direction.
 
 ## Direction contract
-THESIS: Meet one agent as a tangible machine and discover its code through parts,
-instead of reading an expanded documentation dashboard.
 
-OWN-WORLD: The established graphite stage and Plex controls recede behind a
-beveled, articulated industrial robot with pale alloy, dark joints, cyan selection,
-directional studio light and grounded shadows. No new brand, headline or paid assets.
+THESIS: Meet one agent as a tangible machine and discover its code through parts.
 
-STORY: Choose a role, orbit the machine, select a physical component, read a short
-explanation, then open exact manifest facts and sources when wanted. Team handoffs
-remain an optional, explicitly illustrative view.
+OWN-WORLD: A beveled industrial robot, pale alloy, dark joints, grounded shadows
+and cyan selection on the established graphite stage. Local Oxanium SemiBold
+role and physical-part headings match its geometric form. IBM Plex Sans prose
+and controls, and Plex Mono evidence, retain the shared interface language.
+The Anatomy-only roles in DESIGN.md record this narrow exception; shared
+title and body roles remain unchanged.
 
-FIRST VIEWPORT: A compact identity/controls row, a large perspective 3D stage occupying
-most of the viewport, eleven quiet component hotspots and a compact role strip.
-No inspector until selection. Selection focuses the part and reveals a narrow
-inspector; mobile keeps the model above it. Chapters and long guide text are collapsed.
+STORY: Choose a role, orbit the machine, select a part, then inspect its evidence.
+Selection preserves the view. All eleven controls remain available in sequence.
 
-FORM: User-pinned character inspection, implemented code-first in the existing
-local Three.js runtime; the actual interactive model is the visual asset.
-No concept roll: this is the specified replacement of one existing component.
-Signature interaction: physical part highlight, camera focus and one short explanation.
+FIRST VIEWPORT: Compact identity and controls, a large full-body model, eleven
+quiet hotspots and a compact role strip. A reserved inspector column prevents
+layout jumps; before selection it contains only a short instruction.
+The model remains above selected details on mobile.
+
+FORM: The existing procedural Three.js model is the visual asset. Part highlight
+and one compact explanation are the signature interaction. No concept roll is
+needed for this precisely specified local correction.
 
 FINISH: unreviewed and undocumented is unfinished; this build ends with the finish review, the verdict, DESIGN.md, and every shipping raster carrying its provenance
 
-Constraints: all 99 panels retain source-backed facts; native selectors and SVG
-fallback preserve access without graphics. Reduced motion removes idle motion and
-camera tweening; pause and reset are explicit. Hidden views stop rendering.
+## Implementation contract
 
-## Shipped behavior — 2026-11-02
+- Fit the robot's real body bounds to the available viewport with a margin.
+  Exclude the floor. Refit after resize and orbit, including while selected.
+  Selection never changes the camera or root orientation. Reset view is explicit.
+- Keep all eleven hotspots visible and pointer-accessible after selection.
+  Native select, component arrow keys and Enter/Space retain equivalent access.
+- A constant desktop stage/340px inspector grid (280px below 1000px) prevents
+  stage resizing on selection. At 700px and below use a stacked 420px stage.
+- The selected physical part leads at 24px Oxanium; the code topic sits below
+  at 13px Plex. The summary is 16px/1.55. Two source values use 16px Plex Mono.
+  Remaining facts, caveats, Agent Cards and source links stay behind disclosure.
+- All 99 panels remain API-generated from real manifests, SOUL, cards and
+  recorded evidence. Plain-language summaries never grant new capabilities.
+- Preserve the existing renderer budget, reduced motion, pause, offscreen
+  suspension, scene disposal, SVG fallback, retry and optional team/guide views.
+- The 28,892-byte Oxanium font is self-hosted under SIL OFL 1.1. No external
+  font requests, glowing type, simulated telemetry or global restyling.
 
-This local replacement preserves the existing design system. DESIGN.md and
-.impeccable/design.json remain authoritative and unchanged. The rendered model's
-materials and lighting are local to this experience, not new rules for ordinary
-operation panels.
+## Verification and finish
 
-- **Initial view:** a 24px Plex role title (22px on mobile), one short mission and
-  the dominant model. Inspector, guide and chapter navigation start closed.
-  Eleven physical parts map to eleven source-backed panels for each of nine roles.
-- **Inspect:** part clicks, hotspots, the native selector and keyboard activation
-  highlight the geometry and focus the camera. Other hotspot dots recede during
-  selection. The inspector shows the summary and first two values; **Details &
-  source** discloses remaining values, policy, evidence and sources. **Whole
-  agent** restores the full model. Closing returns focus to the trigger.
-- **Depth:** beveled meshes, pale alloy, dark articulated joints, cyan illumination,
-  perspective, a lit floor and cast shadows supply the physical character.
-  Controls and evidence panels retain shared flat surfaces and fine rules.
-  The machine is explicitly an illustration of code, not live activity.
-- **Layout:** stage height is clamped between 360px and 800px around 100svh minus
-  310px. Selection adds a 320px inspector, reduced to 280px at 1000px and below.
-  At 700px and below, the 420px model stays above the inspector and the role
-  strip scrolls horizontally. Focused inspection deliberately crops the whole
-  body while keeping the selected component visible. Long evidence scrolls locally.
-- **Motion:** idle articulation and slow orbit use a 30fps maximum and pixel ratio
-  capped at 1.5. After 45 frames, mean render time above 35ms switches to 15fps
-  and pixel ratio 1. **Pause motion** stops idle movement. Reduced motion also
-  removes camera tweening and handoff animation. Hidden and offscreen views skip
-  rendering; leaving the chapter disposes the scene.
-- **Access and recovery:** visible focus, component arrow navigation, Enter/Space
-  activation, canvas arrow orbit and plus/minus zoom accompany the native
-  selector. Wheel scrolling stays native. WebGL failure or context loss switches
-  to the labelled interactive SVG with the same panels. Definition-load failure
-  exposes **Retry agent definitions**.
-- **Optional reading:** **Team connections** illustrates permitted manifest
-  handoffs, with a text equivalent and finite replay. **Read guide** reveals the
-  chapter; **Chapters** reveals navigation.
+Reviewer disposition: **SHIP**, 2026-11-02. The independent finish reviewer
+inspected all nineteen current inspection captures and marked all five original
+material fixes resolved, with no new regression. The prior showcase verdict is
+historical: its focused cropping and hidden-hotspot behavior are superseded.
+See [the correction finish record](../review/agent-inspection-finish.md).
 
-## Finish evidence
+Verified overview, antenna and memory captures cover 1440x1000, 1280x800,
+390x844, 1265x712, 1916x1244 and the supplied 1463x753 viewport; the nineteenth
+capture covers SVG fallback. All nineteen and the README image carry embedded
+screenshot-origin metadata.
 
-FINISH documentation is complete for this surface. The fresh
-[finish review](../review/agent-showcase-finish.md) records **SHIP**, with
-Persistence, Fidelity, Ceiling, Material fixes and Keep sections and no material
-fixes. No QUALITY BAR card or critique comp was supplied, so a separate
-reference-card ceiling was not assessed. The precisely specified local request
-uses new-work's concept-roll exemption.
+[The browser receipt](../review/anatomy-checks.json) records source parity for 99 panels, sequential
+direct clicks on all eleven parts, full-body framing, preserved orbit, keyboard
+access, progressive details, source dialogs, Agent Cards, bounded animation,
+reduced motion, retry, context-loss fallback, disposal and no page overflow.
+The browser script also checks safe fitting after orbit, resize and zoom.
+Thirty targeted Python tests passed. The full-suite result is maintained by the
+implementation verification rather than inferred from this design review.
+The final post-documentation typography scan has zero findings. DESIGN.md and
+its sidecar record only the verified Anatomy-specific type roles and rule.
 
-The documenter checked the implementation, guide, PRODUCT.md, DESIGN.md and its
-sidecar, sampled browser-contract assertions, and inspected the desktop overview,
-mobile memory and SVG fallback captures. The review covers overview and selected
-memory at 1440×1000, 1280×800, 390×844, 1265×712 and 1916×1244, plus fallback.
-All eleven showcase PNGs in ../review have embedded impeccable:prompt origin
-metadata. The mobile memory image is a 390×1109 full-page capture from the
-390×844 viewport, preserving the stacked inspector.
-
-The build handoff reports browser contracts passing for all 99 panels across
-nine roles, 30 targeted Python tests passing, and an observed renderer workload
-of 99 draw calls and 67,018 triangles. This documentation pass did not rerun
-those checks or a browser; these are build verification results, not new
-measurements.
-
-The existing global design documents remain unchanged. Pre-existing provenance
-gaps in unrelated review captures, the sidecar's older Bakiano display title,
-and PRODUCT.md's older worktree instruction were reported without repair or
-promotion into new design rules.
+No QUALITY BAR card or approved comparison composition was supplied. The
+precisely specified local-correction exemption applies; the implemented contract,
+source-backed facts and current captures provide the review baseline.

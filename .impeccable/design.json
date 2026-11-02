@@ -389,6 +389,18 @@
       "operational-status": {
         "displayName": "Madrid status",
         "purpose": "Compact rounded state pills with centered readable labels, consistent column widths and no redundant dots."
+      },
+      "anatomy-title": {
+        "displayName": "Anatomy role and physical-part heading",
+        "purpose": "Agent Anatomy only: locally served Oxanium SemiBold echoes the illustrated machine; shared title roles remain Plex."
+      },
+      "anatomy-summary": {
+        "displayName": "Anatomy explanation",
+        "purpose": "Plain-language first explanation for each selected physical part; the code-topic subtitle retains the body-small role."
+      },
+      "anatomy-primary-value": {
+        "displayName": "Anatomy primary evidence value",
+        "purpose": "Two source-backed values with tabular Plex Mono and aligned value rows; further evidence stays compact behind disclosure."
       }
     },
     "shadows": [
@@ -589,6 +601,11 @@
         "name": "Flat Surface",
         "body": "Separate working areas with tonal changes and fine rules. Keep ordinary panels and rows shadowless; reserve the small ambient shadow for map overlays.",
         "section": "elevation"
+      },
+      {
+        "name": "Anatomy Type",
+        "body": "Use Oxanium only for Agent Anatomy's role and physical-part headings. Keep explanation and controls in Plex Sans and source values in Plex Mono; preserve the shared typography elsewhere.",
+        "section": "typography"
       }
     ],
     "dos": [

@@ -1,5 +1,5 @@
 {
-  "checked_at": "2026-11-02T03:34:29.332Z",
+  "checked_at": "2026-11-02T16:21:45.816Z",
   "agents": 9,
   "panels": 99,
   "render": {
@@ -7,6 +7,9 @@
     "triangles": 67018
   },
   "webgl": true,
+  "full_body_framing": true,
+  "sequential_part_clicks": true,
+  "selection_preserves_orbit": true,
   "progressive_details": true,
   "keyboard": true,
   "source_dialog": true,
@@ -42,6 +45,11 @@
       "name": "user-1916",
       "width": 1916,
       "height": 1244
+    },
+    {
+      "name": "user-1463",
+      "width": 1463,
+      "height": 753
     }
   ]
 }
