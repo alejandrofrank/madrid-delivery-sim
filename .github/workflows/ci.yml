@@ -34,17 +34,17 @@ jobs:
       - uses: actions/checkout@v4
       - name: Start local stack
         run: make setup
-      - name: Typed Python and failure tests
-        run: |
-          docker compose exec -T -e DELIVERY_SOURCE_REVISION="$GITHUB_SHA" app python scripts/health_check.py
-      - name: Courier movement regressions
-        run: node --test scripts/test_courier_motion.cjs
       - name: Agent anatomy browser contracts
         run: |
           npm ci --ignore-scripts
           node node_modules/playwright/cli.js install --with-deps chromium
           node scripts/check_agent_anatomy.cjs
           node scripts/check_store_view.cjs
+      - name: Typed Python and failure tests
+        run: |
+          docker compose exec -T -e DELIVERY_SOURCE_REVISION="$GITHUB_SHA" app python scripts/health_check.py
+      - name: Courier movement regressions
+        run: node --test scripts/test_courier_motion.cjs
       - name: Full seeded day without paid calls
         run: docker compose exec -T app delivery demo --wall-seconds 0
       - name: Verify demo invariants

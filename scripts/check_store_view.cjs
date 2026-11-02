@@ -5,13 +5,22 @@ const base=process.env.STORE_UI_BASE||'http://localhost:8010';
 (async()=>{
  const browser=await chromium.launch({headless:true,args:['--enable-unsafe-swiftshader','--use-angle=swiftshader']});
  const path='artifacts/dark-store';await fs.mkdir(path,{recursive:true});
- const page=await browser.newPage({viewport:{width:1916,height:1244}});
+ let page=await browser.newPage({viewport:{width:1916,height:1244}});
  const errors=[],requests=[];page.on('pageerror',e=>errors.push(e.message));page.on('request',r=>requests.push(r.url()));
  try{
   await page.goto(base+'/');await page.locator('#store-demo').waitFor();
   assert(!requests.some(r=>r.includes('/simready/')||r.includes('/three/')),'3D must stay lazy');
   await page.locator('#store-demo-chaos').check();
+  // Give the inspection run time to show real motion on software GPUs. Its
+  // business clock still advances normally; only the supported playback rate changes.
+  await page.route('**/api/stores/demo',async route=>{
+   const body=route.request().postDataJSON();assert.equal(body.wall_seconds,60);
+   await route.continue({postData:JSON.stringify({...body,wall_seconds:300})});
+  },{times:1});
   await page.locator('#store-demo').click();
+  // Inspect without automatic camera departure; a separate fresh run below
+  // verifies live handoff. Screenshots must not race a successful delivery.
+  await page.locator('#store-follow[aria-pressed="true"]').click();
   await page.waitForFunction(()=>document.querySelector('#store-render-status').textContent.includes('3D cutaway'),{},{timeout:60000});
   // The live inspector changes height while orders advance. Do not wait for the
   // entire container to be stable before scrolling; actual controls remain checked.
@@ -20,9 +29,8 @@ const base=process.env.STORE_UI_BASE||'http://localhost:8010';
   assert(!(await page.locator('#store-floor').isVisible()));
   assert.match(await page.locator('#store-order-title').innerText(),/DS-0001/);
   await page.locator('#store-track').uncheck();await page.locator('#store-fit').click();
-  await page.screenshot({path:path+'/store-desktop.png',fullPage:false});
-  const canvas=page.locator('#store-stage canvas');await canvas.focus();await page.keyboard.press('ArrowLeft');await page.keyboard.press('+');
-  const run=new URL(page.url()).searchParams.get('run');assert(run);
+  const canvas=page.locator('#store-stage canvas');
+  const inspectionRun=new URL(page.url()).searchParams.get('run');assert(inspectionRun);
   await page.waitForFunction(()=>Number(document.querySelector('#store-stage canvas')?.dataset.drawCalls)>0);
   const stats=await canvas.evaluate(el=>({calls:Number(el.dataset.drawCalls),triangles:Number(el.dataset.triangles)}));
   assert(stats.calls<100,'Repeated shelves must be batched for laptop GPUs: '+JSON.stringify(stats));
@@ -37,6 +45,8 @@ const base=process.env.STORE_UI_BASE||'http://localhost:8010';
   await workerLabel.focus();await page.keyboard.press('Enter');
   assert.equal(await workerLabel.getAttribute('aria-pressed'),'true');
   await page.locator('#store-fit').click();
+  await page.screenshot({path:path+'/store-desktop.png',fullPage:false});
+  await canvas.focus();await page.keyboard.press('ArrowLeft');await page.keyboard.press('+');
 
   // Losing a graphics context must retain the live floor plan and order controls.
   await canvas.dispatchEvent('webglcontextlost');
@@ -44,9 +54,8 @@ const base=process.env.STORE_UI_BASE||'http://localhost:8010';
   assert.equal(await page.locator('#store-stage canvas').count(),0);
   await page.locator('#store-back').click();await page.locator('#store-open').click();
   await page.waitForFunction(()=>document.querySelector('#store-render-status').textContent.includes('3D cutaway'));
-  await page.locator('#store-follow').click();
   await page.locator('#store-fit').click();
-  // Check narrow layout before the basket leaves the building.
+  // Responsive inspection remains valid after the basket leaves the building.
   await page.setViewportSize({width:390,height:844});
   // The live inspector changes height while orders advance. Do not wait for the
   // entire container to be stable before scrolling; actual controls remain checked.
@@ -60,7 +69,7 @@ const base=process.env.STORE_UI_BASE||'http://localhost:8010';
   await page.setViewportSize({width:1916,height:1244});
   await page.locator('#store-fit').click();
   const fallback=await browser.newPage({viewport:{width:390,height:844},reducedMotion:'reduce'});
-  await fallback.goto(base+'/?run='+run+'&store-fallback=1');
+  await fallback.goto(base+'/?run='+inspectionRun+'&store-fallback=1');
   await fallback.locator('#store-open').click();
   await fallback.locator('#store-floor').waitFor({state:'visible'});
   assert.equal(await fallback.locator('#store-stage canvas').count(),0);
@@ -70,10 +79,22 @@ const base=process.env.STORE_UI_BASE||'http://localhost:8010';
   await fallback.close();
   const missing=await browser.newPage();
   await missing.route('**/simready/*.glb',route=>route.abort());
-  await missing.goto(base+'/?run='+run);await missing.locator('#store-open').click();
+  await missing.goto(base+'/?run='+inspectionRun);await missing.locator('#store-open').click();
   await missing.getByText('Some models unavailable; simple shapes shown.',{exact:true}).waitFor();
   assert(await missing.locator('#store-stage canvas').isVisible());
   await missing.close();
+  // A separate, untouched 60-second demo checks automatic handoff. All heavy
+  // screenshots and resizing are finished before following this fresh live order.
+  // A new browser context also isolates the inspection request's long-running
+  // HTTP connection from the untouched public-demo request.
+  await page.close();page=await browser.newPage({viewport:{width:1280,height:900}});
+  page.on('pageerror',e=>errors.push(e.message));
+  await page.goto(base+'/');await page.locator('#store-demo-chaos').check();
+  await page.locator('#store-demo').click();
+  await page.locator('#store-follow[aria-pressed="true"]').waitFor();
+  const run=new URL(page.url()).searchParams.get('run');assert(run&&run!==inspectionRun);
+  const beforeHandoff=await (await page.request.get(base+'/api/runs/'+run+'/stores')).json();
+  assert.notEqual(beforeHandoff.stores[0].orders.find(o=>o.order_id==='DS-0001').stage,'handed_off');
   // The live order must leave the store through its actual courier handoff.
   await page.waitForFunction(()=>document.querySelector('#store-view').hidden,{},{timeout:180000});
   await page.waitForFunction(()=>document.querySelector('#store-follow-note').textContent.includes('Delivered'),{},{timeout:180000});
@@ -92,7 +113,7 @@ const base=process.env.STORE_UI_BASE||'http://localhost:8010';
   await trace.getByText('Order DS-0001',{exact:false}).first().waitFor();
   await trace.close();
   assert.deepEqual(errors,[]);
-  await fs.writeFile(path+'/browser-checks.json',JSON.stringify({passed:true,run,lazy:true,keyboard:true,mobile:true,fallback:true,delivered:true,shelfSupport:support,workersMoving:true,render:stats,errors},null,2));
+  await fs.writeFile(path+'/browser-checks.json',JSON.stringify({passed:true,run,inspectionRun,lazy:true,keyboard:true,mobile:true,fallback:true,delivered:true,shelfSupport:support,workersMoving:true,render:stats,errors},null,2));
   console.log('Store browser checks passed: lazy 3D, keyboard, mobile, fallback, real courier handoff and delivery.');
  }catch(error){
   const detail=await page.evaluate(()=>({url:location.href,stage:document.querySelector('#store-order-state')?.textContent,render:document.querySelector('#store-render-status')?.textContent,view:document.querySelector('#store-view')?.getBoundingClientRect().toJSON(),hidden:document.querySelector('#store-view')?.hidden})).catch(()=>null);
