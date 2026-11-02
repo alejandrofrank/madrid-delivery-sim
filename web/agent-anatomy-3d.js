@@ -116,7 +116,8 @@ export function createAgentScene(host, {onPart, onFailure, buttons}) {
   const budget=part('limits');
   box(budget,.59,2.14,.58,.25,.72,.23,alloy,.04);
   box(budget,.59,2.14,.71,.15,.56,.025,dark,.02);
-  for(let i=0;i<5;i++)box(budget,.59,1.94+i*.1,.735,.1,.035,.025,i<3?light:metal,.005);
+  const budgetBars=[];
+  for(let i=0;i<5;i++)budgetBars.push(box(budget,.59,1.94+i*.1,.735,.1,.035,.025,mat(0x647f8e),.005));
   const arms=part('tools');
   const forearms=[];
   for(const s of [-1,1]){
@@ -153,6 +154,45 @@ export function createAgentScene(host, {onPart, onFailure, buttons}) {
   // A second rear canister gives the silhouette real volume from every orbit.
   cylinder(memory,.35,2.2,-.64,.25,.92,dark);
   for(const y of [1.79,2.61])cylinder(memory,.35,y,-.64,.27,.08,metal);
+
+  function badge(parent,x,y,z,w,h,width,height){
+    const surface=document.createElement('canvas');surface.width=width;surface.height=height;
+    const texture=new THREE.CanvasTexture(surface);texture.colorSpace=THREE.SRGBColorSpace;resources.add(texture);
+    const material=mat(0xffffff,.15,.7,{map:texture});
+    mesh(new THREE.PlaneGeometry(w,h),material,parent,x,y,z);
+    return {surface,texture};
+  }
+  const roleBadge=badge(cab,0,3.47,.617,1.03,.14,512,72);
+  const toolBadges=[-1,1].flatMap(side=>[2.48,2.28].map(y=>badge(arms,side*1.15,y,.267,.19,.16,96,80)));
+  function paintIcon(target,tool){
+    const ctx=target.surface.getContext('2d');ctx.clearRect(0,0,96,80);ctx.fillStyle='#153c48';ctx.fillRect(0,0,96,80);
+    if(!tool){target.texture.needsUpdate=true;return;}
+    ctx.strokeStyle='#c3d2d4';ctx.lineWidth=5;ctx.lineCap='round';ctx.lineJoin='round';ctx.beginPath();
+    const icon=tool.icon;
+    if(icon==='search'){ctx.arc(41,32,17,0,Math.PI*2);ctx.moveTo(54,46);ctx.lineTo(69,61);}
+    else if(icon==='shield'){ctx.moveTo(48,12);ctx.lineTo(71,22);ctx.lineTo(65,48);ctx.lineTo(48,65);ctx.lineTo(31,48);ctx.lineTo(25,22);ctx.closePath();}
+    else if(icon==='message'){ctx.rect(22,17,52,34);ctx.moveTo(38,51);ctx.lineTo(31,66);ctx.lineTo(53,51);}
+    else if(icon==='route'){ctx.moveTo(22,58);ctx.lineTo(42,58);ctx.lineTo(42,25);ctx.lineTo(73,25);ctx.moveTo(61,15);ctx.lineTo(73,25);ctx.lineTo(61,35);}
+    else if(icon==='clock'){ctx.arc(48,39,25,0,Math.PI*2);ctx.moveTo(48,21);ctx.lineTo(48,39);ctx.lineTo(64,47);}
+    else if(icon==='memory'){ctx.rect(26,14,44,52);ctx.moveTo(36,28);ctx.lineTo(60,28);ctx.moveTo(36,40);ctx.lineTo(60,40);ctx.moveTo(36,52);ctx.lineTo(60,52);}
+    else{ctx.rect(25,19,46,42);ctx.moveTo(25,32);ctx.lineTo(71,32);ctx.moveTo(48,19);ctx.lineTo(48,41);}
+    ctx.stroke();target.texture.needsUpdate=true;
+  }
+  function decorate(agent){
+    const ctx=roleBadge.surface.getContext('2d');ctx.fillStyle='#153c48';ctx.fillRect(0,0,512,72);
+    ctx.fillStyle='#e5eef5';ctx.font='600 38px "IBM Plex Sans", sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';
+    ctx.fillText(agent.badge,256,37,480);roleBadge.texture.needsUpdate=true;
+    const lit=Math.ceil(agent.budget.fraction*5);
+    budgetBars.forEach((bar,i)=>{
+      bar.material.color.setHex(i<lit?0x60dfd3:0x647f8e);
+      bar.userData.originalEmissive?.setHex(i<lit?0x1ca999:0);
+      bar.userData.originalIntensity=i<lit?.35:0;
+    });
+    toolBadges.forEach((badge,index)=>paintIcon(badge,agent.tool_badges[index]));
+    canvas.dataset.budget=JSON.stringify({...agent.budget,bars:lit});
+    canvas.dataset.tools=JSON.stringify(agent.tool_badges.map(t=>t.id));
+    canvas.dataset.badge=agent.badge;
+  }
 
   const platform=mesh(new THREE.CylinderGeometry(2.35,2.43,.13,80),mat(0x182730,.5,.6),scene,0,-.035,0);
   platform.receiveShadow=true;
@@ -325,5 +365,13 @@ export function createAgentScene(host, {onPart, onFailure, buttons}) {
   }
   camera.position.copy(basePosition);controls.target.copy(baseTarget);resize();raf=requestAnimationFrame(draw);
   return {focus,reset,dispose,pause(value){motion=!value;dirty=true;},hover(id){hovered=id;highlight();},
-    agent(id){canvas.dataset.agent=id;reset();},wake(){dirty=true;resize();}};
+    agent(agent){canvas.dataset.agent=agent.id;decorate(agent);reset();},
+    thumbnail(agent){
+      decorate(agent);selected=null;hovered=null;highlight();root.rotation.y=0;rig.position.y=0;
+      camera.position.copy(basePosition);camera.aspect=180/210;camera.updateProjectionMatrix();fitFrame(true);
+      renderer.setSize(180,210,false);camera.lookAt(baseTarget);camera.updateMatrixWorld(true);renderer.render(scene,camera);
+      const image=canvas.toDataURL('image/webp',.85);
+      viewWidth=0;viewHeight=0;resize();return image;
+    },
+    wake(){dirty=true;resize();}};
 }
