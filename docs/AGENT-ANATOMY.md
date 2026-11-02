@@ -3,9 +3,17 @@
 Choose a role, rotate its 3D machine, and select a physical component. The whole
 robot stays visible while the component highlights and its explanation appears.
 Every hotspot stays available, so you can move directly between parts without
-resetting your view. **Details & source** opens the full policy, limits, evidence
-and source links. **Reset view** restores the starting angle; **Team connections** shows the
-permitted handoffs. **Read guide** opens this chapter and **Chapters** opens navigation.
+resetting your view. Anatomy is the complete agent reference: all 99 component
+panels include **Full reference · read here**, which opens the corresponding
+chapter beside the robot. Its section selector and related chapter links keep
+reading inside the inspector; **Back to component reference** returns from a
+related chapter. **Details & source** exposes the component's policy, evidence,
+Agent Card where applicable, and source dialogs.
+
+**Reset view** restores the starting angle; **Team connections** shows the
+permitted handoffs. **Read guide** opens this guide below the machine, and
+**Chapters** opens the wider documentation navigation. Neither is required to
+read a selected component's complete reference.
 
 The robot is an illustration of code, not a live actor or activity meter. Its
 cab, tank, engine, arms and other parts map to the same manifest-backed panels.
@@ -19,9 +27,12 @@ and activate with Enter or Space. On the focused 3D canvas, arrows rotate and
 plus/minus zoom within bounds that keep the body visible. A native component selector provides the same information.
 If WebGL is unavailable or loses its context, the labelled SVG machine remains
 fully usable. On a phone, the model stays above the selected component's details.
-The desktop inspector has a reserved width, so opening or closing it never shifts
-the machine. The physical part name leads each panel, followed by its code topic,
-a short plain-language explanation and two real values.
+The desktop reading column keeps the same width for every component, so opening
+or closing it never shifts the machine. It scrolls independently on desktop and
+uses normal page flow on mobile. The physical part name leads each panel,
+followed by its code topic and a plain-language explanation. Most components
+then show two source values; memory opens its visual reference instead. Selecting
+a memory tab or reading a chapter preserves the chosen camera view.
 
 Local Oxanium headings echo the machine's geometric form. The rest of the page
 keeps IBM Plex text and numeric evidence; the shared UI typography is unchanged.
@@ -54,6 +65,83 @@ Solid event links are derived by matching emitted and accepted manifest topics.
 Dashed A2A links start at the simulation scheduler: this project does not pretend
 that every role directly calls every other role. Replay handoffs runs a short
 animation; reduced-motion preferences disable it.
+
+## Inspecting memory
+
+Select the storage tank to inspect the exact stored format, what reaches the
+agent core, the local and optional Google Cloud paths, and their constraints.
+The examples are explicitly synthetic. The page reads no private run memory,
+database, deployment status or provider, and changing a preview changes no run.
+
+**Record** shows PostgreSQL rows with a JSONB body, rather than a CSV, chat
+transcript or file per agent. Select **Scope**, **Observation** or **History** to
+see the corresponding fields. The body is selected initially; roles with several
+observation kinds expose an **Observation type** selector. **Accepted body
+schema** and **Complete example record** expose the full schema and record.
+Examples are validated with the same role-specific Python contracts as the
+runtime. Scope comes from the authenticated role and leased event; identity,
+revision and provenance come from SQL. Times are simulation seconds.
+
+**Core view** projects that same example through the real projection function:
+
+| Profile | What reaches the core |
+| --- | --- |
+| `none` | An empty list; writes and audit history still exist. |
+| `text` | A bounded string containing scope, facts and provenance. |
+| `json` | A JSON object separating shared scope, fact bodies and provenance. |
+| `typed` | Complete typed records with scope and provenance. |
+| `semantic` | Typed records after ranking permitted candidates; the one-record preview demonstrates shape, not measured search quality. |
+
+The recall diagram follows the leased event through the SQL scope gate, optional
+ranking, SQL recheck and agent input. Restaurant ADK receives the selected
+projection in its tool response. Deterministic workers use canonical facts for
+decisions and audit; selecting a memory profile adds no model. The packaged
+local embedding model makes no paid embedding API calls. SQL still rechecks
+scope, lease, expiry and revision after ranking.
+
+**Local / GCP** separates canonical records from their optional search index.
+Locally, Docker Compose retains PostgreSQL data in `postgres-data`;
+`agent_memory_facts` stores the observations, and `agent_semantic_vectors` holds
+embedding arrays used by optional pgvector search. On Google Cloud, the
+implemented Terraform path uses Cloud Run workers and Cloud SQL/PostgreSQL 17,
+with optional Vertex Vector Search. The Vertex payload contains vectors, fact
+IDs, scope/model hashes and expiry metadata, without raw fact text. Hashes are
+filters, not encryption, and embeddings remain derived data.
+
+The cloud view describes prerequisites rather than claiming a live deployment:
+`active` and `enable_live` enable live storage, `live_ready` follows migration,
+login and secret setup, and `enable_vector_search` adds Vertex. Authenticated
+public API calls and scoped service-account grants govern access. Cloud SQL and
+the one-replica Vertex deployment incur idle costs. The current lab disables SQL
+backups and deletion protection; teardown can remove retained history. No
+automatic Vertex TTL deletion or archival pipeline is implemented.
+
+**Constraints** distinguishes recall budgets from storage capacity. An explicit
+profile defaults to eight complete facts, 8,192 UTF-8 bytes and a 3,600-second
+simulation lifetime; allowed bounds come from the profile schema. Per-role live
+entry, body-byte and tool limits come from its manifest. An unset profile keeps
+legacy recall behavior, not an implied explicit profile. Oversized facts are
+omitted whole. Writes are idempotent for the same source event/type/subject;
+conflicting content is rejected. Every recall uses a tool slot, and semantic
+recall uses two fenced reads.
+
+The lifecycle shows why expiry does not erase the audit trail or revive an older
+revision. A disabled recall profile also preserves writes and audit history.
+Scope prevents cross-order and cross-role recall; SQL functions and grants
+enforce access, while the Python host and operator remain trusted. Observations
+provide context, never new authority or proof that an observation is true.
+
+Customer-service classification has a different, explicit view: a fresh ADK
+session for each complaint, no persistent memory contract and no memory tools.
+Durable request/result receipts prevent repeat billing; they are not recall.
+Its separate Chaos turn receives only the affected order facts. A disclosure
+explains the shared storage system without presenting it as a classifier feature.
+
+Use Left/Right or Home/End within the four-tab list, or click a tab. The memory
+chapter, source files and related references remain available in the same
+inspector. The reference distinguishes local embedding/pgvector tests and mocked
+Vertex request tests from a live GCP quality benchmark; no memory-specific
+production pass rate, latency or monetary cost receipt is claimed.
 
 ## One authority, several profiles
 
@@ -92,14 +180,18 @@ this page never silently relabels old results as a fresh run.
 
 The [data builder](../src/delivery/agent_anatomy.py) reads manifests and SOUL files,
 uses the real Agent Card factory, inspects MCP declarations and loads dated eval
-receipts. It does not connect to a database or provider. The browser contains SVG
-geometry and interaction, not a second list of agent facts. A fingerprint covers
+receipts. The [memory reference builder](../src/delivery/memory_reference.py)
+validates synthetic bodies with the runtime contracts and generates all five
+projections using the real memory profile function. It does not connect to a
+database or provider. The browser renders the supplied facts and examples;
+it does not maintain a second fact catalogue. A fingerprint covers
 all source inputs, and contract tests compare panels, permissions, cards, event
 edges, evidence and the published schema against their originating files.
 
-Continue to [agent implementation](AGENT-IMPLEMENTATION.md),
+The component readers include [agent implementation](AGENT-IMPLEMENTATION.md),
 [ADK restaurants](ADK-RESTAURANT.md), [memory](AGENT-MEMORY.md),
-[A2A](A2A.md), or [evaluations](AGENT-EVALS.md).
+[A2A](A2A.md), and [evaluations](AGENT-EVALS.md). Related chapter links inside a
+component reader stay beside the robot; source links open inspectable dialogs.
 
 ## Source index
 
@@ -132,9 +224,16 @@ Continue to [agent implementation](AGENT-IMPLEMENTATION.md),
 - [docs/evidence/a2a-chaos-local.json](evidence/a2a-chaos-local.json)
 - [docs/evidence/heldout-release.json](evidence/heldout-release.json)
 - [docs/evidence/main-consolidation.json](evidence/main-consolidation.json)
+- [evals/memory/recall.json](../evals/memory/recall.json)
+- [infra/production/live.tf](../infra/production/live.tf)
+- [infra/production/vector.tf](../infra/production/vector.tf)
+- [sql/migrations/015_typed_memory.sql](../sql/migrations/015_typed_memory.sql)
+- [sql/migrations/024_agent_memory_modes.sql](../sql/migrations/024_agent_memory_modes.sql)
+- [sql/migrations/031_semantic_memory.sql](../sql/migrations/031_semantic_memory.sql)
 - [src/delivery/a2a_server.py](../src/delivery/a2a_server.py)
 - [src/delivery/adk_contracts.py](../src/delivery/adk_contracts.py)
 - [src/delivery/adk_customer.py](../src/delivery/adk_customer.py)
+- [src/delivery/adk_restaurant.py](../src/delivery/adk_restaurant.py)
 - [src/delivery/agent_access.py](../src/delivery/agent_access.py)
 - [src/delivery/agent_anatomy.py](../src/delivery/agent_anatomy.py)
 - [src/delivery/agent_runtime.py](../src/delivery/agent_runtime.py)
@@ -146,7 +245,10 @@ Continue to [agent implementation](AGENT-IMPLEMENTATION.md),
 - [src/delivery/jev_routing.py](../src/delivery/jev_routing.py)
 - [src/delivery/mcp_server.py](../src/delivery/mcp_server.py)
 - [src/delivery/memory_profiles.py](../src/delivery/memory_profiles.py)
+- [src/delivery/memory_reference.py](../src/delivery/memory_reference.py)
 - [src/delivery/queue.py](../src/delivery/queue.py)
 - [src/delivery/role_manifest.py](../src/delivery/role_manifest.py)
 - [src/delivery/semantic_memory.py](../src/delivery/semantic_memory.py)
+- [src/delivery/typed_memory.py](../src/delivery/typed_memory.py)
+- [tests/test_semantic_memory.py](../tests/test_semantic_memory.py)
 <!-- anatomy-sources:end -->

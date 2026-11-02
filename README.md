@@ -3,9 +3,16 @@
 Queue-driven delivery agents on Madrid streets, with Google ADK, real A2A endpoints, distributed traces, and auditable BigQuery run evidence.
 
 **[Meet the agents — interactive anatomy](http://localhost:8010/architecture)** ·
-[Read the same guide in the repository](docs/AGENT-ANATOMY.md)
+[Repository guide](docs/AGENT-ANATOMY.md)
 
 [![Interactive 3D agent anatomy](docs/media/agent-anatomy.png)](http://localhost:8010/architecture)
+
+Anatomy is the agent reference: every component opens its full explanation in
+place. Select **Memory** to inspect a typed record, preview the five input formats,
+trace local or GCP storage, and check scope, lifetime and capacity limits. Examples
+are synthetic and validated against the real contracts; no private run memory is
+shown.
+
 
 ## 60 second tour
 
@@ -31,8 +38,8 @@ memory leaking across orders or roles. ADK proposes through granular tools;
 scoped SQL, durable queues and authenticated A2A boundaries enforce the contract.
 Routine policies can run without a model.
 
-**1,030 Python tests passing**, plus all **99 anatomy panels**
-checked in the browser ([verification receipt](docs/evidence/dark-store.json));
+**1,043 Python tests in the suite**, plus all **99 anatomy panels**
+checked in the browser ([verification workflow](https://github.com/alejandrofrank/madrid-delivery-sim/actions/workflows/ci.yml));
 **pass^5 = 1.000 across 72 held-out cases** (360 attempts), with an all-pass
 bootstrap interval of [1, 1] in the [release receipt](docs/evidence/heldout-release.json).
 One [seeded Chaos shift](docs/evidence/a2a-chaos-local.json) delivered 71/71 orders
