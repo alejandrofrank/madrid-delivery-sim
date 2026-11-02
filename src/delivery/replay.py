@@ -21,6 +21,7 @@ class Recordings:
         if manifest.get("schema_version") != 1 or not manifest.get("recordings"):
             raise ValueError("A reviewed replay manifest is required")
         self.shifts: dict[str, dict[str, Any]] = {}
+        self.sources: dict[str, dict[str, str]] = {}
         for entry in manifest["recordings"]:
             if not re.fullmatch(r"[a-z0-9-]+\.json\.gz", entry["file"]):
                 raise ValueError("Invalid recording filename")
@@ -44,6 +45,7 @@ class Recordings:
                     or identifier in self.shifts):
                 raise ValueError("Invalid recording frame sequence")
             self.shifts[identifier] = shift
+            self.sources[identifier] = {"file": entry["file"], "sha256": entry["sha256"]}
 
     def shift(self, run: str | None) -> dict[str, Any]:
         if run is None:
