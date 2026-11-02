@@ -151,16 +151,18 @@
     const stageControls=node("div",undefined,"anatomy-stage-controls");
     const picker=node("label","Component","anatomy-part-picker");
     const select=node("select");select.id="anatomy-part-select";picker.append(select);
-    const reset=node("button","Whole agent");reset.id="anatomy-reset";
+    const reset=node("button","Reset view");reset.id="anatomy-reset";
     const pause=node("button","Pause motion");pause.id="anatomy-pause";pause.setAttribute("aria-pressed","false");
     stageControls.append(picker,reset,pause);drawing.append(stageControls);
     const hint=node("p","Drag to rotate \u00b7 Select a part to inspect","anatomy-hint");drawing.append(hint);
     const inspector=node("section",undefined,"anatomy-inspector");inspector.id="anatomy-inspector";inspector.hidden=true;
     inspector.setAttribute("aria-labelledby","anatomy-panel-title");
     const status=node("span","","sr-only");status.setAttribute("role", "status");
-    workbench.append(drawing,inspector);host.append(workbench,status);
+    const idle=node("div",undefined,"anatomy-inspector-idle");
+    idle.append(node("p","Select a component"),node("p","Explore the code behind each part."));
+    workbench.append(drawing,idle,inspector);host.append(workbench,status);
     select.onchange=()=>{lastTrigger=select;choose(selected.id,select.value||null);};
-    reset.onclick=()=>choose(selected.id,null);
+    reset.onclick=()=>{choose(selected.id,null);scene?.reset();};
     pause.onclick=()=>{paused=!paused;scene?.pause(paused);pause.textContent=paused?"Play motion":"Pause motion";pause.setAttribute("aria-pressed",String(paused));};
     const roster=node("nav",undefined,"anatomy-roster");roster.setAttribute("aria-label","Choose an agent");
     agents.forEach(agent=>{
@@ -234,7 +236,7 @@
       }
       if(changed)scene?.agent(selected.id);
       scene?.focus(part);
-      inspector.hidden=!part;workbench.classList.toggle("has-selection",!!part);illustration.classList.toggle("has-part",!!part);
+      inspector.hidden=!part;idle.hidden=!!part;workbench.classList.toggle("has-selection",!!part);illustration.classList.toggle("has-part",!!part);
       if(part)renderPanel();
       status.textContent=part?selected.name+": "+selected.panels.find(p=>p.id===part).title:selected.name;
       if(updateURL){
@@ -247,9 +249,11 @@
       const basePanel=selected.panels.find(p=>p.id===part),variant=basePanel.environments?.[environment];
       const panel=variant?{...basePanel,...variant}:basePanel;
       const panelHeader=node("div",undefined,"anatomy-panel-heading");
-      const title=node("h3",panel.title);title.id="anatomy-panel-title";
+      const title=node("h3",panel.part);title.id="anatomy-panel-title";
       const close=node("button","Close");close.setAttribute("aria-label","Close component details");close.onclick=closePanel;
-      panelHeader.append(title,close);inspector.replaceChildren(panelHeader,node("p",panel.summary,"anatomy-summary"));
+      const heading=node("div");
+      heading.append(title,node("p",panel.title,"anatomy-panel-topic"));
+      panelHeader.append(heading,close);inspector.replaceChildren(panelHeader,node("p",panel.summary,"anatomy-summary"));
       if(basePanel.environments){
         const label=node("label","Environment","anatomy-part-picker"),choice=node("select");choice.id="anatomy-environment";
         const all=node("option","All environments");all.value="all";choice.append(all);
@@ -291,7 +295,7 @@
       choose(selected.id,part,false);
     }
     choose(selected.id,params.get("part"),false);
-    import('./agent-anatomy-3d.js?v=c5e7236d174e').then(({createAgentScene})=>{
+    import('./agent-anatomy-3d.js?v=47767184835e').then(({createAgentScene})=>{
       if(disposed||version!==generation)return;
       try{
         scene=createAgentScene(illustration,{buttons,onPart:key=>choose(selected.id,key),onFailure:fallback});
