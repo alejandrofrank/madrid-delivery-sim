@@ -1,11 +1,23 @@
 # Agent anatomy
 
-The team above is the quickest way to understand the system. Select a machine,
-then its cab, arms, engine or another labelled part. Every panel explains the
-selected role, shows the actual defaults or dated measurements, and links to its
-source. Keyboard users can Tab through the controls, move between SVG parts with
-arrow keys, and activate with Enter or Space. A standard part selector offers the
-same information on a phone or with assistive technology.
+Choose a role, rotate its 3D machine, and select a physical component. The camera
+focuses on that part and reveals one short explanation with two source-backed
+numbers. **Details & source** opens the full policy, limits, evidence and source
+links. **Whole agent** restores the full machine; **Team connections** shows the
+permitted handoffs. **Read guide** opens this chapter and **Chapters** opens navigation.
+
+The robot is an illustration of code, not a live actor or activity meter. Its
+cab, tank, engine, arms and other parts map to the same manifest-backed panels.
+The local Three.js renderer uses authored geometry, studio lighting and shadows;
+there are no external models or network asset requests. **Pause motion** stops
+the idle animation. Reduced motion also removes camera tweening. Hidden views
+stop rendering, and leaving the chapter disposes the scene.
+
+Keyboard users can Tab through component controls, use arrows between them,
+and activate with Enter or Space. On the focused 3D canvas, arrows rotate and
+plus/minus zoom. A native component selector provides the same information.
+If WebGL is unavailable or loses its context, the labelled SVG machine remains
+fully usable. On a phone, the model stays above the selected component's details.
 
 ## What is technically hard
 
