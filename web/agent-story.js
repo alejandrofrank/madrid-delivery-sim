@@ -43,7 +43,7 @@ window.AgentStory=(()=>{
   function update(){
    steps.forEach((li,index)=>{li.classList.toggle('is-current',index===current);if(index===current)li.setAttribute('aria-current','step');else li.removeAttribute('aria-current');});
    const step=data.story.steps[current];state.textContent=(current+1)+' of '+steps.length+' · '+step.label+': '+step.summary+'.';
-   if(step.handoff&&current<steps.length-1){const next=data.story.steps[current+1];state.textContent+=' '+(step.agent?data.agents.find(a=>a.id===step.agent).name:'Order')+' '+step.handoff+' '+data.agents.find(a=>a.id===next.agent).name+'.';}
+   if(step.handoff&&current<steps.length-1){const next=data.story.steps[current+1];state.textContent+=' '+(step.agent?data.agents.find(a=>a.id===step.agent).name:'Order')+' → '+data.agents.find(a=>a.id===next.agent).name+': '+step.handoff.replace(/\s+(to|for)$/, '')+'.';}
    replay.textContent=reduced.matches?'Next step':playing?'Pause order':current===steps.length-1?'Replay order':'Play order';
    replay.setAttribute('aria-pressed',String(playing));drawState();
   }
