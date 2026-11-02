@@ -31,8 +31,8 @@ memory leaking across orders or roles. ADK proposes through granular tools;
 scoped SQL, durable queues and authenticated A2A boundaries enforce the contract.
 Routine policies can run without a model.
 
-Prior architecture release: **998 Python tests passing**, plus all **99 anatomy panels**
-checked in the browser ([verification receipt](docs/evidence/agent-anatomy.json));
+**1,030 Python tests passing**, plus all **99 anatomy panels**
+checked in the browser ([verification receipt](docs/evidence/dark-store.json));
 **pass^5 = 1.000 across 72 held-out cases** (360 attempts), with an all-pass
 bootstrap interval of [1, 1] in the [release receipt](docs/evidence/heldout-release.json).
 One [seeded Chaos shift](docs/evidence/a2a-chaos-local.json) delivered 71/71 orders
@@ -63,7 +63,8 @@ basket before taking over. **Follow this order** moves the view between those sc
 
 ![Actual seeded store order, from Madrid to shelves and back](docs/media/store-journey.gif)
 
-The elevated cutaway uses the actual layout, shelf stock and worker paths.
+The elevated cutaway seats stock on the actual shelf decks. Robot and forklift
+labels show their live tasks; select one to follow its route.
 Choose a store pin to inspect its load, highlight an order's shelves, or trigger
 a blocked aisle, stock shortage, robot breakdown or delayed truck. The inventory
 and fulfillment roles share the city's clock, durable events and A2A transport.

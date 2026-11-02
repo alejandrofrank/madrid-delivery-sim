@@ -58,17 +58,27 @@
   ],
   "browser": {
     "passed": true,
-    "run": "04cdaaf5-d7ef-444a-9134-63f7e5253099",
+    "run": "d91633a8-c693-45d8-9366-541145443dfe",
     "lazy": true,
     "keyboard": true,
     "mobile": true,
     "fallback": true,
     "delivered": true,
+    "shelfSupport": {
+      "slots": 120,
+      "errors": 0,
+      "maxGap": 0.0020000000000000018
+    },
+    "workersMoving": true,
+    "render": {
+      "calls": 52,
+      "triangles": 351031
+    },
     "errors": []
   },
   "render": {
-    "calls": 167,
-    "triangles": 316195
+    "calls": 55,
+    "triangles": 351067
   },
   "validation": {
     "focused_regressions": "50 passed",
@@ -76,6 +86,15 @@
     "terraform_tests": 7,
     "ruff": "passed",
     "mypy_modules": 94,
-    "full_suite": "Pending final PR gate"
+    "full_suite": {
+      "passed": 1030,
+      "failed": 0,
+      "skipped": 0,
+      "seconds": 770.315685,
+      "source_revision": "23d6fea5cba6251eae1bd3265dfc3de732dd156b",
+      "workflow_run": "https://github.com/alejandrofrank/madrid-delivery-sim/actions/runs/41363950611",
+      "scope": "Hosted full Python suite; whole-pipeline status is reported separately by the PR checks."
+    },
+    "release_checks": "https://github.com/alejandrofrank/madrid-delivery-sim/pull/9/checks"
   }
 }

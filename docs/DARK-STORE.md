@@ -8,10 +8,13 @@ target; a slower machine will take longer rather than skip physical steps.
 
 The default view is an elevated cutaway. Cyan marks the selected order's shelf
 faces and the current planned route. Green items are already in the basket.
-Amber blocks show inaccessible cells. Use **Track picker** for a closer camera,
+Amber blocks show inaccessible cells. Use **Track worker** for a closer camera,
 **Fit store** for the whole layout, or **Back to Madrid** to leave. **Follow this
 order** returns to the city after physical courier collection; it ends at delivery
-or cancellation. Escape leaves the store. On a focused 3D view, arrows orbit and
+or cancellation. Select a robot or forklift label to follow that worker; the label
+shows its actual task and the ground marker follows its route. Completed shifts
+are labeled **shift complete**; start a store demo for live movement. Escape
+leaves the store. On a focused 3D view, arrows orbit and
 plus/minus zoom. All order facts and controls remain available without WebGL.
 
 ## Two environments, one order
@@ -26,6 +29,10 @@ zone, a packing station and a loading dock by default. The sixty supermarket
 catalogue products have two distinct pick faces each, including cold storage for
 dairy, protein and frozen items. Opening physical stock is 24 units per SKU;
 listing a product or expecting a truck never creates sellable stock.
+
+Stock models sit inside the actual rack bounds on its raycast deck surfaces;
+logical levels select usable decks rather than placing goods in mid-air. Shelf
+and product instances share draw calls.
 
 The renderer uses metre coordinates from this layout, not a separate visual
 layout. Pick routes use deterministic shortest aisle paths, avoid rack cells and
@@ -113,7 +120,8 @@ The pinned source revision, original links, modifications and hashes are in
 `web/vendor/simready/manifest.json`. The models total 920,992 bytes; models plus
 the local Three.js loader stay below 4 MB. They load only when opening a store.
 Failed models use boxes; failed WebGL uses the floor plan. Rendering is capped
-at 30 fps and pixel ratio 1.5, pauses in hidden views, and disposes its renderer
+at 30 fps and pixel ratio 1.5, skips unchanged frames, reduces resolution on slow
+software GPUs, pauses in hidden views, and disposes its renderer
 when closed. The original model geometry is visual evidence, not the simulation's
 physical collision or navigation authority.
 
