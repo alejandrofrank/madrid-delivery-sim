@@ -9,6 +9,7 @@ const base=process.env.STORE_UI_BASE||'http://localhost:8010';
  // CI asserts rendered geometry and behavior. Routine screenshots are local
  // review evidence, not image comparisons; software-GPU readback can stall CI.
  const capture=(tab,options)=>process.env.CI?Promise.resolve():tab.screenshot(options);
+ let checking=page;
  const errors=[],requests=[];page.on('pageerror',e=>errors.push(e.message));page.on('request',r=>requests.push(r.url()));
  try{
   await page.goto(base+'/');await page.locator('#store-demo').waitFor();
@@ -71,7 +72,12 @@ const base=process.env.STORE_UI_BASE||'http://localhost:8010';
   assert(await page.evaluate(()=>document.querySelector('#store-incident').getBoundingClientRect().bottom<=document.querySelector('.store-footer').getBoundingClientRect().top),'Laptop disruption action must remain above the footer');
   await page.setViewportSize({width:1916,height:1244});
   await page.locator('#store-fit').click();
+  // Dispose the completed 3D inspection before opening another page. Keeping
+  // its software renderer active can starve the fallback page's initialization
+  // on CI, leaving Open store disabled even though the API is healthy.
+  await page.locator('#store-back').click();
   const fallback=await browser.newPage({viewport:{width:390,height:844},reducedMotion:'reduce'});
+  checking=fallback;
   await fallback.goto(base+'/?run='+inspectionRun+'&store-fallback=1');
   await fallback.locator('#store-open').click();
   await fallback.locator('#store-floor').waitFor({state:'visible'});
@@ -80,15 +86,14 @@ const base=process.env.STORE_UI_BASE||'http://localhost:8010';
   await fallback.locator('#store-back').focus();await fallback.keyboard.press('Escape');
   assert(!(await fallback.locator('#store-view').isVisible()));
   await fallback.close();
-  const missing=await browser.newPage();
+  const missing=await browser.newPage();checking=missing;
   await missing.route('**/simready/*.glb',route=>route.abort());
   await missing.goto(base+'/?run='+inspectionRun);await missing.locator('#store-open').click();
   await missing.getByText('Some models unavailable; simple shapes shown.',{exact:true}).waitFor();
   assert(await missing.locator('#store-stage canvas').isVisible());
-  await missing.close();
+  await missing.close();checking=page;
   // A separate, untouched 60-second demo checks automatic handoff. All heavy
   // screenshots and resizing are finished before following this fresh live order.
-  await page.locator('#store-back').click();
   // Hold an old run response across selection of the new run. It must not
   // reset order following or replace the newly selected run's store data.
   const oldPending=page.waitForRequest(request=>request.url()===base+'/api/state?run='+inspectionRun);
@@ -118,17 +123,17 @@ const base=process.env.STORE_UI_BASE||'http://localhost:8010';
   assert(timeline.includes('Robot breakdown'),'Store incidents must have readable city timeline labels');
   assert(!timeline.includes('undefined'));
   await capture(page,{path:path+'/store-delivered.png',fullPage:false});
-  const trace=await browser.newPage();
+  const trace=await browser.newPage();checking=trace;
   await trace.goto(base+'/agent-traces?source=madrid&run='+run+'&order=DS-0001');
   await trace.getByText('Order DS-0001',{exact:false}).first().waitFor();
-  await trace.close();
+  await trace.close();checking=page;
   assert.deepEqual(errors,[]);
   await fs.writeFile(path+'/browser-checks.json',JSON.stringify({passed:true,run,inspectionRun,lazy:true,keyboard:true,mobile:true,fallback:true,delivered:true,shelfSupport:support,workersMoving:true,render:stats,errors},null,2));
   console.log('Store browser checks passed: lazy 3D, keyboard, mobile, fallback, real courier handoff and delivery.');
  }catch(error){
-  const detail=await page.evaluate(()=>({url:location.href,stage:document.querySelector('#store-order-state')?.textContent,render:document.querySelector('#store-render-status')?.textContent,view:document.querySelector('#store-view')?.getBoundingClientRect().toJSON(),hidden:document.querySelector('#store-view')?.hidden})).catch(()=>null);
+  const detail=await checking.evaluate(()=>({url:location.href,connection:document.querySelector('#connection-text')?.textContent,storeOptions:document.querySelector('#store-select')?.textContent,stage:document.querySelector('#store-order-state')?.textContent,render:document.querySelector('#store-render-status')?.textContent,view:document.querySelector('#store-view')?.getBoundingClientRect().toJSON(),hidden:document.querySelector('#store-view')?.hidden})).catch(()=>null);
   await fs.writeFile(path+'/browser-failure.json',JSON.stringify({error:String(error),detail},null,2));
-  await page.screenshot({path:path+'/browser-failure.png',fullPage:true,timeout:15000}).catch(()=>{});
+  await checking.screenshot({path:path+'/browser-failure.png',fullPage:true,timeout:15000}).catch(()=>{});
   throw error;
  }finally{await browser.close();}
 })().catch(e=>{console.error(e);process.exitCode=1;});
