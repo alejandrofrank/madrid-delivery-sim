@@ -17,20 +17,24 @@ def main() -> None:
     args = parser.parse_args()
     changed = []
     # The lazy renderer must change URL before its controller and HTML are hashed.
-    controller = WEB / "store-view.js"
-    renderer = WEB / "store-3d.js"
-    if controller.is_file() and renderer.is_file():
-        original = controller.read_text(encoding="utf-8")
-        digest = hashlib.sha256(renderer.read_bytes()).hexdigest()[:12]
-        updated = re.sub(
-            r"import\('\./store-3d\.js(?:\?v=[^']+)?'\)",
-            f"import('./store-3d.js?v={digest}')",
-            original,
-        )
-        if updated != original:
-            changed.append(controller.name)
-            if args.write:
-                controller.write_text(updated, encoding="utf-8")
+    for controller_name, renderer_name in (
+        ("store-view.js", "store-3d.js"),
+        ("agent-anatomy.js", "agent-anatomy-3d.js"),
+    ):
+        controller = WEB / controller_name
+        renderer = WEB / renderer_name
+        if controller.is_file() and renderer.is_file():
+            original = controller.read_text(encoding="utf-8")
+            digest = hashlib.sha256(renderer.read_bytes()).hexdigest()[:12]
+            updated = re.sub(
+                r"import\('\./" + re.escape(renderer_name) + r"(?:\?v=[^']+)?'\)",
+                f"import('./{renderer_name}?v={digest}')",
+                original,
+            )
+            if updated != original:
+                changed.append(controller.name)
+                if args.write:
+                    controller.write_text(updated, encoding="utf-8")
     for page in sorted(WEB.glob("*.html")):
         original = page.read_text(encoding="utf-8")
 
