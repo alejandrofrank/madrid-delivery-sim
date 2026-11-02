@@ -1,5 +1,9 @@
 # Agent showcase finish review
 
+Historical verdict, superseded by the user's subsequent full-robot feedback and
+agent-inspection correction. Focused cropping and hidden hotspots are no longer
+accepted behavior. See ../surfaces/agent-anatomy.md for the current contract.
+
 Reviewer disposition: **ship**. Fresh review, 2026-11-02.
 
 Missing inputs: no QUALITY BAR card or critique-reference comp was supplied. No approved comp is expected for this code-led local replacement. Documentation files were sampled rather than read end-to-end.

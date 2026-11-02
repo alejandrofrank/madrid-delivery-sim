@@ -80,6 +80,21 @@ typography:
     fontWeight: 600
     lineHeight: 1.2
     letterSpacing: -0.35px
+  anatomy-title:
+    fontFamily: Oxanium, IBM Plex Sans, sans-serif
+    fontSize: 24px
+    fontWeight: 600
+    lineHeight: 1.3
+  anatomy-summary:
+    fontFamily: IBM Plex Sans, sans-serif
+    fontSize: 16px
+    fontWeight: 400
+    lineHeight: 1.55
+  anatomy-primary-value:
+    fontFamily: IBM Plex Mono, monospace
+    fontSize: 16px
+    fontWeight: 400
+    lineHeight: 1.5
   cartographic-label:
     fontFamily: Noto Sans Regular
     fontSize: 10px
@@ -227,6 +242,14 @@ Madrid's agent identity is 12px with 10px secondary detail at full width. Status
 Body text is IBM Plex Sans. IDs, simulation times, trace metadata, code and narrow numerical evidence use IBM Plex Mono. Tabular numbers keep values stable as they update. Supporting labels are smaller than body text; technical annotation is not a new headline tier. Reading prose and trace summaries are capped at 75ch in their existing layouts.
 
 **The Compact Title Rule.** Start with a plain workspace title and the working interface. Do not add a display headline, decorative hero or slogan.
+
+### Agent Anatomy exception
+
+The Anatomy-only roles in the frontmatter record the repeated role and physical-part headings, plain-language summaries and two primary evidence values in web/agent-anatomy.css. Oxanium SemiBold is served locally from web/fonts/Oxanium-SemiBold.ttf under SIL OFL 1.1, with Plex as the fallback. Its angular forms connect the compact headings to the illustrated machine. This exception does not replace the shared title or body roles.
+
+Plex carries the code-topic subtitle, controls and explanation. The existing body-small role supplies the subtitle; the Anatomy summary role keeps the first explanation readable. The primary values use tabular Plex Mono and aligned value rows, including when a label wraps. Additional evidence keeps its existing compact treatment behind disclosure. The idle instruction and narrow component selectors also use the intentional 16px size; this is local reading and control legibility, not a new global body size.
+
+**The Anatomy Type Rule.** Use Oxanium only for Agent Anatomy's role and physical-part headings. Keep explanation and controls in Plex Sans and source values in Plex Mono; preserve the shared typography elsewhere.
 
 ## Layout
 
