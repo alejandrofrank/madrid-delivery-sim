@@ -15,6 +15,7 @@ from google.protobuf.json_format import MessageToDict
 
 from delivery.adk_contracts import JevRouting, restaurant_template
 from delivery.agent_specs import load_role
+from delivery.anatomy_presentation import LIMIT_LABELS, enrich_agent, order_story
 from delivery.config import Settings
 from delivery.memory_profiles import MemoryProfile
 from delivery.memory_reference import SOURCES as MEMORY_SOURCES
@@ -50,6 +51,7 @@ def source_paths() -> list[str]:
     paths = [
         "config/agents/role.schema.json",
         "src/delivery/agent_anatomy.py",
+        "src/delivery/anatomy_presentation.py",
         "src/delivery/agent_specs.py",
         "src/delivery/role_manifest.py",
         "src/delivery/agent_runtime.py",
@@ -215,7 +217,7 @@ def anatomy_data() -> dict[str, Any]:
                 "override that policy."
             )
         limits_numbers = {
-            key.replace("_", " "): value for key, value in role.limits.model_dump().items()
+            LIMIT_LABELS[key]: value for key, value in role.limits.model_dump().items()
         }
         if name == "customer_service":
             limits_numbers = {
@@ -463,6 +465,12 @@ def anatomy_data() -> dict[str, Any]:
                 panels=list(panels.values()),
             )
         )
+    for agent in agents:
+        enrich_agent(agent, load_role(agent["id"]), release)
+    budget_scale = max(a["budget"]["value"] for a in agents) or 1
+    for agent in agents:
+        agent["budget"]["scale"] = budget_scale
+        agent["budget"]["fraction"] = agent["budget"]["value"] / budget_scale
     edges = [
         dict(source=a["id"], target=b["id"], kind="event", topics=sorted(shared))
         for a in agents
@@ -478,6 +486,25 @@ def anatomy_data() -> dict[str, Any]:
         input_fingerprint=input_fingerprint(),
         agents=agents,
         edges=edges,
+        story=order_story(agents),
+        tour=[
+            {
+                "part": "mission",
+                "caption": "Start with its job: one agent owns one part of the order.",
+            },
+            {
+                "part": "tools",
+                "caption": "Its arms are approved actions, not unrestricted access.",
+            },
+            {
+                "part": "policy",
+                "caption": "Fixed rules check each action before it can change anything.",
+            },
+            {
+                "part": "evals",
+                "caption": "The inspection sticker shows recorded tests and their limits.",
+            },
+        ],
         evidence=dict(
             release=release,
             verification=verified,
