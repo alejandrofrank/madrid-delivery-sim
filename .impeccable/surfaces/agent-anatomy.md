@@ -2,7 +2,7 @@
 version: 1
 slug: agent-anatomy
 primary_target: web/agent-anatomy.js
-related_targets: [web/agent-story.js, web/agent-anatomy.css, web/agent-anatomy-3d.js, web/agent-memory.js, web/documentation.js, web/documentation.html, src/delivery/agent_anatomy.py, src/delivery/anatomy_presentation.py, src/delivery/memory_reference.py, docs/AGENT-ANATOMY.md]
+related_targets: [web/agent-delivery-scene.js, web/agent-role-symbols.js, web/agent-story.js, web/agent-anatomy.css, web/agent-anatomy-3d.js, web/agent-memory.js, web/documentation.js, web/documentation.html, src/delivery/agent_anatomy.py, src/delivery/anatomy_presentation.py, src/delivery/memory_reference.py, docs/AGENT-ANATOMY.md]
 ---
 
 # Agent anatomy
@@ -20,53 +20,47 @@ and the memory explorer remain available.
 
 ## Direction contract
 
-THESIS: Understand one order through team handoffs, then discover each agent's
-real configuration and evidence through its physical parts.
+THESIS: Understand the team as one working delivery place. The user rejected
+repeated raster portraits; the shared scene replaces both portrait rows.
 
-OWN-WORLD: Keep the graphite stage, dimensional pale-alloy robot, dark joints,
-cyan selection, compact Oxanium headings, Plex Sans explanation and controls,
-and Plex Mono evidence. Shared tokens stay intact.
+OWN-WORLD: Retain the graphite interface, alloy robot, Plex and compact Oxanium.
+Role-colored body panels and top beacons encode purpose, with a distinct symbol
+and readable name. Selection uses an outline, not a change of role color.
 
-STORY: Follow six steps from demo order through stock check, pick and pack,
-courier dispatch, delivery and judge review. Inspect any of nine roles;
-Back to team restores the journey. A remembered, skippable four-step tour
-introduces the job, tools, guardrails and recorded tests.
+STORY: Follow one illustrated order from stock shelves to packing, dispatch
+and doorstep. Recovery review branches off as evidence. All nine roles remain
+inspectable; the complete robot and memory explorer remain unchanged.
 
-FIRST VIEWPORT: A compact title and working journey lead. Five robot miniatures
-follow the demo-input bag; four related specialists sit below the handoff legend
-and illustration note. Desktop runs horizontally; mobile runs vertically.
-Opening a robot restores the full-body model and reserved reading column.
+FIRST VIEWPORT: One elevated cutaway fills the working region. Stock shelves,
+packing bench, dispatch dock and a street to a doorstep share a floor and light.
+A short current-step explanation and compact role controls accompany it.
+Mobile keeps an overview and readable controls, without portrait stacks.
 
-FORM: The existing procedural Three.js machine supplies the inspection model
-and miniature portraits. Plain handoffs, generated headlines and in-place source
-reading carry the interaction. Memory retains its annotated synthetic record
-and four tabs. No new visual world or comparison composition was requested.
+FORM: User-selected procedural shared 3D delivery scene, code-led within the
+existing surface. Reuse the robot builder at bounded detail. No new global
+visual world or generated comp. seed: none (user-pinned structure; no roll).
 
-FINISH: Unreviewed and undocumented is unfinished. This extension ends with
-the finish review, verdict, current surface documentation and provenance in
-every shipping raster. Existing DESIGN.md and its sidecar are preserved.
+FINISH: unreviewed and undocumented is unfinished; this build ends with the
+finish review, verdict, this surface contract and its documentation record,
+with every shipping raster carrying provenance. Preserve the existing global
+DESIGN.md and sidecar: the purpose identities are local to this component.
 
-## Team journey and tour
+## Team scene contract
 
-- The default URL without an agent or part opens the team. Existing agent/part
-  deep links open the inspector. A miniature opens that role's mission;
-  Back to team returns focus to its miniature.
-- Inventory, fulfillment, dispatcher, courier and recovery judge form the store
-  route. Household, restaurant, market and customer service remain inspectable
-  specialists. The demo creates the order; household represents meal customers.
-  The judge reviews recovery evidence, not every successful delivery.
-- Solid, dashed and dotted paths mean queued handoffs, controller-routed A2A
-  requests and review evidence. Text and a visible legend explain them.
-  The journey is explicitly illustrative, not live activity.
-- Play order runs one finite journey with pause/replay. Reduced motion uses
-  manual Next step. Playback stops when hidden, offscreen or an agent opens.
-- The four-step first-visit tour supports Next, Pause/Resume and Skip. Completion
-  or dismissal is remembered locally; Replay tour remains available. Reduced
-  motion uses manual steps. Selecting a part stops the tour; completion or Skip
-  returns to the team.
-- View options groups Reset view, Pause motion, Read guide and Chapters.
-  Preserve the exact footer: "Built from the agents' real configuration files
-  and test results."
+- The previous miniature-portrait direction and SHIP are superseded by the
+  user's screenshot rejection on 2026-11-02. See the scene rejection review.
+- No raster portraits in the team region. All bots occupy one actual WebGL scene.
+- Colors, beacon symbols and names distinguish roles, consistently in scene,
+  accessible role controls and full-body inspector. The generated `ROLE_VISUALS`
+  mapping is authoritative; selection must not recolor a role. The shared symbol
+  set supplies the controls, top lights and inspector identity. See the
+  [local palette and source comparison](../review/delivery-scene-documentation.md#palette-and-identity).
+- Finite order playback supports pause/replay and manual reduced-motion steps.
+  The parcel remains at the doorstep when evidence passes to the recovery judge.
+- The four specialists stay discoverable beside their appropriate stations and
+  are not silently inserted into the store-order delivery sequence.
+- Provide keyboard access, fallback, focus restoration, suspension and disposal.
+- Preserve the remembered four-part tour and all source-backed inspector data.
 
 ## Inspection and evidence contract
 
@@ -99,8 +93,8 @@ every shipping raster. Existing DESIGN.md and its sidecar are preserved.
   in USD per run across templates; a zero cap is not an exhausted balance.
   The inspector names unit/scope and separate optional-profile limits.
 - Preserve bounded rendering, adaptive frame rate, pause, reduced motion,
-  offscreen suspension, disposal, SVG fallback and retry. Miniatures reuse the
-  existing renderer. No live telemetry, fabricated scores or currency conversion.
+  offscreen suspension, disposal, SVG fallback and retry. The shared scene reuses the same
+  robot geometry at bounded detail. No live telemetry, fabricated scores or currency conversion.
 - Oxanium stays self-hosted under SIL OFL 1.1. No external font requests,
   glowing type or global restyling.
 
@@ -129,42 +123,63 @@ every shipping raster. Existing DESIGN.md and its sidecar are preserved.
 
 ## Verification and finish
 
-Current reviewer disposition: **SHIP**, 2026-11-02, for this story/tour extension.
-The independent fresh-context reviewer inspected 38 captures and sampled source;
-persistence, fidelity, ceiling and keep passed, with no material fixes.
-See [current finish review](../review/anatomy-tour-finish-review.md) and
-[documentation record](../review/anatomy-tour-documentation.md).
-This is not CI or full-suite certification.
+The replacement shared scene received **SHIP** in the fresh-context
+[FULL finish review](../review/delivery-scene-finish-review.md) on 2026-11-02.
+The reviewer opened all 47 captures in that packet, sampled source and passed
+persistence, fidelity, ceiling and keep, with no material fixes. This replaces
+the rejected portrait version's earlier disposition. The local
+[documentation record](../review/delivery-scene-documentation.md) records the
+palette, typography, layout, rules and current capture inventory.
+
+The final narrow caption addendum also gives **SHIP**. Generated handoffs read
+`sender → recipient: handoff`, with a terminal “to” or “for” removed only for
+display. The reviewer reopened the four refreshed order-stage captures and scene
+fallback and found the single copy finding resolved; dispatch was checked in
+source because no separate dispatch capture was supplied. Generated data is
+unchanged, and the whole-surface visual decision remains separate.
+Full CI is running and is **not yet certified** by this record.
 
 The [browser receipt](../review/anatomy-checks.json), recorded at
-2026-11-02T19:28:55.467Z, covers 9 roles and 99 panels; team story; generated
-labels, headlines and badges; first-visit/remembered tour; full-body framing;
-sequential selection and orbit preservation; progressive details; keyboard;
-source dialog and Agent Card; finite animation; reduced motion; retry;
-context-loss fallback; disposal; and no horizontal page overflow. Its sampled
-render records 115 calls and 67,038 triangles.
+2026-11-02T22:33:41.288Z, covers 9 roles and 99 panels; one shared delivery scene;
+stable role identities; parcel retention at the doorstep during review; team
+and inspector context-loss fallbacks; generated labels, headlines and badges;
+first-visit/remembered tour; full-body framing; sequential selection and orbit
+preservation; progressive details; keyboard; source dialog and Agent Card;
+finite animation; reduced motion; retry; disposal; and no horizontal page
+overflow. Its sampled shared scene records **516 calls / 82,372 triangles**;
+the full inspector records **123 calls / 67,042 triangles**. These are bounded
+sampled render counts, not device-independent frame-rate measurements.
 
-The 36 required captures comprise six story views; overview, protocols and memory
-inspection at each of six sizes; four memory tabs on desktop/mobile; two tour
-views; budget; and SVG fallback. Viewports: 1440×1000, 1280×800, 390×844,
-1265×712, 1916×1244 and 1463×753. results-desktop.png and card-desktop.png are
-two supplemental viewport shots of scrolled inspector evidence. All 38 files
-carry embedded origin metadata; full-page heights can exceed viewport heights.
+The seven viewport sizes are **1440×1000, 1280×800, 390×844, 1265×712,
+1916×1244, 1463×753 and 1801×839**. The 47 current captures comprise seven
+story views; overview, protocols and memory inspection at each of seven sizes;
+eight desktop/mobile memory-tab views; two tours; budget; two fallbacks;
+results; Agent Card; and four order stages. Results and Agent Card are declared
+scrolled viewport captures; the other full-page captures start at the document
+top and can exceed the viewport height. All 47 PNGs and the
+[README image](../../docs/media/agent-anatomy.png) carry embedded
+`impeccable:prompt` origin metadata. The complete inventory and representative
+links are in the documentation record.
 
-The root agent reports 22 focused anatomy/presentation tests, the documentation
-catalogue (27 chapters, 164 sources) and asset-version check passing. The
-documenter ran no runtime tests or browser checks.
+The root agent reports **23 focused Python tests, Ruff, Mypy, documentation
+catalogue and asset-version checks passing**, together with browser coverage
+of 9 roles / 99 panels. The documenter read source, receipts and image metadata
+and sampled existing captures; it ran no runtime tests, server or browser.
 
-The [current detector](../review/anatomy-tour-detector.json) has three advisories.
-The reviewer accepted the tiny order-marker radius and local story-heading size;
-saved captures contradicted the black-text advisory. These are not new global
-tokens. No QUALITY BAR card or approved comparison composition was supplied.
-The baseline is the established surface, shared system and source contracts.
-Earlier [memory](../review/memory-finish.md) and
-[inspection](../review/agent-inspection-finish.md) records remain historical.
+The [current detector](../review/delivery-scene-detector.json) is `[]` from one
+finish run. Earlier detector advisories and the portrait review belong to the
+superseded implementation. No QUALITY BAR card or approved comparison comp was
+supplied; the baseline is the user-pinned shared scene, established surface,
+shared system and source contracts. The
+[portrait rejection](../review/scene-rejection-review.md),
+[previous tour finish](../review/anatomy-tour-finish-review.md),
+[memory finish](../review/memory-finish.md) and
+[inspection finish](../review/agent-inspection-finish.md) remain historical.
 
 DESIGN.md and .impeccable/design.json remain unchanged. Their older two-primary-
-values prose does not specify this surface's new single-headline hierarchy or
-its earlier memory exception. Oxanium journey headings are local adaptations,
-not shared title changes. The sidecar's older Bakiano title/date and PRODUCT.md's
-older worktree metadata remain reported drift, not unrequested repairs.
+values prose does not specify this surface's single generated headline or its
+memory exception. The generated purpose colors and symbols are a local semantic
+identity extension, and compact Oxanium journey headings are a local adaptation.
+Neither changes the shared typography or global accent. The sidecar's older
+Bakiano title/date and PRODUCT.md's older worktree metadata remain reported
+drift, not unrequested repairs.

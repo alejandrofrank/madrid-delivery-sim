@@ -113,3 +113,13 @@ def test_card_fields_keep_runtime_identity_and_skill_descriptions(anatomy):
             assert card["name"] in values
             for skill in card.get("skills", []):
                 assert skill["description"] in values
+
+
+def test_role_identity_is_distinct_and_covers_the_whole_team(anatomy):
+    import re
+
+    visuals = [a["visual"] for a in anatomy["agents"]]
+    assert len({v["color"] for v in visuals}) == len(visuals) == 9
+    assert len({v["symbol"] for v in visuals}) == len(visuals)
+    assert all(re.fullmatch(r"#[0-9a-f]{6}", v["color"]) and v["label"] for v in visuals)
+    assert next(a for a in anatomy["agents"] if a["id"] == "judge")["visual"]["symbol"] == "review"

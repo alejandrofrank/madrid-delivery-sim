@@ -5,7 +5,7 @@ Queue-driven delivery agents on Madrid streets, with Google ADK, real A2A endpoi
 **[Meet the agents — interactive anatomy](http://localhost:8010/architecture)** ·
 [Repository guide](docs/AGENT-ANATOMY.md)
 
-[![Agent team journey and interactive 3D anatomy](docs/media/agent-anatomy.png)](http://localhost:8010/architecture)
+[![Shared 3D delivery scene with purpose-colored robots and interactive anatomy](docs/media/agent-anatomy.png)](http://localhost:8010/architecture)
 
 Start with one order moving through the team, then click a robot. A short,
 skippable first-visit tour explains its job, tools, rules and recorded tests.
@@ -39,7 +39,7 @@ memory leaking across orders or roles. ADK proposes through granular tools;
 scoped SQL, durable queues and authenticated A2A boundaries enforce the contract.
 Routine policies can run without a model.
 
-**1,056 Python tests in the suite**, plus all **99 anatomy panels**
+**1,057 Python tests in the suite**, plus all **99 anatomy panels**
 checked in the browser ([verification workflow](https://github.com/alejandrofrank/madrid-delivery-sim/actions/workflows/ci.yml));
 **pass^5 = 1.000 across 72 held-out cases** (360 attempts), with an all-pass
 bootstrap interval of [1, 1] in the [release receipt](docs/evidence/heldout-release.json).

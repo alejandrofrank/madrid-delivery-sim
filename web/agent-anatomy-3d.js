@@ -9,27 +9,9 @@ const anchors = {
   model:[0,2.18,.92], protocols:[.67,4.15,0], events:[-1.04,3.09,-.05],
   evals:[0,1.52,.85], environment:[.9,.58,.66],
 };
-export function createAgentScene(host, {onPart, onFailure, buttons}) {
-  const reduced = matchMedia('(prefers-reduced-motion: reduce)');
-  const renderer = new THREE.WebGLRenderer({antialias:true,alpha:false,preserveDrawingBuffer:true,powerPreference:'low-power'});
-  renderer.setPixelRatio(Math.min(devicePixelRatio,1.5));
-  renderer.setClearColor(0x0c151c);
-  renderer.shadowMap.enabled=true; renderer.shadowMap.type=THREE.PCFSoftShadowMap;
-  renderer.toneMapping=THREE.ACESFilmicToneMapping; renderer.toneMappingExposure=1.3;
-  const canvas=renderer.domElement;
-  canvas.tabIndex=0; canvas.setAttribute('role','img');
-  canvas.setAttribute('aria-label','3D agent. Drag to rotate, arrows to orbit, plus and minus to zoom. Select a component using the adjacent controls.');
-  host.prepend(canvas);
-  const scene=new THREE.Scene();
-  scene.fog=new THREE.Fog(0x0c151c,15,32);
-  const camera=new THREE.PerspectiveCamera(34,1,.1,60);
-  const controls=new OrbitControls(camera,canvas);
-  controls.enablePan=false; controls.enableDamping=false;
-  controls.minDistance=4; controls.maxDistance=20;
-  controls.minPolarAngle=.45; controls.maxPolarAngle=1.55;
-  controls.enableZoom=false; // Page scrolling remains native; explicit buttons/keys zoom.
+export function createAgentModel({detail=true}={}) {
   const resources=new Set(), parts=new Map(), root=new THREE.Group(), rig=new THREE.Group();
-  scene.add(root); root.add(rig);
+  root.add(rig);
   const mat=(color,metalness=.45,roughness=.32,extra={})=>{
     const m=new THREE.MeshStandardMaterial({color,metalness,roughness,...extra});
     resources.add(m); return m;
@@ -38,7 +20,8 @@ export function createAgentScene(host, {onPart, onFailure, buttons}) {
   const rubber=mat(0x101d24,.12,.82), metal=mat(0x647f8e,.8,.24);
   const light=mat(0x60dfd3,.25,.28,{emissive:0x1ca999,emissiveIntensity:.35});
   const glass=mat(0x153c48,.55,.16), pale=mat(0xc3d2d4,.4,.5);
-  const accent=mat(0x478b91,.65,.34);
+  const accent=mat(0x478b91,.65,.34);accent.userData.rolePaint=true;
+  const beacon=mat(0x60dfd3,.2,.3,{emissive:0x60dfd3,emissiveIntensity:.35});beacon.userData.roleBeacon=true;
   const geometry=g=>{resources.add(g);return g;};
   function part(id){const p=new THREE.Group(); p.userData.part=id;rig.add(p);parts.set(id,p);return p;}
   function mesh(g,m,parent,x=0,y=0,z=0){
@@ -46,6 +29,7 @@ export function createAgentScene(host, {onPart, onFailure, buttons}) {
     obj.castShadow=true;obj.receiveShadow=true;parent.add(obj);return obj;
   }
   function bevel(w,h,d,r=.08) {
+    if(!detail)return new THREE.BoxGeometry(w,h,d);
     const s=new THREE.Shape(),x=-w/2,y=-h/2;
     s.moveTo(x+r,y);s.lineTo(x+w-r,y);s.quadraticCurveTo(x+w,y,x+w,y+r);
     s.lineTo(x+w,y+h-r);s.quadraticCurveTo(x+w,y+h,x+w-r,y+h);
@@ -55,13 +39,13 @@ export function createAgentScene(host, {onPart, onFailure, buttons}) {
     g.translate(0,0,-d/2+.03);return g;
   }
   const box=(p,x,y,z,w,h,d,m=alloy,r=.07)=>mesh(bevel(w,h,d,r),m,p,x,y,z);
-  const cylinder=(p,x,y,z,r,h,m=metal,r2=r)=>mesh(new THREE.CylinderGeometry(r,r2,h,24),m,p,x,y,z);
-  const sphere=(p,x,y,z,r,m=metal)=>mesh(new THREE.SphereGeometry(r,18,12),m,p,x,y,z);
+  const cylinder=(p,x,y,z,r,h,m=metal,r2=r)=>mesh(new THREE.CylinderGeometry(r,r2,h,detail?24:10),m,p,x,y,z);
+  const sphere=(p,x,y,z,r,m=metal)=>mesh(new THREE.SphereGeometry(r,detail?18:8,detail?12:6),m,p,x,y,z);
   const tube=(p,points,r,m=metal)=>{
     const curve=new THREE.CatmullRomCurve3(points.map(v=>new THREE.Vector3(...v)));
-    return mesh(new THREE.TubeGeometry(curve,16,r,8,false),m,p);
+    return mesh(new THREE.TubeGeometry(curve,detail?16:6,r,detail?8:5,false),m,p);
   };
-  const ring=(p,x,y,z,r,t,m=metal)=>mesh(new THREE.TorusGeometry(r,t,10,36),m,p,x,y,z);
+  const ring=(p,x,y,z,r,t,m=metal)=>mesh(new THREE.TorusGeometry(r,t,detail?10:6,detail?36:12),m,p,x,y,z);
   const base=part('environment');
   box(base,0,.96,0,1.58,.4,1.05,dark);
   for(const side of [-1,1]){
@@ -87,7 +71,7 @@ export function createAgentScene(host, {onPart, onFailure, buttons}) {
   const cab=part('mission');
   cylinder(cab,0,2.94,0,.35,.16,metal);
   box(cab,0,3.32,0,1.5,.69,1.14,alloy,.16);
-  box(cab,0,3.68,0,1.38,.08,1.03,metal,.025);
+  box(cab,0,3.68,0,1.38,.08,1.03,accent,.025);
   box(cab,0,3.47,.58,1.17,.21,.04,glass,.04);
   for(const x of [-.55,.55])box(cab,x,3.49,.61,.03,.14,.035,metal,.012);
   const face=part('persona');
@@ -127,7 +111,7 @@ export function createAgentScene(host, {onPart, onFailure, buttons}) {
     ring(arms,s*1.25,2.03,.31,.12,.025,metal);
     const forearm=new THREE.Group();forearm.position.set(s*1.27,1.99,.06);arms.add(forearm);
     box(forearm,0,-.28,0,.28,.53,.36,metal,.07);
-    box(forearm,0,-.24,.2,.12,.29,.06,alloy,.025);
+    box(forearm,0,-.24,.2,.12,.29,.06,accent,.025);
     for(const side of [-1,1]){
       box(forearm,side*.15,-.66,.07,.1,.28,.15,alloy,.035).rotation.z=side*.16;
       box(forearm,side*.1,-.8,.12,.16,.09,.21,dark,.025);
@@ -138,7 +122,7 @@ export function createAgentScene(host, {onPart, onFailure, buttons}) {
   const aerial=part('protocols');
   box(aerial,.54,3.72,-.2,.25,.11,.28,dark,.03);
   cylinder(aerial,.54,3.96,-.2,.035,.44,metal);
-  sphere(aerial,.54,4.2,-.2,.09,light);
+  sphere(aerial,.54,4.2,-.2,.14,beacon);
   const dish=cylinder(aerial,.54,4.12,-.2,.19,.06,alloy,.08);dish.rotation.x=.4;
   const events=part('events');
   for(const s of [-1,1]){
@@ -160,10 +144,12 @@ export function createAgentScene(host, {onPart, onFailure, buttons}) {
     const texture=new THREE.CanvasTexture(surface);texture.colorSpace=THREE.SRGBColorSpace;resources.add(texture);
     const material=mat(0xffffff,.15,.7,{map:texture});
     mesh(new THREE.PlaneGeometry(w,h),material,parent,x,y,z);
-    return {surface,texture};
+    return {surface,texture,material};
   }
+  const roleLight=badge(aerial,.54,4.3,-.04,.38,.38,96,96);
+  roleLight.material.transparent=true;roleLight.material.depthWrite=false;
   const roleBadge=badge(cab,0,3.47,.617,1.03,.14,512,72);
-  const toolBadges=[-1,1].flatMap(side=>[2.48,2.28].map(y=>badge(arms,side*1.15,y,.267,.19,.16,96,80)));
+  const toolBadges=detail?[-1,1].flatMap(side=>[2.48,2.28].map(y=>badge(arms,side*1.15,y,.267,.19,.16,96,80))):[];
   function paintIcon(target,tool){
     const ctx=target.surface.getContext('2d');ctx.clearRect(0,0,96,80);ctx.fillStyle='#153c48';ctx.fillRect(0,0,96,80);
     if(!tool){target.texture.needsUpdate=true;return;}
@@ -178,7 +164,15 @@ export function createAgentScene(host, {onPart, onFailure, buttons}) {
     else{ctx.rect(25,19,46,42);ctx.moveTo(25,32);ctx.lineTo(71,32);ctx.moveTo(48,19);ctx.lineTo(48,41);}
     ctx.stroke();target.texture.needsUpdate=true;
   }
-  function decorate(agent){
+  function decorate(agent,canvas){
+    const color=agent.visual?.color||"#23d8ce";
+    window.AgentRoleSymbols.paint(roleLight.surface,agent.visual);roleLight.texture.needsUpdate=true;
+    for(const material of resources){
+      if(material.userData?.rolePaint)material.color.set(color);
+      if(material.userData?.roleBeacon){material.color.set(color);material.emissive.set(color);}
+    }
+    rig.traverse(obj=>{if(obj.isMesh&&obj.material.userData.roleBeacon&&obj.userData.originalEmissive)obj.userData.originalEmissive.set(color);});
+    if(canvas)canvas.dataset.roleColor=color;
     const ctx=roleBadge.surface.getContext('2d');ctx.fillStyle='#153c48';ctx.fillRect(0,0,512,72);
     ctx.fillStyle='#e5eef5';ctx.font='600 38px "IBM Plex Sans", sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';
     ctx.fillText(agent.badge,256,37,480);roleBadge.texture.needsUpdate=true;
@@ -189,23 +183,11 @@ export function createAgentScene(host, {onPart, onFailure, buttons}) {
       bar.userData.originalIntensity=i<lit?.35:0;
     });
     toolBadges.forEach((badge,index)=>paintIcon(badge,agent.tool_badges[index]));
-    canvas.dataset.budget=JSON.stringify({...agent.budget,bars:lit});
+    if(canvas){canvas.dataset.budget=JSON.stringify({...agent.budget,bars:lit});
     canvas.dataset.tools=JSON.stringify(agent.tool_badges.map(t=>t.id));
-    canvas.dataset.badge=agent.badge;
+    canvas.dataset.badge=agent.badge;}
   }
 
-  const platform=mesh(new THREE.CylinderGeometry(2.35,2.43,.13,80),mat(0x182730,.5,.6),scene,0,-.035,0);
-  platform.receiveShadow=true;
-  const trim=ring(scene,0,.04,0,2.25,.012,metal);trim.rotation.x=-Math.PI/2;
-  const floor=mesh(new THREE.PlaneGeometry(100,100),mat(0x0c151c,.1,.9),scene,0,-.11,0);
-  floor.rotation.x=-Math.PI/2;floor.castShadow=false;
-  scene.add(new THREE.HemisphereLight(0xc8dde7,0x223038,2.2));
-  const key=new THREE.SpotLight(0xe9f3fa,105,30,.55,.75,1);
-  key.position.set(-4,8,6);key.target.position.set(0,1.9,0);key.castShadow=true;
-  key.shadow.mapSize.set(1024,1024);key.shadow.bias=-.0003;key.shadow.normalBias=.03;
-  scene.add(key,key.target);
-  const rim=new THREE.DirectionalLight(0x7ba6b5,3.2);rim.position.set(4,5,-5);scene.add(rim);
-  const fill=new THREE.DirectionalLight(0x9cc4ca,1.1);fill.position.set(4,2,5);scene.add(fill);
   // Batch rigid surfaces by material while keeping the articulated groups separate.
   function batch(parent){
     for(const child of [...parent.children])if(child.isGroup)batch(child);
@@ -224,12 +206,56 @@ export function createAgentScene(host, {onPart, onFailure, buttons}) {
       meshes.forEach(child=>parent.remove(child));mesh(merged,material,parent);
     }
   }
-  batch(rig);
+  if(!detail){
+    rig.updateMatrixWorld(true);
+    const flat=new THREE.Group();
+    rig.traverse(obj=>{if(obj.isMesh){
+      const copy=new THREE.Mesh(obj.geometry,obj.material);
+      copy.applyMatrix4(obj.matrixWorld);flat.add(copy);
+    }});
+    rig.clear();rig.add(flat);batch(flat);
+  }else batch(rig);
   const ownedMaterials=new Set();
-  for(const p of parts.values())p.traverse(obj=>{
+  if(detail)for(const p of parts.values())p.traverse(obj=>{
     if(obj.isMesh){obj.material=obj.material.clone();resources.add(obj.material);ownedMaterials.add(obj.material);
       obj.userData.originalEmissive=obj.material.emissive.clone();obj.userData.originalIntensity=obj.material.emissiveIntensity;}
   });
+  return {resources,parts,root,rig,mat,mesh,ring,metal,fan,forearms,decorate};
+}
+
+export function createAgentScene(host, {onPart, onFailure, buttons}) {
+  const reduced = matchMedia('(prefers-reduced-motion: reduce)');
+  const renderer = new THREE.WebGLRenderer({antialias:true,alpha:false,preserveDrawingBuffer:true,powerPreference:'low-power'});
+  renderer.setPixelRatio(Math.min(devicePixelRatio,1.5));
+  renderer.setClearColor(0x0c151c);
+  renderer.shadowMap.enabled=true; renderer.shadowMap.type=THREE.PCFSoftShadowMap;
+  renderer.toneMapping=THREE.ACESFilmicToneMapping; renderer.toneMappingExposure=1.3;
+  const canvas=renderer.domElement;
+  canvas.tabIndex=0; canvas.setAttribute('role','img');
+  canvas.setAttribute('aria-label','3D agent. Drag to rotate, arrows to orbit, plus and minus to zoom. Select a component using the adjacent controls.');
+  host.prepend(canvas);
+  const scene=new THREE.Scene();
+  scene.fog=new THREE.Fog(0x0c151c,15,32);
+  const camera=new THREE.PerspectiveCamera(34,1,.1,60);
+  const controls=new OrbitControls(camera,canvas);
+  controls.enablePan=false; controls.enableDamping=false;
+  controls.minDistance=4; controls.maxDistance=20;
+  controls.minPolarAngle=.45; controls.maxPolarAngle=1.55;
+  controls.enableZoom=false; // Page scrolling remains native; explicit buttons/keys zoom.
+  const {resources,parts,root,rig,mat,mesh,ring,metal,fan,forearms,decorate}=createAgentModel();
+  scene.add(root);
+  const platform=mesh(new THREE.CylinderGeometry(2.35,2.43,.13,80),mat(0x182730,.5,.6),scene,0,-.035,0);
+  platform.receiveShadow=true;
+  const trim=ring(scene,0,.04,0,2.25,.012,metal);trim.rotation.x=-Math.PI/2;
+  const floor=mesh(new THREE.PlaneGeometry(100,100),mat(0x0c151c,.1,.9),scene,0,-.11,0);
+  floor.rotation.x=-Math.PI/2;floor.castShadow=false;
+  scene.add(new THREE.HemisphereLight(0xc8dde7,0x223038,2.2));
+  const key=new THREE.SpotLight(0xe9f3fa,105,30,.55,.75,1);
+  key.position.set(-4,8,6);key.target.position.set(0,1.9,0);key.castShadow=true;
+  key.shadow.mapSize.set(1024,1024);key.shadow.bias=-.0003;key.shadow.normalBias=.03;
+  scene.add(key,key.target);
+  const rim=new THREE.DirectionalLight(0x7ba6b5,3.2);rim.position.set(4,5,-5);scene.add(rim);
+  const fill=new THREE.DirectionalLight(0x9cc4ca,1.1);fill.position.set(4,2,5);scene.add(fill);
   let disposed=false,selected=null,hovered=null,motion=true,visible=true,last=0,clock=0;
   let dirty=true,frames=0,totalMs=0,fps=30,raf=0,viewWidth=0,viewHeight=0;
   const bodyBox=new THREE.Box3().setFromObject(rig);
@@ -337,6 +363,7 @@ export function createAgentScene(host, {onPart, onFailure, buttons}) {
   function draw(now){
     if(disposed)return;
     raf=requestAnimationFrame(draw);
+    if(dirty){const bounds=host.getBoundingClientRect();visible=bounds.width>0&&bounds.height>0&&bounds.bottom>0&&bounds.top<innerHeight;}
     if(document.hidden||!visible||host.hidden||now-last<1000/fps)return;
     resize(); // Layout may change before ResizeObserver delivers its callback.
     const dt=Math.min((now-last)/1000,.08);last=now;
@@ -365,13 +392,6 @@ export function createAgentScene(host, {onPart, onFailure, buttons}) {
   }
   camera.position.copy(basePosition);controls.target.copy(baseTarget);resize();raf=requestAnimationFrame(draw);
   return {focus,reset,dispose,pause(value){motion=!value;dirty=true;},hover(id){hovered=id;highlight();},
-    agent(agent){canvas.dataset.agent=agent.id;decorate(agent);reset();},
-    thumbnail(agent){
-      decorate(agent);selected=null;hovered=null;highlight();root.rotation.y=0;rig.position.y=0;
-      camera.position.copy(basePosition);camera.aspect=180/210;camera.updateProjectionMatrix();fitFrame(true);
-      renderer.setSize(180,210,false);camera.lookAt(baseTarget);camera.updateMatrixWorld(true);renderer.render(scene,camera);
-      const image=canvas.toDataURL('image/webp',.85);
-      viewWidth=0;viewHeight=0;resize();return image;
-    },
+    agent(agent){canvas.dataset.agent=agent.id;decorate(agent,canvas);reset();},
     wake(){dirty=true;resize();}};
 }

@@ -67,49 +67,71 @@
 .anatomy-card{margin-top:16px}
 .anatomy-card summary{cursor:pointer}
 .anatomy-card pre{max-height:260px;overflow:auto;font:11px/1.6 var(--ui-mono);padding:10px;background:var(--ui-surface)}
-/* One order is the map of this team; the existing robot is its entry point. */
-.anatomy-team-panel{padding:12px 0 24px;min-width:0}
-.anatomy-team-toolbar{display:flex;align-items:center;justify-content:space-between;gap:16px;margin:8px 0 24px}
-.story-caption{color:var(--ui-muted);font-size:14px}
-.anatomy-flow{list-style:none;display:grid;grid-template-columns:repeat(6,minmax(0,1fr));margin:0;padding:0}
-.story-step{position:relative;min-width:0;padding-bottom:80px}
-#agent-anatomy .team-diagram-agent{display:flex;flex-direction:column;align-items:center;width:100%;gap:10px;text-align:center;background:transparent;border:1px solid transparent;border-radius:0;padding:8px 10px 14px}
-#agent-anatomy .team-diagram-agent:hover{background:var(--ui-surface);border-color:var(--ui-line)}
-.story-portrait{display:block;flex-shrink:0}
-.story-portrait img,.story-portrait .agent-machine{display:block;width:144px;height:168px;max-width:100%;object-fit:contain}
-.story-step-copy{display:flex;flex-direction:column;align-items:center;gap:6px}
-.story-number{font:12px/1.4 var(--ui-mono);color:var(--ui-muted)}
-.story-step-copy strong{font:600 18px/1.4 Oxanium,var(--ui-font)}
-.story-role{font-size:12px;color:var(--ui-muted)}
-.story-description{font:14px/1.5 var(--ui-font);max-width:21ch;color:var(--ui-muted)}
-.story-handoff{position:absolute;bottom:0;left:50%;width:100%;height:76px;display:flex;flex-direction:column;align-items:center;gap:10px;z-index:1;pointer-events:none;color:var(--ui-muted);font-size:12px;line-height:1.4;text-align:center}
-.story-handoff>span:last-child{max-width:19ch;padding:0 10px}
-.story-track{position:relative;display:block;width:100%;height:1px;border-top:1px solid var(--ui-strong-line)}
-.story-track:after{content:"";position:absolute;right:0;top:-4px;border:solid var(--ui-strong-line);border-width:0 1px 1px 0;display:block;padding:3px;transform:rotate(-45deg)}
-.story-handoff[data-kind="a2a"] .story-track{border-top:1px dashed var(--ui-info)}
-.story-handoff[data-kind="review"] .story-track{border-top:1px dotted var(--ui-muted)}
-.story-order{position:absolute;left:0;top:-5px;width:9px;height:9px;border-radius:2px;background:var(--ui-accent);visibility:hidden}
-.story-step.is-current .story-number{color:var(--ui-accent)}
-.story-step.is-current .story-order{visibility:visible}
-.story-step.is-travelling .story-order{animation:order-travel 2.8s linear 1 both}
-@keyframes order-travel{from{left:0}to{left:calc(100% - 9px)}}
-.story-current{font-size:14px;padding:12px 0;margin-top:12px;border-bottom:1px solid var(--ui-line)}
+/* The team shares a physical delivery setting; role color is identity, white is selection. */
+.anatomy-team-panel{padding:4px 0 20px;min-width:0}
+.anatomy-team-toolbar{display:flex;align-items:center;justify-content:space-between;gap:16px;margin:4px 0}
+.anatomy-team-toolbar>div{display:flex;gap:8px}
+.anatomy-team-toolbar button{font-size:12px;min-height:36px;background:transparent}
+.story-caption{color:var(--ui-muted);font-size:13px}
+.delivery-scene{height:clamp(390px,60svh,700px);position:relative;overflow:hidden;isolation:isolate}
+.delivery-scene-canvas{display:block;width:100%;height:100%;cursor:grab;touch-action:pan-y}
+.delivery-scene-canvas:focus-visible{outline:2px solid var(--ui-accent);outline-offset:-4px}
+.delivery-scene-labels{position:absolute;inset:0;pointer-events:none}
+.scene-role-label{position:absolute;top:0;left:0;display:flex;align-items:center;gap:5px;background:var(--ui-bg);padding:4px 7px;border:1px solid var(--ui-line);font-size:11px;white-space:nowrap;color:var(--ui-ink)}
+.role-symbol{display:block;width:22px;height:22px;flex-shrink:0;color:var(--role-color)}
+.scene-role-label .role-symbol{width:16px;height:16px}
+.scene-role-label.is-owner,.scene-role-label.is-hovered{border-color:var(--ui-ink);z-index:1}
+.scene-loading{position:absolute;inset:45% 0;text-align:center;color:var(--ui-muted);font-size:13px}
+.anatomy-flow{list-style:none;display:grid;grid-template-columns:repeat(6,minmax(0,1fr));margin:0;padding:0;border-top:1px solid var(--ui-line)}
+.story-step{min-width:0}
+#agent-anatomy .story-step button{width:100%;display:flex;align-items:center;gap:9px;border:0;border-top:2px solid transparent;background:transparent;border-radius:0;padding:12px 8px;text-align:left;font-size:13px;min-height:44px;color:var(--ui-muted)}
+#agent-anatomy .story-step.is-current button{border-color:var(--ui-accent);color:var(--ui-ink);background:var(--ui-surface)}
+.story-number{font:11px/1.4 var(--ui-mono);color:var(--ui-muted)}
+.story-current{font-size:14px;line-height:1.5;padding:12px 0;margin:0}
+.story-roles{display:flex;flex-wrap:wrap;gap:6px 12px;border-block:1px solid var(--ui-line);padding:9px 0}
+#agent-anatomy .story-role-button{display:flex;align-items:center;gap:8px;padding:8px 10px;font-size:13px;background:transparent;border:1px solid transparent;min-height:44px}
+#agent-anatomy .story-role-button:hover{background:var(--ui-surface);border-color:var(--ui-strong-line)}
+.story-explanation{font-size:12px;color:var(--ui-muted);margin-top:12px}
+.story-explanation>summary{cursor:pointer;width:fit-content;padding:6px 0}
 .story-legend{display:flex;flex-wrap:wrap;gap:20px 32px;margin:18px 0 8px;font-size:12px}
 .story-legend dt{display:flex;align-items:center;gap:8px;color:var(--ui-ink)}
 .story-legend dd{margin:5px 0 0;color:var(--ui-muted)}
 .story-legend-line{display:inline-block;width:32px;border-top:1px solid var(--ui-strong-line)}
 .story-legend-line[data-kind="a2a"]{border-top:1px dashed var(--ui-info)}
 .story-legend-line[data-kind="review"]{border-top:1px dotted var(--ui-muted)}
+.story-handoffs{padding-left:20px;line-height:1.8;margin:12px 0}
 .story-note{font-size:12px;color:var(--ui-muted);line-height:1.6}
-.story-support{margin-top:28px;border-top:1px solid var(--ui-line);padding-top:20px}
-.story-support h3{font:600 16px/1.5 var(--ui-font);margin:0 0 14px}
-.story-support-list{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:20px}
-#agent-anatomy .story-specialist{display:flex;align-items:center;gap:12px;text-align:left;background:transparent;border:1px solid transparent;padding:8px}
-.story-specialist:hover{border-color:var(--ui-line)!important;background:var(--ui-surface)!important}
-.story-specialist .story-portrait img,.story-specialist .agent-machine{width:68px;height:80px}
-.story-specialist>span:last-child{display:flex;flex-direction:column;gap:6px}
-.story-specialist strong{font:600 15px/1.4 var(--ui-font)}
-.story-specialist>span>span{font:13px/1.5 var(--ui-font);color:var(--ui-muted)}
+.scene-fallback-note{font-size:13px;color:var(--ui-muted);margin:20px 0}
+.scene-plan{display:grid;grid-template-columns:2fr 1fr 1fr;gap:20px;padding:30px 10px}
+.scene-plan section{border:1px solid var(--ui-line);padding:16px;background:var(--ui-surface)}
+.scene-plan h3{font-size:14px;margin-bottom:16px}
+#agent-anatomy .scene-plan button{display:flex;align-items:center;gap:9px;margin:8px 0;min-height:44px;background:transparent;border:1px solid transparent}
+#agent-anatomy .scene-plan .is-owner{border-color:var(--ui-ink)}
+@media(max-width:1000px){.scene-role-label{font-size:10px;padding:3px 5px}.story-roles{gap:2px}}
+@media(max-width:700px){
+ .delivery-scene{height:360px;margin-inline:-12px}
+ .delivery-scene.is-fallback{height:auto;min-height:360px;margin-inline:0}
+ .scene-role-label:not(.is-owner):not(.is-hovered){display:none}
+ .anatomy-team-toolbar{align-items:flex-start;margin:12px 0 0}
+ .anatomy-team-toolbar>div{gap:4px}
+ .anatomy-team-toolbar button{min-height:44px;padding:8px}
+ .story-reset{display:none}
+ .story-caption{max-width:22ch}
+ .anatomy-flow{grid-template-columns:repeat(3,minmax(0,1fr))}
+ #agent-anatomy .story-step button{font-size:12px;padding:9px 6px;gap:6px}
+ .story-current{min-height:70px;font-size:13px}
+ .story-roles{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:2px}
+ #agent-anatomy .story-role-button{font-size:12px;padding:6px}
+ .story-legend{display:grid;gap:12px}
+ .scene-plan{grid-template-columns:1fr;padding:0;gap:8px}
+ .scene-plan section{padding:12px;display:flex;flex-wrap:wrap;gap:4px}
+ .scene-plan h3{width:100%;margin:0}
+ .anatomy-tour{display:block;padding:12px}
+ .anatomy-tour>div{margin-top:10px;flex-wrap:wrap}
+ .anatomy-tour button,.anatomy-options>summary,.anatomy-option-items>button{min-height:44px}
+ .anatomy-actions{justify-content:flex-start;flex-wrap:wrap}
+ .anatomy-options{margin-left:auto}
+}
 .anatomy-options{position:relative;font-size:13px;z-index:12;align-self:flex-start}
 .anatomy-options>summary{cursor:pointer;list-style:none;border:1px solid var(--ui-strong-line);border-radius:var(--ui-radius);padding:8px 12px;min-height:36px}
 .anatomy-options>summary::-webkit-details-marker{display:none}
@@ -134,40 +156,6 @@
 .anatomy-card-fields dd{font-size:13px;line-height:1.6;color:var(--ui-muted);margin:5px 0 0;overflow-wrap:anywhere;white-space:pre-wrap}
 .hotspot-label strong{display:block;font-weight:500}
 .hotspot-label small{display:block;color:var(--ui-muted);font-size:11px}
-@media(max-width:1000px){
- .story-portrait img,.story-portrait .agent-machine{width:110px;height:129px}
- .story-step-copy strong{font-size:15px}
- .story-description{font-size:13px}
- .story-handoff{font-size:11px}
-}
-@media(max-width:700px){
- .anatomy-team-toolbar{margin:16px 0}
- .anatomy-flow{display:block}
- .story-step{padding-bottom:38px}
- #agent-anatomy .team-diagram-agent{display:grid;grid-template-columns:88px minmax(0,1fr);text-align:left;gap:18px;padding:4px 0 8px}
- .story-step-copy{align-items:flex-start;gap:4px}
- .story-step-copy strong{font-size:18px}
- .story-description{max-width:none;font-size:14px}
- .story-portrait img,.story-portrait .agent-machine{width:88px;height:103px}
- .story-number{font-size:11px}
- .story-handoff{left:44px;bottom:4px;width:calc(100% - 44px);height:32px;flex-direction:row;text-align:left;gap:24px;font-size:12px}
- .story-handoff>span:last-child{max-width:none;padding:0 12px 0 0}
- .story-track{width:1px;height:32px;border-top:0;border-left:1px solid var(--ui-strong-line);flex-shrink:0}
- .story-track:after{top:auto;right:-3px;bottom:0;transform:rotate(45deg)}
- .story-handoff[data-kind="a2a"] .story-track{border-top:0;border-left:1px dashed var(--ui-info)}
- .story-handoff[data-kind="review"] .story-track{border-top:0;border-left:1px dotted var(--ui-muted)}
- .story-order{left:-5px;top:0}
- .story-step.is-travelling .story-order{animation-name:order-travel-down}
- .story-legend{display:grid;gap:12px}
- .story-support-list{grid-template-columns:1fr;gap:6px}
- .anatomy-tour{display:block;padding:12px}
- .anatomy-tour>div{margin-top:10px;flex-wrap:wrap}
- .anatomy-tour button,.anatomy-options>summary,.anatomy-option-items>button{min-height:44px}
- .anatomy-actions{justify-content:flex-start;flex-wrap:wrap}
- .anatomy-options{margin-left:auto}
-}
-@keyframes order-travel-down{from{top:0}to{top:calc(100% - 9px)}}
-@media(prefers-reduced-motion:reduce){.story-step.is-travelling .story-order{animation:none}}
 .agent-machine{width:70px;height:92px}
 .anatomy-edge-list{padding:16px 0;color:var(--ui-muted);font-size:12px}
 .anatomy-edge-list summary{cursor:pointer;width:fit-content}

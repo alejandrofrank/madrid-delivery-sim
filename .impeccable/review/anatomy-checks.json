@@ -1,11 +1,19 @@
 {
-  "checked_at": "2026-11-02T19:28:55.467Z",
+  "checked_at": "2026-11-02T22:33:41.288Z",
   "agents": 9,
   "panels": 99,
   "render": {
-    "calls": 115,
-    "triangles": 67038
+    "calls": 123,
+    "triangles": 67042
   },
+  "team_render": {
+    "calls": 516,
+    "triangles": 82372
+  },
+  "shared_delivery_scene": true,
+  "role_identities": true,
+  "parcel_retained_at_doorstep": true,
+  "team_context_loss_fallback": true,
   "webgl": true,
   "team_story": true,
   "generated_labels": true,
@@ -56,6 +64,11 @@
       "name": "user-1463",
       "width": 1463,
       "height": 753
+    },
+    {
+      "name": "user-1801",
+      "width": 1801,
+      "height": 839
     }
   ]
 }

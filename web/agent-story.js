@@ -1,84 +1,93 @@
-/* One illustrated order. All role and handoff descriptions come from the API. */
+/* An illustrated order in one shared place; role and handoff copy comes from the API. */
 window.AgentStory=(()=>{
  const make=(tag,text,cls)=>{const el=document.createElement(tag);if(text!==undefined)el.textContent=text;if(cls)el.className=cls;return el;};
- function mount(host,data,choose,machine){
+ function mount(host,data,choose){
   const reduced=matchMedia('(prefers-reduced-motion: reduce)');
   const section=make('section',undefined,'anatomy-team-panel');section.setAttribute('aria-label','How one order moves');
   const tools=make('div',undefined,'anatomy-team-toolbar');
   const caption=make('p','Click a robot to see how it works.','story-caption');
   const replay=make('button',reduced.matches?'Next step':'Play order');replay.id='story-play';
-  tools.append(caption,replay);section.append(tools);
+  const reset=make('button','Reset scene');reset.className='story-reset';
+  const actions=make('div');actions.append(reset,replay);tools.append(caption,actions);section.append(tools);
+  const place=make('div',undefined,'delivery-scene');section.append(place);
+  const loading=make('p','Loading the delivery scene…','scene-loading');place.append(loading);
   const flow=make('ol',undefined,'anatomy-flow');flow.setAttribute('aria-label','Order journey');
-  const cards=new Map();
-  function actor(agent,cls){
-   const button=make('button',undefined,cls);button.dataset.agent=agent.id;
-   const portrait=make('span',undefined,'story-portrait');portrait.append(machine(agent,null,true));
-   button.append(portrait);button.setAttribute('aria-label','Inspect '+agent.name+' agent');
-   button.onclick=()=>{pause();choose(agent.id,button);};
-   const entries=cards.get(agent.id)||[];entries.push(portrait);cards.set(agent.id,entries);
-   return button;
-  }
   const steps=data.story.steps.map((step,index)=>{
-   const agent=data.agents.find(a=>a.id===step.agent),li=make('li',undefined,'story-step');
-   li.dataset.step=index;li.dataset.kind=step.kind;
-   const button=agent?actor(agent,'team-diagram-agent'):make('div',undefined,'team-diagram-agent story-order-input');
-   if(!agent){
-    const portrait=make('span',undefined,'story-portrait story-bag');portrait.setAttribute('aria-hidden','true');
-    portrait.innerHTML='<svg viewBox="0 0 100 110"><path d="M25 38h50l6 55H19z M35 38V26a15 15 0 0 1 30 0v12 M36 59h28 M36 70h20" fill="none" stroke="currentColor" stroke-width="2"/></svg>';button.append(portrait);
-   }
-   const text=make('span',undefined,'story-step-copy');
-   text.append(make('span',String(index+1).padStart(2,'0'),'story-number'),make('strong',step.label),make('span',agent?agent.name:'Demo input','story-role'),make('span',step.summary,'story-description'));
-   button.append(text);li.append(button);
-   if(step.handoff){
-    const link=make('div',undefined,'story-handoff');link.dataset.kind=step.kind;
-    const track=make('span',undefined,'story-track');track.setAttribute('aria-hidden','true');
-    track.append(make('span',undefined,'story-order'));
-    link.append(track,make('span',step.handoff));li.append(link);
-   }
-   flow.append(li);return li;
+   const li=make('li',undefined,'story-step');li.dataset.step=index;
+   const button=make('button');button.append(make('span',String(index+1).padStart(2,'0'),'story-number'),make('span',step.label));
+   button.onclick=()=>{pause();current=index;progress=1;update();};li.append(button);flow.append(li);return li;
   });
   section.append(flow);
   const state=make('p',undefined,'story-current');state.setAttribute('role','status');section.append(state);
+  const roles=make('div',undefined,'story-roles');roles.setAttribute('role','group');roles.setAttribute('aria-label','Inspect an agent');
+  const buttons=new Map();
+  for(const agent of data.agents){
+   const button=make('button',undefined,'story-role-button');button.dataset.agent=agent.id;button.style.setProperty('--role-color',agent.visual.color);
+   button.setAttribute('aria-label','Inspect '+agent.name+' agent');button.append(window.AgentRoleSymbols.icon(agent.visual),make('span',agent.name));
+   button.onclick=()=>open(agent.id);button.onmouseenter=button.onfocus=()=>scene?.highlight(agent.id);button.onmouseleave=button.onblur=()=>scene?.highlight(null);
+   buttons.set(agent.id,button);roles.append(button);
+  }
+  section.append(roles);
+  const explanation=make('details',undefined,'story-explanation');explanation.append(make('summary','How agents communicate'));
   const legend=make('dl',undefined,'story-legend');
   for(const entry of data.story.legend){
    const row=make('div'),term=make('dt'),sample=make('i',undefined,'story-legend-line');sample.dataset.kind=entry.kind;sample.setAttribute('aria-hidden','true');
    term.append(sample,document.createTextNode(entry.label));row.append(term,make('dd',entry.detail));legend.append(row);
   }
-  section.append(legend,make('p',data.story.note,'story-note'));
-  const support=make('section',undefined,'story-support');support.setAttribute('aria-label','Other agents in the team');
-  support.append(make('h3','Other parts of the team'));
-  const supportList=make('div',undefined,'story-support-list');
-  for(const entry of data.story.support){
-   const agent=data.agents.find(a=>a.id===entry.agent),button=actor(agent,'story-specialist');
-   const copy=make('span');copy.append(make('strong',agent.name),make('span',entry.summary));button.append(copy);supportList.append(button);
-  }
-  support.append(supportList);section.append(support);host.append(section);
-  let current=0,timer=null,playing=false,shown=false;
+  const handoffs=make('ol',undefined,'story-handoffs');
+  for(const step of data.story.steps.filter(s=>s.handoff)){const li=make('li');li.append(make('strong',step.label+': '),document.createTextNode(step.handoff));handoffs.append(li);}
+  explanation.append(legend,handoffs,make('p',data.story.note,'story-note'));section.append(explanation);host.append(section);
+  let current=0,progress=0,playing=false,shown=false,disposed=false,scene=null,raf=0,last=0,factory=null,loadingScene=false,fallback=null;
+  function open(id){pause();choose(id,buttons.get(id));}
+  function drawState(){scene?.setState(current,progress,playing);if(fallback){fallback.dataset.step=String(current);fallback.querySelectorAll('[data-agent]').forEach(el=>el.classList.toggle('is-owner',el.dataset.agent===data.story.steps[current].agent));}}
   function update(){
-   steps.forEach((li,index)=>{li.classList.toggle('is-current',index===current);li.classList.toggle('is-travelling',index===current&&playing&&!reduced.matches);if(index===current)li.setAttribute('aria-current','step');else li.removeAttribute('aria-current');});
-   const step=data.story.steps[current];state.textContent=(current+1)+' of '+steps.length+' \u00b7 '+step.label+': '+step.summary+'.';
+   steps.forEach((li,index)=>{li.classList.toggle('is-current',index===current);if(index===current)li.setAttribute('aria-current','step');else li.removeAttribute('aria-current');});
+   const step=data.story.steps[current];state.textContent=(current+1)+' of '+steps.length+' · '+step.label+': '+step.summary+'.';
+   if(step.handoff&&current<steps.length-1){const next=data.story.steps[current+1];state.textContent+=' '+(step.agent?data.agents.find(a=>a.id===step.agent).name:'Order')+' → '+data.agents.find(a=>a.id===next.agent).name+': '+step.handoff.replace(/\s+(to|for)$/, '')+'.';}
    replay.textContent=reduced.matches?'Next step':playing?'Pause order':current===steps.length-1?'Replay order':'Play order';
-   replay.setAttribute('aria-pressed',String(playing));
+   replay.setAttribute('aria-pressed',String(playing));drawState();
   }
-  function pause(){clearTimeout(timer);timer=null;playing=false;update();}
-  function schedule(){
-   clearTimeout(timer);
-   if(!playing||!shown||reduced.matches||document.hidden)return;
-   timer=setTimeout(()=>{if(current===steps.length-1){pause();return;}current++;update();schedule();},2800);
+  function pause(){playing=false;last=0;cancelAnimationFrame(raf);update();}
+  function tick(now){
+   if(!playing||!shown||disposed||reduced.matches||document.hidden)return;
+   if(last)progress+=(now-last)/2800;last=now;
+   if(progress>=1){if(current===steps.length-1){progress=1;pause();return;}current++;progress=0;update();}else drawState();
+   raf=requestAnimationFrame(tick);
   }
   replay.onclick=()=>{
-   if(reduced.matches){current=(current+1)%steps.length;update();return;}
-   if(playing){pause();return;}if(current===steps.length-1)current=0;playing=true;update();schedule();
+   if(reduced.matches){current=(current+1)%steps.length;progress=1;update();return;}
+   if(playing){pause();return;}if(current===steps.length-1){current=0;progress=0;}else if(progress>=1){progress=0;}
+   playing=true;last=0;update();raf=requestAnimationFrame(tick);
   };
+  reset.onclick=()=>scene?.reset();
+  function flatScene(){
+   scene=null;place.replaceChildren();place.classList.add('is-fallback');reset.hidden=true;
+   const message=make('p','3D is unavailable. Explore the same team on this floor plan.','scene-fallback-note');place.append(message);
+   fallback=make('div',undefined,'scene-plan');
+   const zones=[['Stock & packing',['inventory','fulfillment','market','restaurant']],['Delivery',['dispatcher','courier','household']],['Review & support',['judge','customer_service']]];
+   for(const [title,ids]of zones){const zone=make('section');zone.append(make('h3',title));
+    for(const id of ids){const a=data.agents.find(a=>a.id===id),b=make('button');b.dataset.agent=id;b.style.setProperty('--role-color',a.visual.color);
+     b.append(window.AgentRoleSymbols.icon(a.visual),document.createTextNode(a.name));b.onclick=()=>open(id);zone.append(b);}fallback.append(zone);}
+   place.append(fallback);drawState();
+  }
+  async function loadScene(){
+   if(!factory||loadingScene||scene||disposed)return;loadingScene=true;
+   try{
+    const {createDeliveryScene}=await import('./agent-delivery-scene.js?v=9cabc4df7325');
+    if(disposed)return;
+    scene=createDeliveryScene(place,data,{createAgentModel:factory,onAgent:open,onFailure:flatScene});
+    loading.remove();scene.show(shown);drawState();
+   }catch(error){console.warn('Delivery scene unavailable',error);flatScene();}
+   finally{loadingScene=false;}
+  }
   const change=()=>pause();reduced.addEventListener('change',change);
   const visibility=()=>{if(document.hidden)pause();};document.addEventListener('visibilitychange',visibility);
   const observer=new IntersectionObserver(entries=>{if(!entries[0]?.isIntersecting)pause();});observer.observe(section);
   update();
-  return {section,pause,
-   show(value){shown=value;section.hidden=!value;if(!value)pause();},
-   portraits(render){for(const agent of data.agents){const source=render(agent);for(const place of cards.get(agent.id)||[]){const image=make('img');image.src=source;image.alt='';image.width=180;image.height=210;place.replaceChildren(image);}}},
-   focus(id){section.querySelector('[data-agent="'+id+'"]')?.focus({preventScroll:true});},
-   dispose(){pause();observer.disconnect();reduced.removeEventListener('change',change);document.removeEventListener('visibilitychange',visibility);}
+  return {section,pause,attachFactory(value){factory=value;loadScene();},fallback:flatScene,
+   show(value){shown=value;section.hidden=!value;scene?.show(value);if(!value)pause();},
+   focus(id){buttons.get(id)?.focus({preventScroll:true});},
+   dispose(){disposed=true;pause();scene?.dispose();observer.disconnect();reduced.removeEventListener('change',change);document.removeEventListener('visibilitychange',visibility);}
   };
  }
  return {mount};
