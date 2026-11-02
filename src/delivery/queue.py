@@ -22,11 +22,16 @@ from delivery.telemetry import active, current_traceparent, order_span, traced_e
 PUBLISH: dict[str, set[str]] = {
     "lab_scenario": {"basket.requested", "shipment.delayed", "reservation.expire"},
     "generator": {"order.created", "complaint.created"},
+    "store_world": {"store.order.requested", "store.worker.arrived", "store.replan",
+                    "store.restock.arrived", "store.disruption", "store.courier.collected"},
     "lab_world": {"delivery.arrived", "delivery.failed"},
     "supply_ingress": {"household.intent"},
 }
 SUBSCRIBE: dict[str, set[str]] = {
     "inventory_audit": {"inventory.decided"},
+    "store_audit": {"store.pick.started", "store.item.picked", "store.packed",
+                    "store.dock.ready", "store.replanned", "store.restock.started",
+                    "store.disruption", "store.courier.collected", "inventory.decided"},
     "delivery_audit": {
         "delivery.assigned", "delivery.completed", "dispatch.noted", "recovery.requested"
     },
@@ -251,8 +256,15 @@ class Queue:
             raise PermissionError("Consumer topics exceed role authority")
         token = uuid4()
         with connect(self.url) as conn:
-            scope = conn.execute("SELECT public.agent_scope() AS scope").fetchone()
+            scope = conn.execute(
+                "SELECT public.agent_scope() AS scope,"
+                "public.agent_definition()->'accepts' AS accepts"
+            ).fetchone()
             if scope and scope["scope"]:
+                # A bound lab identity keeps its frozen subscription even when
+                # the same role also serves another environment through A2A.
+                if accepted_topics is None:
+                    topics = set(scope["accepts"])
                 claimed = conn.execute(
                     "SELECT public.agent_queue_claim(%s,%s,%s,%s) AS event",
                     (role, run_id, sorted(topics), self.lease_seconds),

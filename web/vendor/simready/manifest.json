@@ -1,0 +1,75 @@
+{
+  "dataset": "https://huggingface.co/datasets/codepawl/simready-glb",
+  "revision": "5888c2bede350ab39719834f58c2714e531c6851",
+  "author": "NVIDIA",
+  "conversion": "codepawl",
+  "license": "CC-BY-4.0",
+  "license_url": "https://creativecommons.org/licenses/by/4.0/",
+  "modifications": "glTF Transform 4.5.1: simplified geometry, 256px WebP textures, Meshopt compression; visual assets only, not physics.",
+  "assets": [
+    {
+      "role": "shelving",
+      "name": "storage_shelf_basic_b01",
+      "url": "https://huggingface.co/datasets/codepawl/simready-glb/resolve/5888c2bede350ab39719834f58c2714e531c6851/glb/storage_shelf_basic_b01.glb",
+      "source_sha256": "522294498dc527f9a73bc4002ed444a62763b023e22f68f46bd4f03bbcc91f82",
+      "path": "/static/vendor/simready/shelving.glb",
+      "bytes": 141288,
+      "sha256": "b2d431b5fecb47428bf24e30eaa53d6460ce631d5c0ea15f199ba49c229e0198"
+    },
+    {
+      "role": "pallet",
+      "name": "pallet_a01",
+      "url": "https://huggingface.co/datasets/codepawl/simready-glb/resolve/5888c2bede350ab39719834f58c2714e531c6851/glb/pallet_a01.glb",
+      "source_sha256": "a9977de90583cab3604bfc79c44d0203736f31daa42100012c85cb7b32f6b2c4",
+      "path": "/static/vendor/simready/pallet.glb",
+      "bytes": 25896,
+      "sha256": "a7417430559383bb7c803a1ee2f011add9787d6e60702700a5d0ce094724df4e"
+    },
+    {
+      "role": "cart",
+      "name": "cart_mobile_b01",
+      "url": "https://huggingface.co/datasets/codepawl/simready-glb/resolve/5888c2bede350ab39719834f58c2714e531c6851/glb/cart_mobile_b01.glb",
+      "source_sha256": "18727df561f189d869d3123e9c554c07b90d334f87584b28a445b57981de8a9f",
+      "path": "/static/vendor/simready/cart.glb",
+      "bytes": 79896,
+      "sha256": "09f628e50982a830b5ad591e5a1f6cf8cdd597bd7cdd3e83cd7a451d6699c983"
+    },
+    {
+      "role": "forklift",
+      "name": "vehicle_forklift_orange_a01",
+      "url": "https://huggingface.co/datasets/codepawl/simready-glb/resolve/5888c2bede350ab39719834f58c2714e531c6851/glb/vehicle_forklift_orange_a01.glb",
+      "source_sha256": "ad84b70d469642451c7456e649a7d68631e78061a4744ec131733336942fcc41",
+      "path": "/static/vendor/simready/forklift.glb",
+      "bytes": 246268,
+      "sha256": "8d7251b3b1dff016567845b13d7b9a889eceb1cdb26167fc76d4d1312002b36e"
+    },
+    {
+      "role": "robot",
+      "name": "robotics_small_bot_a01",
+      "url": "https://huggingface.co/datasets/codepawl/simready-glb/resolve/5888c2bede350ab39719834f58c2714e531c6851/glb/robotics_small_bot_a01.glb",
+      "source_sha256": "6c8fe63356abdda1b4df56c9e34a62f1beba8fdaf6b3e0e06aa58b8385e4e621",
+      "path": "/static/vendor/simready/robot.glb",
+      "bytes": 390912,
+      "sha256": "3a1ff7e7939eb1e517fd8f3711986439a869606fe4be3279a95cce0e58da44da"
+    },
+    {
+      "role": "produce",
+      "name": "food_produce_apple_f01",
+      "url": "https://huggingface.co/datasets/codepawl/simready-glb/resolve/5888c2bede350ab39719834f58c2714e531c6851/glb/food_produce_apple_f01.glb",
+      "source_sha256": "96a79e6f70797ea22acec7dc0cf71e342626d775ae3a0630f5b70e7b2a09b33a",
+      "path": "/static/vendor/simready/produce.glb",
+      "bytes": 15728,
+      "sha256": "90a38eff1dcec6ab294c0e7e25b597b3fc7b7111c925e7c94483dee121fbb5a5"
+    },
+    {
+      "role": "packaged",
+      "name": "food_processed_boxedCereal_l01",
+      "url": "https://huggingface.co/datasets/codepawl/simready-glb/resolve/5888c2bede350ab39719834f58c2714e531c6851/glb/food_processed_boxedCereal_l01.glb",
+      "source_sha256": "13542b61c5a2a9af25d81ee4b3a3d02f2530b0679e6c329555b23e5eb9afbc71",
+      "path": "/static/vendor/simready/packaged.glb",
+      "bytes": 21004,
+      "sha256": "cb38d1d44b47915c1f26be7b6d4e6eb3b32b4a1e4af178ac02cf60f7afb48872"
+    }
+  ],
+  "total_bytes": 920992
+}

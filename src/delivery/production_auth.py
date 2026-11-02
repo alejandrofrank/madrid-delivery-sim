@@ -41,11 +41,12 @@ class AuthPolicy:
         operators = json.loads(os.environ.get("DELIVERY_OPERATOR_PRINCIPALS", "[]"))
         callers = json.loads(os.environ.get("DELIVERY_A2A_CALLERS", "{}"))
         if (not audience.startswith("https://") or role not in {
-            "api", "dispatcher", "restaurant", "customer_service"
+            "api", "dispatcher", "restaurant", "customer_service", "inventory", "fulfillment"
         } or not isinstance(operators, list) or not isinstance(callers, dict)
             or any(not isinstance(e, str) or "@" not in e for e in operators)
             or any(not isinstance(e, str) or "@" not in e or not isinstance(v, list)
-                   or any(r not in {"dispatcher", "restaurant", "customer_service"} for r in v)
+                   or any(r not in {"dispatcher", "restaurant", "customer_service",
+                                   "inventory", "fulfillment"} for r in v)
                    for e, v in callers.items())):
             raise ValueError("Invalid production identity policy")
         if role == "api" and not operators:

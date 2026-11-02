@@ -48,11 +48,51 @@
   "tool_descriptions": {
     "inventory.read": "Read stock and reservations in this store.",
     "inventory.reserve": "Reserve available units atomically for a basket.",
-    "inventory.release": "Release this basket’s reserved stock.",
+    "inventory.release": "Release this basket\u2019s reserved stock.",
     "inventory.delay": "Record a shipment delay without inventing stock.",
     "inventory.receive": "Receive the confirmed shipment into physical stock.",
     "memory.read": "Recall evidence inside the current run, role and order scope.",
     "memory.write": "Append a bounded memory observation with provenance.",
     "queue.publish": "Publish an allowed topic to a permitted recipient."
+  },
+  "environment_limits": {
+    "dark_store": {
+      "events_per_run": 1000,
+      "tool_calls_per_event": 8,
+      "tool_calls_per_run": 2000,
+      "memory_entries": 32,
+      "memory_bytes": 16384,
+      "model_calls": 0,
+      "model_tokens": 0,
+      "model_usd": 0
+    }
+  },
+  "tool_profiles": {
+    "dark_store": [
+      "inventory.read",
+      "inventory.reserve",
+      "inventory.release",
+      "inventory.delay",
+      "inventory.receive",
+      "memory.read",
+      "memory.write",
+      "queue.publish"
+    ]
+  },
+  "service_events": {
+    "accepts": [
+      "basket.requested",
+      "shipment.delayed",
+      "shipment.received",
+      "reservation.expire",
+      "store.order.requested",
+      "store.restock.arrived"
+    ],
+    "emits": [
+      "inventory.decided",
+      "shipment.received",
+      "basket.reserved",
+      "store.order.reserved"
+    ]
   }
 }

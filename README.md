@@ -31,8 +31,8 @@ memory leaking across orders or roles. ADK proposes through granular tools;
 scoped SQL, durable queues and authenticated A2A boundaries enforce the contract.
 Routine policies can run without a model.
 
-Verified evidence: **998 Python tests passing**, plus all **99 anatomy panels**
-checked in the browser ([verification receipt](docs/evidence/agent-anatomy.json));
+**1,030 Python tests passing**, plus all **99 anatomy panels**
+checked in the browser ([verification receipt](docs/evidence/dark-store.json));
 **pass^5 = 1.000 across 72 held-out cases** (360 attempts), with an all-pass
 bootstrap interval of [1, 1] in the [release receipt](docs/evidence/heldout-release.json).
 One [seeded Chaos shift](docs/evidence/a2a-chaos-local.json) delivered 71/71 orders
@@ -52,6 +52,39 @@ into `main`; its files and data were preserved. [Before/after, verification and 
 
 The GIF records actual local simulation activity. All default runs are free of
 cloud and model charges.
+
+## Shelf to doorstep
+
+Open **Operations → Start store demo** on [localhost:8010](http://localhost:8010/).
+A real seeded basket is reserved, picked from shelves, packed and carried to the
+dock. The same order then travels across Madrid with its assigned courier.
+**Picker breakdown** interrupts the route; another picker must reach the stranded
+basket before taking over. **Follow this order** moves the view between those scales.
+
+![Actual seeded store order, from Madrid to shelves and back](docs/media/store-journey.gif)
+
+The elevated cutaway seats stock on the actual shelf decks. Robot and forklift
+labels show their live tasks; select one to follow its route.
+Choose a store pin to inspect its load, highlight an order's shelves, or trigger
+a blocked aisle, stock shortage, robot breakdown or delayed truck. The inventory
+and fulfillment roles share the city's clock, durable events and A2A transport.
+Routine decisions need no model calls. The anatomy page's **Environment** part
+switches between store and city explanations.
+
+Seven locally optimized NVIDIA SimReady models total **0.92 MB**; Three.js and
+models together stay below **4 MB** and load only when a store opens. Missing
+models become simple shapes; unavailable graphics use an interactive floor plan.
+This is deterministic logistics, with aisle navigation and stock conservation,
+not collision-accurate robotics physics.
+
+All four store disruptions pass twice over A2A with matching outcomes, conserved
+stock and no late deliveries or paid calls. [Measured recovery](docs/evidence/dark-store.json) ·
+[Environment, controls, limits and reproducible demo](docs/DARK-STORE.md).
+Assets: NVIDIA SimReady, converted by
+[codepawl](https://huggingface.co/datasets/codepawl/simready-glb),
+[CC BY 4.0](https://creativecommons.org/licenses/by/4.0/); geometry and textures
+simplified for the browser. Full source hashes and modifications are in
+[the asset manifest](web/vendor/simready/manifest.json).
 
 ## On-demand Google Cloud
 
@@ -76,7 +109,7 @@ flowchart LR
       Client[Authorized operator ID token] --> API[Private Cloud Run API]
       API --> Job[Cloud Run shift job]
       Job --> A2A[A2A with audience-bound ID tokens]
-      A2A --> Agents[Dispatcher / restaurant / customer service]
+      A2A --> Agents[Dispatcher / restaurant / customer service / inventory / fulfillment]
       Agents --> SQL[(Cloud SQL: scoped state + pgvector)]
       Agents -. optional semantic index .-> Vector[Vertex Vector Search]
       Job --> BQ[(BigQuery metrics + views)]
@@ -125,7 +158,7 @@ flowchart LR
 | Scenarios | 12 deterministic role scenarios, run twice with matching outcomes. |
 | Cost per local run | **$0 in cloud/model charges**; local compute excluded. |
 | Evaluation pass rate | **360/360 held-out ADK attempts** across 72 cases; [release results](#held-out-release-results). Four A2A recovery scenarios and matching seeded Chaos runs remain covered by [Chaos verification](docs/evidence/a2a-chaos-local.json). These scripted checks measure contracts, recovery and policy, not live-model quality. |
-| Interoperability | Dispatcher, customer service and individually scoped restaurants expose A2A 1.0 Agent Cards. The normal scheduler uses the official SDK; isolated tests can use the same services in process. |
+| Interoperability | Dispatcher, customer service, inventory, fulfillment and individually scoped restaurants expose A2A 1.0 Agent Cards. The normal scheduler uses the official SDK; isolated tests can use the same services in process. |
 
 Start at the [Google stack demonstration guide](docs/GOOGLE-STACK.md), inspect
 [agent traces](http://localhost:8010/agent-traces), or browse the
@@ -150,6 +183,10 @@ flowchart LR
     A --> D[Dispatcher A2A server]
     A --> R[Restaurant A2A servers: one card per identity]
     A --> C[Customer service A2A server]
+    A --> V[Inventory A2A server]
+    A --> F[Fulfillment A2A server]
+    V --> Q
+    F --> Q
     I --> D
     I --> R
     I --> C
@@ -677,3 +714,15 @@ resample cases. An all-pass cohort has a degenerate [1, 1] interval and does
 not establish certainty on unseen workloads. Costs include failed attempts.
 Source revision: `751b2d5f8a9c3b33b8301e37680809a452a99d8c`.
 <!-- release-results:end -->
+
+### Store model credits
+
+The dark-store view uses NVIDIA SimReady models converted by
+[codepawl/simready-glb](https://huggingface.co/datasets/codepawl/simready-glb),
+licensed [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/).
+This project simplifies geometry, downsizes textures to 256 px and compresses
+meshes for the browser. The seven local models total 920,992 bytes; these are
+visual assets, not a robotics physics simulation. Original URLs, the pinned
+dataset revision and SHA-256 checksums are in
+[the asset manifest](web/vendor/simready/manifest.json). Rebuild with
+`node scripts/build_store_assets.mjs` after `npm ci`.

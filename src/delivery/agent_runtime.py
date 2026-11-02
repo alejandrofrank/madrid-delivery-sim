@@ -21,7 +21,7 @@ from delivery.telemetry import active, trace_fields, trace_span, traced_event
 class BasketRequest(BaseModel):
     model_config = ConfigDict(extra="forbid", strict=True)
     basket: str = Field(min_length=1, max_length=100)
-    store: str = Field(pattern=r"^store-([1-9]|1[0-2])$")
+    store: str = Field(pattern=r"^store-([1-9]|1[0-2]|(?:node|way|relation)/[0-9]+)$")
     sku: str = Field(min_length=1, max_length=512)
     quantity: int = Field(gt=0)
     expires_sim: int = Field(ge=0)

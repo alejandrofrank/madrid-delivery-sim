@@ -20,7 +20,7 @@ provider "google" {
 
 locals {
   labels = { application = "madrid-delivery-sim", environment = "production" }
-  roles  = toset(["replay", "api", "dispatcher", "restaurant", "customer-service", "ci"])
+  roles  = toset(["replay", "api", "dispatcher", "restaurant", "customer-service", "inventory", "fulfillment", "ci"])
 }
 
 resource "google_project" "app" {

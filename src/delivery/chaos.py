@@ -12,6 +12,7 @@ from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 from delivery.agent_transport import restaurant_name
 from delivery.db import Connection, connect
+from delivery.store_conditions import STORE_KINDS
 from delivery.telemetry import trace_span
 from delivery.world import World, position
 
@@ -29,19 +30,24 @@ class Disruption(BaseModel):
     model_config = ConfigDict(extra="forbid")
     id: str = Field(min_length=1, max_length=64, pattern=r"^[a-zA-Z0-9_-]+$")
     kind: Literal[
-        "heavy_rain", "metro_strike", "restaurant_outage", "courier_offline", "demand_surge"
+        "heavy_rain", "metro_strike", "restaurant_outage", "courier_offline", "demand_surge",
+        "blocked_aisle", "shelf_out_of_stock", "robot_breakdown", "late_restock_truck"
     ]
     at: int = Field(default=0, ge=0, le=43200)
     duration: int = Field(default=900, ge=60, le=14400)
     district: District | None = None
     target: str | None = Field(default=None, max_length=80, pattern=r"^[a-zA-Z0-9_/-]+$")
     severity: float = Field(default=2, ge=1, le=4)
+    resource: str | None = Field(default=None,max_length=100,pattern=r"^[a-zA-Z0-9_:-]+$")
 
     @model_validator(mode="after")
     def scope(self) -> "Disruption":
         if self.kind in {"metro_strike", "demand_surge"} and self.district is None:
             raise ValueError("A district is required")
-        if self.kind in {"restaurant_outage", "courier_offline"} and self.target is None:
+        if self.resource is not None and self.kind not in STORE_KINDS:
+            raise ValueError("Resources apply only to in-store disruptions")
+        if (self.kind in {"restaurant_outage", "courier_offline", *STORE_KINDS}
+                and self.target is None):
             raise ValueError("A restaurant or courier target is required (or 'auto')")
         return self
 
@@ -50,6 +56,7 @@ class ChaosConfig(BaseModel):
     model_config = ConfigDict(extra="forbid")
     events: list[Disruption] = Field(default_factory=list, max_length=32)
     random_events: int = Field(default=0, ge=0, le=20)
+    random_store_events: int = Field(default=0, ge=0, le=20)
     demand_multiplier: float = Field(default=1, ge=1, le=8)
 
     @model_validator(mode="after")
@@ -82,23 +89,19 @@ def schedule(config: ChaosConfig, seed: int, duration: int) -> list[Disruption]:
                 target="auto" if kind in {"restaurant_outage", "courier_offline"} else None,
             )
         )
+    store_rng = random.Random(f"dark-store:{seed}")
+    for index in range(config.random_store_events):
+        events.append(Disruption(
+            id=f"random-store-{index:02d}", kind=store_rng.choice(STORE_KINDS),  # type: ignore[arg-type]
+            at=store_rng.randrange(1,max(2,(duration-120)//60))*60,
+            duration=120,target="auto",
+        ))
     if any(e.at + e.duration > duration for e in events):
         raise ValueError("Disruptions must end within the run duration")
     return sorted(events, key=lambda e: (e.at, e.id))
 
 
 def insert_event(conn: Connection, run: str, event: Disruption) -> None:
-    if event.target and event.target != "auto":
-        if event.kind == "restaurant_outage":
-            valid = conn.execute(
-                "SELECT 1 FROM locations WHERE kind='store' AND id=%s", (event.target,)
-            ).fetchone()
-        else:
-            valid = conn.execute(
-                "SELECT 1 FROM couriers WHERE run_id=%s AND id=%s", (run, event.target)
-            ).fetchone()
-        if not valid:
-            raise ValueError("Unknown disruption target")
     previous = conn.execute(
         "SELECT * FROM chaos_events WHERE run_id=%s AND id=%s", (run, event.id)
     ).fetchone()
@@ -109,22 +112,40 @@ def insert_event(conn: Connection, run: str, event: Disruption) -> None:
         event.severity,
         event.at,
         event.at + event.duration,
+        event.resource,
     )
     if previous:
         if (
             tuple(
-                previous["requested_target"] if k == "target" else previous[k]
-                for k in ("kind", "district", "target", "severity", "start_sim", "end_sim")
+                previous["requested_target"] if k == "target" else
+                previous["requested_resource"] if k == "resource" else previous[k]
+                for k in ("kind", "district", "target", "severity", "start_sim", "end_sim",
+                          "resource")
             )
             != values
         ):
             raise ValueError("Disruption ID already has a different payload")
         return
+    if event.kind in STORE_KINDS:
+        from delivery.store_disruptions import validate_store_target
+
+        validate_store_target(conn,run,event.target,event.resource,event.kind)
+    elif event.target and event.target != "auto":
+        if event.kind == "restaurant_outage":
+            valid = conn.execute(
+                "SELECT 1 FROM locations WHERE kind='store' AND id=%s", (event.target,)
+            ).fetchone()
+        else:
+            valid = conn.execute(
+                "SELECT 1 FROM couriers WHERE run_id=%s AND id=%s", (run, event.target)
+            ).fetchone()
+        if not valid:
+            raise ValueError("Unknown disruption target")
     conn.execute(
         "INSERT INTO chaos_events(run_id,id,kind,district,target,severity,"
-        "start_sim,end_sim,requested_target) "
-        "VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s)",
-        (run, event.id, *values, event.target),
+        "start_sim,end_sim,resource,requested_target,requested_resource) "
+        "VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)",
+        (run, event.id, *values, event.target,event.resource),
     )
 
 
@@ -166,6 +187,8 @@ def active_events(conn: Connection, run: str) -> list[dict[str, Any]]:
 
 
 def affected(event: dict[str, Any], order: dict[str, Any]) -> bool:
+    if event["kind"] in STORE_KINDS:
+        return order["store"] == event["target"] and order["status"] == "pending"
     if event["kind"] == "restaurant_outage":
         return order["store"] == event["target"] and order["status"] != "picked_up"
     if event["kind"] == "courier_offline":
@@ -248,6 +271,14 @@ def physical_tick(conn: Connection, run: str, sim: int) -> None:
         (run, sim),
     ).fetchall()
     for event in pending:
+        if event["kind"] in STORE_KINDS:
+            from delivery.store_disruptions import start_store_disruption
+
+            start_store_disruption(conn,run,event,sim)
+            with trace_span("chaos.started",attributes={"chaos.kind":event["kind"],
+                                                       "chaos.id":event["id"]}):
+                pass
+            continue
         target = event["target"]
         if target == "auto":
             if event["kind"] == "courier_offline":
@@ -329,6 +360,10 @@ def observe(conn: Connection, run: str, sim: int) -> None:
                 "INSERT INTO chaos_impacts VALUES (%s,%s,%s,%s,%s) ON CONFLICT DO NOTHING",
                 (run, event["id"], order["id"], sim, (order["route"] or {}).get("end_at")),
             )
+            # Store roles replan from queue facts and scoped tools in their usual turns.
+            # Existing city recovery agents must not overwrite physical dock readiness.
+            if event["kind"] in STORE_KINDS:
+                continue
             for agent in (restaurant_name(order["store"]), "dispatcher", "customer_service"):
                 identity = f"{event['id']}:{agent}:{order['id']}"
                 key = hashlib.sha256(identity.encode()).hexdigest()[:32]
@@ -359,7 +394,7 @@ def demand_factors(conn: Connection, run: str) -> tuple[float, dict[str, float]]
 def evidence(conn: Connection, run: str) -> dict[str, Any]:
     events = list(
         conn.execute(
-            "SELECT id,kind,district,target,severity,start_sim,end_sim,state "
+            "SELECT id,kind,district,target,severity,start_sim,end_sim,state,resource "
             "FROM chaos_events WHERE run_id=%s ORDER BY start_sim,id",
             (run,),
         )

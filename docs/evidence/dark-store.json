@@ -1,0 +1,100 @@
+{
+  "recorded_date": "2026-11-02",
+  "scope": "Local deterministic offline A2A SDK integration; not live-model quality",
+  "fixture_hash": "b8a3358358c85d1513fb7f4ba6499afebd2f34cbdbcd27b5869f6e2e1bd76084",
+  "rows": [
+    {
+      "case": "blocked_aisle",
+      "attempts": 2,
+      "delivered": true,
+      "dock_recovery_seconds": 160,
+      "delivery_seconds": 447,
+      "stock_conserved": true,
+      "reserved": 0,
+      "dead_events": 0,
+      "model_calls": 0,
+      "model_cost_usd": 0.0,
+      "repeats_match": true
+    },
+    {
+      "case": "shelf_out_of_stock",
+      "attempts": 2,
+      "delivered": true,
+      "dock_recovery_seconds": 200,
+      "delivery_seconds": 487,
+      "stock_conserved": true,
+      "reserved": 0,
+      "dead_events": 0,
+      "model_calls": 0,
+      "model_cost_usd": 0.0,
+      "repeats_match": true
+    },
+    {
+      "case": "robot_breakdown",
+      "attempts": 2,
+      "delivered": true,
+      "dock_recovery_seconds": 190,
+      "delivery_seconds": 477,
+      "stock_conserved": true,
+      "reserved": 0,
+      "dead_events": 0,
+      "model_calls": 0,
+      "model_cost_usd": 0.0,
+      "repeats_match": true
+    },
+    {
+      "case": "late_restock_truck",
+      "attempts": 2,
+      "delivered": true,
+      "dock_recovery_seconds": 160,
+      "delivery_seconds": 447,
+      "stock_conserved": true,
+      "reserved": 0,
+      "dead_events": 0,
+      "model_calls": 0,
+      "model_cost_usd": 0.0,
+      "repeats_match": true
+    }
+  ],
+  "browser": {
+    "passed": true,
+    "run": "d91633a8-c693-45d8-9366-541145443dfe",
+    "lazy": true,
+    "keyboard": true,
+    "mobile": true,
+    "fallback": true,
+    "delivered": true,
+    "shelfSupport": {
+      "slots": 120,
+      "errors": 0,
+      "maxGap": 0.0020000000000000018
+    },
+    "workersMoving": true,
+    "render": {
+      "calls": 52,
+      "triangles": 351031
+    },
+    "errors": []
+  },
+  "render": {
+    "calls": 55,
+    "triangles": 351067
+  },
+  "validation": {
+    "focused_regressions": "50 passed",
+    "anatomy_panels": 99,
+    "terraform_tests": 7,
+    "ruff": "passed",
+    "mypy_modules": 94,
+    "full_suite": {
+      "passed": 1030,
+      "failed": 0,
+      "skipped": 0,
+      "seconds": 770.315685,
+      "source_revision": "23d6fea5cba6251eae1bd3265dfc3de732dd156b",
+      "workflow_run": "https://github.com/alejandrofrank/madrid-delivery-sim/actions/runs/41363950611",
+      "scope": "Hosted full Python suite; whole-pipeline status is reported separately by the PR checks."
+    },
+    "release_checks": "https://github.com/alejandrofrank/madrid-delivery-sim/pull/9/checks"
+  }
+}

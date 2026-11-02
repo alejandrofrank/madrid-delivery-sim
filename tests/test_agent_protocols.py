@@ -14,7 +14,8 @@ from delivery.agent_transport import A2ATransport, InProcessTransport
 from delivery.mcp_server import create_mcp_server
 
 
-@pytest.mark.parametrize("agent", ["dispatcher", "customer_service", "restaurant-kitchen"])
+@pytest.mark.parametrize("agent", ["dispatcher", "customer_service", "restaurant-kitchen",
+                                   "inventory", "fulfillment"])
 def test_transports_share_contract_and_discovered_card(monkeypatch, agent):
     def invoke(self, command):
         return {"agent": self.role, "entity_id": command.entity_id, "operation": command.operation}
@@ -24,6 +25,8 @@ def test_transports_share_contract_and_discovered_card(monkeypatch, agent):
     app.mount(f"/a2a/{agent}", create_a2a_app(agent))
     remote = A2ATransport("http://localhost:8010", http_transport=httpx.ASGITransport(app=app))
     command = {"run_id": str(uuid4()), "entity_id": "order-1"}
+    if agent in {"inventory", "fulfillment"}:
+        command["operation"] = "store_tick"
     assert remote.invoke(agent, command) == InProcessTransport().invoke(agent, command)
 
 
@@ -102,7 +105,8 @@ def test_every_restaurant_has_an_individual_sdk_agent_card(db_url):
                 assert parsed.capabilities.push_notifications is False
                 for example in parsed.skills[0].examples:
                     command = AgentCommand.model_validate_json(example)
-                    expected = "replan" if name.startswith("restaurant-") else "submit"
+                    expected = ("store_tick" if name in {"inventory", "fulfillment"} else
+                                "replan" if name.startswith("restaurant-") else "submit")
                     assert command.operation == expected
             assert (
                 await http.get("/a2a/restaurant-unknown/.well-known/agent-card.json")

@@ -64,6 +64,10 @@ def source_paths() -> list[str]:
         "src/delivery/a2a_server.py",
         "src/delivery/mcp_server.py",
         "src/delivery/fleet_policy.py",
+        "src/delivery/environment.py",
+        "src/delivery/madrid_city.py",
+        "src/delivery/dark_store.py",
+        "src/delivery/store_layout.py",
         "compose.yaml",
         "docs/evidence/main-consolidation.json",
         "docs/evidence/heldout-release.json",
@@ -117,7 +121,7 @@ def anatomy_data() -> dict[str, Any]:
         card_name = "restaurant-kitchen" if name == "restaurant" else name
         card = (
             MessageToDict(agent_card(card_name, base_url="http://localhost:8010", live=False))
-            if name in EVAL_ARMS
+            if name in {*EVAL_ARMS, "inventory", "fulfillment"}
             else None
         )
         model = "No model: deterministic Python/SQL policy."
@@ -327,7 +331,8 @@ def anatomy_data() -> dict[str, Any]:
                         "The card is produced by the same factory as the server. Restaurant "
                         "card shown here is a template; running identities have individual cards."
                         if card
-                        else "A2A belongs to dispatcher, restaurant and customer service; "
+                        else "A2A connects dispatcher, restaurant, customer service, "
+                        "inventory and fulfillment; "
                         "other roles retain scoped event handoffs."
                     ),
                     "MCP is a separate read-only simulation server for external agents: "
@@ -385,6 +390,47 @@ def anatomy_data() -> dict[str, Any]:
                 sources=["compose.yaml"],
             ),
         }
+        if name in {"inventory", "fulfillment", "dispatcher", "courier"}:
+            from delivery.store_layout import StoreLayoutConfig
+
+            layout = StoreLayoutConfig()
+            panels["environment"].update(
+                summary=("Works across Madrid streets and a physical dark store."
+                         if name in {"dispatcher","courier"} else
+                         "Works in the inventory lab or inside a Madrid dark store."),
+                details=panels["environment"]["details"] + [
+                    "DarkStore shares MadridCity's clock, durable events and order IDs.",
+                    "Inventory reserves existing catalogue stock. Fulfillment walks aisles, "
+                    "picks real shelf units, packs and carries the basket to the dock.",
+                    "Dispatch starts only after the dock handoff. Robot recovery requires "
+                    "a replacement picker to reach the stranded basket.",
+                    "Store motion is a deterministic grid simulation, not robotics physics.",
+                ],
+                numbers={"Default aisles":layout.aisles,"Default pickers":layout.picker_count,
+                         "Walking metres per second":layout.speed_mps,
+                         "Seconds per pick":layout.pick_seconds,
+                         "Packing seconds":layout.pack_seconds,"Paid model calls":0},
+                sources=["src/delivery/environment.py","src/delivery/madrid_city.py",
+                         "src/delivery/dark_store.py","src/delivery/store_layout.py"],
+            )
+        if name in {"inventory","fulfillment","dispatcher","courier"}:
+            panels["environment"]["environments"] = {
+                "dark_store": {
+                    "label":"Dark store",
+                    "summary":"Physical shelves, aisle paths, packing and a courier loading dock.",
+                    "details":panels["environment"]["details"],
+                    "numbers":panels["environment"]["numbers"],
+                },
+                "madrid_city": {
+                    "label":"Madrid city",
+                    "summary":"Madrid road routes connect store docks with customer doorsteps.",
+                    "details":["The city clock advances courier movement on the OSM road network.",
+                               "A store order becomes dispatchable only after physical packing "
+                               "and dock arrival. No model is needed for movement."],
+                    "numbers":{"City-only tick seconds":60,"With-store tick seconds":10,
+                               "Paid movement model calls":0},
+                },
+            }
         if name == "restaurant":
             panels["persona"]["details"] += [
                 f"ADK {variant} profile: "
@@ -418,7 +464,7 @@ def anatomy_data() -> dict[str, Any]:
     ]
     edges += [
         dict(source="scheduler", target=name, kind="a2a", topics=["JSON-RPC command"])
-        for name in EVAL_ARMS
+        for name in (*EVAL_ARMS, "inventory", "fulfillment")
     ]
     return dict(
         schema_version=1,

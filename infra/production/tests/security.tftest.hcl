@@ -31,7 +31,7 @@ run "replay_has_no_idle_instances_or_credential_grants" {
     error_message = "A monthly budget alert is required at bootstrap."
   }
   assert {
-    condition     = length(google_service_account.role) == 6
+    condition     = length(google_service_account.role) == 8
     error_message = "Each application role and CI require separate identities."
   }
 }
@@ -78,7 +78,7 @@ run "live_uses_distinct_identities_private_invocation_and_jobs" {
     operator_principals = ["operator@example.com"]
   }
   assert {
-    condition     = length(google_cloud_run_v2_service.live) == 4 && length(google_cloud_run_v2_service_iam_member.agents) == 3
+    condition     = length(google_cloud_run_v2_service.live) == 6 && length(google_cloud_run_v2_service_iam_member.agents) == 5
     error_message = "API and three agent roles require separate private Cloud Run services."
   }
   assert {

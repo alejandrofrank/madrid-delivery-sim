@@ -276,7 +276,7 @@
 
   let liveSteps = [];
   const traceParams = new URLSearchParams(location.search);
-  const source = traceParams.get('source'), run = traceParams.get('run'), agent = traceParams.get('agent');
+  const source = traceParams.get('source'), run = traceParams.get('run'), agent = traceParams.get('agent'), order = traceParams.get('order');
   const stepTime = value => Number.isFinite(Number(value)) && value != null ? 'T+' + Number(value).toFixed(0) + 's' : 'Time not recorded';
   function stepTitle(record) { return label(record.action || record.tool || record.name || record.topic || record.kind || 'Recorded step'); }
   function stepSummary(record) {
@@ -308,12 +308,12 @@
     return response.json();
   }
   async function loadLiveTrace() {
-    if (!run || !agent || !['madrid','delivery','supply'].includes(source)) return;
+    if (!run || (!agent && !order) || !['madrid','delivery','supply'].includes(source)) return;
     const context = document.getElementById('live-trace-context');
     context.textContent = 'Loading ' + agent + '…';
     try {
       const prefix = source === 'madrid' ? '/api/runs/' : source === 'delivery' ? '/api/lab/delivery-runs/' : '/api/supply/runs/';
-      const data = await readTrace(prefix + encodeURIComponent(run) + (source === 'madrid' ? '/trace?courier=' + encodeURIComponent(agent) : source === 'supply' ? '/evidence' : ''));
+      const data = await readTrace(prefix + encodeURIComponent(run) + (source === 'madrid' ? '/trace?' + (order ? 'order=' + encodeURIComponent(order) : 'courier=' + encodeURIComponent(agent)) : source === 'supply' ? '/evidence' : ''));
       const belongs = item => source === 'madrid' || item.agent === agent || item.agent_id === agent || item.actor === agent;
       const decisions = list(data.decisions).filter(belongs);
       liveSteps = [];
@@ -330,7 +330,7 @@
       }
       for (const call of list(data.model_calls).filter(belongs)) liveSteps.push({kind:'model',title:call.model || 'Model call',summary:call.state || 'Recorded model response',sim:call.sim_time,latency:call.latency_ms,cost:call.usage_cost_usd,record:call});
       liveSteps.sort((a,b) => Number(a.sim || 0) - Number(b.sim || 0));
-      context.textContent = agent + ' · ' + source + ' · run ' + run.slice(0,8);
+      context.textContent = (order ? 'Order '+order : agent) + ' · ' + source + ' · run ' + run.slice(0,8);
       const measured = liveSteps.filter(s => Number.isFinite(s.latency));
       const costs = liveSteps.filter(s => Number.isFinite(s.cost));
       const summary = document.getElementById('trace-summary');

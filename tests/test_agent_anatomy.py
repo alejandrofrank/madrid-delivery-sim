@@ -66,7 +66,7 @@ def test_cards_match_the_runtime_factory_even_in_live_mode(anatomy, monkeypatch)
     assert live_reference == anatomy
     for agent in anatomy["agents"]:
         card = next(p for p in agent["panels"] if p["id"] == "protocols")["card"]
-        if agent["id"] in EVAL_ARMS:
+        if agent["id"] in {*EVAL_ARMS, "inventory", "fulfillment"}:
             name = "restaurant-kitchen" if agent["id"] == "restaurant" else agent["id"]
             assert card == MessageToDict(
                 agent_card(name, base_url="http://localhost:8010", live=False)
@@ -87,7 +87,11 @@ def test_event_edges_have_real_manifest_topics(anatomy):
         (e["source"], e["target"]): e["topics"] for e in anatomy["edges"] if e["kind"] == "event"
     }
     assert actual == {key: topics for key, topics in expected.items() if topics}
-    assert {e["target"] for e in anatomy["edges"] if e["kind"] == "a2a"} == set(EVAL_ARMS)
+    assert {e["target"] for e in anatomy["edges"] if e["kind"] == "a2a"} == {
+        *EVAL_ARMS,
+        "inventory",
+        "fulfillment",
+    }
 
 
 def test_eval_results_are_measured_receipts_not_browser_constants(anatomy):
@@ -145,3 +149,15 @@ def test_architecture_opens_on_anatomy_and_supports_accessible_controls():
         assert behavior in js
     css = Path("web/agent-anatomy.css").read_text()
     assert "prefers-reduced-motion: reduce" in css
+
+
+def test_store_wheels_use_real_layout_defaults(anatomy):
+    from delivery.store_layout import StoreLayoutConfig
+
+    config = StoreLayoutConfig()
+    for name in ("inventory", "fulfillment", "dispatcher", "courier"):
+        agent = next(a for a in anatomy["agents"] if a["id"] == name)
+        panel = next(p for p in agent["panels"] if p["id"] == "environment")
+        assert panel["numbers"]["Default aisles"] == config.aisles
+        assert panel["numbers"]["Packing seconds"] == config.pack_seconds
+        assert "src/delivery/dark_store.py" in panel["sources"]

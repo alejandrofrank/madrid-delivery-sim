@@ -2,7 +2,19 @@
   "name": "madrid-delivery-sim-ui-checks",
   "private": true,
   "description": "Development-only browser evidence tooling; no frontend runtime dependencies.",
-  "engines": {"node": ">=20"},
-  "scripts": {"screenshots": "node scripts/screenshot_ui.ts"},
-  "devDependencies": {"playwright": "1.64.1"}
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "screenshots": "node scripts/screenshot_ui.ts"
+  },
+  "devDependencies": {
+    "@gltf-transform/core": "4.5.1",
+    "@gltf-transform/extensions": "4.5.1",
+    "@gltf-transform/functions": "4.5.1",
+    "meshoptimizer": "1.2.0",
+    "playwright": "1.64.1",
+    "sharp": "0.35.5",
+    "three": "0.187.0"
+  }
 }

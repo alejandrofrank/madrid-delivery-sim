@@ -1,6 +1,19 @@
 # madrid-delivery-sim roadmap
 
-Updated 2026-10-31. Implemented slices are identified below; remaining milestones are planned.
+Updated 2026-11-02. Implemented slices are identified below; remaining milestones are planned.
+
+## Dark store slice: shelf to doorstep
+
+- [x] Shared Environment contract, unchanged city-only clock and configurable store layouts.
+- [x] Real catalogue stock mapped to shelves, scoped reservations, physical pick/pack/dock
+  effects, replacement-picker recovery and forklift restocking through A2A roles.
+- [x] Lazy Three.js cutaway with credited SimReady assets, live-load map pins, order
+  following, keyboard controls and graphics/model fallbacks.
+- [x] Four store disruptions, seeded repeatability, stock and timing gates in CI.
+- [x] Environment-specific anatomy, actual journey GIF and reproducible demo request.
+
+See [store behavior and limits](docs/DARK-STORE.md). Worker collision avoidance,
+robotics dynamics and warehouse throughput benchmarking remain outside this slice.
 
 ## Production slice: on-demand cloud sessions
 

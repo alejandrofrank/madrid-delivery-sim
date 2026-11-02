@@ -55,7 +55,7 @@ MAX_EVENTS_PER_REQUEST = 32
 class AgentCommand(BaseModel):
     model_config = ConfigDict(extra="forbid")
     run_id: UUID
-    operation: Literal["submit", "tick", "supply_tick", "replan"] = "submit"
+    operation: Literal["submit", "tick", "supply_tick", "replan", "store_tick"] = "submit"
     entity_id: str = Field(min_length=1, max_length=80, pattern=r"^[A-Za-z0-9_.:-]+$")
 
 
@@ -67,6 +67,12 @@ class QueuedAgentService:
         self.world: World | None = None
 
     def invoke(self, command: AgentCommand) -> dict[str, Any]:
+        if command.operation == "store_tick":
+            from delivery.store_agents import store_tick
+
+            with trace_span("a2a.invoke", attributes={"agent.role":self.role,
+                                                      "delivery.environment":"dark_store"}):
+                return store_tick(self.role,str(command.run_id),self.url)
         if command.operation == "replan":
             from delivery.chaos_agents import replan
 
@@ -241,8 +247,10 @@ def agent_card(
     base_url: str | None = None,
     live: bool | None = None,
 ) -> AgentCard:
-    if role not in {"dispatcher", "customer_service"} and not re.fullmatch(
-        r"restaurant-[a-z0-9_-]{1,80}", role
+    if role not in {"dispatcher", "customer_service", "inventory", "fulfillment"} and not (
+        re.fullmatch(
+            r"restaurant-[a-z0-9_-]{1,80}", role
+        )
     ):
         raise ValueError("Unknown A2A role")
     origin = (
@@ -265,6 +273,10 @@ def agent_card(
         if role == "dispatcher"
         else "Scoped restaurant preparation, sourcing and recovery through ADK tools."
         if role.startswith("restaurant-")
+        else "Scoped physical stock reservations and confirmed supply receipts."
+        if role == "inventory"
+        else "Plan pick routes, pack complete baskets and hand off at the store dock."
+        if role == "fulfillment"
         else "ADK customer service; policy-checked advice and proactive recovery tools."
     )
     return AgentCard(
@@ -295,10 +307,12 @@ def agent_card(
                 id=role,
                 name=role.replace("_", " ").title(),
                 description=description,
-                tags=["delivery", "durable-queue", "adk"],
+                tags=["delivery", "durable-queue", "dark-store" if role in
+                      {"inventory","fulfillment"} else "adk"],
                 examples=[json.dumps({
                     "run_id": "00000000-0000-0000-0000-000000000000",
-                    "operation": "replan" if role.startswith("restaurant-") else "submit",
+                    "operation": "store_tick" if role in {"inventory","fulfillment"} else
+                        "replan" if role.startswith("restaurant-") else "submit",
                     "entity_id": (
                         "00000000000000000000000000000000" if role.startswith("restaurant-")
                         else "C-1" if role == "customer_service" else "O-1"

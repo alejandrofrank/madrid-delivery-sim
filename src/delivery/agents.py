@@ -33,7 +33,9 @@ class Dispatcher:
             """SELECT o.*, coalesce(o.recovery_node,s.node) AS store_node, c.node AS customer_node,
                s.district AS store_district,c.district AS customer_district
                FROM orders o JOIN locations s ON s.id=o.store JOIN locations c ON c.id=o.customer
-               WHERE o.run_id=%s AND o.status='pending' ORDER BY o.due_sim,o.id
+               WHERE o.run_id=%s AND o.status='pending' AND NOT EXISTS 
+               (SELECT 1 FROM store_orders so WHERE so.run_id=o.run_id AND so.order_id=o.id 
+                AND so.stage NOT IN ('dock','handed_off')) ORDER BY o.due_sim,o.id
                FOR UPDATE OF o SKIP LOCKED LIMIT 100""",
             (event.run_id,),
         ).fetchall()

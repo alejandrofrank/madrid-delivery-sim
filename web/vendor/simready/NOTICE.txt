@@ -1,0 +1,5 @@
+NVIDIA SimReady models, converted by codepawl. CC BY 4.0.
+https://huggingface.co/datasets/codepawl/simready-glb
+https://creativecommons.org/licenses/by/4.0/
+glTF Transform 4.5.1: simplified geometry, 256px WebP textures, Meshopt compression; visual assets only, not physics.
+See manifest.json for pinned originals and SHA-256 checksums.

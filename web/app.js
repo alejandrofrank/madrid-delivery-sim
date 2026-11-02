@@ -17,7 +17,7 @@ const courierMarkers = new Map();
 const {createDisplayClock, courierPosition} = CourierMotion;
 const displayClock = createDisplayClock();
 let state = null, selected = null, runId = new URLSearchParams(location.search).get("run") || "", traceRows = [];
-let tab = "decisions", busy = false, pollCount = 0, traceBusy = false;
+let tab = "decisions", pollTask = null, pollCount = 0, traceBusy = false;
 let runtime = {mode:"local"}, replayStarted = performance.now();
 const narrowMap = matchMedia("(max-width:850px)");
 document.querySelector(".map-key").open = !narrowMap.matches;
@@ -406,7 +406,7 @@ function renderLedger() {
   $("orders-empty").hidden=rows.length>0;
   $("orders-empty").textContent=state.orders.length?"No orders match this view. Adjust the search or choose All orders.":"No orders yet. New requests will appear here during the session.";
   document.querySelector(".ledger .table-scroll").hidden=rows.length===0;
-  document.querySelectorAll("[data-order]").forEach(b=>b.onclick=()=>choose("order",b.dataset.order));
+  document.querySelectorAll("[data-order]").forEach(b=>b.onclick=()=>{choose("order",b.dataset.order);StoreUI.selectOrder(b.dataset.order);});
 }
 function renderInspector() {
   if(!state?.run)return;
@@ -449,11 +449,16 @@ function animate() {
   }
   requestAnimationFrame(animate);
 }
-async function poll() {
-  if(busy) return;
-  busy=true;
+function poll() {
+  if(pollTask)return pollTask;
+  pollTask=readState().finally(()=>{pollTask=null;});
+  return pollTask;
+}
+async function readState() {
+  const requestedRun=runId;
   try {
     const next=await api(`/api/state${runId?`?run=${runId}`:""}`);
+    if(runId!==requestedRun)return;
     if(next.run?.id!==state?.run?.id) {
       traceRows=[];
       $("agent-fleet").value="all";
@@ -465,12 +470,12 @@ async function poll() {
     state=next;
     displayClock.accept(runtime.mode==="replay"&&state.run?{...state.run,id:state.run.id+":"+replayStarted}:state.run, performance.now());
     ChaosUI.update(state);
+    await StoreUI.update(state,runtime);
     $("connection").className="dot online"; $("connection-text").textContent=runtime.mode==="replay"?"Recorded replay · no model calls":"Local services connected";
     if(state.run) { renderFleetControl();renderMetrics();renderCouriers();renderOrders();renderLedger();renderInspector();renderRoute();await refreshTrace(); }
     else $("fleet").innerHTML='<div class="empty"><strong>No session loaded</strong><p>Start a session to see the fleet, routes and orders.</p><button data-open-simulation>Set up simulation</button></div>';
     if(++pollCount%10===0) await refreshRuns();
   } catch(e) { $("connection").className="dot offline";$("connection-text").textContent="Connection interrupted";error(e.message); }
-  finally { busy=false; }
 }
 async function initialize() {
   try {
@@ -496,4 +501,11 @@ async function initialize() {
   } catch(e) { error(e.message); }
   setInterval(poll,1000); animate();
 }
+StoreUI.init({map,api,choose,locate:()=>$("frame-selection").click(),selectRun:async id=>{
+ runId=id;$("run-select").value=id;setConsoleView("operations");
+ history.replaceState(null,"","?run="+encodeURIComponent(id));await refreshRuns();await poll();
+ // A joined poll may belong to the preceding run; wait for this selection.
+ if(state?.run?.id!==id)await poll();
+ if(state?.run?.id!==id)throw new Error("The new run could not be loaded. Try opening the store again.");
+}});
 initialize();

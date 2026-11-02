@@ -2,7 +2,7 @@
 "use strict";
 const ChaosUI = (() => {
   const el = id => document.getElementById(id);
-  const names = {heavy_rain:"Heavy rain",metro_strike:"Metro strike",restaurant_outage:"Restaurant outage",courier_offline:"Courier offline",demand_surge:"Demand surge"};
+  const names = {heavy_rain:"Heavy rain",metro_strike:"Metro strike",restaurant_outage:"Restaurant outage",courier_offline:"Courier offline",demand_surge:"Demand surge",blocked_aisle:"Blocked aisle",shelf_out_of_stock:"Shelf out of stock",robot_breakdown:"Robot breakdown",late_restock_truck:"Late restock truck"};
   const districts = {chamberi:"Chamberí",retiro:"Retiro",vallecas:"Puente de Vallecas"};
   const safe = value => String(value ?? "").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
   const time = s => `${String(10+Math.floor(s/3600)).padStart(2,"0")}:${String(Math.floor(s%3600/60)).padStart(2,"0")}`;
