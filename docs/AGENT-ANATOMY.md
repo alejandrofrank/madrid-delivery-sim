@@ -1,7 +1,8 @@
 # Agent anatomy
 
-Start with the team: follow a store order from stock check to picking, dispatch,
-delivery and recovery review. Click any robot to inspect its parts. The whole
+Start with the team in one shared 3D delivery setting: stocked shelves, a packing
+bench, loading dock, street and doorstep. Follow a store order from stock check
+to picking, dispatch and delivery; recovery evidence then travels to the judge. Click any robot to inspect its parts. The whole
 robot stays visible while the component highlights and its explanation appears.
 Every hotspot stays available, so you can move directly between parts without
 resetting your view. Anatomy is the complete agent reference: all 99 component
@@ -66,14 +67,27 @@ antenna explains A2A and the separate read-only MCP server. Intake and exhaust
 show event topics. The inspection sticker shows evidence; the wheels explain
 where the code runs.
 
+Each role has a stable purpose color on its body and top light, plus a distinct
+symbol. The same color and symbol appear in the named role buttons and the
+full-size inspector. Color is never the only identifier. A white ring marks the
+current step's owner without changing that role's identity.
+
 The team story is an **illustration, not live traffic**. A demo input creates
-a dark-store order; the household robot models meal customers separately. Solid
-lines mean queued handoffs, dashed lines mean controller-routed A2A requests,
-and dotted lines mean review evidence. The judge reviews recovery decisions,
+a dark-store order; the household robot models meal customers separately. A floor route connects physical handoffs; a raised dashed link shows the
+controller-routed A2A request. Dotted review evidence leaves the delivered parcel
+at the doorstep. **How agents communicate** explains the protocol legend. The judge reviews recovery decisions,
 rather than approving every successful delivery. **Play order** runs one finite
-journey; reduced motion offers **Next step** instead. On phones the sequence
-runs vertically. Meal-specific agents and customer service remain inspectable
-alongside the main store flow.
+journey; reduced motion offers **Next step** instead. On phones a single scene overview sits above six manual steps and nine named
+role buttons. Meal-specific agents and customer service have their own stations
+and remain inspectable alongside the main store flow. On the scene canvas,
+arrows orbit and Home resets the viewpoint. Every role is also keyboard-accessible
+through its named button; **Back to team** restores focus to that role.
+
+The shared scene reuses a lower-detail version of the inspector's robot geometry.
+It renders only when visible and changed, caps its render rate at 30 frames per
+second and pixel ratio at 1.3, and disposes resources when leaving the chapter.
+If 3D fails, a grouped floor plan retains all roles and manual story controls.
+The inspector keeps its separate labelled SVG fallback.
 
 The cab badge shows the role, and arm symbols represent up to four of that
 role's actual tools. The gauge compares default USD model spending caps across
