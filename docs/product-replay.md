@@ -1,6 +1,6 @@
 # Recorded product examples
 
-The story landing uses a committed static projection of a reviewed offline
+The story landing's prepared data is a static projection of a reviewed offline
 recording. Downloading this file does not start a simulation, connect to a
 database, call a model, or require a running application backend.
 
@@ -68,3 +68,39 @@ referenced route. Equal-position points with different times represent waiting.
 Null references are intentional. Raw IDs belong in source details, not the
 visitor-facing explanation. Labels must distinguish recorded examples from a
 new run, and visible motion must pause off-screen and respect reduced motion.
+
+
+## Inventory, restaurant and store examples
+
+The prepared examples in `web/data/examples/` use separate synthetic runs.
+Their manifest records each file's byte count and SHA-256 digest; the read-only
+loader rejects tampering, unfinished runs, paid calls and non-synthetic captures.
+
+- `inventory.json` retains the stock ledger, agents, six checkpoints and the
+  actual worker-crash recovery. Its catalogue is the repository's synthetic
+  fixture, not a merchant's current stock or prices.
+- `restaurant.json` retains a completed offline ADK order, its 24-message
+  conversation, memory history, agent inspections and replay verification.
+  Scripted model turns are labelled as offline; they are not paid model results.
+- `store.json` captures one order every ten simulated seconds from picking to
+  courier delivery, including a picker breakdown and agent replanning through
+  A2A. Layouts and catalogues are stored once; frame data retains actual workers,
+  shelves, stock, decisions and order stages.
+
+These files are intended to load on their corresponding pages, not as part of
+the landing download. They contain no runtime credentials. A recorded example
+must never be submitted to a live write endpoint; starting a new run creates a
+new live identity through the existing authorized API.
+
+To capture fresh examples deliberately, from the repository root:
+
+```bash
+TEST_DATABASE_URL=postgresql://delivery:delivery_local_only@localhost:55432/delivery_test \
+  python3 scripts/record_product_examples.py --source-revision "$(git rev-parse HEAD)"
+python3 -m pytest -q tests/test_product_examples.py
+```
+
+The recorder accepts only this project's local `delivery_test` database, forces
+paid providers off before imports, and records the supplied simulator commit.
+It creates real test runs, including a real crashing inventory worker. Reading
+the committed examples needs no database, cloud service or running simulator.

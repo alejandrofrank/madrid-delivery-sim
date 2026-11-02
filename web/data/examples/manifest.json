@@ -1,0 +1,20 @@
+{
+  "schema_version": 1,
+  "examples": {
+    "inventory": {
+      "file": "inventory.json",
+      "bytes": 403586,
+      "sha256": "2ad10527ec4a59d5d5e3b5b09f99d723933a4600b2238d7a4bbb0e2f025fdec2"
+    },
+    "restaurant": {
+      "file": "restaurant.json",
+      "bytes": 1068102,
+      "sha256": "7491ba89531b923392c5b5c3c9658f6a176bf76c166d6a714019e4fb4aa22ace"
+    },
+    "store": {
+      "file": "store.json",
+      "bytes": 6937789,
+      "sha256": "8555b4b9b2648037c1921c904dd59aca5514fc441f2063006641dd7f6b2c5360"
+    }
+  }
+}
