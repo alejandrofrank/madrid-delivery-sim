@@ -9,7 +9,7 @@ window.StoreUI=(()=>{
   $('store-demo').onclick=startDemo;
   $('store-open').onclick=()=>open($('store-select').value);
   $('store-back').onclick=()=>close(true);
-  $('store-fit').onclick=()=>scene?.fit();
+  $('store-fit').onclick=()=>{scene?.fit();$('store-track').checked=false;};
   $('store-track').onchange=e=>scene?.track(e.target.checked);
   $('store-order').onchange=()=>{orderId=$('store-order').value||null;render();};
   $('store-follow').onclick=()=>{if(follow){follow=null;scene?.track(false);}else if(orderId){follow=orderId;scene?.track(true);$('store-track').checked=true;}render();};
@@ -80,13 +80,13 @@ window.StoreUI=(()=>{
   $('store-render-status').textContent='Loading local 3D models; floor plan ready.';render();
   try{
    if(new URLSearchParams(location.search).has('store-fallback'))throw new Error('Floor-plan mode selected.');
-   const module=await import('./store-3d.js?v=4');
+   const module=await import('./store-3d.js?v=9914096e761c');
    const built=await module.createStoreScene($('store-stage'),store,text=>{$('store-render-status').textContent=text;},()=>{
     if(token!==generation)return;
     scene?.dispose();scene=null;
     $('store-floor').removeAttribute('hidden');
     $('store-render-status').textContent='Floor plan · graphics connection lost. Order tracking still works.';
-   });
+   },()=>{$('store-track').checked=true;});
    if(token!==generation){built?.dispose();return;}
    scene=built;$('store-floor').setAttribute('hidden','');scene?.track(!!follow);render();
   }catch(error){
@@ -120,7 +120,7 @@ window.StoreUI=(()=>{
   const store=data?.stores.find(s=>s.store===storeId);if(!store||!opened)return;
   const order=store.orders.find(o=>o.order_id===orderId);
   $('store-title').textContent=store.name+' · '+store.district;
-  $('store-load').textContent=store.load+' active orders · '+store.workers.filter(w=>w.kind!=='forklift').length+' pickers';
+  $('store-load').textContent=store.load+' active orders · '+store.workers.filter(w=>w.kind!=='forklift').length+' pickers'+(city?.run?.status==='running'?' · live':' · shift complete');
   const select=$('store-order'),signature=store.orders.map(o=>o.order_id).join('|');
   if(select.dataset.items!==signature){select.replaceChildren(new Option('All store work',''),...store.orders.map(o=>new Option(o.order_id,o.order_id)));select.dataset.items=signature;}
   select.value=orderId||'';

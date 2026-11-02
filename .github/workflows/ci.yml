@@ -63,6 +63,7 @@ jobs:
             artifacts/health/runs/*.json
             .impeccable/review/anatomy-checks.json
             artifacts/dark-store/browser-checks.json
+            artifacts/dark-store/browser-failure.*
       - name: Show service logs after failure
         if: failure()
         run: docker compose logs --no-color --tail 150 app postgres redis

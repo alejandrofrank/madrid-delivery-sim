@@ -54,6 +54,9 @@ def test_three_loader_uses_local_modules_only() -> None:
 
 
 def test_local_module_import_graph_is_complete():
+    renderer = Path("web/store-3d.js")
+    digest = hashlib.sha256(renderer.read_bytes()).hexdigest()[:12]
+    assert f"import('./store-3d.js?v={digest}')" in Path("web/store-view.js").read_text()
     root = Path("web/vendor/three")
     for module in root.glob("*.js"):
         for relative in re.findall(
