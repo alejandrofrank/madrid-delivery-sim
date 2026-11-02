@@ -1,6 +1,7 @@
 # Agent anatomy
 
-Choose a role, rotate its 3D machine, and select a physical component. The whole
+Start with the team: follow a store order from stock check to picking, dispatch,
+delivery and recovery review. Click any robot to inspect its parts. The whole
 robot stays visible while the component highlights and its explanation appears.
 Every hotspot stays available, so you can move directly between parts without
 resetting your view. Anatomy is the complete agent reference: all 99 component
@@ -10,10 +11,14 @@ reading inside the inspector; **Back to component reference** returns from a
 related chapter. **Details & source** exposes the component's policy, evidence,
 Agent Card where applicable, and source dialogs.
 
-**Reset view** restores the starting angle; **Team connections** shows the
-permitted handoffs. **Read guide** opens this guide below the machine, and
-**Chapters** opens the wider documentation navigation. Neither is required to
-read a selected component's complete reference.
+On a first visit, a skippable four-part tour explains the job, tools, guardrails
+and recorded tests. Completion or dismissal is remembered in localStorage;
+**Replay tour** starts it again. Reduced motion uses manual **Next** steps.
+Selecting a part stops the tour, and **Back to team** returns to the order story.
+
+**View options** contains **Reset view**, **Pause motion**, **Read guide** and
+**Chapters**. Guide and chapter navigation remain optional: every selected
+component still has its complete reference in the inspector.
 
 The robot is an illustration of code, not a live actor or activity meter. Its
 cab, tank, engine, arms and other parts map to the same manifest-backed panels.
@@ -30,8 +35,9 @@ fully usable. On a phone, the model stays above the selected component's details
 The desktop reading column keeps the same width for every component, so opening
 or closing it never shifts the machine. It scrolls independently on desktop and
 uses normal page flow on mobile. The physical part name leads each panel,
-followed by its code topic and a plain-language explanation. Most components
-then show two source values; memory opens its visual reference instead. Selecting
+followed by its code topic and a plain-language explanation. Each component then leads with a real configuration or evidence number and short
+plain-language bullets. Technical numbers, readable result tables and formatted
+Agent Cards sit inside **Details & source**; memory retains its visual explorer. Selecting
 a memory tab or reading a chapter preserves the chosen camera view.
 
 Local Oxanium headings echo the machine's geometric form. The rest of the page
@@ -60,11 +66,20 @@ antenna explains A2A and the separate read-only MCP server. Intake and exhaust
 show event topics. The inspection sticker shows evidence; the wheels explain
 where the code runs.
 
-Team lines are an **illustration of permitted handoffs**, not live traffic.
-Solid event links are derived by matching emitted and accepted manifest topics.
-Dashed A2A links start at the simulation scheduler: this project does not pretend
-that every role directly calls every other role. Replay handoffs runs a short
-animation; reduced-motion preferences disable it.
+The team story is an **illustration, not live traffic**. A demo input creates
+a dark-store order; the household robot models meal customers separately. Solid
+lines mean queued handoffs, dashed lines mean controller-routed A2A requests,
+and dotted lines mean review evidence. The judge reviews recovery decisions,
+rather than approving every successful delivery. **Play order** runs one finite
+journey; reduced motion offers **Next step** instead. On phones the sequence
+runs vertically. Meal-specific agents and customer service remain inspectable
+alongside the main store flow.
+
+The cab badge shows the role, and arm symbols represent up to four of that
+role's actual tools. The gauge compares default USD model spending caps across
+these templates: dark bars mean a zero default model budget, not an exhausted
+balance. Customer service's default is $0.02 per run; optional ADK and cloud
+profiles have their own limits. The inspector identifies the unit and scope.
 
 ## Inspecting memory
 
@@ -178,6 +193,8 @@ this page never silently relabels old results as a fresh run.
 
 ## How the page stays honest
 
+The [presentation builder](../src/delivery/anatomy_presentation.py) generates
+plain labels, human number rows, evidence headlines and the narrated team flow.
 The [data builder](../src/delivery/agent_anatomy.py) reads manifests and SOUL files,
 uses the real Agent Card factory, inspects MCP declarations and loads dated eval
 receipts. The [memory reference builder](../src/delivery/memory_reference.py)

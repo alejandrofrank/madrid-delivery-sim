@@ -1,12 +1,18 @@
 {
-  "checked_at": "2026-11-02T17:39:11.830Z",
+  "checked_at": "2026-11-02T19:28:55.467Z",
   "agents": 9,
   "panels": 99,
   "render": {
-    "calls": 99,
-    "triangles": 67018
+    "calls": 115,
+    "triangles": 67038
   },
   "webgl": true,
+  "team_story": true,
+  "generated_labels": true,
+  "real_headlines": true,
+  "real_robot_badges": true,
+  "first_visit_tour": true,
+  "tour_remembered": true,
   "full_body_framing": true,
   "sequential_part_clicks": true,
   "selection_preserves_orbit": true,

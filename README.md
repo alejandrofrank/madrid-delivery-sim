@@ -5,10 +5,11 @@ Queue-driven delivery agents on Madrid streets, with Google ADK, real A2A endpoi
 **[Meet the agents — interactive anatomy](http://localhost:8010/architecture)** ·
 [Repository guide](docs/AGENT-ANATOMY.md)
 
-[![Interactive 3D agent anatomy](docs/media/agent-anatomy.png)](http://localhost:8010/architecture)
+[![Agent team journey and interactive 3D anatomy](docs/media/agent-anatomy.png)](http://localhost:8010/architecture)
 
-Anatomy is the agent reference: every component opens its full explanation in
-place. Select **Memory** to inspect a typed record, preview the five input formats,
+Start with one order moving through the team, then click a robot. A short,
+skippable first-visit tour explains its job, tools, rules and recorded tests.
+Every component opens its full explanation in place. Select **What it remembers** to inspect a typed record, preview the five input formats,
 trace local or GCP storage, and check scope, lifetime and capacity limits. Examples
 are synthetic and validated against the real contracts; no private run memory is
 shown.
@@ -18,7 +19,7 @@ shown.
 
 Synthetic households order meals on Madrid's real street graph. Kitchens source
 ingredients, couriers deliver, and disruptions force the team to reconsider its
-plans. Open the **Architecture** workspace, choose a robot, and inspect its parts.
+plans. Open the **Architecture** workspace, follow the team journey, then inspect a robot.
 
 | Agent | Its job |
 | --- | --- |
@@ -38,7 +39,7 @@ memory leaking across orders or roles. ADK proposes through granular tools;
 scoped SQL, durable queues and authenticated A2A boundaries enforce the contract.
 Routine policies can run without a model.
 
-**1,043 Python tests in the suite**, plus all **99 anatomy panels**
+**1,056 Python tests in the suite**, plus all **99 anatomy panels**
 checked in the browser ([verification workflow](https://github.com/alejandrofrank/madrid-delivery-sim/actions/workflows/ci.yml));
 **pass^5 = 1.000 across 72 held-out cases** (360 attempts), with an all-pass
 bootstrap interval of [1, 1] in the [release receipt](docs/evidence/heldout-release.json).
