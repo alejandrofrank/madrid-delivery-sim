@@ -12,7 +12,7 @@
 .anatomy-identity p{font-size:13px;color:var(--ui-muted);margin-top:5px;max-width:65ch}
 .anatomy-actions{display:flex;gap:8px;flex-shrink:0}
 .anatomy-actions button{font-size:13px;background:transparent}
-.anatomy-workbench{display:grid;grid-template-columns:minmax(0,1fr) 340px;gap:24px;align-items:start}
+.anatomy-workbench{display:grid;grid-template-columns:minmax(0,1fr) minmax(340px,42%);gap:24px;align-items:start}
 .anatomy-drawing{min-width:0}
 .anatomy-illustration{height:clamp(360px,calc(100svh - 280px),800px);position:relative;isolation:isolate;overflow:hidden}
 .anatomy-illustration canvas{width:100%;height:100%;display:block;cursor:grab;touch-action:pan-y}
@@ -35,7 +35,7 @@
 #agent-anatomy .team-agent[aria-pressed="true"]{color:var(--ui-ink);border-color:var(--ui-strong-line);background:var(--ui-raised)}
 .anatomy-provenance{color:var(--ui-muted);font-size:12px;text-align:center;margin:9px 0 0}
 .anatomy-inspector,.anatomy-inspector-idle{align-self:center;margin-bottom:64px}
-.anatomy-inspector{padding:20px;border:1px solid var(--ui-line);background:var(--ui-surface);max-height:calc(100svh - 250px);overflow:auto;scrollbar-color:var(--ui-strong-line) var(--ui-bg);scrollbar-width:thin}
+.anatomy-inspector{padding:20px;border:1px solid var(--ui-line);background:var(--ui-surface);max-height:calc(100svh - 195px);margin-bottom:20px;overflow:auto;scrollbar-color:var(--ui-strong-line) var(--ui-bg);scrollbar-width:thin}
 .anatomy-inspector-idle{color:var(--ui-muted);font-size:14px;line-height:1.6;padding:20px}
 .anatomy-inspector-idle p:first-child{color:var(--ui-ink);font-size:16px;margin-bottom:4px}
 .anatomy-panel-heading{display:flex;align-items:flex-start;justify-content:space-between;gap:14px}
@@ -105,7 +105,7 @@
  .anatomy-mode #reader{padding:16px}
  .anatomy-heading{gap:16px;align-items:flex-start}
  .anatomy-actions{gap:5px}
- .anatomy-workbench{grid-template-columns:minmax(0,1fr) 280px;gap:16px}
+ .anatomy-workbench{grid-template-columns:minmax(0,1fr) 44%;gap:16px}
  #agent-anatomy .team-agent{padding:8px}
 }
 @media(max-width:700px){
@@ -136,4 +136,64 @@
  .anatomy-mode #chapter-body{display:block}
  .anatomy-illustration{height:450px}
  .anatomy-inspector{max-height:none}
+}
+
+
+/* Memory reference: a visual record, its projections and its storage boundary. */
+.memory-reference{font-size:14px;line-height:1.6;margin-top:20px;min-width:0}
+.memory-reference h4,.anatomy-full-reference h4{font:600 18px/1.4 var(--ui-font);margin:22px 0 10px}
+.memory-reference p{margin:10px 0;overflow-wrap:anywhere}
+.memory-tabs{position:sticky;top:-20px;z-index:3;background:var(--ui-surface);display:flex;flex-wrap:wrap;gap:0;border-bottom:1px solid var(--ui-line)}
+#agent-anatomy .memory-tabs button{border:0;border-bottom:2px solid transparent;border-radius:0;background:transparent;font:14px/1.5 var(--ui-font);padding:10px 9px;color:var(--ui-muted)}
+#agent-anatomy .memory-tabs button[aria-selected="true"]{color:var(--ui-ink);border-color:var(--ui-accent)}
+.memory-tab-content{min-width:0}
+.memory-note{color:var(--ui-muted);font-size:13px;line-height:1.6}
+.memory-record{margin:20px 0}
+.memory-record figcaption{font:12px/1.6 var(--ui-mono);overflow-wrap:anywhere;padding:10px 12px;background:var(--ui-bg);border:1px solid var(--ui-line);border-bottom:0}
+.memory-record-groups{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));border:1px solid var(--ui-line)}
+#agent-anatomy .memory-record-groups button{display:flex;flex-direction:column;align-items:flex-start;gap:4px;border:0;border-radius:0;padding:10px;background:transparent}
+#agent-anatomy .memory-record-groups button+button{border-left:1px solid var(--ui-line)}
+#agent-anatomy .memory-record-groups button[aria-pressed="true"]{background:var(--ui-accent-soft);color:var(--ui-accent)}
+.memory-record-groups strong{font:500 14px/1.5 var(--ui-font)}
+.memory-record-groups span{font:12px/1.5 var(--ui-font);color:var(--ui-muted)}
+.memory-record-fields{padding:10px 12px;background:var(--ui-bg);border:1px solid var(--ui-line);border-top:0}
+.memory-field{display:grid;grid-template-columns:minmax(80px,.8fr) minmax(0,1.6fr);gap:10px;padding:7px 0;align-items:start}
+.memory-body-field{grid-template-columns:1fr}
+.memory-field code{font:12px/1.6 var(--ui-mono);color:var(--ui-muted)}
+.memory-field span{font:12px/1.6 var(--ui-mono);overflow-wrap:anywhere;white-space:pre-wrap}
+.memory-select{display:flex;flex-wrap:wrap;align-items:center;gap:10px;margin:16px 0;color:var(--ui-muted);font-size:13px}
+.memory-select select,.anatomy-full-reference select{font:14px/1.5 var(--ui-font);padding:8px;background:var(--ui-bg);color:var(--ui-ink);border:1px solid var(--ui-strong-line);max-width:100%;min-width:0}
+.memory-code{font:12px/1.7 var(--ui-mono);background:var(--ui-bg);padding:14px;max-height:330px;overflow:auto;white-space:pre-wrap;overflow-wrap:anywhere;border:1px solid var(--ui-line);margin:12px 0}
+.memory-reference details,.anatomy-full-reference{border-top:1px solid var(--ui-line);padding:12px 0;margin-top:8px;font-size:14px;line-height:1.65}
+.memory-reference summary,.anatomy-full-reference>summary{cursor:pointer;color:var(--ui-accent);padding:4px 0}
+.memory-flow,.memory-storage-flow{list-style:none;margin:20px 0;padding:0}
+.memory-flow li,.memory-storage-flow li{position:relative;display:grid;grid-template-columns:minmax(90px,1fr) minmax(0,2fr);gap:12px;padding:14px 0;border-top:1px solid var(--ui-line)}
+.memory-flow li strong,.memory-storage-flow li strong{font-weight:500;color:var(--ui-ink)}
+.memory-flow li span,.memory-storage-flow li span{color:var(--ui-muted);overflow-wrap:anywhere}
+.memory-storage-flow li{grid-template-columns:1fr;padding:16px 16px 16px 26px;gap:4px;border:1px solid var(--ui-line);margin-bottom:22px;background:var(--ui-bg)}
+.memory-storage-flow li:not(:last-child):after{content:"";position:absolute;top:100%;left:26px;width:1px;height:23px;background:var(--ui-accent)}
+.memory-storage-flow li:last-child{border-style:dashed}
+.memory-limits{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:10px 16px;padding:16px 0;margin:12px 0;border-block:1px solid var(--ui-line);font-size:13px}
+.memory-limits dt{color:var(--ui-muted)}
+.memory-limits dd{margin:0;max-width:25ch;font:13px/1.6 var(--ui-mono);overflow-wrap:anywhere;text-align:right}
+.memory-bounds{width:100%;border-collapse:collapse;font-size:12px;text-align:left}
+.memory-bounds th,.memory-bounds td{padding:10px 5px;border-bottom:1px solid var(--ui-line);font-weight:400}
+.memory-bounds thead{color:var(--ui-muted)}
+.memory-bounds td{font-family:var(--ui-mono);white-space:nowrap}
+.anatomy-full-reference{margin-top:16px}
+.anatomy-inline-article{font-size:14px;line-height:1.7;overflow-wrap:anywhere;min-width:0}
+.anatomy-inline-article h2{font:600 20px/1.4 var(--ui-font);margin:28px 0 10px}
+.anatomy-inline-article h3{font:600 17px/1.5 var(--ui-font);margin:24px 0 8px}
+.anatomy-inline-article p,.anatomy-inline-article ul,.anatomy-inline-article ol{margin:12px 0}
+.anatomy-inline-article ul,.anatomy-inline-article ol{padding-left:22px}
+.anatomy-inline-article a{color:var(--ui-accent)}
+.anatomy-inline-article pre{font:12px/1.7 var(--ui-mono);white-space:pre-wrap;overflow-wrap:anywhere;max-height:400px;overflow:auto;padding:12px}
+.anatomy-inline-article table{border-collapse:collapse;font-size:12px}
+.anatomy-inline-article th,.anatomy-inline-article td{padding:8px;border-bottom:1px solid var(--ui-line);text-align:left}
+.anatomy-inline-article .table-wrap{overflow:auto}
+.anatomy-reference-back{margin:12px 0}
+@media(max-width:700px){
+ .memory-select select,.anatomy-full-reference select{font-size:16px;min-height:44px}
+ #agent-anatomy .memory-tabs button,.memory-reference summary,.anatomy-full-reference>summary{min-height:44px}
+ .memory-limits{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
 }

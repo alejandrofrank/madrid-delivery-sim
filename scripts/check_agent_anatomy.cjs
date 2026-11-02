@@ -57,9 +57,14 @@ async function capture(page,path){
     assert(!(await page.locator('.anatomy-technical').getAttribute('open')));
     await page.locator('.anatomy-technical>summary').click();
     for(const detail of panel.details)assert((await page.locator('.anatomy-explanation').textContent()).includes(detail));
+    await page.locator(".anatomy-full-reference>summary").click();
+    await page.locator(".anatomy-inline-article").waitFor();
+    assert((await page.locator(".anatomy-inline-article").innerText()).length>100);
+    await page.locator(".anatomy-full-reference>summary").click();
     panels++;
    }
   }
+  await require("./check_memory_reference.cjs")(page,data,capture,out);
   await page.locator('.team-agent[data-agent="fulfillment"]').click();
   await page.locator('#anatomy-part-select').selectOption('environment');
   for(const [id,variant] of Object.entries(data.agents.find(a=>a.id==='fulfillment').panels.find(p=>p.id==='environment').environments)){

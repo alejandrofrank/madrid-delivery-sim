@@ -17,6 +17,8 @@ from delivery.adk_contracts import JevRouting, restaurant_template
 from delivery.agent_specs import load_role
 from delivery.config import Settings
 from delivery.memory_profiles import MemoryProfile
+from delivery.memory_reference import SOURCES as MEMORY_SOURCES
+from delivery.memory_reference import memory_reference
 from delivery.role_manifest import manifest_names
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -79,7 +81,7 @@ def source_paths() -> list[str]:
         "config/agents/restaurant-adk/" + name
         for name in ("PROMPT.md", "SOUL-speed.md", "SOUL-cost.md")
     ]
-    return sorted(paths)
+    return sorted(set(paths + MEMORY_SOURCES))
 
 
 def input_fingerprint() -> str:
@@ -291,7 +293,8 @@ def anatomy_data() -> dict[str, Any]:
                     if name == "customer_service"
                     else profile.model_dump()
                 ),
-                sources=["src/delivery/memory_profiles.py", "src/delivery/semantic_memory.py"],
+                sources=MEMORY_SOURCES,
+                reference=memory_reference(role),
             ),
             "policy": dict(
                 summary="Checks every proposed action against permissions and policy.",
