@@ -1,0 +1,38 @@
+[
+  {
+    "antipattern": "design-system-radius",
+    "name": "Radius outside DESIGN.md",
+    "description": "A border-radius value is outside the DESIGN.md rounded scale. Use a documented radius token or update the design system if the new shape is intentional.",
+    "severity": "advisory",
+    "category": "quality",
+    "file": "/mnt/wsl/docker-desktop-bind-mounts/Ubuntu/fbb69697e62aa3ca30d95f0383c944ae1ce17f670b898bcac9f83f025a7948e5/web/agent-anatomy.css",
+    "line": 91,
+    "snippet": "border-radius: 2px is outside the DESIGN.md rounded scale",
+    "advisory": true,
+    "ignoreValue": "2px"
+  },
+  {
+    "antipattern": "design-system-font-size",
+    "name": "Font size outside DESIGN.md",
+    "description": "A literal font-size is off the type ramp documented in DESIGN.md typography. Use a documented size step or update the design system if the new step is intentional.",
+    "severity": "advisory",
+    "category": "quality",
+    "file": "/mnt/wsl/docker-desktop-bind-mounts/Ubuntu/fbb69697e62aa3ca30d95f0383c944ae1ce17f670b898bcac9f83f025a7948e5/web/agent-anatomy.css",
+    "line": 149,
+    "snippet": "font-size: 18px is off the DESIGN.md type ramp",
+    "advisory": true,
+    "ignoreValue": "18px"
+  },
+  {
+    "antipattern": "design-system-color",
+    "name": "Color outside DESIGN.md",
+    "description": "A literal color is outside the DESIGN.md palette and sidecar tonal ramps. This may be legitimate, but it should be an intentional design-system addition rather than drift.",
+    "severity": "advisory",
+    "category": "quality",
+    "file": "/mnt/wsl/docker-desktop-bind-mounts/Ubuntu/fbb69697e62aa3ca30d95f0383c944ae1ce17f670b898bcac9f83f025a7948e5/web/documentation.html",
+    "line": 0,
+    "snippet": "text color rgb(0, 0, 0) on span \"Search chapters\" is outside DESIGN.md colors",
+    "advisory": true,
+    "ignoreValue": "rgb(0, 0, 0)"
+  }
+]
