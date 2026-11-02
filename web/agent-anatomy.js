@@ -86,161 +86,223 @@
     a.dataset.source = path;
     return a;
   }
-  let generation = 0;
+  let generation = 0, disposeCurrent = null;
+  function unmount() { generation++; disposeCurrent?.(); disposeCurrent=null; }
   async function mount(host) {
-    const version = ++generation;
-    host.replaceChildren(node("p", "Loading agent manifests and recorded evidence…", "anatomy-status"));
+    unmount(); const version=generation;
+    host.replaceChildren(node("p", "Loading agent definitions\u2026", "anatomy-status"));
     try {
-      const response = await fetch("/api/agent-anatomy", {cache: "no-store", credentials: "same-origin"});
-      if (!response.ok) throw new Error("Unavailable");
-      const data = await response.json();
-      if (version !== generation || host.hidden) return;
-      render(host, data);
+      const response=await fetch("/api/agent-anatomy", {cache:"no-store",credentials:"same-origin"});
+      if(!response.ok)throw new Error("Unavailable");
+      const data=await response.json();
+      if(version!==generation||host.hidden)return;
+      render(host,data,version);
     } catch {
-      if (version !== generation) return;
-      const error = node("p", "Agent definitions could not be loaded. Retry after the local service is ready.");
-      error.setAttribute("role", "alert");
-      const retry = node("button", "Retry agent definitions");
-      retry.onclick = () => mount(host);
-      host.replaceChildren(error, retry);
+      if(version!==generation)return;
+      const error=node("p","Agent definitions could not be loaded. Retry after the local service is ready.");
+      error.setAttribute("role","alert");
+      const retry=node("button","Retry agent definitions");retry.onclick=()=>mount(host);
+      host.replaceChildren(error,retry);
     }
   }
-  function render(host, data) {
-    host.replaceChildren();
-    host.dataset.fingerprint = data.input_fingerprint;
-    const agents = [...data.agents].sort((a, b) => order.indexOf(a.id) - order.indexOf(b.id));
-    const params = new URLSearchParams(location.search);
-    let selected = agents.find(a => a.id === params.get("agent")) || agents.find(a => a.id === "restaurant") || agents[0];
-    let part = params.get("part") || "mission";
-    const heading = node("div", undefined, "anatomy-team-heading");
-    heading.append(node("p", "Choose an agent, then inspect its parts. These are role templates; a shift creates many individual agents."));
-    host.append(heading);
-    const toolbar = node("div", undefined, "anatomy-team-toolbar");
-    toolbar.append(node("span", "Solid lines: queued events · Dashed lines: A2A calls · Illustrated topology, not live traffic"));
-    const replay = node("button", "Replay handoffs");
-    toolbar.append(replay);
-    host.append(toolbar);
-    const scroll = node("div", undefined, "anatomy-team-scroll");
-    scroll.setAttribute("role", "region");
-    scroll.setAttribute("aria-label", "Agent team diagram; scroll horizontally on small screens");
-    scroll.tabIndex = 0;
-    const team = node("div", undefined, "anatomy-team");
-    const scheduler = node("p", "Simulation scheduler · A2A JSON-RPC", "anatomy-scheduler");
-    team.append(scheduler);
-    const graph = svgNode("svg", {viewBox: "0 0 1170 285", preserveAspectRatio: "none", class: "anatomy-connections", "aria-hidden": "true"});
-    const x = id => agents.findIndex(a => a.id === id) * 130 + 65;
-    data.edges.forEach((edge, index) => {
-      const start = x(edge.source), end = x(edge.target);
-      const d = edge.kind === "a2a" ? `M585 27H${end}V61` :
-        `M${start} 201V${220 + (index % 5) * 11}H${end}V201`;
-      const path = svgNode("path", {d, class: `team-wire ${edge.kind}`, "data-from": edge.source, "data-to": edge.target});
-      graph.append(path);
-    });
-    team.append(graph);
-    const roster = node("div", undefined, "anatomy-team-roster");
-    agents.forEach(agent => {
-      const button = node("button", undefined, "team-agent");
-      button.dataset.agent = agent.id;
-      button.setAttribute("aria-controls", "anatomy-detail");
-      button.append(machine(agent, null, true), node("strong", agent.name));
-      button.append(node("small", agent.panels.find(p => p.id === "protocols").card ? "A2A + events" : "Queued events"));
-      button.onclick = () => choose(agent.id, "mission");
-      roster.append(button);
-    });
-    team.append(roster); scroll.append(team); host.append(scroll);
-    const connections = node("details", undefined, "anatomy-edge-list");
-    connections.append(node("summary", "Read the handoffs as text"));
-    const edgeText = node("ul"); connections.append(edgeText); host.append(connections);
-    replay.onclick = () => {
-      graph.classList.remove("playing");
-      requestAnimationFrame(() => { void graph.getBoundingClientRect(); graph.classList.add("playing"); });
+  function render(host,data,version) {
+    host.replaceChildren();host.dataset.fingerprint=data.input_fingerprint;
+    const agents=[...data.agents].sort((a,b)=>order.indexOf(a.id)-order.indexOf(b.id));
+    const params=new URLSearchParams(location.search);
+    let selected=agents.find(a=>a.id===params.get("agent"))||agents.find(a=>a.id==="restaurant")||agents[0];
+    let part=null,environment="all",scene=null,teamMode=false,paused=false,disposed=false,lastTrigger=null;
+    const header=node("div",undefined,"anatomy-heading");
+    const identity=node("div",undefined,"anatomy-identity");
+    const name=node("h2"),mission=node("p");identity.append(name,mission);
+    const actions=node("nav",undefined,"anatomy-actions");actions.setAttribute("aria-label","Anatomy views");
+    const teamToggle=node("button","Team connections");teamToggle.setAttribute("aria-pressed","false");
+    const chapters=node("button","Chapters");chapters.setAttribute("aria-expanded","false");chapters.setAttribute("aria-controls","topics");
+    const guide=node("button","Read guide");guide.setAttribute("aria-expanded","false");guide.setAttribute("aria-controls","chapter-body");
+    actions.append(teamToggle,guide,chapters);header.append(identity,actions);host.append(header);
+    chapters.onclick=()=>{
+      const open=document.body.classList.toggle("anatomy-topics-open");chapters.setAttribute("aria-expanded",String(open));
     };
-    const detail = node("section", undefined, "anatomy-detail"); detail.id = "anatomy-detail";
-    const identity = node("div", undefined, "anatomy-identity");
-    const name = node("h2"); const mission = node("p");
-    identity.append(name, mission); detail.append(identity);
-    const workbench = node("div", undefined, "anatomy-workbench");
-    const drawing = node("div", undefined, "anatomy-drawing");
-    const picker = node("label", "Inspect a part", "anatomy-part-picker");
-    const select = node("select"); select.id = "anatomy-part-select";
-    picker.append(select); drawing.append(picker);
-    const illustration = node("div", undefined, "anatomy-illustration"); drawing.append(illustration);
-    drawing.append(node("p", "Select a labelled part. Keyboard: Tab to a part, arrow keys to move, Enter to inspect.", "anatomy-hint"));
-    const inspector = node("section", undefined, "anatomy-inspector");
-    inspector.id = "anatomy-inspector"; inspector.setAttribute("aria-labelledby", "anatomy-panel-title");
-    const status = node("span", "", "sr-only"); status.setAttribute("role", "status");
-    workbench.append(drawing, inspector); detail.append(workbench, status); host.append(detail);
-    select.onchange = () => choose(selected.id, select.value);
-    let environment = "all";
-    const footer = node("p", undefined, "anatomy-provenance");
-    footer.append(document.createTextNode("Generated from repository files · definition fingerprint "), node("code", data.input_fingerprint.slice(0, 12)), document.createTextNode(" · "), sourceLink("docs/evidence/heldout-release.json"));
-    host.append(footer);
-    function choose(id, key, updateURL = true) {
-      selected = agents.find(a => a.id === id) || selected;
-      part = selected.panels.some(p => p.id === key) ? key : "mission";
-      name.textContent = selected.name;
-      mission.textContent = selected.mission;
-      roster.querySelectorAll("button").forEach(button => button.setAttribute("aria-pressed", String(button.dataset.agent === selected.id)));
-      graph.querySelectorAll("path").forEach(path => path.classList.toggle("connected", [path.dataset.from, path.dataset.to].includes(selected.id)));
-      edgeText.replaceChildren(...data.edges.filter(e => e.source === selected.id || e.target === selected.id).map(e => node("li", `${e.source} → ${e.target} · ${e.kind === "a2a" ? "A2A" : "queue"}: ${e.topics.join(", ")}`)));
-      if (illustration.dataset.agent !== selected.id) {
-        illustration.replaceChildren(machine(selected, value => choose(selected.id, value)));
-        illustration.dataset.agent = selected.id;
+    guide.onclick=()=>{
+      const open=document.body.classList.toggle("anatomy-reading");guide.setAttribute("aria-expanded",String(open));
+      if(open)document.getElementById("chapter-body").scrollIntoView({behavior:"instant",block:"start"});
+    };
+    const workbench=node("div",undefined,"anatomy-workbench");
+    const drawing=node("div",undefined,"anatomy-drawing");
+    const illustration=node("div",undefined,"anatomy-illustration");
+    illustration.setAttribute("aria-label","Inspect the agent's physical components");
+    const hotspots=node("div",undefined,"anatomy-hotspots"),buttons={};
+    Object.keys(shapes).forEach(key=>{
+      const button=node("button",undefined,"anatomy-hotspot");button.dataset.part=key;
+      button.setAttribute("tabindex", "0");button.setAttribute("aria-controls","anatomy-inspector");
+      const marker=node("span",undefined,"hotspot-dot"),label=node("span",labels[key][2],"hotspot-label");
+      marker.setAttribute("aria-hidden","true");button.append(marker,label);
+      button.onclick=()=>{lastTrigger=button;choose(selected.id,key);};
+      button.onpointerenter=()=>scene?.hover(key);button.onpointerleave=()=>scene?.hover(null);
+      button.addEventListener("keydown",event=>{
+        if(["ArrowRight","ArrowDown","ArrowLeft","ArrowUp"].includes(event.key)){
+          event.preventDefault();const list=Object.values(buttons),direction=["ArrowRight","ArrowDown"].includes(event.key)?1:-1;
+          list[(list.indexOf(button)+direction+list.length)%list.length].focus();
+        }
+        if(event.key==="Enter"){event.preventDefault();button.click();}
+      });
+      buttons[key]=button;hotspots.append(button);
+    });
+    hotspots.hidden=true;illustration.append(hotspots);drawing.append(illustration);
+    const stageControls=node("div",undefined,"anatomy-stage-controls");
+    const picker=node("label","Component","anatomy-part-picker");
+    const select=node("select");select.id="anatomy-part-select";picker.append(select);
+    const reset=node("button","Whole agent");reset.id="anatomy-reset";
+    const pause=node("button","Pause motion");pause.id="anatomy-pause";pause.setAttribute("aria-pressed","false");
+    stageControls.append(picker,reset,pause);drawing.append(stageControls);
+    const hint=node("p","Drag to rotate \u00b7 Select a part to inspect","anatomy-hint");drawing.append(hint);
+    const inspector=node("section",undefined,"anatomy-inspector");inspector.id="anatomy-inspector";inspector.hidden=true;
+    inspector.setAttribute("aria-labelledby","anatomy-panel-title");
+    const status=node("span","","sr-only");status.setAttribute("role", "status");
+    workbench.append(drawing,inspector);host.append(workbench,status);
+    select.onchange=()=>{lastTrigger=select;choose(selected.id,select.value||null);};
+    reset.onclick=()=>choose(selected.id,null);
+    pause.onclick=()=>{paused=!paused;scene?.pause(paused);pause.textContent=paused?"Play motion":"Pause motion";pause.setAttribute("aria-pressed",String(paused));};
+    const roster=node("nav",undefined,"anatomy-roster");roster.setAttribute("aria-label","Choose an agent");
+    agents.forEach(agent=>{
+      const button=node("button",agent.name,"team-agent");button.dataset.agent=agent.id;
+      button.onclick=()=>{setTeam(false);choose(agent.id,null);};roster.append(button);
+    });
+    host.append(roster);
+    const teamPanel=node("section",undefined,"anatomy-team-panel");teamPanel.hidden=true;
+    teamPanel.setAttribute("aria-label","Permitted team handoffs");
+    const toolbar=node("div",undefined,"anatomy-team-toolbar");
+    toolbar.append(node("p","Illustrated handoffs \u00b7 solid: events \u00b7 dashed: A2A"));
+    const replay=node("button","Replay handoffs");toolbar.append(replay);teamPanel.append(toolbar);
+    const scroll=node("div",undefined,"anatomy-team-scroll");
+    scroll.setAttribute("role","region");scroll.setAttribute("aria-label","Agent team diagram; scroll horizontally on small screens");scroll.tabIndex=0;
+    const team=node("div",undefined,"anatomy-team");
+    team.append(node("p","Simulation scheduler \u00b7 A2A","anatomy-scheduler"));
+    const graph=svgNode("svg",{viewBox:"0 0 1170 285",preserveAspectRatio:"none",class:"anatomy-connections","aria-hidden":"true"});
+    const x=id=>agents.findIndex(a=>a.id===id)*130+65;
+    data.edges.forEach((edge,index)=>{
+      const start=x(edge.source),end=x(edge.target);
+      const d=edge.kind==="a2a"?"M585 27H"+end+"V61":"M"+start+" 201V"+(220+(index%5)*11)+"H"+end+"V201";
+      graph.append(svgNode("path",{d,class:"team-wire "+edge.kind,"data-from":edge.source,"data-to":edge.target}));
+    });
+    team.append(graph);const teamRoster=node("div",undefined,"anatomy-team-roster");
+    agents.forEach(agent=>{
+      const button=node("button",undefined,"team-diagram-agent");button.dataset.agent=agent.id;
+      button.append(machine(agent,null,true),node("strong",agent.name));
+      button.onclick=()=>{setTeam(false);choose(agent.id,null);};teamRoster.append(button);
+    });
+    team.append(teamRoster);scroll.append(team);teamPanel.append(scroll);
+    const connections=node("details",undefined,"anatomy-edge-list");connections.append(node("summary","Read the handoffs as text"));
+    const edgeText=node("ul");connections.append(edgeText);teamPanel.append(connections);host.insertBefore(teamPanel,workbench);
+    replay.onclick=()=>{graph.classList.remove("playing");requestAnimationFrame(()=>{void graph.getBoundingClientRect();graph.classList.add("playing");});};
+    function setTeam(show){
+      teamMode=show;teamPanel.hidden=!show;workbench.hidden=show;
+      teamToggle.textContent=show?"Inspect agent":"Team connections";teamToggle.setAttribute("aria-pressed",String(show));
+      if(!show)scene?.wake();
+    }
+    teamToggle.onclick=()=>setTeam(!teamMode);
+    const provenance=node("p","Illustrated code, not live agent activity.","anatomy-provenance");
+    host.append(provenance);
+    function closePanel(){choose(selected.id,null);if(lastTrigger?.isConnected)lastTrigger.focus();else select.focus();}
+    const keydown=event=>{
+      if(event.key!=="Escape")return;
+      if(document.querySelector("dialog[open]"))return;
+      if(document.body.classList.contains("anatomy-topics-open")){
+        document.body.classList.remove("anatomy-topics-open");chapters.setAttribute("aria-expanded","false");chapters.focus();
+      }else if(part)closePanel();
+      else if(teamMode){setTeam(false);teamToggle.focus();}
+    };
+    host.addEventListener("keydown",keydown);
+    function choose(id,key,updateURL=true){
+      const changed=selected.id!==id;selected=agents.find(a=>a.id===id)||selected;
+      if(changed)environment="all";
+      part=selected.panels.some(p=>p.id===key)?key:null;
+      name.textContent=selected.name;mission.textContent=selected.mission;
+      roster.querySelectorAll("button").forEach(b=>b.setAttribute("aria-pressed",String(b.dataset.agent===selected.id)));
+      teamRoster.querySelectorAll("button").forEach(b=>b.setAttribute("aria-pressed",String(b.dataset.agent===selected.id)));
+      graph.querySelectorAll("path").forEach(p=>p.classList.toggle("connected",[p.dataset.from,p.dataset.to].includes(selected.id)));
+      edgeText.replaceChildren(...data.edges.filter(e=>e.source===selected.id||e.target===selected.id).map(e=>node("li",e.source+" \u2192 "+e.target+" \u00b7 "+(e.kind==="a2a"?"A2A":"queue")+": "+e.topics.join(", "))));
+      const placeholder=node("option","Inspect a component");placeholder.value="";
+      select.replaceChildren(placeholder,...selected.panels.map(p=>{const option=node("option",p.title);option.value=p.id;return option;}));select.value=part||"";
+      for(const [id,button] of Object.entries(buttons)){
+        const p=selected.panels.find(p=>p.id===id);button.setAttribute("aria-label",p.title+" \u2014 "+p.part);
+        button.setAttribute("aria-pressed",String(id===part));
       }
-      illustration.querySelectorAll('[role="button"]').forEach(g => g.setAttribute("aria-pressed", String(g.dataset.part === part)));
-      select.replaceChildren(...selected.panels.map(p => { const option = node("option", `${p.title} · ${p.part}`); option.value = p.id; return option; }));
-      select.value = part;
-      const basePanel = selected.panels.find(p => p.id === part);
-      const variant = basePanel.environments?.[environment];
-      const panel = variant ? {...basePanel,...variant} : basePanel;
-      const title = node("h3", panel.title); title.id = "anatomy-panel-title";
-      inspector.replaceChildren(title, node("p", panel.summary, "anatomy-summary"));
-      if(basePanel.environments){
-        const label=node("label","Environment","anatomy-part-picker");
-        const environmentSelect=node("select");environmentSelect.id="anatomy-environment";
-        const all=node("option","All environments");all.value="all";environmentSelect.append(all);
-        Object.entries(basePanel.environments).forEach(([id,view])=>{const option=node("option",view.label);option.value=id;environmentSelect.append(option);});
-        environmentSelect.value=environment;
-        environmentSelect.onchange=()=>{environment=environmentSelect.value;choose(selected.id,part);};
-        label.append(environmentSelect);inspector.insertBefore(label,title);
-        const wheels=illustration.querySelector('[data-part="environment"]');
-        wheels?.setAttribute("data-environment",environment);
+      illustration.querySelectorAll(".agent-machine").forEach(svg=>svg.remove());
+      if(illustration.classList.contains("is-fallback")){
+        const svg=machine(selected,key=>choose(selected.id,key));illustration.append(svg);
+        svg.querySelectorAll("[data-part]").forEach(p=>p.setAttribute("aria-pressed",String(p.dataset.part===part)));
       }
-      const numbers = node("dl", undefined, "anatomy-numbers");
-      Object.entries(panel.numbers).forEach(([label, value]) => {
-        const row = node("div"); row.append(node("dt", label.replaceAll("_", " ")), node("dd", String(value))); numbers.append(row);
-      }); inspector.append(numbers);
-      if (panel.results?.length) {
-        const tableWrap = node("div", undefined, "anatomy-results");
-        const table = node("table");
-        const caption = node("caption", "Recorded held-out results · scripted offline ADK");
-        const head = node("thead"); const tr = node("tr");
-        ["Arm", "Cases × k", "pass^k / 95% CI", "Cost / success", "p95"].forEach(text => {const th = node("th", text); th.scope = "col"; tr.append(th);}); head.append(tr);
-        const body = node("tbody");
-        panel.results.forEach(result => {
-          const row = node("tr");
-          [result.arm, `${result.cases} × ${result.repeat}`, `${result.pass_power_k.toFixed(3)} / [${result.pass_power_k_ci95.join(", ")}]`, result.cost_per_success_usd === null ? "Unmeasured" : `$${result.cost_per_success_usd.toFixed(4)}`, `${result.p95_latency_ms.toFixed(1)} ms`].forEach(text => row.append(node("td", text)));
-          body.append(row);
-        }); table.append(caption, head, body); tableWrap.append(table); inspector.append(tableWrap);
-      }
-      const details = node("div", undefined, "anatomy-explanation");
-      panel.details.forEach(text => details.append(node("p", text))); inspector.append(details);
-      if (panel.card) {
-        const disclosure = node("details", undefined, "anatomy-card");
-        disclosure.append(node("summary", "Inspect the generated Agent Card"), node("pre", JSON.stringify(panel.card, null, 2))); inspector.append(disclosure);
-      }
-      const links = node("nav", undefined, "anatomy-sources"); links.setAttribute("aria-label", "Evidence for this part");
-      links.append(node("strong", "Source of truth"));
-      panel.sources.forEach(path => links.append(sourceLink(path)));
-      const chapter = node("a", "Read the docs chapter →"); chapter.href = `/architecture?page=${panel.chapter}`;
-      links.append(chapter); inspector.append(links);
-      status.textContent = `${selected.name}: ${panel.title}`;
-      if (updateURL) {
-        const url = new URL(location.href); url.searchParams.set("agent", selected.id); url.searchParams.set("part", part);
-        history.replaceState({}, "", url.pathname + url.search);
+      if(changed)scene?.agent(selected.id);
+      scene?.focus(part);
+      inspector.hidden=!part;workbench.classList.toggle("has-selection",!!part);illustration.classList.toggle("has-part",!!part);
+      if(part)renderPanel();
+      status.textContent=part?selected.name+": "+selected.panels.find(p=>p.id===part).title:selected.name;
+      if(updateURL){
+        const url=new URL(location.href);url.searchParams.set("agent",selected.id);
+        if(part)url.searchParams.set("part",part);else url.searchParams.delete("part");
+        history.replaceState({},"",url.pathname+url.search);
       }
     }
-    choose(selected.id, part, false);
+    function renderPanel(){
+      const basePanel=selected.panels.find(p=>p.id===part),variant=basePanel.environments?.[environment];
+      const panel=variant?{...basePanel,...variant}:basePanel;
+      const panelHeader=node("div",undefined,"anatomy-panel-heading");
+      const title=node("h3",panel.title);title.id="anatomy-panel-title";
+      const close=node("button","Close");close.setAttribute("aria-label","Close component details");close.onclick=closePanel;
+      panelHeader.append(title,close);inspector.replaceChildren(panelHeader,node("p",panel.summary,"anatomy-summary"));
+      if(basePanel.environments){
+        const label=node("label","Environment","anatomy-part-picker"),choice=node("select");choice.id="anatomy-environment";
+        const all=node("option","All environments");all.value="all";choice.append(all);
+        Object.entries(basePanel.environments).forEach(([id,view])=>{const option=node("option",view.label);option.value=id;choice.append(option);});
+        choice.value=environment;choice.onchange=()=>{environment=choice.value;renderPanel();};label.append(choice);inspector.append(label);
+      }
+      function numbers(entries){
+        const dl=node("dl",undefined,"anatomy-numbers");
+        entries.forEach(([label,value])=>{const row=node("div");row.append(node("dt",label.replaceAll("_"," ")),node("dd",String(value)));dl.append(row);});return dl;
+      }
+      const entries=Object.entries(panel.numbers);inspector.append(numbers(entries.slice(0,2)));
+      const technical=node("details",undefined,"anatomy-technical");technical.append(node("summary","Details & source"));
+      technical.append(numbers(entries.slice(2)));
+      const details=node("div",undefined,"anatomy-explanation");panel.details.forEach(text=>details.append(node("p",text)));technical.append(details);
+      if(panel.results?.length){
+        const tableWrap=node("div",undefined,"anatomy-results"),table=node("table");
+        table.append(node("caption","Recorded held-out results \u00b7 scripted offline ADK"));
+        const head=node("thead"),tr=node("tr");
+        ["Arm","Cases \u00d7 k","pass^k / 95% CI","Cost / success","p95"].forEach(text=>{const th=node("th",text);th.scope="col";tr.append(th);});head.append(tr);
+        const body=node("tbody");
+        panel.results.forEach(result=>{
+          const row=node("tr");
+          [result.arm,result.cases+" \u00d7 "+result.repeat,result.pass_power_k.toFixed(3)+" / ["+result.pass_power_k_ci95.join(", ")+"]",result.cost_per_success_usd===null?"Unmeasured":"$"+result.cost_per_success_usd.toFixed(4),result.p95_latency_ms.toFixed(1)+" ms"].forEach(text=>row.append(node("td",text)));body.append(row);
+        });table.append(head,body);tableWrap.append(table);technical.append(tableWrap);
+      }
+      if(panel.card){
+        const disclosure=node("details",undefined,"anatomy-card");
+        disclosure.append(node("summary","Inspect the generated Agent Card"),node("pre",JSON.stringify(panel.card,null,2)));technical.append(disclosure);
+      }
+      const links=node("nav",undefined,"anatomy-sources");links.setAttribute("aria-label","Evidence for this part");
+      panel.sources.forEach(path=>{const link=sourceLink(path);link.textContent=path.split("/").slice(-2).join("/");link.title=path;links.append(link);});
+      const chapter=node("a","Read the docs chapter");chapter.href="/architecture?page="+panel.chapter;links.append(chapter);technical.append(links);
+      inspector.append(technical);
+    }
+    function fallback(){
+      if(disposed)return;
+      scene=null;hotspots.hidden=true;illustration.classList.add("is-fallback");
+      pause.hidden=true;hint.textContent="3D unavailable \u00b7 Select a labelled part or use the component menu.";
+      choose(selected.id,part,false);
+    }
+    choose(selected.id,params.get("part"),false);
+    import('./agent-anatomy-3d.js?v=c5e7236d174e').then(({createAgentScene})=>{
+      if(disposed||version!==generation)return;
+      try{
+        scene=createAgentScene(illustration,{buttons,onPart:key=>choose(selected.id,key),onFailure:fallback});
+        scene.agent(selected.id);scene.focus(part);hotspots.hidden=false;
+      }catch{fallback();}
+    }).catch(fallback);
+    disposeCurrent=()=>{
+      disposed=true;scene?.dispose();scene=null;
+      host.removeEventListener("keydown",keydown);
+      document.body.classList.remove("anatomy-topics-open","anatomy-reading");
+    };
   }
-  window.AgentAnatomy = {mount};
+  window.AgentAnatomy={mount,unmount};
 })();

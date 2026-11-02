@@ -5,7 +5,7 @@ Queue-driven delivery agents on Madrid streets, with Google ADK, real A2A endpoi
 **[Meet the agents — interactive anatomy](http://localhost:8010/architecture)** ·
 [Read the same guide in the repository](docs/AGENT-ANATOMY.md)
 
-[![Agent team and interactive machine anatomy](docs/media/agent-anatomy.png)](http://localhost:8010/architecture)
+[![Interactive 3D agent anatomy](docs/media/agent-anatomy.png)](http://localhost:8010/architecture)
 
 ## 60 second tour
 

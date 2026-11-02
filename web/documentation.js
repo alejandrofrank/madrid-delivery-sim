@@ -497,6 +497,7 @@ function pagination(index) {
 }
 
 async function showPage(id, resetScroll = false) {
+  window.AgentAnatomy?.unmount();
   const index = catalogue.pages.findIndex((page) => page.id === id);
   if (index < 0) {
     currentPage = null;

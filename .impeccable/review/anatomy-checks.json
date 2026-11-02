@@ -1,14 +1,21 @@
 {
-  "checked_at": "2026-11-01T23:35:57.945Z",
+  "checked_at": "2026-11-02T03:34:29.332Z",
   "agents": 9,
   "panels": 99,
+  "render": {
+    "calls": 99,
+    "triangles": 67018
+  },
+  "webgl": true,
+  "progressive_details": true,
   "keyboard": true,
   "source_dialog": true,
   "card": true,
   "finite_animation": true,
   "reduced_motion": true,
   "retry": true,
-  "aligned_handoffs": true,
+  "context_loss_fallback": true,
+  "renderer_disposed": true,
   "no_horizontal_page_overflow": true,
   "captures": [
     {
@@ -17,9 +24,19 @@
       "height": 1000
     },
     {
+      "name": "laptop",
+      "width": 1280,
+      "height": 800
+    },
+    {
       "name": "mobile",
       "width": 390,
       "height": 844
+    },
+    {
+      "name": "user-1265",
+      "width": 1265,
+      "height": 712
     },
     {
       "name": "user-1916",

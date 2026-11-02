@@ -1,108 +1,132 @@
-.anatomy-mode .layout { grid-template-columns: 220px minmax(0, 1fr); }
-.anatomy-mode .on-this-page { display: none; }
-.anatomy-mode #reader { max-width: none; padding: 24px 28px; }
-.anatomy-mode .chapter-header { margin-bottom: 12px; }
-.anatomy-mode .breadcrumb { display: none; }
-.anatomy-mode .chapter-header p { margin-top: 5px; }
-.anatomy-mode .review-strip, .anatomy-mode .reference-note { display: none; }
-#agent-anatomy { min-width: 0; }
-#agent-anatomy h2 { font-size: 18px; line-height: 1.4; }
-#agent-anatomy h3 { font-size: 18px; }
-#agent-anatomy p { max-width: 75ch; }
-.anatomy-team-heading p { margin-top: 5px; color: var(--ui-muted); }
-.anatomy-team-toolbar { display: flex; gap: 16px; align-items: center; justify-content: space-between; margin: 12px 0 6px; }
-.anatomy-team-toolbar span { color: var(--ui-muted); font-size: 12px; }
-.anatomy-team-toolbar button { flex: 0 0 auto; }
-.anatomy-team-scroll { overflow-x: auto; border-block: 1px solid var(--ui-line); scrollbar-color: var(--ui-strong-line) var(--ui-bg); }
-.anatomy-team { position: relative; min-width: 900px; height: 245px; }
-.anatomy-scheduler { position: absolute; top: 3px; left: 50%; transform: translateX(-50%); font-size: 11px; padding: 0 8px; background: var(--ui-bg); z-index: 1; white-space: nowrap; }
-.anatomy-connections { position: absolute; width: 100%; height: 100%; inset: 0; }
-.team-wire { fill: none; stroke: var(--ui-strong-line); stroke-width: 1.3; opacity: .55; }
-.team-wire.a2a { stroke: var(--ui-info); stroke-dasharray: 5 5; }
-.team-wire.connected { stroke: var(--ui-accent); stroke-width: 2; opacity: 1; }
-.anatomy-connections.playing .team-wire.connected { animation: handoff 1.2s linear 4; }
-@keyframes handoff { from { stroke-dasharray: 7 5; stroke-dashoffset: 0; } to { stroke-dasharray: 7 5; stroke-dashoffset: -48; } }
-.anatomy-team-roster { position: relative; top: 43px; display: grid; grid-template-columns: repeat(9, minmax(0, 1fr)); }
-.team-agent { display: flex; flex-direction: column; align-items: center; gap: 3px; border: 1px solid transparent; background: var(--ui-bg); padding: 4px; min-width: 0; }
-.team-agent[aria-pressed="true"] { border-color: var(--ui-accent); background: var(--ui-accent-soft); }
-.team-agent strong { font-size: 12px; line-height: 1.3; }
-.team-agent small { font-size: 10px; color: var(--ui-muted); }
-.team-agent .agent-machine { width: 64px; height: 80px; }
-.agent-machine { width: 100%; display: block; overflow: visible; }
-.machine-body { fill: var(--ui-surface); stroke: var(--ui-strong-line); stroke-width: 2; }
-.machine-part { fill: var(--ui-raised); stroke: var(--ui-muted); stroke-width: 2; stroke-linejoin: round; stroke-linecap: round; }
-.machine-glass { fill: var(--ui-accent-soft); }
-.machine-cage { fill: none; stroke-width: 4; }
-.machine-part .part-leader { fill: none; stroke: var(--ui-strong-line); stroke-width: 1; }
-.machine-part .part-label { fill: var(--ui-muted); stroke: none; font: 12px var(--ui-font); }
-.anatomy-illustration .machine-part { cursor: pointer; }
-.anatomy-illustration .machine-part[aria-pressed="true"], .anatomy-illustration .machine-part:hover { fill: var(--ui-accent-soft); stroke: var(--ui-accent); }
-.anatomy-illustration .machine-part[aria-pressed="true"] .part-label, .anatomy-illustration .machine-part:hover .part-label { fill: var(--ui-accent); font-weight: 600; }
-.machine-part:focus-visible { outline: 2px solid var(--ui-accent); outline-offset: 5px; }
-.anatomy-edge-list { padding: 10px 0; color: var(--ui-muted); font-size: 12px; }
-.anatomy-edge-list summary { cursor: pointer; width: fit-content; }
-.anatomy-edge-list ul { margin: 10px 0; padding-left: 20px; }
-.anatomy-edge-list li { overflow-wrap: anywhere; margin: 5px 0; }
-.anatomy-detail { border-top: 1px solid var(--ui-line); margin-top: 8px; }
-.anatomy-identity { padding: 16px 0; }
-.anatomy-identity p { color: var(--ui-muted); margin-top: 4px; }
-.anatomy-workbench { display: grid; grid-template-columns: minmax(300px, .85fr) minmax(0, 1.15fr); border: 1px solid var(--ui-line); }
-.anatomy-drawing { padding: 16px; border-right: 1px solid var(--ui-line); align-self: start; position: sticky; top: 60px; }
-.anatomy-part-picker { display: flex; gap: 10px; align-items: center; font-size: 12px; color: var(--ui-muted); }
-.anatomy-part-picker select { min-width: 0; flex: 1; font: inherit; background: var(--ui-surface); border: 1px solid var(--ui-strong-line); color: var(--ui-ink); padding: 8px; border-radius: var(--ui-radius); }
-.anatomy-illustration { max-width: 500px; margin-inline: auto; }
-.anatomy-hint { font-size: 12px; color: var(--ui-muted); margin: 0 10px; }
-.anatomy-inspector { min-width: 0; padding: 20px 24px; }
-.anatomy-summary { margin-top: 6px; color: var(--ui-ink); font-size: 15px; }
-.anatomy-numbers { margin: 16px 0; border-block: 1px solid var(--ui-line); font-size: 12px; }
-.anatomy-numbers > div { display: flex; justify-content: space-between; gap: 16px; padding: 7px 0; }
-.anatomy-numbers dt { color: var(--ui-muted); }
-.anatomy-numbers dd { margin: 0; font-family: var(--ui-mono); font-variant-numeric: tabular-nums; }
-.anatomy-explanation p + p { margin-top: 12px; }
-.anatomy-explanation p { overflow-wrap: anywhere; }
-.anatomy-sources { display: flex; flex-direction: column; gap: 7px; font-size: 12px; margin-top: 24px; padding-top: 14px; border-top: 1px solid var(--ui-line); }
-.anatomy-sources a { color: var(--ui-accent); overflow-wrap: anywhere; width: fit-content; }
-.anatomy-sources strong { color: var(--ui-muted); font-weight: 500; }
-.anatomy-provenance { margin: 14px 0 28px; font-size: 11px; color: var(--ui-muted); overflow-wrap: anywhere; }
-.anatomy-results { overflow-x: auto; margin-block: 16px; }
-.anatomy-results table { border-collapse: collapse; font-size: 11px; width: 100%; }
-.anatomy-results caption { text-align: left; color: var(--ui-muted); margin-bottom: 7px; }
-.anatomy-results th, .anatomy-results td { padding: 8px 9px; border-bottom: 1px solid var(--ui-line); text-align: left; }
-.anatomy-results td:not(:first-child) { white-space: nowrap; font-variant-numeric: tabular-nums; }
-.anatomy-card { margin-top: 16px; font-size: 12px; }
-.anatomy-card summary { cursor: pointer; }
-.anatomy-card pre { max-height: 300px; overflow: auto; font: 11px/1.6 var(--ui-mono); background: var(--ui-bg); padding: 12px; }
-.anatomy-status { padding: 24px 0; }
-#agent-anatomy .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; border: 0; }
-@media (max-width: 1100px) {
-  .anatomy-mode .layout { grid-template-columns: 190px minmax(0, 1fr); }
-  .anatomy-mode #reader { padding: 20px; }
-  .anatomy-workbench { grid-template-columns: minmax(260px, .85fr) minmax(0, 1fr); }
-  .anatomy-inspector { padding: 16px; }
+.anatomy-mode .layout{display:block;max-width:none}
+.anatomy-mode #reader{max-width:none;padding:18px 28px 12px}
+.anatomy-mode .sidebar,.anatomy-mode .on-this-page,.anatomy-mode .chapter-header,.anatomy-mode .breadcrumb,.anatomy-mode .review-strip,.anatomy-mode .reference-note,.anatomy-mode #chapter-body,.anatomy-mode .pagination,.anatomy-mode .reader-footer{display:none}
+.anatomy-mode.anatomy-reading #chapter-body,.anatomy-mode.anatomy-reading .pagination{display:block;max-width:850px;margin:40px auto}
+.anatomy-mode.anatomy-topics-open .sidebar{display:block;position:fixed;z-index:15;top:44px;bottom:0;left:0;width:260px;background:var(--ui-bg);border-right:1px solid var(--ui-line);overflow:auto;padding:24px 16px}
+#agent-anatomy{min-width:0}
+#agent-anatomy button,#agent-anatomy select{border-radius:var(--ui-radius)}
+#agent-anatomy button:focus-visible,#agent-anatomy select:focus-visible,#agent-anatomy summary:focus-visible{outline:2px solid var(--ui-accent);outline-offset:4px}
+.anatomy-heading{display:flex;align-items:center;justify-content:space-between;gap:24px;min-height:64px;margin-bottom:6px}
+.anatomy-identity h2{font-size:24px;font-weight:600;line-height:1.3}
+.anatomy-identity p{font-size:13px;color:var(--ui-muted);margin-top:5px;max-width:65ch}
+.anatomy-actions{display:flex;gap:8px;flex-shrink:0}
+.anatomy-actions button{font-size:12px;background:transparent}
+.anatomy-workbench{display:grid;grid-template-columns:minmax(0,1fr);align-items:start}
+.anatomy-workbench.has-selection{grid-template-columns:minmax(0,1fr) 320px;gap:24px}
+.anatomy-drawing{min-width:0}
+.anatomy-illustration{height:clamp(360px,calc(100svh - 310px),800px);position:relative;isolation:isolate;overflow:hidden}
+.anatomy-illustration canvas{width:100%;height:100%;display:block;cursor:grab;touch-action:pan-y}
+.anatomy-illustration canvas:active{cursor:grabbing}
+.anatomy-illustration canvas:focus-visible{outline:2px solid var(--ui-accent);outline-offset:-4px}
+.anatomy-hotspots{position:absolute;inset:0;pointer-events:none}
+#agent-anatomy .anatomy-hotspot{position:absolute;top:0;left:0;width:32px;height:32px;display:grid;place-items:center;pointer-events:auto;padding:0;border:0;border-radius:50%;background:transparent}
+.hotspot-dot{width:9px;height:9px;border:1px solid var(--ui-muted);border-radius:50%;background:var(--ui-bg);box-shadow:0 2px 6px #0008}
+.anatomy-hotspot:hover .hotspot-dot,.anatomy-hotspot:focus-visible .hotspot-dot,.anatomy-hotspot[aria-pressed="true"] .hotspot-dot{background:var(--ui-accent);border-color:var(--ui-ink)}
+.hotspot-label{position:absolute;bottom:32px;left:50%;transform:translateX(-50%);white-space:nowrap;padding:4px 8px;background:var(--ui-bg);border:1px solid var(--ui-line);font-size:12px;line-height:1.4;pointer-events:none;visibility:hidden}
+.anatomy-hotspot:hover,.anatomy-hotspot:focus-visible,.anatomy-hotspot[aria-pressed="true"]{z-index:2}
+.anatomy-hotspot:hover .hotspot-label,.anatomy-hotspot:focus-visible .hotspot-label,.anatomy-hotspot[aria-pressed="true"] .hotspot-label{visibility:visible}
+.anatomy-stage-controls{display:flex;justify-content:center;align-items:center;gap:10px;min-height:44px;margin-top:4px}
+.anatomy-stage-controls button{font-size:12px;min-height:36px;background:transparent}
+.anatomy-part-picker{display:flex;gap:8px;align-items:center;font-size:12px;color:var(--ui-muted)}
+.anatomy-part-picker select{min-width:0;font:inherit;background:var(--ui-surface);border:1px solid var(--ui-strong-line);color:var(--ui-ink);padding:8px}
+.anatomy-hint{text-align:center;color:var(--ui-muted);font-size:11px;margin:5px 0 10px}
+.anatomy-roster{display:flex;justify-content:center;gap:2px;flex-wrap:wrap;border-top:1px solid var(--ui-line);padding-top:7px}
+#agent-anatomy .team-agent{padding:8px 13px;font-size:12px;color:var(--ui-muted);background:transparent;border:1px solid transparent;min-height:38px;white-space:nowrap}
+#agent-anatomy .team-agent[aria-pressed="true"]{color:var(--ui-ink);border-color:var(--ui-strong-line);background:var(--ui-raised)}
+.anatomy-provenance{color:var(--ui-muted);font-size:11px;text-align:center;margin:9px 0 0}
+.anatomy-inspector{padding:26px 0 12px;border-top:1px solid var(--ui-line);margin-top:28px;max-height:calc(100svh - 210px);overflow:auto;scrollbar-color:var(--ui-strong-line) var(--ui-bg);scrollbar-width:thin}
+.anatomy-panel-heading{display:flex;align-items:center;justify-content:space-between;gap:14px}
+.anatomy-panel-heading h3{font-size:18px;line-height:1.4}
+.anatomy-panel-heading button{font-size:11px;padding:4px 7px;background:transparent}
+.anatomy-summary{font-size:14px;line-height:1.6;margin-top:12px;color:var(--ui-ink)}
+.anatomy-inspector>.anatomy-part-picker{margin-top:16px}
+.anatomy-numbers{margin:18px 0;font-size:12px;font-variant-numeric:tabular-nums}
+.anatomy-numbers:empty{display:none}
+.anatomy-numbers>div{display:flex;justify-content:space-between;align-items:baseline;gap:12px;padding:8px 0;border-bottom:1px solid var(--ui-line)}
+.anatomy-numbers dt{color:var(--ui-muted);overflow-wrap:anywhere}
+.anatomy-numbers dd{margin:0;text-align:right;font-family:var(--ui-mono);font-size:11px;overflow-wrap:anywhere;min-width:0;max-width:55%}
+.anatomy-technical{font-size:12px;padding-top:4px}
+.anatomy-technical>summary{cursor:pointer;color:var(--ui-accent);width:fit-content;padding:6px 0}
+.anatomy-explanation{margin-top:14px}
+.anatomy-explanation p{overflow-wrap:anywhere;line-height:1.65;margin-bottom:12px}
+.anatomy-sources{display:flex;flex-direction:column;gap:8px;margin-top:20px;border-top:1px solid var(--ui-line);padding-top:14px}
+.anatomy-sources a{color:var(--ui-accent);overflow-wrap:anywhere;width:fit-content;text-underline-offset:3px}
+.anatomy-results{overflow-x:auto;margin:16px 0}
+.anatomy-results table{border-collapse:collapse;font-size:11px;width:100%}
+.anatomy-results caption{text-align:left;color:var(--ui-muted);margin-bottom:7px}
+.anatomy-results th,.anatomy-results td{padding:8px;border-bottom:1px solid var(--ui-line);text-align:left}
+.anatomy-results td:not(:first-child){white-space:nowrap}
+.anatomy-card{margin-top:16px}
+.anatomy-card summary{cursor:pointer}
+.anatomy-card pre{max-height:260px;overflow:auto;font:11px/1.6 var(--ui-mono);padding:10px;background:var(--ui-surface)}
+.anatomy-team-panel{padding:24px 0;min-height:clamp(400px,calc(100svh - 220px),800px)}
+.anatomy-team-toolbar{display:flex;align-items:center;justify-content:space-between;gap:16px;color:var(--ui-muted);font-size:12px;margin-bottom:16px}
+.anatomy-team-scroll{overflow-x:auto;border-block:1px solid var(--ui-line);scrollbar-color:var(--ui-strong-line) var(--ui-bg)}
+.anatomy-team{position:relative;min-width:900px;height:285px}
+.anatomy-scheduler{position:absolute;top:3px;left:50%;transform:translateX(-50%);font-size:11px;padding:0 8px;background:var(--ui-bg);z-index:1;white-space:nowrap}
+.anatomy-connections{position:absolute;width:100%;height:100%;inset:0}
+.team-wire{fill:none;stroke:var(--ui-strong-line);stroke-width:1.3;opacity:.55}
+.team-wire.a2a{stroke:var(--ui-info);stroke-dasharray:5 5}
+.team-wire.connected{stroke:var(--ui-accent);stroke-width:2;opacity:1}
+.anatomy-connections.playing .team-wire.connected{animation:handoff 1.2s linear 4}
+@keyframes handoff{from{stroke-dasharray:7 5;stroke-dashoffset:0}to{stroke-dasharray:7 5;stroke-dashoffset:-48}}
+.anatomy-team-roster{position:relative;top:61px;display:grid;grid-template-columns:repeat(9,minmax(0,1fr))}
+.team-diagram-agent{display:flex;flex-direction:column;align-items:center;gap:10px;padding:8px 4px;border:1px solid transparent;background:var(--ui-bg)}
+.team-diagram-agent[aria-pressed="true"]{border-color:var(--ui-accent);background:var(--ui-accent-soft)}
+.team-diagram-agent strong{font-size:12px;line-height:1.3}
+.team-diagram-agent .agent-machine{width:70px;height:92px}
+.anatomy-edge-list{padding:16px 0;color:var(--ui-muted);font-size:12px}
+.anatomy-edge-list summary{cursor:pointer;width:fit-content}
+.anatomy-edge-list ul{margin:10px 0;padding-left:20px}
+.anatomy-edge-list li{overflow-wrap:anywhere;margin:5px 0}
+.agent-machine{width:100%;display:block;overflow:visible}
+.machine-body{fill:var(--ui-surface);stroke:var(--ui-strong-line);stroke-width:2}
+.machine-part{fill:var(--ui-raised);stroke:var(--ui-muted);stroke-width:2;stroke-linejoin:round;stroke-linecap:round}
+.machine-glass{fill:var(--ui-accent-soft)}
+.machine-cage{fill:none;stroke-width:4}
+.machine-part .part-leader{fill:none;stroke:var(--ui-strong-line);stroke-width:1}
+.machine-part .part-label{fill:var(--ui-muted);stroke:none;font:12px var(--ui-font)}
+.anatomy-illustration.is-fallback{max-width:580px;margin-inline:auto}
+.anatomy-illustration.is-fallback .agent-machine{height:100%}
+.anatomy-illustration .machine-part{cursor:pointer}
+.anatomy-illustration .machine-part[aria-pressed="true"],.anatomy-illustration .machine-part:hover{fill:var(--ui-accent-soft);stroke:var(--ui-accent)}
+.machine-part:focus-visible{outline:2px solid var(--ui-accent);outline-offset:5px}
+.anatomy-status{padding:24px}
+#agent-anatomy .sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap;border:0}
+@media(max-width:1000px){
+ .anatomy-mode #reader{padding:16px}
+ .anatomy-heading{gap:16px;align-items:flex-start}
+ .anatomy-actions{gap:5px}
+ .anatomy-workbench.has-selection{grid-template-columns:minmax(0,1fr) 280px;gap:16px}
+ #agent-anatomy .team-agent{padding:8px}
 }
-@media (max-width: 850px) {
-  .anatomy-workbench { grid-template-columns: minmax(0, 1fr); }
-  .anatomy-drawing { position: static; border-right: 0; border-bottom: 1px solid var(--ui-line); }
-  .anatomy-illustration { max-width: 400px; }
+@media(max-width:700px){
+ .anatomy-mode #reader{padding:12px}
+ .anatomy-heading{display:block;min-height:0}
+ .anatomy-identity h2{font-size:22px}
+ .anatomy-identity p{font-size:12px}
+ .anatomy-actions{margin-top:12px;justify-content:space-between}
+ .anatomy-actions button{min-height:44px}
+ .anatomy-illustration{height:420px}
+ .anatomy-workbench.has-selection{grid-template-columns:minmax(0,1fr);gap:0}
+ .anatomy-inspector{max-height:none;margin:12px 0 20px;padding-top:18px}
+ .anatomy-stage-controls{flex-wrap:wrap;gap:6px}
+ .anatomy-stage-controls .anatomy-part-picker{flex:1 1 100%;justify-content:center}
+ .anatomy-stage-controls select{font-size:16px;max-width:calc(100vw - 120px);min-height:44px}
+ .anatomy-stage-controls button,#agent-anatomy .team-agent{min-height:44px}
+ .anatomy-roster{flex-wrap:nowrap;justify-content:flex-start;overflow-x:auto;scrollbar-width:thin}
+ #agent-anatomy .anatomy-hotspot{width:44px;height:44px}
+ .hotspot-label{bottom:38px}
+ .anatomy-mode.anatomy-topics-open .sidebar{top:56px}
+ .anatomy-inspector .anatomy-part-picker select{font-size:16px;min-height:44px}
 }
-@media (max-width: 700px) {
-  .anatomy-mode .layout { display: block; }
-  .anatomy-mode #reader { padding: 16px 12px; }
-  .anatomy-mode .page-actions { display: none; }
-  .anatomy-team-toolbar { align-items: flex-start; }
-  .anatomy-team-toolbar button { min-height: 44px; }
-  .anatomy-part-picker { flex-direction: column; align-items: stretch; }
-  .anatomy-part-picker select { min-height: 44px; font-size: 16px; }
-  .anatomy-sources a { padding-block: 6px; }
-  .anatomy-inspector { padding: 16px; }
+@media (prefers-reduced-motion: reduce){
+ .anatomy-connections.playing .team-wire.connected{animation:none}
 }
-@media (prefers-reduced-motion: reduce) {
-  .anatomy-connections.playing .team-wire.connected { animation: none; }
-}
-@media print {
-  .anatomy-team-scroll { overflow: visible; }
-  .anatomy-team { min-width: 0; }
-  .anatomy-drawing { position: static; }
+@media print{
+ .anatomy-mode #chapter-body{display:block}
+ .anatomy-illustration{height:450px}
+ .anatomy-inspector{max-height:none}
 }
 
-[data-part="environment"][data-environment="dark_store"]{stroke-dasharray:3 2}
+.anatomy-illustration.has-part .anatomy-hotspot:not([aria-pressed="true"]):not(:focus-visible):not(:hover){opacity:0;pointer-events:none}
