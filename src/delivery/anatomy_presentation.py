@@ -44,6 +44,18 @@ INTRODUCTIONS = {
     "customer_service": "It explains delivery problems and applies refund or escalation rules.",
     "judge": "It checks recovery decisions and records whether they followed the rules.",
 }
+ROLE_VISUALS = {
+    "inventory": ("#75d2a8", "stock", "Stock"),
+    "fulfillment": ("#e9bc71", "pick", "Pick"),
+    "dispatcher": ("#8db9e3", "dispatch", "Route"),
+    "courier": ("#23d8ce", "deliver", "Deliver"),
+    "judge": ("#e5eef5", "review", "Review"),
+    "household": ("#f28e8e", "home", "Customer"),
+    "restaurant": ("#db9669", "kitchen", "Kitchen"),
+    "market": ("#bdcf7c", "supply", "Supply"),
+    "customer_service": ("#b9a5dd", "support", "Support"),
+}
+
 ARM_LABELS = {
     "adk-offline-restaurant": "Kitchen decisions",
     "adk-chaos-restaurant": "Kitchen disruption recovery",
@@ -96,6 +108,8 @@ def enrich_agent(agent: dict[str, Any], role: RoleSpec, release: dict[str, Any])
     preferred = [t for t in tools if not t["id"].startswith("memory.")]
     agent["tool_badges"] = (preferred or tools)[:4]
     agent["badge"] = agent["name"]
+    color, symbol, short_label = ROLE_VISUALS[name]
+    agent["visual"] = {"color": color, "symbol": symbol, "label": short_label}
     # Same USD unit for every role. This is a ceiling, never a remaining balance.
     budget = float(
         panels["limits"]["numbers"].get("Default run budget (USD)", role.limits.model_usd)
