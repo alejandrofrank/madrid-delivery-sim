@@ -20,6 +20,7 @@ def main() -> None:
     for controller_name, renderer_name in (
         ("store-view.js", "store-3d.js"),
         ("agent-anatomy.js", "agent-anatomy-3d.js"),
+        ("agent-story.js", "agent-delivery-scene.js"),
     ):
         controller = WEB / controller_name
         renderer = WEB / renderer_name

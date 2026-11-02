@@ -178,7 +178,7 @@
     const story=window.AgentStory.mount(host,data,(id,trigger)=>{
       stopTour();lastTrigger=trigger;setTeam(false);choose(id,'mission');
       select.focus({preventScroll:true});
-    },machine);
+    });
     host.insertBefore(story.section,workbench);
     function setTeam(show,updateURL=true){
       teamMode=show;story.show(show);workbench.hidden=show;roster.hidden=show;
@@ -324,14 +324,14 @@
     setTeam(!params.has('agent')&&!params.has('part'),false);
     let seen=false;try{seen=localStorage.getItem(tourKey)==='seen';}catch{}
     if(teamMode&&!seen)autoTimer=setTimeout(startTour,2400);
-    import('./agent-anatomy-3d.js?v=1f2283ff80bb').then(({createAgentScene})=>{
+    import('./agent-anatomy-3d.js?v=0f21cabb011a').then(({createAgentScene,createAgentModel})=>{
       if(disposed||version!==generation)return;
       try{
+        story.attachFactory(createAgentModel);
         scene=createAgentScene(illustration,{buttons,onPart:key=>{stopTour();choose(selected.id,key);},onFailure:fallback});
-        story.portraits(agent=>scene.thumbnail(agent));
         scene.agent(selected);scene.focus(part);scene.pause(paused);hotspots.hidden=false;
       }catch{fallback();}
-    }).catch(fallback);
+    }).catch(()=>{story.fallback();fallback();});
     disposeCurrent=()=>{
       disposed=true;stopTour();story.dispose();scene?.dispose();scene=null;
       reduced.removeEventListener("change",motionChanged);document.removeEventListener("visibilitychange",visibilityChanged);
