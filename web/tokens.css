@@ -18,6 +18,7 @@
  --ui-radius:12px;--ui-radius-lg:16px;
  --ui-shadow:0 6px 22px #24351c0c;--ui-shadow-raised:0 14px 40px #24351c18;
  --ui-motion:220ms;--ui-ease:cubic-bezier(.16,1,.3,1);--ui-header-height:72px;
+ --map-water:#bedbe1;--map-water-line:#7fa9b2;--map-land:#e9e5db;--map-park:#d6e3c9;--map-building:#e1d9cb;
  --map-ground:#eee7db;--map-road:#fffdf6;--map-edge:#d7d4c8;--map-route:#158648;--map-label:#536257;
  --ui-selection:#c7e3c2;
 }
@@ -30,6 +31,7 @@
  --ui-positive:#9bdfb1;--ui-negative:#f2a1a0;--ui-warning:#edcc85;--ui-info:#a8cddd;
  --ui-positive-bg:#203c2b;--ui-negative-bg:#4a2d2d;--ui-warning-bg:#443c24;--ui-info-bg:#273e49;
  --ui-shadow:0 6px 22px #0002;--ui-shadow-raised:0 14px 40px #0005;
+ --map-water:#1f4650;--map-water-line:#49818a;--map-land:#293b30;--map-park:#314b34;--map-building:#304335;
  --map-ground:#24362b;--map-road:#3f5542;--map-edge:#1a2b20;--map-route:#80d99c;--map-label:#b3c2b3;
  --ui-selection:#385d40;
 }

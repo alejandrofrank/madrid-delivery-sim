@@ -59,10 +59,11 @@ const ChaosUI = (() => {
       lastRun=run?.id;
       selectedEvent=null;
       el("chaos-feedback").textContent=open?"Events begin at the next simulation minute.":"Start a Chaos session to enable event controls.";
-      if(chaos)el("chaos-panel").open=true;
+      if(chaos)el("chaos-panel").open=new URLSearchParams(location.search).has("chaos");
       el("chaos-controls-disclosure").open=Boolean(chaos&&!chaos.events.length);
     }
     if(chaos&&["complete","failed"].includes(run?.status))el("chaos-feedback").textContent="This run has ended. Start a new Chaos session to trigger events.";
+    el("chaos-controls-disclosure").hidden=replay;
     if(replay) {
       el("chaos-feedback").textContent="Recorded shift · events and agent decisions are read-only.";
       el("chaos-demo").disabled=true;

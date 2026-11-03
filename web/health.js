@@ -4,6 +4,7 @@ let evidence,
   city,
   selectedCategory = "all",
   selectedCapability = null;
+let historicalBanner = null;
 let selectedRun = new URLSearchParams(location.search).get("test_run");
 const expandedScenarios = new Set();
 const names = {
@@ -886,10 +887,20 @@ function renderCity() {
 }
 async function loadEvidence() {
   try {
-    evidence = await get(
-      "/api/health/evidence" +
-        (selectedRun ? "?test_run=" + encodeURIComponent(selectedRun) : ""),
-    );
+    try {
+      evidence = await get("/api/health/evidence" + (selectedRun ? "?test_run=" + encodeURIComponent(selectedRun) : ""));
+      if(!evidence.available&&!selectedRun)throw Error("No retained local report");
+      historicalBanner?.remove();historicalBanner=null;
+    }catch(error){
+      if(selectedRun)throw error;
+      evidence=await get("/static/data/health-evidence.json");
+      if(!historicalBanner){
+        historicalBanner=ProductExamples.banner("Historical test results from "+when(evidence.recording.completed_at)+". These do not certify this running build",async()=>{
+          location.href="/engineers/architecture?page=validation";
+        });
+        document.querySelector("#recorded-example-banner button").textContent="How to run the checks";
+      }
+    }
     renderSummary();
     renderCategories();
     renderTests();
@@ -926,12 +937,13 @@ async function loadCity(run) {
     if (evidence) renderSummary();
   } catch {
     $("services").replaceChildren(
-      el("p", "Runtime probes unavailable.", "empty"),
+      el("p", "This view has no live worker connection. The recorded shift is ready to explore.", "empty"),
     );
     $("diagnostics").replaceChildren(
-      el("p", "Queue and budget diagnostics are unavailable.", "empty"),
+      el("p", "Live diagnostics appear when you connect an authorized workspace.", "empty"),
     );
-    $("runtime-time").textContent = "Probe failed";
+    const watch=el("a","Watch the recorded shift");watch.href="/watch";$("services").append(watch);
+    $("runtime-time").textContent = "No live connection";
     city = null;
     if (evidence) renderSummary();
   }

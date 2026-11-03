@@ -79,3 +79,41 @@ table{font-variant-numeric:tabular-nums}th{font-weight:500;color:var(--ui-muted)
 @media(max-width:520px){.workspace-header{padding:12px 16px;gap:8px}.workspace-brand{font-size:22px;gap:6px}.workspace-logo{width:25px;height:25px}.workspace-cta{padding:10px 12px}.workspace-cta .ui-icon{display:none}.workspace-menu{width:40px;padding:8px}.workspace-theme{width:40px}.workspace-actions{gap:6px}.workspace-footer{align-items:flex-start;flex-direction:column}.ui-card,.ui-panel,.ui-drawer{padding:20px}.workspace-navigation{gap:20px}.workspace-navigation>a{font-size:15px}}
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{scroll-behavior:auto!important;animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:0s!important}}
 @media print{#workspace-shell,.workspace-footer,.ui-drawer{display:none!important}}
+
+/* Public watch keeps the city first; the same controls remain in Advanced. */
+body[data-page="baseline"][data-audience="visitor"] .workspace{grid-template-columns:minmax(0,1.8fr) minmax(320px,1fr);gap:20px;--ops-height:clamp(430px,58vh,680px)}
+body[data-page="baseline"][data-audience="visitor"] .map-panel{grid-column:1;grid-row:1}
+body[data-page="baseline"][data-audience="visitor"] .agents-panel{grid-column:2;grid-row:1}
+body[data-audience="visitor"] #session-id,body[data-audience="visitor"] #view-operations{display:none}
+body[data-page="baseline"] .kpis{border-radius:var(--ui-radius-lg);background:var(--ui-surface);margin-bottom:20px}
+body[data-page="baseline"] .kpis article{padding:18px 24px}
+body[data-page="baseline"][data-audience="visitor"] .metric-chart{display:none}
+.store-launch{border-radius:var(--ui-radius);padding:16px 20px;margin:16px 0}
+body[data-page="baseline"] .fleet-total,body[data-page="baseline"] .fleet-throughput{font-family:var(--ui-font);font-size:var(--ui-text-sm)}
+.ui-drawer .toolbar,.ui-drawer .controls{display:flex;align-items:flex-start;gap:20px}
+.ui-drawer .controls label{flex:1 1 180px}.ui-drawer .diagnostic-metrics{grid-template-columns:1fr}
+.ui-drawer .toolbar>.clock{flex-basis:100%}.ui-drawer #simulation-panel{padding:0}
+.ui-drawer .simulation-intro{display:none}.ui-drawer .toolbar{padding-top:0}
+.ui-drawer .controls{border:0;padding:0;background:transparent}
+.ui-drawer .controls input,.ui-drawer .controls select{width:100%;max-width:none}
+.ui-drawer #supply-settings{display:block}.ui-drawer .settings-grid{grid-template-columns:1fr}
+.ui-drawer #supply-controls{display:flex;flex-wrap:wrap}
+@media(max-width:1000px){body[data-page="baseline"][data-audience="visitor"] .workspace{grid-template-columns:1fr}
+body[data-page="baseline"][data-audience="visitor"] .map-panel{grid-column:1;grid-row:1}
+body[data-page="baseline"][data-audience="visitor"] .agents-panel{grid-column:1;grid-row:2;height:360px}}
+
+body[data-page="baseline"][data-audience="visitor"][data-store-open="true"] .workspace{grid-template-columns:1fr}
+body[data-page="baseline"][data-audience="visitor"][data-store-open="true"] .map-panel{grid-column:1/-1}
+body[data-page="baseline"][data-audience="visitor"] .agent-role-column,
+body[data-page="baseline"][data-audience="visitor"] .fleet-throughput,
+body[data-page="baseline"][data-audience="visitor"] .agent-column-labels>span:last-child{display:none}
+body[data-page="baseline"][data-audience="visitor"] .fleet-row,
+body[data-page="baseline"][data-audience="visitor"] .agent-column-labels{grid-template-columns:minmax(112px,1.2fr) 98px minmax(95px,1fr) 50px;padding:10px 12px;gap:8px}
+@media(max-width:600px){body[data-page="baseline"][data-audience="visitor"] .fleet-row,
+body[data-page="baseline"][data-audience="visitor"] .agent-column-labels{grid-template-columns:minmax(110px,1fr) 88px minmax(70px,1fr)}
+body[data-page="baseline"][data-audience="visitor"] .fleet-total,body[data-page="baseline"][data-audience="visitor"] .agent-column-labels>span:nth-last-child(2){display:none}}
+
+.ui-replay-controls{display:flex;align-items:center;gap:16px;padding:12px 16px;margin:0 0 16px;background:var(--ui-surface);border:1px solid var(--ui-line);border-radius:var(--ui-radius)}
+.ui-replay-controls input{flex:1;min-width:70px;padding:0;accent-color:var(--ui-accent)}
+.ui-replay-controls output{font-variant-numeric:tabular-nums;font-size:var(--ui-text-sm);white-space:nowrap}
+body[data-audience="visitor"] .order-ref{display:none}

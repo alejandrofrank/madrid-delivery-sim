@@ -41,6 +41,7 @@ jobs:
           node scripts/check_agent_anatomy.cjs
           node scripts/check_store_view.cjs
           node scripts/check_product_site.cjs
+          node scripts/check_recorded_views.cjs
       - name: Typed Python and failure tests
         run: |
           docker compose exec -T -e DELIVERY_SOURCE_REVISION="$GITHUB_SHA" app python scripts/health_check.py

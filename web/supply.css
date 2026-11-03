@@ -1,76 +1,9 @@
-:where(body[data-page="restaurants"]) {
-  color-scheme: dark;
-  --bg: var(--ui-bg);
-  --panel: var(--ui-surface);
-  --raised: var(--ui-surface);
-  --line: var(--ui-line);
-  --muted: var(--ui-muted);
-  --text: var(--ui-ink);
-  --blue: var(--ui-accent);
-  --green: var(--ui-positive);
-  --red: var(--ui-negative);
-  --orange: var(--ui-warning);
-  --amber: var(--ui-warning);
-  font:
-    14px/1.5 var(--ui-font);
-  color: var(--text);
-  background: var(--bg);
-  margin: 0;
-}
-:where(body[data-page="restaurants"]) * {
-  box-sizing: border-box;
-}
-:where(body[data-page="restaurants"]) button,
-:where(body[data-page="restaurants"]) input,
-:where(body[data-page="restaurants"]) textarea,
-:where(body[data-page="restaurants"]) select {
-  font:
-    14px/1.5 var(--ui-font);
-  color: inherit;
-}
-:where(body[data-page="restaurants"]) button,
-:where(body[data-page="restaurants"]) input,
-:where(body[data-page="restaurants"]) textarea,
-:where(body[data-page="restaurants"]) select {
-  border: 1px solid var(--line);
-  border-radius: var(--ui-radius);
-  background: var(--raised);
-}
-:where(body[data-page="restaurants"]) button {
-  padding: 8px 12px;
-  cursor: pointer;
-  line-height: 1.25;
-  min-height: 36px;
-  font-weight: 600;
-}
-:where(body[data-page="restaurants"]) button:hover {
-  border-color: var(--ui-strong-line);
-  background: var(--ui-bg);
-}
-:where(body[data-page="restaurants"]) button:disabled {
-  opacity: 1;
-  cursor: not-allowed;
-  color: var(--muted);
-  background: var(--ui-raised);
-  border-color: var(--line);
-}
+:where(body[data-page="restaurants"]) {--bg: var(--ui-bg);--panel: var(--ui-surface);--raised: var(--ui-surface);--line: var(--ui-line);--muted: var(--ui-muted);--text: var(--ui-ink);--blue: var(--ui-accent);--green: var(--ui-positive);--red: var(--ui-negative);--orange: var(--ui-warning);--amber: var(--ui-warning);}
 :where(body[data-page="restaurants"]) button.primary {
   background: var(--blue);
   border-color: var(--blue);
   color: var(--ui-surface);
   font-weight: 600;
-}
-:where(body[data-page="restaurants"]) input,
-:where(body[data-page="restaurants"]) select {
-  min-height: 36px;
-  padding: 8px 8px;
-  min-width: 0;
-}
-:where(body[data-page="restaurants"]) textarea {
-  padding: 8px;
-  line-height: 1.5;
-  resize: vertical;
-  min-width: 0;
 }
 :where(body[data-page="restaurants"]) input[type="checkbox"] {
   width: 16px;
@@ -81,19 +14,6 @@
 :where(body[data-page="restaurants"]) input:disabled,
 :where(body[data-page="restaurants"]) textarea:disabled {
   opacity: 0.6;
-}
-:where(body[data-page="restaurants"]) button:focus-visible,
-:where(body[data-page="restaurants"]) a:focus-visible,
-:where(body[data-page="restaurants"]) input:focus-visible,
-:where(body[data-page="restaurants"]) textarea:focus-visible,
-:where(body[data-page="restaurants"]) select:focus-visible,
-:where(body[data-page="restaurants"]) summary:focus-visible {
-  outline: 2px solid var(--blue);
-  outline-offset: 3px;
-}
-:where(body[data-page="restaurants"]) a {
-  color: var(--blue);
-  text-underline-offset: 3px;
 }
 :where(body[data-page="restaurants"]) h1,
 :where(body[data-page="restaurants"]) h2,
@@ -107,11 +27,11 @@
   letter-spacing: -0.2px;
 }
 :where(body[data-page="restaurants"]) h2 {
-  font-size: 15px;
+  font-size:var(--ui-text-lg);
   font-weight: 600;
 }
 :where(body[data-page="restaurants"]) h3 {
-  font-size: 14px;
+  font-size:var(--ui-text-md);
   font-weight: 600;
 }
 :where(body[data-page="restaurants"]) p {
@@ -121,7 +41,7 @@
 :where(body[data-page="restaurants"]) .subtle,
 :where(body[data-page="restaurants"]) small {
   color: var(--muted);
-  font-size: 12px;
+  font-size:var(--ui-text-sm);
 }
 :where(body[data-page="restaurants"]) .mono {
   font-family: var(
@@ -132,7 +52,7 @@
     monospace
   );
   font-variant-numeric: tabular-nums;
-  font-size: 12px;
+  font-size:var(--ui-text-sm);
 }
 :where(body[data-page="restaurants"]) main {
   max-width: 1800px;
@@ -154,21 +74,21 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  font-size: 12px;
+  font-size:var(--ui-text-sm);
   color: var(--muted);
 }
 :where(body[data-page="restaurants"]) #playback-control {
   width: 65px;
 }
 :where(body[data-page="restaurants"]) .toolbar #run-state {
-  font-size: 12px;
+  font-size:var(--ui-text-sm);
   max-width: 200px;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 :where(body[data-page="restaurants"]) .toolbar #sim-clock {
-  font-size: 14px;
+  font-size:var(--ui-text-md);
   min-width: 72px;
 }
 :where(body[data-page="restaurants"]) .notice {
@@ -182,9 +102,9 @@
   overflow-wrap: anywhere;
 }
 :where(body[data-page="restaurants"]) .notice.error {
-  background: #352428;
+  background: var(--ui-negative-bg);
   color: var(--red);
-  border-color: #784c4c;
+  border-color: var(--ui-negative);
 }
 :where(body[data-page="restaurants"]) .settings-panel {
   border: 1px solid var(--line);
@@ -195,7 +115,7 @@
 :where(body[data-page="restaurants"]) .settings-panel summary {
   cursor: pointer;
   padding: 12px 12px;
-  font-size: 12px;
+  font-size:var(--ui-text-sm);
   list-style-position: inside;
 }
 :where(body[data-page="restaurants"]) .settings-panel summary .subtle {
@@ -212,14 +132,14 @@
 :where(body[data-page="restaurants"]) .advanced label {
   display: grid;
   gap: 8px;
-  font-size: 12px;
+  font-size:var(--ui-text-sm);
   color: var(--muted);
 }
 :where(body[data-page="restaurants"]) .settings-grid input {
   width: 100%;
 }
 :where(body[data-page="restaurants"]) .settings-note {
-  font-size: 12px;
+  font-size:var(--ui-text-sm);
   padding: 0 16px 12px;
 }
 :where(body[data-page="restaurants"]) .metrics {
@@ -243,7 +163,7 @@
 :where(body[data-page="restaurants"]) .metric > span {
   display: block;
   color: var(--muted);
-  font-size: 12px;
+  font-size:var(--ui-text-sm);
   text-transform: none;
   letter-spacing: 0;
 }
@@ -262,7 +182,7 @@
 }
 :where(body[data-page="restaurants"]) .metric small {
   display: block;
-  font-size: 12px;
+  font-size:var(--ui-text-sm);
 }
 :where(body[data-page="restaurants"]) .workspace {
   display: grid;
@@ -289,7 +209,7 @@
   min-width: 0;
 }
 :where(body[data-page="restaurants"]) .panel-heading p {
-  font-size: 12px;
+  font-size:var(--ui-text-sm);
   margin-top: 4px;
   overflow-wrap: anywhere;
 }
@@ -304,16 +224,16 @@
   align-items: center;
   gap: 12px;
   padding: 12px 16px;
-  font-size: 12px;
+  font-size:var(--ui-text-sm);
   color: var(--muted);
 }
 :where(body[data-page="restaurants"]) .entity-picker select {
   width: 100%;
-  font-size: 12px;
+  font-size:var(--ui-text-sm);
 }
 :where(body[data-page="restaurants"]) .pill {
   display: inline-block;
-  font-size: 12px;
+  font-size:var(--ui-text-sm);
   border: 1px solid var(--line);
   background: var(--ui-surface);
   border-radius: var(--ui-radius);
@@ -340,7 +260,7 @@
   background: transparent;
   color: var(--muted);
   padding: 12px 12px;
-  font-size: 12px;
+  font-size:var(--ui-text-sm);
   border-bottom: 2px solid transparent;
   flex: 0 0 auto;
 }
@@ -353,7 +273,7 @@
   color: var(--text);
 }
 :where(body[data-page="restaurants"]) .scope-note {
-  font-size: 12px;
+  font-size:var(--ui-text-sm);
   padding: 12px 16px;
   line-height: 1.55;
 }
@@ -403,7 +323,7 @@
 :where(body[data-page="restaurants"]) .advanced summary {
   padding: 12px 0;
   cursor: pointer;
-  font-size: 12px;
+  font-size:var(--ui-text-sm);
   color: var(--blue);
 }
 :where(body[data-page="restaurants"]) .advanced label {
@@ -411,12 +331,12 @@
 }
 :where(body[data-page="restaurants"]) .json-editor {
   width: 100%;
-  font: 12px/1.6
+  font:var(--ui-text-sm)/1.6
     var(--ui-mono, ui-monospace, SFMono-Regular, Consolas, monospace);
   tab-size: 2;
 }
 :where(body[data-page="restaurants"]) .advanced button {
-  font-size: 12px;
+  font-size:var(--ui-text-sm);
 }
 :where(body[data-page="restaurants"]) .advanced .scope-note {
   padding: 8px 0 0;
@@ -428,7 +348,7 @@
   border-bottom: 0;
 }
 :where(body[data-page="restaurants"]) .evidence .panel-heading > button {
-  font-size: 12px;
+  font-size:var(--ui-text-sm);
 }
 :where(body[data-page="restaurants"]) .evidence-content {
   min-height: 150px;
@@ -446,7 +366,7 @@
   min-width: 0;
 }
 :where(body[data-page="restaurants"]) .count {
-  font-size: 12px;
+  font-size:var(--ui-text-sm);
   margin-left: 4px;
   border-radius: var(--ui-radius);
   background: var(--ui-hover);
@@ -463,7 +383,7 @@
 :where(body[data-page="restaurants"]) table {
   border-collapse: collapse;
   width: 100%;
-  font-size: 12px;
+  font-size:var(--ui-text-sm);
 }
 :where(body[data-page="restaurants"]) th,
 :where(body[data-page="restaurants"]) td {
@@ -476,7 +396,7 @@
 :where(body[data-page="restaurants"]) th {
   font-weight: 600;
   color: var(--muted);
-  font-size: 12px;
+  font-size:var(--ui-text-sm);
   text-transform: uppercase;
   letter-spacing: 0.4px;
   position: sticky;
@@ -487,10 +407,10 @@
 :where(body[data-page="restaurants"]) td small {
   display: block;
   margin-top: 4px;
-  font-size: 12px;
+  font-size:var(--ui-text-sm);
 }
 :where(body[data-page="restaurants"]) td button {
-  font-size: 12px;
+  font-size:var(--ui-text-sm);
   padding: 0;
   text-align: left;
   border: 0;
@@ -509,7 +429,7 @@
   background: var(--ui-surface);
   padding: 4px 8px;
   border-radius: var(--ui-radius);
-  font-size: 12px;
+  font-size:var(--ui-text-sm);
   white-space: nowrap;
   font-family: var(
     --ui-mono,
@@ -525,8 +445,8 @@
   color: var(--green);
 }
 :where(body[data-page="restaurants"]) .state.bad {
-  border-color: #784c4c;
-  background: #352428;
+  border-color: var(--ui-negative);
+  background: var(--ui-negative-bg);
   color: var(--red);
 }
 :where(body[data-page="restaurants"]) .state.pending {
@@ -536,14 +456,14 @@
 }
 :where(body[data-page="restaurants"]) .empty {
   color: var(--muted);
-  font-size: 12px;
+  font-size:var(--ui-text-sm);
   padding: 24px 0;
   line-height: 1.7;
 }
 :where(body[data-page="restaurants"]) .record {
   border-bottom: 1px solid var(--line);
   padding: 12px 0;
-  font-size: 12px;
+  font-size:var(--ui-text-sm);
 }
 :where(body[data-page="restaurants"]) .record:last-child {
   border-bottom: 0;
@@ -556,16 +476,16 @@
   margin-bottom: 4px;
 }
 :where(body[data-page="restaurants"]) .record-head strong {
-  font-size: 12px;
+  font-size:var(--ui-text-sm);
   font-weight: 600;
   overflow-wrap: anywhere;
 }
 :where(body[data-page="restaurants"]) .record-head .mono {
-  font-size: 12px;
+  font-size:var(--ui-text-sm);
   color: var(--muted);
 }
 :where(body[data-page="restaurants"]) .record p {
-  font-size: 12px;
+  font-size:var(--ui-text-sm);
   white-space: pre-wrap;
   overflow-wrap: anywhere;
 }
@@ -575,7 +495,7 @@
 :where(body[data-page="restaurants"]) .record summary {
   cursor: pointer;
   color: var(--blue);
-  font-size: 12px;
+  font-size:var(--ui-text-sm);
 }
 :where(body[data-page="restaurants"]) .record pre,
 :where(body[data-page="restaurants"]) pre {
@@ -585,7 +505,7 @@
   border: 1px solid var(--line);
   border-radius: var(--ui-radius);
   padding: 8px;
-  font: 12px/1.6
+  font:var(--ui-text-sm)/1.6
     var(--ui-mono, ui-monospace, SFMono-Regular, Consolas, monospace);
   color: var(--text);
   max-height: 350px;
@@ -599,13 +519,13 @@
   margin: 8px 0;
 }
 :where(body[data-page="restaurants"]) .inspector-section > p {
-  font-size: 12px;
+  font-size:var(--ui-text-sm);
 }
 :where(body[data-page="restaurants"]) .inspector-section details {
   margin-top: 12px;
 }
 :where(body[data-page="restaurants"]) .inspector-section summary {
-  font-size: 12px;
+  font-size:var(--ui-text-sm);
   cursor: pointer;
   color: var(--blue);
 }
@@ -623,12 +543,12 @@
   padding: 8px;
 }
 :where(body[data-page="restaurants"]) .stat-list dt {
-  font-size: 12px;
+  font-size:var(--ui-text-sm);
   color: var(--muted);
 }
 :where(body[data-page="restaurants"]) .stat-list dd {
   margin: 4px 0 0;
-  font-size: 12px;
+  font-size:var(--ui-text-sm);
   overflow-wrap: anywhere;
 }
 :where(body[data-page="restaurants"]) .replay-actions {
@@ -638,7 +558,7 @@
   padding: 16px 0 12px;
 }
 :where(body[data-page="restaurants"]) .replay-actions span {
-  font-size: 12px;
+  font-size:var(--ui-text-sm);
   color: var(--muted);
 }
 :where(body[data-page="restaurants"]) #invariant-results {
@@ -653,12 +573,9 @@
   gap: 24px;
   padding: 16px 0 24px;
   color: var(--muted);
-  font-size: 12px;
+  font-size:var(--ui-text-sm);
   line-height: 1.7;
   overflow-wrap: anywhere;
-}
-:where(body[data-page="restaurants"]) [hidden] {
-  display: none !important;
 }
 @media (min-width: 1600px) {
   :where(body[data-page="restaurants"]) .workspace {
@@ -707,7 +624,7 @@
     grid-template-columns: repeat(4, 1fr);
   }
   :where(body[data-page="restaurants"]) .settings-grid label {
-    font-size: 12px;
+    font-size:var(--ui-text-sm);
   }
   :where(body[data-page="restaurants"]) .inspector {
     max-height: 690px;
@@ -768,7 +685,7 @@
     flex-basis: 100%;
   }
   :where(body[data-page="restaurants"]) .panel-heading .inline-label {
-    font-size: 12px;
+    font-size:var(--ui-text-sm);
   }
   :where(body[data-page="restaurants"]) .evidence-content {
     max-height: 420px;
@@ -792,14 +709,14 @@
   max-width: 390px;
 }
 :where(body[data-page="restaurants"]) .call-transcript summary {
-  font-size: 12px;
+  font-size:var(--ui-text-sm);
   color: var(--blue);
   cursor: pointer;
 }
 :where(body[data-page="restaurants"]) .call-transcript p {
   margin-top: 8px;
   white-space: pre-wrap;
-  font-size: 12px;
+  font-size:var(--ui-text-sm);
   line-height: 1.6;
 }
 :where(body[data-page="restaurants"]) .ingredient-search {
@@ -821,11 +738,11 @@
 }
 :where(body[data-page="restaurants"]) .local-search-label {
   color: var(--green);
-  font-size: 12px;
+  font-size:var(--ui-text-sm);
 }
 :where(body[data-page="restaurants"]) .ingredient-search form > label {
   display: block;
-  font-size: 12px;
+  font-size:var(--ui-text-sm);
   color: var(--muted);
   margin-bottom: 8px;
 }
@@ -838,16 +755,16 @@
   min-width: 0;
 }
 :where(body[data-page="restaurants"]) .search-controls button {
-  font-size: 12px;
+  font-size:var(--ui-text-sm);
 }
 :where(body[data-page="restaurants"]) .ingredient-search .search-state {
   margin-top: 8px;
-  font-size: 12px;
+  font-size:var(--ui-text-sm);
   line-height: 1.6;
 }
 :where(body[data-page="restaurants"]) .ingredient-search table {
   margin-top: 8px;
-  font-size: 12px;
+  font-size:var(--ui-text-sm);
 }
 :where(body[data-page="restaurants"]) .ingredient-search th,
 :where(body[data-page="restaurants"]) .ingredient-search td {
@@ -855,7 +772,7 @@
 }
 :where(body[data-page="restaurants"]) .search-empty {
   padding: 12px 0;
-  font-size: 12px;
+  font-size:var(--ui-text-sm);
 }
 :where(body[data-page="restaurants"]) .search-provider-note,
 :where(body[data-page="restaurants"]) .search-reviews {
@@ -863,19 +780,16 @@
 }
 :where(body[data-page="restaurants"]) .search-provider-note summary,
 :where(body[data-page="restaurants"]) .search-reviews summary {
-  font-size: 12px;
+  font-size:var(--ui-text-sm);
   color: var(--blue);
   cursor: pointer;
 }
 :where(body[data-page="restaurants"]) .search-provider-note p {
-  font-size: 12px;
+  font-size:var(--ui-text-sm);
   margin-top: 8px;
   line-height: 1.7;
 }
 @media (prefers-reduced-motion: reduce) {
-  :where(body[data-page="restaurants"]) * {
-    scroll-behavior: auto !important;
-  }
 }
 :where(body[data-page="restaurants"]) .metric.metric-action {
   border: 0;
@@ -904,7 +818,7 @@
   padding-top: 12px;
 }
 :where(body[data-page="restaurants"]) .order-book-note {
-  font-size: 12px;
+  font-size:var(--ui-text-sm);
   padding: 0 0 12px;
 }
 :where(body[data-page="restaurants"]) .order-record {
@@ -944,23 +858,23 @@
 }
 :where(body[data-page="restaurants"]) .order-title strong {
   display: block;
-  font-size: 12px;
+  font-size:var(--ui-text-sm);
   font-weight: 600;
 }
 :where(body[data-page="restaurants"]) .order-title small {
   display: block;
   margin-top: 4px;
-  font-size: 12px;
+  font-size:var(--ui-text-sm);
   overflow-wrap: anywhere;
 }
 :where(body[data-page="restaurants"]) .order-parties {
-  font-size: 12px;
+  font-size:var(--ui-text-sm);
   line-height: 1.6;
   color: var(--text);
   overflow-wrap: anywhere;
 }
 :where(body[data-page="restaurants"]) .order-time {
-  font-size: 12px;
+  font-size:var(--ui-text-sm);
   color: var(--muted);
   overflow-wrap: anywhere;
 }
@@ -977,10 +891,10 @@
   gap: 12px;
 }
 :where(body[data-page="restaurants"]) .order-history-heading p {
-  font-size: 12px;
+  font-size:var(--ui-text-sm);
 }
 :where(body[data-page="restaurants"]) .order-history-heading button {
-  font-size: 12px;
+  font-size:var(--ui-text-sm);
   flex-shrink: 0;
 }
 :where(body[data-page="restaurants"]) .order-section {
@@ -992,14 +906,14 @@
   margin-bottom: 8px;
 }
 :where(body[data-page="restaurants"]) .order-section > p {
-  font-size: 12px;
+  font-size:var(--ui-text-sm);
   line-height: 1.7;
 }
 :where(body[data-page="restaurants"]) .order-section > details {
   margin-top: 8px;
 }
 :where(body[data-page="restaurants"]) .order-section summary {
-  font-size: 12px;
+  font-size:var(--ui-text-sm);
   color: var(--blue);
   cursor: pointer;
 }
@@ -1018,11 +932,11 @@
   border: 1px solid #75613e;
   border-radius: var(--ui-radius);
   margin-top: 12px;
-  font-size: 12px;
+  font-size:var(--ui-text-sm);
   color: var(--orange);
 }
 :where(body[data-page="restaurants"]) .order-load-state {
-  font-size: 12px;
+  font-size:var(--ui-text-sm);
   padding: 12px 0;
 }
 :where(body[data-page="restaurants"]) .order-section .record pre {
@@ -1044,13 +958,13 @@
   :where(body[data-page="restaurants"]) .order-parties {
     grid-column: 2;
     grid-row: 2;
-    font-size: 12px;
+    font-size:var(--ui-text-sm);
     overflow-wrap: anywhere;
   }
   :where(body[data-page="restaurants"]) .order-time {
     grid-column: 3;
     grid-row: 2;
-    font-size: 12px;
+    font-size:var(--ui-text-sm);
     overflow-wrap: anywhere;
   }
   :where(body[data-page="restaurants"]) .order-history {
@@ -1064,7 +978,7 @@
     max-height: 80dvh;
   }
   :where(body[data-page="restaurants"]) .order-history table {
-    font-size: 12px;
+    font-size:var(--ui-text-sm);
   }
   :where(body[data-page="restaurants"]) .order-history th,
   :where(body[data-page="restaurants"]) .order-history td {
@@ -1087,7 +1001,7 @@
   flex-basis: 100%;
 }
 :where(body[data-page="restaurants"]) .order-history-navigation button {
-  font-size: 12px;
+  font-size:var(--ui-text-sm);
 }
 :where(body[data-page="restaurants"]) .order-section {
   scroll-margin-top: 144px;
@@ -1125,7 +1039,7 @@
   background: var(--ui-bg);
   color: var(--muted);
   border: 1px solid var(--line);
-  font-size: 12px;
+  font-size:var(--ui-text-sm);
   font-weight: 600;
 }
 :where(body[data-page="restaurants"]) .chat-bubble {
@@ -1172,7 +1086,7 @@
   .order-section
   .chat-system-event
   > summary {
-  font-size: 12px;
+  font-size:var(--ui-text-sm);
   color: var(--muted);
   cursor: pointer;
   line-height: 1.8;
@@ -1192,13 +1106,13 @@
   min-width: 0;
 }
 :where(body[data-page="restaurants"]) .chat-person strong {
-  font-size: 12px;
+  font-size:var(--ui-text-sm);
   font-weight: 600;
   color: var(--text);
 }
 :where(body[data-page="restaurants"]) .chat-person > span,
 :where(body[data-page="restaurants"]) .chat-recipient {
-  font-size: 12px;
+  font-size:var(--ui-text-sm);
   color: var(--muted);
   line-height: 1.6;
   font-family: var(
@@ -1210,7 +1124,7 @@
   );
 }
 :where(body[data-page="restaurants"]) .chat-time {
-  font-size: 12px;
+  font-size:var(--ui-text-sm);
   color: var(--muted);
   white-space: nowrap;
   padding-top: 1px;
@@ -1226,7 +1140,7 @@
   margin: 8px 0 0;
 }
 :where(body[data-page="restaurants"]) .chat-text {
-  font-size: 14px;
+  font-size:var(--ui-text-md);
   line-height: 1.8;
   white-space: pre-wrap;
   margin: 12px 0;
@@ -1239,16 +1153,16 @@
   flex-wrap: wrap;
   gap: 8px;
   color: var(--muted);
-  font-size: 12px;
+  font-size:var(--ui-text-sm);
 }
 :where(body[data-page="restaurants"]) .chat-outcome {
-  font-size: 12px;
+  font-size:var(--ui-text-sm);
   line-height: 1.7;
   margin: 12px 0 0;
   color: var(--text);
 }
 :where(body[data-page="restaurants"]) .chat-reason {
-  font-size: 12px;
+  font-size:var(--ui-text-sm);
   line-height: 1.7;
   color: var(--orange);
   margin: 8px 0 0;
@@ -1260,13 +1174,13 @@
   background: var(--ui-accent-soft);
   padding: 12px 12px;
   margin-top: 12px;
-  font-size: 12px;
+  font-size:var(--ui-text-sm);
   overflow-wrap: anywhere;
   border-left-width: 2px;
   border-left-color: var(--green);
 }
 :where(body[data-page="restaurants"]) .chat-memory > strong {
-  font-size: 12px;
+  font-size:var(--ui-text-sm);
   color: var(--green);
   font-weight: 600;
 }
@@ -1298,7 +1212,7 @@
 }
 :where(body[data-page="restaurants"]) .memory-change dt {
   color: var(--muted);
-  font-size: 12px;
+  font-size:var(--ui-text-sm);
 }
 :where(body[data-page="restaurants"]) .memory-change dd {
   margin: 0;
@@ -1316,7 +1230,7 @@
 }
 :where(body[data-page="restaurants"]) .memory-validity,
 :where(body[data-page="restaurants"]) .memory-owner {
-  font-size: 12px;
+  font-size:var(--ui-text-sm);
   color: var(--muted);
   line-height: 1.7;
   margin: 8px 0 0;
@@ -1333,7 +1247,7 @@
 }
 :where(body[data-page="restaurants"]) .memory-metadata summary,
 :where(body[data-page="restaurants"]) .order-section .chat-evidence > summary {
-  font-size: 12px;
+  font-size:var(--ui-text-sm);
   color: var(--muted);
   cursor: pointer;
   line-height: 1.6;
@@ -1355,7 +1269,7 @@
   :where(body[data-page="restaurants"]) .chat-avatar {
     width: 28px;
     height: 28px;
-    font-size: 12px;
+    font-size:var(--ui-text-sm);
   }
   :where(body[data-page="restaurants"]) .chat-household {
     margin-left: 8px;
@@ -1368,7 +1282,7 @@
     flex-wrap: wrap;
   }
   :where(body[data-page="restaurants"]) .chat-text {
-    font-size: 14px;
+    font-size:var(--ui-text-md);
   }
   :where(body[data-page="restaurants"]) .memory-change {
     grid-template-columns: 1fr;
@@ -1414,11 +1328,10 @@
 .console-views {display:flex;gap:6px;border-bottom:1px solid var(--line);padding:0 0 10px;margin-bottom:16px}
 .console-views button {background:transparent;border-color:transparent}
 .console-views button[aria-pressed="true"] {background:var(--ui-raised);border-color:var(--ui-strong-line);color:var(--ui-ink)}
-[hidden] {display:none!important}
 .metrics {grid-template-columns:repeat(4,minmax(0,1fr));margin:16px 0}
 .workspace {display:grid;grid-template-columns:minmax(0,1fr);gap:16px;align-items:start}
 .workspace:has(#supply-inspector:not([hidden])) {grid-template-columns:minmax(340px,.9fr) minmax(0,1.1fr)}
-.entity-source {margin:0 0 12px;font-size:12px;color:var(--muted)}
+.entity-source {margin:0 0 12px;font-size:var(--ui-text-sm);color:var(--muted)}
 #supply-agents {grid-column:1;grid-row:1}
 #supply-agents .roster-list {height:452px}
 #supply-inspector {grid-column:2;grid-row:1;max-height:none}

@@ -11,6 +11,7 @@ const base=arg('--url','http://127.0.0.1:8010'),out=arg('--output','artifacts/pr
   page.on('pageerror',e=>errors.push(String(e)));page.on('request',r=>{if(new URL(r.url()).pathname.startsWith('/api/'))apiCalls.push(r.url());});
   await page.goto(base+'/');await page.waitForSelector('#story-robots canvas');await page.waitForFunction(()=>Number(document.getElementById('story-canvas').dataset.simTime)>1440);
   assert.equal(await page.locator('#workspace-navigation a').count(),3);assert.equal(apiCalls.length,0);
+  await page.waitForTimeout(600);const work=await page.locator('#story-canvas').evaluate(c=>({draws:Number(c.dataset.draws),routes:Number(c.dataset.routeBuilds)}));assert(work.draws>work.routes*3,'Route geometry is cached between recorded snapshots');
   await page.getByRole('button',{name:'Pause recorded shift',exact:true}).click();
   const time=await page.locator('#story-canvas').getAttribute('data-sim-time');await page.waitForTimeout(300);assert.equal(await page.locator('#story-canvas').getAttribute('data-sim-time'),time);
   await page.screenshot({path:out+'/landing-desktop.png'});checks.push('recorded map, real robot models, three destinations, no API requests, pause');

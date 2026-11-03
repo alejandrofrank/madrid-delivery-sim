@@ -46,6 +46,7 @@
   });
   document.addEventListener("close",event=>{if(event.target.classList?.contains("ui-drawer"))trigger?.focus();},true);
   window.ProductUI={make,icon,button,tooltip,drawer};
+  document.querySelectorAll("[data-term]").forEach(node=>node.replaceWith(tooltip(node.textContent,node.dataset.term)));
   document.querySelectorAll("[data-icon]").forEach(node=>node.replaceChildren(icon(node.dataset.icon)));
   let theme="light";try{theme=localStorage.getItem("mds-theme")==="dark"?"dark":"light";}catch{}
   document.documentElement.dataset.theme=theme;

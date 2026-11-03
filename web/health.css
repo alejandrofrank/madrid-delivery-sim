@@ -1,61 +1,4 @@
-:where(body[data-page="health"]) {
-  color-scheme: dark;
-  --bg: var(--ui-bg);
-  --panel: var(--ui-surface);
-  --raised: var(--ui-surface);
-  --line: var(--ui-line);
-  --muted: var(--ui-muted);
-  --text: var(--ui-ink);
-  --blue: var(--ui-accent);
-  --green: var(--ui-positive);
-  --red: var(--ui-negative);
-  --orange: var(--ui-warning);
-  --amber: var(--ui-warning);
-  font:
-    14px/1.5 var(--ui-font);
-  color: var(--text);
-  background: var(--bg);
-  margin: 0;
-}
-:where(body[data-page="health"]) * {
-  box-sizing: border-box;
-}
-:where(body[data-page="health"]) button,
-:where(body[data-page="health"]) input,
-:where(body[data-page="health"]) select {
-  font:
-    14px/1.5 var(--ui-font);
-}
-:where(body[data-page="health"]) button,
-:where(body[data-page="health"]) a,
-:where(body[data-page="health"]) input,
-:where(body[data-page="health"]) select {
-  outline-offset: 4px;
-}
-:where(body[data-page="health"]) button {
-  background: var(--ui-surface);
-  color: var(--text);
-  border: 1px solid var(--line);
-  border-radius: var(--ui-radius);
-  padding: 8px 12px;
-  cursor: pointer;
-  min-height: 36px;
-  font-weight: 600;
-}
-:where(body[data-page="health"]) button:hover {
-  background: var(--ui-bg);
-}
-:where(body[data-page="health"]) button:disabled {
-  opacity: 1;
-  cursor: not-allowed;
-  color: var(--muted);
-  background: var(--ui-raised);
-  border-color: var(--line);
-}
-:where(body[data-page="health"]) a {
-  color: var(--blue);
-  text-decoration: none;
-}
+:where(body[data-page="health"]) {--bg: var(--ui-bg);--panel: var(--ui-surface);--raised: var(--ui-surface);--line: var(--ui-line);--muted: var(--ui-muted);--text: var(--ui-ink);--blue: var(--ui-accent);--green: var(--ui-positive);--red: var(--ui-negative);--orange: var(--ui-warning);--amber: var(--ui-warning);}
 :where(body[data-page="health"]) h1,
 :where(body[data-page="health"]) h2,
 :where(body[data-page="health"]) h3,
@@ -68,17 +11,17 @@
   letter-spacing: -0.2px;
 }
 :where(body[data-page="health"]) h2 {
-  font-size: 15px;
+  font-size:var(--ui-text-lg);
   font-weight: 600;
 }
 :where(body[data-page="health"]) h3 {
-  font-size: 14px;
+  font-size:var(--ui-text-md);
 }
 :where(body[data-page="health"]) main > header p,
 :where(body[data-page="health"]) .section-heading p,
 :where(body[data-page="health"]) .subtle {
   color: var(--muted);
-  font-size: 12px;
+  font-size:var(--ui-text-sm);
 }
 :where(body[data-page="health"]) main > header p {
   margin-top: 4px;
@@ -101,7 +44,7 @@
   flex-wrap: wrap;
 }
 :where(body[data-page="health"]) .actions button {
-  font-size: 12px;
+  font-size:var(--ui-text-sm);
 }
 :where(body[data-page="health"]) .notice {
   margin-top: 16px;
@@ -110,12 +53,12 @@
   background: var(--panel);
   color: var(--text);
   border-radius: var(--ui-radius);
-  font-size: 12px;
+  font-size:var(--ui-text-sm);
   overflow-wrap: anywhere;
 }
 :where(body[data-page="health"]) .danger {
-  background: #352428;
-  border-color: #784c4c;
+  background: var(--ui-negative-bg);
+  border-color: var(--ui-negative);
   color: var(--red);
 }
 :where(body[data-page="health"]) .provenance {
@@ -125,7 +68,7 @@
   flex-wrap: wrap;
   margin: 16px 0 16px;
   color: var(--muted);
-  font-size: 12px;
+  font-size:var(--ui-text-sm);
   font-family: var(
     --ui-mono,
     ui-monospace,
@@ -153,7 +96,7 @@
 }
 :where(body[data-page="health"]) .metric > span {
   display: block;
-  font-size: 12px;
+  font-size:var(--ui-text-sm);
   text-transform: none;
   letter-spacing: 0;
   color: var(--muted);
@@ -173,7 +116,7 @@
   line-height: 1.4;
 }
 :where(body[data-page="health"]) .metric p {
-  font-size: 12px;
+  font-size:var(--ui-text-sm);
   color: var(--muted);
 }
 :where(body[data-page="health"]) .tabs {
@@ -192,7 +135,7 @@
   padding: 0 0 12px;
   color: var(--muted);
   white-space: nowrap;
-  font-size: 13px;
+  font-size:var(--ui-text-sm);
   min-height: 36px;
 }
 :where(body[data-page="health"]) .tabs button[aria-selected="true"] {
@@ -210,13 +153,13 @@
   min-width: 0;
 }
 :where(body[data-page="health"]) .categories h2 {
-  font-size: 12px;
+  font-size:var(--ui-text-sm);
   text-transform: uppercase;
   letter-spacing: 0.8px;
   margin-bottom: 12px;
 }
 :where(body[data-page="health"]) .categories > p {
-  font-size: 12px;
+  font-size:var(--ui-text-sm);
   color: var(--muted);
   margin-top: 16px;
 }
@@ -239,17 +182,17 @@
   justify-content: space-between;
   align-items: baseline;
   gap: 12px;
-  font-size: 12px;
+  font-size:var(--ui-text-sm);
 }
 :where(body[data-page="health"]) .category-head span:last-child {
-  font: 12px/1.6
+  font:var(--ui-text-sm)/1.6
     var(--ui-mono, ui-monospace, SFMono-Regular, Consolas, monospace);
   white-space: nowrap;
 }
 :where(body[data-page="health"]) .category small {
   display: block;
   color: var(--muted);
-  font-size: 12px;
+  font-size:var(--ui-text-sm);
   line-height: 1.5;
   margin-top: 4px;
 }
@@ -283,20 +226,8 @@
   display: grid;
   gap: 4px;
   color: var(--muted);
-  font-size: 12px;
+  font-size:var(--ui-text-sm);
   min-width: 0;
-}
-:where(body[data-page="health"]) input,
-:where(body[data-page="health"]) select {
-  width: 100%;
-  min-width: 0;
-  background: var(--ui-surface);
-  border: 1px solid var(--line);
-  border-radius: var(--ui-radius);
-  color: var(--text);
-  padding: 8px 12px;
-  font-size: 12px;
-  min-height: 36px;
 }
 :where(body[data-page="health"]) input::placeholder {
   color: var(--muted);
@@ -309,11 +240,11 @@
   background: var(--ui-surface);
   border: 1px solid var(--line);
   margin: 12px 0;
-  font-size: 12px;
+  font-size:var(--ui-text-sm);
 }
 :where(body[data-page="health"]) .selection-note button {
   float: right;
-  font-size: 12px;
+  font-size:var(--ui-text-sm);
   padding: 2px 8px;
 }
 :where(body[data-page="health"]) .file-group {
@@ -339,7 +270,7 @@
   min-width: 0;
 }
 :where(body[data-page="health"]) .file-heading strong {
-  font-size: 13px;
+  font-size:var(--ui-text-sm);
   font-weight: 600;
 }
 :where(body[data-page="health"]) .file-heading strong:before {
@@ -354,14 +285,14 @@
 }
 :where(body[data-page="health"]) .file-heading small {
   display: block;
-  font: 12px/1.6
+  font:var(--ui-text-sm)/1.6
     var(--ui-mono, ui-monospace, SFMono-Regular, Consolas, monospace);
   color: var(--muted);
   margin: 4px 0 0 24px;
   overflow-wrap: anywhere;
 }
 :where(body[data-page="health"]) .file-count {
-  font: 12px/1.6
+  font:var(--ui-text-sm)/1.6
     var(--ui-mono, ui-monospace, SFMono-Regular, Consolas, monospace);
   white-space: nowrap;
 }
@@ -382,18 +313,18 @@
   display: none;
 }
 :where(body[data-page="health"]) .case-title {
-  font-size: 12px;
+  font-size:var(--ui-text-sm);
   line-height: 1.6;
   overflow-wrap: anywhere;
 }
 :where(body[data-page="health"]) .case-duration {
-  font: 12px/1.6
+  font:var(--ui-text-sm)/1.6
     var(--ui-mono, ui-monospace, SFMono-Regular, Consolas, monospace);
   text-align: right;
   color: var(--muted);
 }
 :where(body[data-page="health"]) .case-body {
-  font-size: 12px;
+  font-size:var(--ui-text-sm);
   color: var(--text);
   padding: 0 0 16px 96px;
   overflow-wrap: anywhere;
@@ -402,12 +333,12 @@
   margin: 8px 0;
 }
 :where(body[data-page="health"]) .case-source {
-  font: 12px/1.6
+  font:var(--ui-text-sm)/1.6
     var(--ui-mono, ui-monospace, SFMono-Regular, Consolas, monospace);
   color: var(--muted);
 }
 :where(body[data-page="health"]) .case-body code {
-  font: 12px/1.6
+  font:var(--ui-text-sm)/1.6
     var(--ui-mono, ui-monospace, SFMono-Regular, Consolas, monospace);
   display: block;
   background: var(--ui-bg);
@@ -417,7 +348,7 @@
   overflow-wrap: anywhere;
 }
 :where(body[data-page="health"]) .case-body button {
-  font-size: 12px;
+  font-size:var(--ui-text-sm);
   padding: 4px 8px;
 }
 :where(body[data-page="health"]) .badge,
@@ -426,7 +357,7 @@
   border: 1px solid var(--line);
   border-radius: var(--ui-radius);
   padding: 4px 8px;
-  font: 12px/1.6
+  font:var(--ui-text-sm)/1.6
     var(--ui-mono, ui-monospace, SFMono-Regular, Consolas, monospace);
   white-space: nowrap;
   font-family: var(
@@ -463,8 +394,8 @@
   border-color: #3a6961;
 }
 :where(body[data-page="health"]) .badge.failed {
-  background: #352428;
-  border-color: #784c4c;
+  background: var(--ui-negative-bg);
+  border-color: var(--ui-negative);
 }
 :where(body[data-page="health"]) .badge.incomplete,
 :where(body[data-page="health"]) .badge.outdated,
@@ -488,7 +419,7 @@
 }
 :where(body[data-page="health"]) .scenario-panel .section-heading button {
   flex-shrink: 0;
-  font-size: 12px;
+  font-size:var(--ui-text-sm);
 }
 :where(body[data-page="health"]) .scenario-provenance {
   display: flex;
@@ -496,7 +427,7 @@
   flex-wrap: wrap;
   gap: 8px 12px;
   color: var(--muted);
-  font-size: 12px;
+  font-size:var(--ui-text-sm);
   margin-bottom: 16px;
 }
 :where(body[data-page="health"]) .scenario-provenance strong {
@@ -505,7 +436,7 @@
     var(--ui-mono, ui-monospace, SFMono-Regular, Consolas, monospace);
 }
 :where(body[data-page="health"]) .scenario-fingerprint {
-  font: 12px/1.6
+  font:var(--ui-text-sm)/1.6
     var(--ui-mono, ui-monospace, SFMono-Regular, Consolas, monospace);
   overflow-wrap: anywhere;
 }
@@ -532,13 +463,13 @@
     var(--ui-mono, ui-monospace, SFMono-Regular, Consolas, monospace);
 }
 :where(body[data-page="health"]) .scenario-role p {
-  font-size: 12px;
+  font-size:var(--ui-text-sm);
   color: var(--muted);
 }
 :where(body[data-page="health"]) .scenario-role button {
   align-self: flex-start;
   margin-top: auto;
-  font-size: 12px;
+  font-size:var(--ui-text-sm);
   padding: 4px 8px;
 }
 :where(body[data-page="health"]) .scenario-filters {
@@ -574,7 +505,7 @@
   overflow-wrap: anywhere;
 }
 :where(body[data-page="health"]) .scenario-case-heading strong {
-  font-size: 12px;
+  font-size:var(--ui-text-sm);
 }
 :where(body[data-page="health"]) .scenario-case-heading strong::before {
   content: "›";
@@ -592,11 +523,11 @@
   display: block;
   margin: 4px 0 0 12px;
   color: var(--muted);
-  font: 12px/1.6
+  font:var(--ui-text-sm)/1.6
     var(--ui-mono, ui-monospace, SFMono-Regular, Consolas, monospace);
 }
 :where(body[data-page="health"]) .scenario-case-score {
-  font: 12px/1.6
+  font:var(--ui-text-sm)/1.6
     var(--ui-mono, ui-monospace, SFMono-Regular, Consolas, monospace);
   color: var(--muted);
   text-align: right;
@@ -605,7 +536,7 @@
 :where(body[data-page="health"]) .scenario-case-body {
   padding: 4px 16px 16px;
   border-top: 1px solid var(--line);
-  font-size: 12px;
+  font-size:var(--ui-text-sm);
   overflow-wrap: anywhere;
 }
 :where(body[data-page="health"]) .scenario-case-body p {
@@ -613,7 +544,7 @@
 }
 :where(body[data-page="health"]) .scenario-case-body h3 {
   margin-top: 16px;
-  font-size: 14px;
+  font-size:var(--ui-text-md);
 }
 :where(body[data-page="health"]) .scenario-case-body th,
 :where(body[data-page="health"]) .scenario-case-body td {
@@ -621,7 +552,7 @@
 }
 :where(body[data-page="health"]) .scenario-note {
   color: var(--muted);
-  font-size: 12px;
+  font-size:var(--ui-text-sm);
   margin-top: 12px;
 }
 :where(body[data-page="health"]) .capability-grid {
@@ -645,11 +576,11 @@
   gap: 8px;
 }
 :where(body[data-page="health"]) .capability p {
-  font-size: 12px;
+  font-size:var(--ui-text-sm);
   color: var(--text);
 }
 :where(body[data-page="health"]) .capability .limit {
-  font-size: 12px;
+  font-size:var(--ui-text-sm);
   color: var(--muted);
   line-height: 1.6;
   border-top: 1px solid var(--line);
@@ -661,7 +592,7 @@
     var(--ui-mono, ui-monospace, SFMono-Regular, Consolas, monospace);
 }
 :where(body[data-page="health"]) .capability button {
-  font-size: 12px;
+  font-size:var(--ui-text-sm);
   align-self: flex-start;
 }
 :where(body[data-page="health"]) .panel {
@@ -682,11 +613,11 @@
 :where(body[data-page="health"]) table {
   border-collapse: collapse;
   width: 100%;
-  font-size: 12px;
+  font-size:var(--ui-text-sm);
 }
 :where(body[data-page="health"]) th {
   text-align: left;
-  font-size: 12px;
+  font-size:var(--ui-text-sm);
   text-transform: uppercase;
   letter-spacing: 0.6px;
   color: var(--muted);
@@ -703,11 +634,11 @@
   padding-left: 0;
 }
 :where(body[data-page="health"]) td code {
-  font-size: 12px;
+  font-size:var(--ui-text-sm);
   overflow-wrap: anywhere;
 }
 :where(body[data-page="health"]) td button {
-  font-size: 12px;
+  font-size:var(--ui-text-sm);
 }
 :where(body[data-page="health"]) .gaps {
   display: grid;
@@ -726,7 +657,7 @@
 }
 :where(body[data-page="health"]) .gaps p {
   color: var(--muted);
-  font-size: 12px;
+  font-size:var(--ui-text-sm);
 }
 :where(body[data-page="health"]) .service-grid {
   display: grid;
@@ -745,7 +676,7 @@
   gap: 12px;
 }
 :where(body[data-page="health"]) .service p {
-  font-size: 12px;
+  font-size:var(--ui-text-sm);
   color: var(--muted);
   margin-top: 8px;
 }
@@ -766,11 +697,11 @@
     var(--ui-mono, ui-monospace, SFMono-Regular, Consolas, monospace);
 }
 :where(body[data-page="health"]) .diagnostic span {
-  font-size: 12px;
+  font-size:var(--ui-text-sm);
   color: var(--muted);
 }
 :where(body[data-page="health"]) .diagnostic-note {
-  font-size: 12px;
+  font-size:var(--ui-text-sm);
   color: var(--muted);
   margin-top: 16px;
 }
@@ -781,14 +712,14 @@
   align-items: center;
   border-bottom: 1px solid var(--line);
   padding: 12px 0;
-  font-size: 12px;
+  font-size:var(--ui-text-sm);
 }
 :where(body[data-page="health"]) .empty {
   padding: 24px;
   border: 1px dashed var(--line);
   border-radius: var(--ui-radius);
   color: var(--muted);
-  font-size: 13px;
+  font-size:var(--ui-text-sm);
 }
 :where(body[data-page="health"]) .empty code {
   color: var(--blue);
@@ -800,15 +731,12 @@
   display: flex;
   gap: 16px;
   justify-content: space-between;
-  font-size: 12px;
+  font-size:var(--ui-text-sm);
   color: var(--muted);
   overflow-wrap: anywhere;
 }
 :where(body[data-page="health"]) footer code {
   color: var(--blue);
-}
-:where(body[data-page="health"]) [hidden] {
-  display: none !important;
 }
 @media (min-width: 1500px) {
   :where(body[data-page="health"]) .catalogue {
@@ -913,7 +841,7 @@
     line-height: 1.4;
   }
   :where(body[data-page="health"]) .provenance {
-    font-size: 12px;
+    font-size:var(--ui-text-sm);
     font-family: var(
       --ui-mono,
       ui-monospace,
@@ -930,7 +858,7 @@
     max-width: 100%;
   }
   :where(body[data-page="health"]) .tabs button {
-    font-size: 12px;
+    font-size:var(--ui-text-sm);
     min-height: 36px;
     border-radius: 0;
   }
@@ -964,13 +892,13 @@
     display: none;
   }
   :where(body[data-page="health"]) .category-head {
-    font-size: 12px;
+    font-size:var(--ui-text-sm);
   }
   :where(body[data-page="health"]) .category-head span:first-child {
     white-space: nowrap;
   }
   :where(body[data-page="health"]) .category-head span:last-child {
-    font-size: 12px;
+    font-size:var(--ui-text-sm);
   }
   :where(body[data-page="health"]) .filters {
     gap: 8px;
@@ -988,19 +916,19 @@
     color: var(--text);
   }
   :where(body[data-page="health"]) .badge {
-    font-size: 12px;
+    font-size:var(--ui-text-sm);
   }
   :where(body[data-page="health"]) .file-group > summary {
     padding: 12px;
   }
   :where(body[data-page="health"]) .file-heading strong {
-    font-size: 12px;
+    font-size:var(--ui-text-sm);
   }
   :where(body[data-page="health"]) .file-heading small {
-    font-size: 12px;
+    font-size:var(--ui-text-sm);
   }
   :where(body[data-page="health"]) .file-count {
-    font-size: 12px;
+    font-size:var(--ui-text-sm);
   }
   :where(body[data-page="health"]) .capability-grid,
   :where(body[data-page="health"]) .gaps,

@@ -3,6 +3,7 @@ window.StoreUI=(()=>{
  const $=id=>document.getElementById(id),esc=value=>String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
  const motion=matchMedia('(prefers-reduced-motion: reduce)');
  const names={requested:'Reserving stock',reserved:'Ready to pick',picking:'Picking shelves',packing:'Packing basket',to_dock:'Moving to dock',dock:'Waiting for courier',handed_off:'With courier',cancelled:'Order cancelled'};
+ let readOnly=false,paused=false;
  let hooks,layer,data=null,city=null,storeId=null,orderId=null,scene=null,generation=0,follow=null,loading=false,opened=false,run=null,request=0;
  function init(options){
   hooks=options;layer=L.layerGroup().addTo(hooks.map);
@@ -20,8 +21,8 @@ window.StoreUI=(()=>{
  async function startDemo(){
   $('store-demo').disabled=true;$('store-follow-note').textContent='Starting a seeded store order…';
   try{
-   const result=await hooks.api('/api/stores/demo',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({seed:42,wall_seconds:60,chaos:$('store-demo-chaos').checked})});
-   await hooks.selectRun(result.id);
+   const result=readOnly?await hooks.playRecording():await hooks.api('/api/stores/demo',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({seed:42,wall_seconds:60,chaos:$('store-demo-chaos').checked})});
+   if(!readOnly)await hooks.selectRun(result.id);
    run=result.id;storeId=result.store;orderId=result.order;follow=orderId;
    await refresh();
    $("chaos-panel").open=false;
@@ -32,8 +33,9 @@ window.StoreUI=(()=>{
  }
  async function update(next,runtime){
   city=next;
-  $('store-launch').hidden=runtime.mode==='replay';
-  if(runtime.mode==='replay')return;
+  readOnly=runtime.mode==='replay';paused=!!runtime.paused;
+  $('store-launch').hidden=false;$('store-demo').textContent=readOnly?'Watch store replay':'Start store demo';
+  $('store-demo-chaos').disabled=readOnly;$('store-demo-chaos').closest('label').hidden=readOnly;
   if(run!==next.run?.id){request++;close(false);run=next.run?.id;data=null;follow=null;}
   if(!next.run?.store_config){layer.clearLayers();$('store-select').replaceChildren(new Option('Start a store demo',''));$('store-open').disabled=true;return;}
   await refresh();
@@ -58,7 +60,7 @@ window.StoreUI=(()=>{
     const s=data.stores.find(s=>s.orders.some(o=>o.order_id===follow)),o=s?.orders.find(o=>o.order_id===follow);
     const delivery=city?.orders?.find(o=>o.id===follow);
     $('store-stop').hidden=false;
-    $('store-follow-note').textContent=follow+' · '+(delivery?.status==='delivered'?'Delivered to the doorstep':names[o?.stage]||'Waiting for stock');
+    $('store-follow-note').textContent='Following order · '+(delivery?.status==='delivered'?'Delivered to the doorstep':names[o?.stage]||'Waiting for stock');
     if(o?.stage==='handed_off'){
      if(opened){close(false);hooks.choose('order',follow);hooks.locate();}
      if(delivery?.status==='delivered'){follow=null;$('store-stop').hidden=true;}
@@ -120,23 +122,23 @@ window.StoreUI=(()=>{
   const store=data?.stores.find(s=>s.store===storeId);if(!store||!opened)return;
   const order=store.orders.find(o=>o.order_id===orderId);
   $('store-title').textContent=store.name+' · '+store.district;
-  $('store-load').textContent=store.load+' active orders · '+store.workers.filter(w=>w.kind!=='forklift').length+' pickers'+(city?.run?.status==='running'?' · live':' · shift complete');
+  $('store-load').textContent=store.load+' active orders · '+store.workers.filter(w=>w.kind!=='forklift').length+' pickers'+(readOnly?' · recorded replay':city?.run?.status==='running'?' · live':' · shift complete');
   const select=$('store-order'),signature=store.orders.map(o=>o.order_id).join('|');
-  if(select.dataset.items!==signature){select.replaceChildren(new Option('All store work',''),...store.orders.map(o=>new Option(o.order_id,o.order_id)));select.dataset.items=signature;}
+  if(select.dataset.items!==signature){select.replaceChildren(new Option('All store work',''),...store.orders.map(o=>new Option('Basket '+(store.orders.indexOf(o)+1),o.order_id)));select.dataset.items=signature;}
   select.value=orderId||'';
-  $('store-order-title').textContent=order?order.order_id:'Store work';
+  $('store-order-title').textContent=order?(document.body.dataset.audience==='visitor'?'Your basket':order.order_id):'Store work';$('store-order-title').title=order?.order_id||'';
   $('store-order-state').textContent=order?((order.status==='delivered'?'Delivered to the doorstep':names[order.stage]||order.stage)):'Choose an order to highlight its shelves and basket.';
   $('store-decision').textContent=order?.decision?('Fulfillment: '+(order.decision.reason||order.decision.action.replaceAll('_',' '))):'';
   const catalogue=new Map(store.catalogue.map(p=>[p.sku,p.name]));
   $('store-basket').innerHTML=order?Object.entries(order.lines).map(([sku,quantity])=>'<li data-picked="'+((order.picked[sku]||0)>=quantity)+'"><span>'+esc(catalogue.get(sku)||sku)+'</span><strong>'+(order.picked[sku]||0)+' / '+quantity+'</strong></li>').join(''):'';
   const worker=store.workers.find(w=>w.id===order?.worker),clock=data.sim_time;
-  $('store-facts').innerHTML='<dt>Picker</dt><dd>'+esc(worker?.id||'Awaiting assignment')+'</dd><dt>Current step</dt><dd>'+esc(worker?.task?.action||'Waiting')+'</dd><dt>Store clock</dt><dd>'+Math.floor(clock/60)+':'+String(clock%60).padStart(2,'0')+'</dd><dt>Blocked cells</dt><dd>'+store.conditions.blocked.length+'</dd><dt>Robots offline</dt><dd>'+store.conditions.broken.length+'</dd>';
+  $('store-facts').innerHTML='<dt>Picker</dt><dd>'+esc(worker?('Robot '+(store.workers.indexOf(worker)+1)):'Awaiting assignment')+'</dd><dt>Current step</dt><dd>'+esc(worker?.task?.action||'Waiting')+'</dd><dt>Store clock</dt><dd>'+Math.floor(clock/60)+':'+String(clock%60).padStart(2,'0')+'</dd><dt>Blocked cells</dt><dd>'+store.conditions.blocked.length+'</dd><dt>Robots offline</dt><dd>'+store.conditions.broken.length+'</dd>';
   $('store-follow').disabled=!order;$('store-follow').textContent=follow?'Stop following':'Follow this order';$('store-follow').setAttribute('aria-pressed',String(!!follow));
-  $('store-trace').href='/agent-traces?source=madrid&run='+encodeURIComponent(run)+'&order='+encodeURIComponent(orderId||'');
-  $('store-incident').disabled=city?.run?.status!=='running';
+  $('store-trace').href='/engineers/traces?source=madrid&run='+encodeURIComponent(run)+'&order='+encodeURIComponent(orderId||'')+(readOnly?'&example=store':'');
+  $('store-incident').disabled=readOnly||city?.run?.status!=='running';
   floor(store,order);
   $('store-legend').textContent=scene?'Cyan: order shelves and planned path · green: picked · amber: blocked':'Cyan: order shelves and route · green: picked · amber: unavailable · circles: workers (red: offline)';
-  scene?.update(store,order,{sim:clock,rate:city?.run?.status==='running'?city.run.duration/Math.max(1,city.run.wall_seconds):0});
+  scene?.update(store,order,{sim:clock,rate:city?.run?.status==='running'&&!paused?city.run.duration/Math.max(1,city.run.wall_seconds):0});
  }
  async function trigger(){
   const button=$('store-incident');button.disabled=true;

@@ -38,7 +38,7 @@ let inspection = null;
 let inspectionAgentId = null;
 let inspectionLoadedAt = 0;
 let runId = null;
-let replay = null;
+let replay = null, recordedExample = null, exampleBanner = null;
 let searchContext = '';
 let searchVersion = 0;
 let orderBookRun = null;
@@ -67,6 +67,10 @@ function notice(message) {
 }
 
 async function api(path, options = {}) {
+  if(recordedExample && (!options.method || options.method === 'GET')) {
+    const recorded=ProductExamples.supplyRead(recordedExample,path);
+    if(recorded !== undefined)return recorded;
+  }
   const response = await fetch(path, {cache: 'no-store', ...options});
   const data = await response.json().catch(() => ({}));
   if (!response.ok) {
@@ -89,12 +93,13 @@ function running() { return snapshot && ['running', 'pending', 'queued', 'starti
 function completed() { return snapshot && !running(); }
 
 function updateButtons() {
-  $('save-blueprint').disabled = !draft || !draftDirty || busy;
+  $('save-blueprint').disabled = !draft || !draftDirty || busy || Boolean(recordedExample);
   $('start-run').disabled = !draft || busy || running();
-  $('start-run').textContent = draftDirty ? 'Save & start simulation' : 'Start simulation';
+  $('start-run').textContent = recordedExample ? 'Set up your own run' : draftDirty ? 'Save & start simulation' : 'Start simulation';
   $('download-evidence').disabled = !snapshot;
   $('check-replay').disabled = !snapshot || running() || busy;
   $('blueprint-state').textContent = !blueprint ? 'Loading blueprint…' : draftDirty ? 'Unsaved next-run edits' : `Blueprint saved · ${String(blueprint.revision).slice(0, 8)}`;
+  if(recordedExample)$('blueprint-state').textContent='Recorded configuration · inspect without changing it';
   $('blueprint-state').style.color = draftDirty ? 'var(--orange)' : '';
 }
 
@@ -355,6 +360,7 @@ async function saveBlueprint() {
 }
 
 async function startRun() {
+  if(recordedExample){await prepareOwnRun();return;}
   if (busy || running()) return;
   if (!captureEditor() || !captureSettings()) return;
   if (draftDirty && !await saveBlueprint()) return;
@@ -363,6 +369,7 @@ async function startRun() {
   clearError();
   try {
     const result = await api('/api/supply/runs', {method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({revision: blueprint.revision})});
+    exampleBanner?.remove();
     runId = result.id;
     sessionStorage.setItem('supply-run-id', runId);
     const url = new URL(location.href); url.searchParams.set('run', runId);
@@ -1065,17 +1072,32 @@ $('download-evidence').addEventListener('click', async () => {
 });
 window.addEventListener('beforeunload', event => { if (draftDirty) { event.preventDefault(); event.returnValue = ''; } });
 
-(async function initialize() {
-  renderMetrics(); renderEvidence();
+async function prepareOwnRun() {
   try {
-    [blueprint, agentTemplates] = await Promise.all([api('/api/supply/blueprint'), api('/api/supply/agent-templates')]);
-    draft = clone(blueprint.config);
-    selectedId = draft.entities.find(entity => entity.kind === 'restaurant')?.id || draft.entities[0]?.id;
-    agentEditScope = currentEntity()?.agent ? 'entity' : 'inherit';
-    renderSettings(); renderEntityOptions(); renderEditor(); renderMetrics(); renderSupplyRoster(); updateButtons();
-    runId = new URLSearchParams(location.search).get('run') || sessionStorage.getItem('supply-run-id');
-    if (runId) await pollRun();
-  } catch (error) { showError(error); }
+    const response=await fetch('/api/supply/blueprint');
+    if(!response.ok)throw Error('Live configuration needs an authorized workspace. The recording remains available.');
+    blueprint=await response.json();recordedExample=null;draft=clone(blueprint.config);snapshot=null;runId=null;inspection=null;
+    selectedId=draft.entities.find(entity=>entity.kind==='restaurant')?.id||draft.entities[0]?.id;
+    draftDirty=false;editorDirty=false;jsonDirty=false;
+    renderSettings();renderEntityOptions();renderEditor();renderMetrics();renderSupplyRoster();updateButtons();showSupplySimulation(true);
+    exampleBanner?.remove();$('start-run').focus();
+  }catch(error){showError(error);}
+}
+(async function initialize() {
+  renderMetrics();renderEvidence();
+  try {
+    runId=new URLSearchParams(location.search).get('run');
+    if(!runId){
+      const payload=await ProductExamples.load('restaurant');recordedExample=payload.data;
+      blueprint={config:recordedExample.snapshot.config,revision:recordedExample.definition_hash};agentTemplates=recordedExample.agent_templates;
+      runId=recordedExample.snapshot.run.id;
+      exampleBanner=ProductExamples.banner('One meal order, ingredient negotiation and delivery',prepareOwnRun);
+    }else [blueprint,agentTemplates]=await Promise.all([api('/api/supply/blueprint'),api('/api/supply/agent-templates')]);
+    draft=clone(blueprint.config);selectedId=draft.entities.find(entity=>entity.kind==='restaurant')?.id||draft.entities[0]?.id;
+    agentEditScope=currentEntity()?.agent?'entity':'inherit';
+    renderSettings();renderEntityOptions();renderEditor();renderMetrics();renderSupplyRoster();updateButtons();
+    if(runId)await pollRun();
+  }catch(error){showError(error);}
 })();
 
 function renderSupplyRoster() {
@@ -1093,9 +1115,14 @@ function renderSupplyRoster() {
   supplyRoster.update(rows, selectedId, thisRun + ':' + (snapshot?.run?.sim_time || 0), snapshot?.run?.sim_time, snapshot?.run?.status);
   const agent = agentForEntity(), link = $('supply-trace-link');
   link.hidden = !runId || !agent?.agent_id;
-  if (!link.hidden) link.href = '/agent-traces?source=supply&run=' + encodeURIComponent(runId) + '&agent=' + encodeURIComponent(agent.agent_id);
+  if (!link.hidden) link.href = '/engineers/traces?source=supply&run=' + encodeURIComponent(runId) + '&agent=' + encodeURIComponent(agent.agent_id) + (recordedExample?'&example=restaurant':'');
 }
+const supplyAdvancedContent=element('div');
+supplyAdvancedContent.append($('supply-controls'),$('supply-settings'));
+const supplyAdvanced=ProductUI.drawer('advanced-controls','Advanced restaurant controls',supplyAdvancedContent);
+$('supply-simulation').textContent='Advanced';
 function showSupplySimulation(open) {
+  if(open&&!supplyAdvanced.open)supplyAdvanced.showModal();else if(!open)supplyAdvanced.close();
   $('supply-controls').hidden = !open;
   $('supply-settings').hidden = !open;
   $('supply-operations').setAttribute('aria-pressed', String(!open));

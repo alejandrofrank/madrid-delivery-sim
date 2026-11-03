@@ -19,6 +19,26 @@ const displayClock = createDisplayClock();
 let state = null, selected = null, runId = new URLSearchParams(location.search).get("run") || "", traceRows = [];
 let tab = "decisions", pollTask = null, pollCount = 0, traceBusy = false;
 let runtime = {mode:"local"}, replayStarted = performance.now();
+let recordedCity = !runId && !new URLSearchParams(location.search).has("live"), liveRuntime = null, exampleBanner = null, storeRecording = null;
+let replayPaused=matchMedia("(prefers-reduced-motion: reduce)").matches, replayPosition=12, replayControls=null;
+function replaySeconds(){return replayPaused?replayPosition:Math.min(60,Math.max(0,(performance.now()-replayStarted)/1000));}
+function updatePlayback(){
+ if(!replayControls)return;
+ const seconds=replaySeconds();replayControls.hidden=runtime.mode!=="replay";
+ replayControls.querySelector("button").textContent=replayPaused?"Play replay":seconds>=60?"Replay again":"Pause replay";
+ replayControls.querySelector("input").value=String(seconds);
+ replayControls.querySelector("output").textContent=Math.floor(seconds)+" / 60 seconds";
+}
+function setupPlayback(){
+ if(replayControls)return;
+ const {make,button}=ProductUI;
+ replayControls=make("section",null,"ui-replay-controls");replayControls.setAttribute("aria-label","Recorded shift playback");
+ const toggle=button("Pause replay"),slider=make("input"),time=make("output");
+ slider.type="range";slider.min="0";slider.max="60";slider.step="1";slider.setAttribute("aria-label","Replay position in seconds");
+ toggle.onclick=()=>{const seconds=replaySeconds();replayPosition=seconds>=60?0:seconds;replayPaused=seconds>=60?false:!replayPaused;replayStarted=performance.now()-replayPosition*1000;updatePlayback();poll();};
+ slider.oninput=()=>{replayPosition=Number(slider.value);replayStarted=performance.now()-replayPosition*1000;observations=[];lastObservationTime=-1;updatePlayback();poll();};
+ replayControls.append(toggle,slider,time);document.querySelector(".console-heading").after(replayControls);updatePlayback();
+}
 const narrowMap = matchMedia("(max-width:850px)");
 document.querySelector(".map-key").open = !narrowMap.matches;
 narrowMap.addEventListener("change",event=>{document.querySelector(".map-key").open=!event.matches;});
@@ -42,6 +62,21 @@ mapResizeObserver.observe($("map"));
 try {
   const base = L.maplibreGL({style:"/static/map/style.json", attributionControl:false, transformRequest:url=>({url:new URL(url,location.href).href})}).addTo(map);
   window.madridBasemap = base.getMaplibreMap();
+  let originalPaint=null;
+  function themeBasemap(){
+    const gl=window.madridBasemap;if(!gl.getStyle()?.layers)return;
+    if(!originalPaint)originalPaint=gl.getStyle().layers.map(layer=>({id:layer.id,paint:{...layer.paint}}));
+    const css=getComputedStyle(document.documentElement),colors={
+      "#14212e":"--map-ground","#15384c":"--map-water","#182633":"--map-land",
+      "#182b34":"--map-park","#1a2c3b":"--map-edge","#1b2c3b":"--map-building",
+      "#205875":"--map-water-line","#273c4c":"--map-edge","#294155":"--map-road",
+      "#39546b":"--map-road","#829caf":"--map-label","#9eb5c9":"--map-label"
+    };
+    for(const layer of originalPaint)for(const [property,value]of Object.entries(layer.paint)){
+      const token=colors[value];if(token)gl.setPaintProperty(layer.id,property,css.getPropertyValue(token).trim());
+    }
+  }
+  window.madridBasemap.once("load",themeBasemap);window.addEventListener("themechange",themeBasemap);
   window.madridBasemap.on("idle", () => {
     if (!window.madridBasemap.queryRenderedFeatures().length) return;
     basemapReady = true;
@@ -65,12 +100,20 @@ const reducedMotion = matchMedia("(prefers-reduced-motion: reduce)");
 const clusterLayer = L.layerGroup().addTo(map);
 const routeLayer = L.layerGroup().addTo(map);
 let observations = [], observationRun = null, lastObservationTime = -1;
-function setConsoleView(view) {
-  $("simulation-panel").hidden=view!=="simulation";
-  $("operations-panel").hidden=view!=="operations";
-  document.querySelectorAll("[data-console-view]").forEach(b=>b.setAttribute("aria-pressed",String(b.dataset.consoleView===view)));
-  if(view==="operations") requestAnimationFrame(()=>{map.invalidateSize(); $("fit-map").click();});
+const advancedControls=ProductUI.drawer("advanced-controls","Advanced simulation controls",$("simulation-panel"));
+$("simulation-panel").hidden=false;
+$("view-simulation").textContent="Advanced";
+if(document.body.dataset.audience==="visitor"){
+ document.querySelector(".console-title h1").textContent="Watch Madrid at work";
+ document.title="Watch Madrid at work";
 }
+function setConsoleView(view) {
+  $("operations-panel").hidden=false;
+  if(view==="simulation"){if(!advancedControls.open)advancedControls.showModal();}
+  else {advancedControls.close();requestAnimationFrame(()=>{map.invalidateSize();$("fit-map").click();});}
+  document.querySelectorAll("[data-console-view]").forEach(b=>b.setAttribute("aria-pressed",String(b.dataset.consoleView===view)));
+}
+
 document.querySelectorAll("[data-console-view]").forEach(b=>b.onclick=()=>setConsoleView(b.dataset.consoleView));
 document.addEventListener("click",event=>{if(event.target.closest("[data-open-simulation]"))setConsoleView("simulation");});
 ["agent-role","agent-status","agent-search"].forEach(id=>$(id).addEventListener("input",()=>state&&renderInspector()));
@@ -117,7 +160,7 @@ function lastDecision(kind,id){
 function taskDetails(c){
   const order=state.orders.find(o=>o.id===c.order_id);
   if(c.status==="offline")return {title:"Offline · unavailable",note:"Not accepting assignments"};
-  return {title:c.order_id|| (c.status==="off_shift"?"Off shift":c.status==="repositioning"?"Moving toward demand":c.status==="returning"?"Return to hub":"Awaiting order"),
+  return {title:(c.order_id?(document.body.dataset.audience==="visitor"?"Delivering an order":c.order_id):null)|| (c.status==="off_shift"?"Off shift":c.status==="repositioning"?"Moving toward demand":c.status==="returning"?"Return to hub":"Awaiting order"),
     note:order?.store || (c.status==="off_shift"?"Not accepting work":c.status==="repositioning"?"No active order":c.status==="returning"?human(c.hub):"Ready for dispatch")};
 }
 function agentTraceLink(id){return "/agent-traces?source=madrid&run="+encodeURIComponent(state.run.id)+"&agent="+encodeURIComponent(id);}
@@ -128,11 +171,29 @@ const human = (s) => String(s).replaceAll("_", " ");
 const measured = (value, unit, digits = 1) => Number.isFinite(value) ? value.toFixed(digits) + unit : "—";
 const activeRoute = (courier) => courier?.route || courier?.reposition_route;
 async function api(path, options) {
+  if(runtime.mode==="replay" && options?.method && options.method!=="GET")
+    throw Error("This is a recorded example. Choose Start your own run to create an editable session.");
+  if(storeRecording && path.startsWith("/api/") && !path.startsWith("/api/runtime")) {
+    const elapsed=replaySeconds();
+    const frame=storeRecording.frames[Math.min(storeRecording.frames.length-1,Math.floor(elapsed/60*(storeRecording.frames.length-1)))];
+    if(path.startsWith("/api/state")) {
+      const city=structuredClone(frame.city);city.decisions=storeRecording.decisions.filter(d=>d.sim_time<=frame.time);city.replay={read_only:true,seconds:elapsed,paid_calls:0};
+      city.run.wall_seconds=60;city.run.status=elapsed>=60?"complete":"running";return city;
+    }
+    if(path.endsWith("/stores")) {
+      const interior=structuredClone(frame.interior);
+      interior.stores.forEach(store=>Object.assign(store,storeRecording.definitions[store.store]));return interior;
+    }
+    if(path.includes("/trace"))return {events:[],decisions:storeRecording.decisions.filter(d=>d.sim_time<=frame.time)};
+    if(path==="/api/runs")return [{...storeRecording.frames.at(-1).city.run,title:"Shelf to doorstep · recorded"}];
+  }
   if(runtime.mode==="replay" && (path.startsWith("/api/state") || /\/trace\?|\/chaos$/.test(path))) {
     const url=new URL(path,location.origin);
-    url.searchParams.set("t",String(Math.min(60,Math.floor((performance.now()-replayStarted)/1000))));
+    url.searchParams.set("t",String(Math.floor(replaySeconds())));
     path=url.pathname+url.search;
   }
+  if(recordedCity && (!options?.method || options.method==="GET") && /^\/api\/(state|runs|world|roads)(\?|\/|$)/.test(path))
+    path=path.replace("/api/","/api/recorded/");
   const response = await fetch(path, options);
   if (!response.ok) throw new Error(`Request failed (${response.status}). Check the local services.`);
   return response.json();
@@ -193,7 +254,7 @@ $("run-select").onchange = () => {
 };
 $("start").onclick = async () => {
   if(runtime.mode==="replay") {
-    replayStarted=performance.now();state=null;observations=[];lastObservationTime=-1;
+    replayPosition=0;replayStarted=performance.now();state=null;observations=[];lastObservationTime=-1;
     await poll();setConsoleView("operations");return;
   }
   $("start").disabled = true;
@@ -266,7 +327,7 @@ function renderDispatchEvidence() {
   $("reposition-distance").textContent=measured(m.reposition_km," km");
   const strategy=policy?.strategy==="min_cost"?"Deadline + cost":policy?.strategy==="legacy"||!policy?"Earliest completion (legacy)":human(policy.strategy);
   const reposition=policy?.reposition==="demand_aware"?"Move toward demand":"Stay at drop-off";
-  $("dispatch-policy-summary").textContent="Run policy: "+strategy+" · "+reposition;
+  $("dispatch-policy-summary").textContent="Delivery rules: "+strategy+" · "+reposition;
   $("dispatch-policy-evidence").textContent=JSON.stringify(policy||{strategy:"legacy",reposition:"stay"},null,2);
 }
 function renderCourierEconomics() {
@@ -401,7 +462,7 @@ function renderLedger() {
   $("orders").innerHTML=rows.slice(0,100).map(o=>{
     const late=o.status!=="delivered"&&o.due_sim<state.run.sim_time;
     const decision=state.decisions.find(d=>d.order_id===o.id);
-    return '<tr><td><button class="order-link" data-order="'+escape(o.id)+'">'+escape(o.id)+'</button></td><td>'+escape(o.store)+'</td><td>'+escape(o.courier||"Awaiting dispatch")+'</td><td>'+clock(o.created_sim)+'</td><td>'+clock(o.due_sim)+'</td><td><span class="status-pill '+escape(late?"late":o.status)+'">'+escape(human(o.status))+(late?" · late":"")+'</span></td><td>'+escape(decision?human(decision.action):"—")+'</td></tr>';
+    return '<tr><td><button class="order-link" data-order="'+escape(o.id)+'">'+(document.body.dataset.audience==='visitor'?'Basket '+(state.orders.indexOf(o)+1):escape(o.id))+'</button></td><td>'+escape(o.store)+'</td><td>'+escape(document.body.dataset.audience==='visitor'?(state.couriers.find(c=>c.id===o.courier)?courierName(state.couriers.find(c=>c.id===o.courier)):'Awaiting dispatch'):(o.courier||'Awaiting dispatch'))+'</td><td>'+clock(o.created_sim)+'</td><td>'+clock(o.due_sim)+'</td><td><span class="status-pill '+escape(late?"late":o.status)+'">'+escape(human(o.status))+(late?" · late":"")+'</span></td><td>'+escape(decision?human(decision.action):"—")+'</td></tr>';
   }).join("");
   $("orders-empty").hidden=rows.length>0;
   $("orders-empty").textContent=state.orders.length?"No orders match this view. Adjust the search or choose All orders.":"No orders yet. New requests will appear here during the session.";
@@ -468,26 +529,38 @@ async function readState() {
       selected=courier?{kind:"courier",id:courier.id}:null;
     }
     state=next;
-    displayClock.accept(runtime.mode==="replay"&&state.run?{...state.run,id:state.run.id+":"+replayStarted}:state.run, performance.now());
+    displayClock.accept(runtime.mode==="replay"&&state.run?{...state.run,id:state.run.id+":"+replayStarted,status:replayPaused?"paused":state.run.status}:state.run, performance.now());
+    updatePlayback();
     ChaosUI.update(state);
-    await StoreUI.update(state,runtime);
+    error("");
+    await StoreUI.update(state,{...runtime,paused:runtime.mode==="replay"&&replayPaused});
     $("connection").className="dot online"; $("connection-text").textContent=runtime.mode==="replay"?"Recorded replay · no model calls":"Local services connected";
     if(state.run) { renderFleetControl();renderMetrics();renderCouriers();renderOrders();renderLedger();renderInspector();renderRoute();await refreshTrace(); }
     else $("fleet").innerHTML='<div class="empty"><strong>No session loaded</strong><p>Start a session to see the fleet, routes and orders.</p><button data-open-simulation>Set up simulation</button></div>';
     if(++pollCount%10===0) await refreshRuns();
-  } catch(e) { $("connection").className="dot offline";$("connection-text").textContent="Connection interrupted";error(e.message); }
+  } catch(e) { console.error(e); $("connection").className="dot offline";$("connection-text").textContent="Connection interrupted";error(e.message); }
 }
 async function initialize() {
   try {
-    runtime=await api("/api/runtime");
+    liveRuntime=await api("/api/runtime");
+    runtime=recordedCity?{...liveRuntime,mode:"replay"}:liveRuntime;
+    if(recordedCity) {
+      replayPosition=12;replayStarted=performance.now()-12000;
+      exampleBanner=ProductExamples.banner("A two-hour Madrid shift with five disruptions",async()=>{
+        if(liveRuntime.mode==="replay"){exampleBanner.label("Live runs need an authorized workspace. Open For engineers → Architecture for setup.");return;}
+        recordedCity=false;storeRecording=null;runtime=liveRuntime;runId="";delete document.body.dataset.runtime;
+        for(const id of ["seed","duration","dispatch-strategy","reposition-policy","chaos-mode"])$(id).disabled=false;
+        $("start").textContent="Start day";exampleBanner.remove();await refreshRuns();await poll();setConsoleView("simulation");
+      });
+    }
     if(runtime.mode==="replay") {
-      document.body.dataset.runtime="replay";
+      document.body.dataset.runtime="replay";setupPlayback();
       $("start").textContent="Replay shift";
       for(const id of ["seed","duration","dispatch-strategy","reposition-policy","chaos-mode"])
         $(id).disabled=true;
       $("duration").value="60";$("chaos-mode").value="demo";
-      document.querySelectorAll(".workspace-navigation a").forEach(a=>{if(new URL(a.href).pathname!=="/")a.hidden=true;});
-      const label=document.querySelector(".workspace-local");if(label)label.textContent="Public replay · synthetic";
+
+
     }
     const [city,network]=await Promise.all([api("/api/world"),api("/api/roads")]);
     ChaosUI.setWorld(city, map);
@@ -498,10 +571,16 @@ async function initialize() {
     }
     $("graph-info").textContent=`${city.manifest.nodes.toLocaleString()} road nodes · ${city.manifest.edges.toLocaleString()} directed edges · OSM`;
     $("fit-map").click(); await refreshRuns(); await poll();
+    if(new URLSearchParams(location.search).has("chaos"))$("chaos-panel").open=true;
   } catch(e) { error(e.message); }
   setInterval(poll,1000); animate();
 }
-StoreUI.init({map,api,choose,locate:()=>$("frame-selection").click(),selectRun:async id=>{
+StoreUI.init({map,api,choose,playRecording:async()=>{
+ const payload=await ProductExamples.load("store");storeRecording=payload.data;recordedCity=true;runtime={...liveRuntime,mode:"replay"};
+ replayPosition=0;replayStarted=performance.now();setupPlayback();runId=storeRecording.frames[0].city.run.id;state=null;await refreshRuns();await poll();
+ exampleBanner?.label("Recorded shelf-to-doorstep order · includes a picker breakdown · no paid model calls.");
+ return {id:runId,store:storeRecording.store,order:storeRecording.order};
+},locate:()=>$("frame-selection").click(),selectRun:async id=>{
  runId=id;$("run-select").value=id;setConsoleView("operations");
  history.replaceState(null,"","?run="+encodeURIComponent(id));await refreshRuns();await poll();
  // A joined poll may belong to the preceding run; wait for this selection.
