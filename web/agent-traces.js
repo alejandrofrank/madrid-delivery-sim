@@ -276,7 +276,7 @@
 
   let liveSteps = [];
   const traceParams = new URLSearchParams(location.search);
-  const source = traceParams.get('source'), run = traceParams.get('run'), agent = traceParams.get('agent'), order = traceParams.get('order');
+  let source = traceParams.get('source'), run = traceParams.get('run'), agent = traceParams.get('agent'), order = traceParams.get('order'), recordedTrace = null;
   const stepTime = value => Number.isFinite(Number(value)) && value != null ? 'T+' + Number(value).toFixed(0) + 's' : 'Time not recorded';
   function stepTitle(record) { return label(record.action || record.tool || record.name || record.topic || record.kind || 'Recorded step'); }
   function stepSummary(record) {
@@ -303,11 +303,21 @@
     document.getElementById('trace-empty').hidden = liveSteps.length > 0;
   }
   async function readTrace(path) {
+    if(recordedTrace)return recordedTrace;
+    if(traceParams.get('example')==='store'){
+      const payload=await ProductExamples.load('store');return {decisions:payload.data.decisions.filter(d=>!order||d.order_id===order)};
+    }
     const response = await fetch(path, {cache:'no-store'});
     if (!response.ok) throw new Error(response.status === 404 ? 'This run or agent is no longer available.' : 'Trace could not be loaded (' + response.status + '). Refresh to retry.');
     return response.json();
   }
   async function loadLiveTrace() {
+    if(!run||(!recordedTrace&&traceParams.get('example')==='restaurant')) {
+      const payload=await ProductExamples.load('restaurant');recordedTrace=payload.data;
+      source='supply';run=recordedTrace.snapshot.run.id;
+      agent=agent||Object.keys(recordedTrace.agent_details).find(id=>id.startsWith('restaurant:'));
+      ProductExamples.banner('A restaurant agent negotiating ingredients and completing an order',async()=>{location.href='/engineers/restaurants';});
+    }
     if (!run || (!agent && !order) || !['madrid','delivery','supply'].includes(source)) return;
     const context = document.getElementById('live-trace-context');
     context.textContent = 'Loading ' + agent + '…';

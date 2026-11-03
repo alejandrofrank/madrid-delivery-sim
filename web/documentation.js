@@ -91,7 +91,7 @@ function element(tag, text, className) {
 }
 
 function pageURL(id, hash = "") {
-  return `/architecture?page=${encodeURIComponent(id)}${hash}`;
+  return (id === "agent-anatomy" ? "/agents" : "/engineers/architecture") + "?page=" + encodeURIComponent(id) + hash;
 }
 
 function sourceURL(path, line) {
@@ -539,7 +539,7 @@ window.AgentReference = {
         if (!a || event.ctrlKey || event.metaKey || event.shiftKey || event.altKey || event.button !== 0) return;
         const url = new URL(a.href);
         if (a.dataset.source || url.searchParams.has("source")) return;
-        if (url.origin !== location.origin || url.pathname !== "/architecture") return;
+        if (url.origin !== location.origin || !["/architecture", "/agents", "/engineers/architecture"].includes(url.pathname)) return;
         event.preventDefault(); event.stopPropagation();
         const target = url.searchParams.get("page") || initialId;
         if (target === id) scroll(decodeURIComponent(url.hash.slice(1)));
@@ -722,7 +722,7 @@ document.addEventListener("click", async (event) => {
   )
     return;
   const url = new URL(link.href);
-  if (url.origin !== location.origin || url.pathname !== "/architecture")
+  if (url.origin !== location.origin || !["/architecture", "/agents", "/engineers/architecture"].includes(url.pathname))
     return;
   event.preventDefault();
   if (!catalogue) return;
@@ -734,7 +734,7 @@ document.addEventListener("click", async (event) => {
     return;
   }
   if ($("#source-dialog").open) $("#source-dialog").close();
-  const id = url.searchParams.get("page") || "agent-anatomy";
+  const id = url.searchParams.get("page") || (url.pathname === "/engineers/architecture" ? "overview" : "agent-anatomy");
   const changed = id !== currentPage?.id;
   history.pushState({}, "", url.pathname + url.search + url.hash);
   $(".sidebar").classList.remove("expanded");
@@ -753,7 +753,7 @@ window.addEventListener("popstate", async () => {
   if (!catalogue) return;
   const routeURL = location.href;
   const params = new URLSearchParams(location.search);
-  const id = params.get("page") || "agent-anatomy";
+  const id = params.get("page") || (location.pathname === "/engineers/architecture" ? "overview" : "agent-anatomy");
   if (id !== currentPage?.id) await showPage(id, true);
   else if (location.hash)
     document
@@ -813,9 +813,10 @@ window.addEventListener("resize", () => {
     catalogue = await getJSON("/api/documentation");
     buildNavigation();
     await showPage(
-      new URLSearchParams(location.search).get("page") || "agent-anatomy",
+      new URLSearchParams(location.search).get("page") || (location.pathname === "/engineers/architecture" ? "overview" : "agent-anatomy"),
     );
     const params = new URLSearchParams(location.search);
+    if (params.get("search") === "1") openSearch();
     if (params.has("source"))
       await showSource(params.get("source"), params.get("line"));
   } catch {

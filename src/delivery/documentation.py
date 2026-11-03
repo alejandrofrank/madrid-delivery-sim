@@ -7,7 +7,6 @@ from pathlib import Path
 from typing import Any
 
 from fastapi import APIRouter, HTTPException, Query
-from fastapi.responses import FileResponse
 
 ROOT = Path(__file__).resolve().parents[2]
 CATALOGUE = ROOT / "config/documentation.json"
@@ -28,12 +27,6 @@ def read_public_file(relative: str) -> str:
     if not path.is_file() or path.stat().st_size > MAX_SOURCE_BYTES:
         raise HTTPException(404, "Source unavailable")
     return path.read_text(encoding="utf-8-sig")
-
-
-@router.get("/architecture", include_in_schema=False)
-def documentation_page() -> FileResponse:
-    # /docs remains FastAPI's existing API reference.
-    return FileResponse(ROOT / "web/documentation.html")
 
 
 @router.get("/api/documentation")

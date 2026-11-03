@@ -1,0 +1,24 @@
+{
+  "retrieved": "2026-11-03",
+  "use": "Unmodified official product marks, no endorsement implied",
+  "assets": {
+    "a2a.svg": {
+      "source": "https://a2a-protocol.org/latest/assets/a2a_logo/icon/color/SVG/a2a_icon_color.svg",
+      "sha256": "ee46ec740f2180ddd5cc4376c55c5a7cf7bc1756aee72676f2f1b38ee7e07942"
+    },
+    "adk.png": {
+      "source": "https://google.github.io/adk-docs/assets/agent-development-kit.png",
+      "sha256": "5a7be1b2e89407a449780d62637041b5605a08a13819eec870c864c11c977fe1",
+      "download_sha256": "7b3a16ca4417a134f1463ae3722ac0a437467fdbf3f7d7c9f29a08fc0cff0fbf",
+      "metadata": "Origin annotation added; image pixels unchanged"
+    },
+    "bigquery.svg": {
+      "source": "https://services.google.com/fh/files/misc/core-products-icons.zip",
+      "sha256": "6c088a2a7afbfcab01918c959aad90d76835093cfc2ec8314bf7ba25b85aaae8"
+    },
+    "cloud-run.svg": {
+      "source": "https://services.google.com/fh/files/misc/core-products-icons.zip",
+      "sha256": "42a910e5d9f5a8685227f91623bf50c8c9259c556a41eb9a97157fd1e78b0cea"
+    }
+  }
+}

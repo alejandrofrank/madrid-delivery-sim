@@ -1,339 +1,346 @@
 ---
-name: madrid-delivery-sim
-description: A calm, dense console for inspectable delivery-agent operations.
+name: Madrid
+description: "A warm, readable product for exploring inspectable delivery agents."
 colors:
-  accent: '#23d8ce'
-  accent-ink: '#052a2c'
-  accent-soft: '#103238'
-  accent-hover: '#90e4d8'
-  bg: '#0c151c'
-  surface: '#0f1b23'
-  raised: '#162630'
-  hover: '#1c303b'
-  ink: '#e5eef5'
-  muted: '#a8bdcd'
-  faint: '#8ba3b5'
-  line: '#263a48'
-  strong-line: '#476271'
-  positive: '#75d2a8'
-  negative: '#f28e8e'
-  warning: '#e9bc71'
-  info: '#8db9e3'
-  map-ground: '#14212e'
-  map-chrome: '#0c1822'
-  map-rule: '#314957'
-  map-ink: '#b4cada'
-  working-fill: '#0b3537'
-  working-ink: '#54e3d7'
-  working-line: '#15766f'
+  "bg": "#f7f2e9"
+  "surface": "#fffdf8"
+  "raised": "#eee8dd"
+  "hover": "#e6eddf"
+  "ink": "#14291e"
+  "muted": "#536257"
+  "faint": "#626e63"
+  "line": "#d9d7cb"
+  "strong-line": "#9da99b"
+  "accent": "#087c3b"
+  "accent-hover": "#066631"
+  "accent-ink": "#fffdf8"
+  "accent-soft": "#dfeedd"
+  "positive": "#146b41"
+  "negative": "#a8323d"
+  "warning": "#865a09"
+  "info": "#306997"
+  "positive-bg": "#e3efdf"
+  "negative-bg": "#f8e5e4"
+  "warning-bg": "#f5e9ce"
+  "info-bg": "#e2edf2"
+  "map-water": "#bedbe1"
+  "map-water-line": "#7fa9b2"
+  "map-land": "#e9e5db"
+  "map-park": "#d6e3c9"
+  "map-building": "#e1d9cb"
+  "map-ground": "#eee7db"
+  "map-road": "#fffdf6"
+  "map-edge": "#d7d4c8"
+  "map-route": "#158648"
+  "map-label": "#536257"
+  "selection": "#c7e3c2"
+  "dark-bg": "#15221b"
+  "dark-surface": "#1e2e23"
+  "dark-raised": "#293a2e"
+  "dark-hover": "#344b39"
+  "dark-ink": "#eef4ea"
+  "dark-muted": "#b3c2b3"
+  "dark-faint": "#a0b3a2"
+  "dark-line": "#3b4e3d"
+  "dark-strong-line": "#6c826d"
+  "dark-accent": "#73d5a1"
+  "dark-accent-hover": "#98e2b7"
+  "dark-accent-ink": "#0b3020"
+  "dark-accent-soft": "#294b35"
+  "dark-positive": "#9bdfb1"
+  "dark-negative": "#f2a1a0"
+  "dark-warning": "#edcc85"
+  "dark-info": "#a8cddd"
+  "dark-positive-bg": "#203c2b"
+  "dark-negative-bg": "#4a2d2d"
+  "dark-warning-bg": "#443c24"
+  "dark-info-bg": "#273e49"
+  "dark-map-water": "#1f4650"
+  "dark-map-water-line": "#49818a"
+  "dark-map-land": "#293b30"
+  "dark-map-park": "#314b34"
+  "dark-map-building": "#304335"
+  "dark-map-ground": "#24362b"
+  "dark-map-road": "#3f5542"
+  "dark-map-edge": "#1a2b20"
+  "dark-map-route": "#80d99c"
+  "dark-map-label": "#b3c2b3"
+  "dark-selection": "#385d40"
 typography:
-  title:
-    fontFamily: IBM Plex Sans, sans-serif
-    fontSize: 24px
+  "title":
+    fontFamily: "Work Sans, sans-serif"
+    fontSize: "30px"
     fontWeight: 700
-    lineHeight: 1.3
-    letterSpacing: -0.3px
-  chapter-title:
-    fontFamily: IBM Plex Sans, sans-serif
-    fontSize: 20px
+    lineHeight: 1.2
+    letterSpacing: "-0.025em"
+  "section":
+    fontFamily: "Work Sans, sans-serif"
+    fontSize: "24px"
     fontWeight: 700
-    lineHeight: 1.3
-    letterSpacing: -0.3px
-  section:
-    fontFamily: IBM Plex Sans, sans-serif
-    fontSize: 15px
-    fontWeight: 600
-    lineHeight: 1.5
-  body:
-    fontFamily: IBM Plex Sans, sans-serif
-    fontSize: 14px
-    fontWeight: 400
-    lineHeight: 1.5
-  body-small:
-    fontFamily: IBM Plex Sans, sans-serif
-    fontSize: 13px
-    fontWeight: 400
-    lineHeight: 1.5
-  label:
-    fontFamily: IBM Plex Sans, sans-serif
-    fontSize: 12px
-    fontWeight: 400
-    lineHeight: 1.5
-  annotation:
-    fontFamily: IBM Plex Sans, sans-serif
-    fontSize: 11px
-    fontWeight: 400
-    lineHeight: 1.5
-  mono:
-    fontFamily: IBM Plex Mono, monospace
-    fontSize: 12px
-    fontWeight: 400
-    lineHeight: 1.5
-  metric:
-    fontFamily: IBM Plex Sans, sans-serif
-    fontSize: 23px
-    fontWeight: 500
     lineHeight: 1.2
-  operations-title:
-    fontFamily: IBM Plex Sans, sans-serif
-    fontSize: 25px
-    fontWeight: 600
+    letterSpacing: "-0.02em"
+  "subsection":
+    fontFamily: "Work Sans, sans-serif"
+    fontSize: "19px"
+    fontWeight: 700
     lineHeight: 1.2
-    letterSpacing: -0.35px
-  anatomy-title:
-    fontFamily: Oxanium, IBM Plex Sans, sans-serif
-    fontSize: 24px
-    fontWeight: 600
-    lineHeight: 1.3
-  anatomy-summary:
-    fontFamily: IBM Plex Sans, sans-serif
-    fontSize: 16px
+  "body":
+    fontFamily: "IBM Plex Sans, sans-serif"
+    fontSize: "16px"
     fontWeight: 400
     lineHeight: 1.55
-  anatomy-primary-value:
-    fontFamily: IBM Plex Mono, monospace
-    fontSize: 16px
-    fontWeight: 400
-    lineHeight: 1.5
-  cartographic-label:
-    fontFamily: Noto Sans Regular
-    fontSize: 10px
-  operational-status:
-    fontFamily: IBM Plex Sans, sans-serif
-    fontSize: 10px
-    fontWeight: 400
-    lineHeight: 1.35
+  "body-large":
+    fontFamily: "IBM Plex Sans, sans-serif"
+    fontSize: "18px"
+  "body-small":
+    fontFamily: "IBM Plex Sans, sans-serif"
+    fontSize: "14px"
+  "label":
+    fontFamily: "IBM Plex Sans, sans-serif"
+    fontSize: "13px"
+  "mono":
+    fontFamily: "IBM Plex Mono, monospace"
+    fontSize: "14px"
+  "stat":
+    fontFamily: "Work Sans, sans-serif"
+    fontSize: "34px"
+    fontWeight: 650
+    lineHeight: 1.1
+  "anatomy-title":
+    fontFamily: "Oxanium, IBM Plex Sans, sans-serif"
+    fontSize: "24px"
+    fontWeight: 600
+    lineHeight: 1.3
+  "story-headline":
+    fontFamily: "Work Sans, sans-serif"
+    fontSize: "clamp(38px,3.96vw,63px)"
+    fontWeight: 700
+    lineHeight: 1.03
+    letterSpacing: "-0.035em"
+  "story-section":
+    fontFamily: "Work Sans, sans-serif"
+    fontSize: "clamp(28px,2.85vw,44px)"
+    fontWeight: 600
+    lineHeight: 1.12
+    letterSpacing: "-0.025em"
 rounded:
-  control: 5px
-  chip: 4px
-  square: 0px
-  status: 12px
+  "control": "12px"
+  "panel": "16px"
+  "pill": "999px"
+  "overlay-detail": "8px"
 spacing:
-  '1': 4px
-  '2': 8px
-  '3': 12px
-  '4': 16px
-  '5': 24px
-  '6': 32px
+  "1": "4px"
+  "2": "8px"
+  "3": "12px"
+  "4": "16px"
+  "5": "24px"
+  "6": "32px"
+  "7": "48px"
+  "8": "72px"
 components:
-  button-primary:
-    backgroundColor: '{colors.accent}'
-    textColor: '{colors.accent-ink}'
-    rounded: '{rounded.control}'
-    padding: 7px 12px
-  button-primary-hover:
-    backgroundColor: '{colors.accent-hover}'
-    textColor: '{colors.accent-ink}'
-    rounded: '{rounded.control}'
-    padding: 7px 12px
-  button-secondary:
-    backgroundColor: '{colors.surface}'
-    textColor: '{colors.ink}'
-    rounded: '{rounded.control}'
-    padding: 7px 12px
-  button-disabled:
-    backgroundColor: '{colors.raised}'
-    textColor: '{colors.faint}'
-    rounded: '{rounded.control}'
-    padding: 7px 12px
-  input:
-    backgroundColor: '{colors.surface}'
-    textColor: '{colors.ink}'
-    rounded: '{rounded.control}'
-    padding: 7px 9px
-  status-chip:
-    textColor: '{colors.muted}'
-    typography: '{typography.annotation}'
-    rounded: '{rounded.chip}'
-    padding: 3px 6px
-  status-chip-active:
-    backgroundColor: '{colors.accent-soft}'
-    textColor: '{colors.accent}'
-    typography: '{typography.annotation}'
-    rounded: '{rounded.chip}'
-    padding: 3px 6px
-  panel:
-    backgroundColor: '{colors.surface}'
-    textColor: '{colors.ink}'
-    rounded: '{rounded.control}'
-  navigation-active:
-    textColor: '{colors.accent}'
-    typography: '{typography.label}'
-  agent-row-selected:
-    backgroundColor: '{colors.accent-soft}'
-    textColor: '{colors.ink}'
-    rounded: '{rounded.square}'
-    padding: 8px 12px
-  operations-panel:
-    backgroundColor: '{colors.bg}'
-    textColor: '{colors.ink}'
-    rounded: '{rounded.control}'
-  madrid-status-active:
-    backgroundColor: '{colors.working-fill}'
-    textColor: '{colors.working-ink}'
-    typography: '{typography.operational-status}'
-    rounded: '{rounded.status}'
-    padding: 2px 7px
-  madrid-agent-row-selected:
-    backgroundColor: '{colors.accent-soft}'
-    textColor: '{colors.ink}'
-    rounded: '{rounded.square}'
-    padding: 7px 12px
-  map-toolbar:
-    backgroundColor: '{colors.map-chrome}'
-    rounded: '{rounded.chip}'
-    padding: 3px 4px
+  "button-primary":
+    backgroundColor: "{colors.accent}"
+    textColor: "{colors.accent-ink}"
+    rounded: "{rounded.control}"
+    padding: "10px 16px"
+    typography: "{typography.body}"
+  "button-primary-hover":
+    backgroundColor: "{colors.accent-hover}"
+    textColor: "{colors.accent-ink}"
+    rounded: "{rounded.control}"
+    padding: "10px 16px"
+  "button-secondary":
+    backgroundColor: "{colors.surface}"
+    textColor: "{colors.ink}"
+    rounded: "{rounded.control}"
+    padding: "10px 16px"
+  "button-quiet":
+    backgroundColor: "transparent"
+    textColor: "{colors.ink}"
+    rounded: "{rounded.control}"
+    padding: "10px 16px"
+  "button-disabled":
+    backgroundColor: "{colors.raised}"
+    textColor: "{colors.faint}"
+    rounded: "{rounded.control}"
+    padding: "10px 16px"
+  "input":
+    backgroundColor: "{colors.surface}"
+    textColor: "{colors.ink}"
+    rounded: "{rounded.control}"
+    padding: "10px 12px"
+  "navigation-active":
+    textColor: "{colors.accent}"
+    typography: "{typography.body}"
+    padding: "10px 0"
+  "status-pill":
+    backgroundColor: "{colors.raised}"
+    textColor: "{colors.ink}"
+    rounded: "{rounded.pill}"
+    padding: "4px 10px"
+    typography: "{typography.label}"
+  "status-pill-positive":
+    backgroundColor: "{colors.positive-bg}"
+    textColor: "{colors.positive}"
+    rounded: "{rounded.pill}"
+    padding: "4px 10px"
+    typography: "{typography.label}"
+  "card":
+    backgroundColor: "{colors.surface}"
+    textColor: "{colors.ink}"
+    rounded: "{rounded.panel}"
+    padding: "24px"
+  "recording-banner":
+    backgroundColor: "{colors.accent-soft}"
+    textColor: "{colors.ink}"
+    rounded: "{rounded.control}"
+    padding: "14px 20px"
+    typography: "{typography.body-small}"
+  "replay-controls":
+    backgroundColor: "{colors.surface}"
+    textColor: "{colors.ink}"
+    rounded: "{rounded.control}"
+    padding: "12px 16px"
+  "drawer":
+    backgroundColor: "{colors.surface}"
+    textColor: "{colors.ink}"
+    padding: "28px"
+    width: "min(640px,100%)"
+    height: "100%"
 ---
 
-# Design system: madrid-delivery-sim
+# Design System: Madrid
 
 ## Overview
 
-**Creative North Star: "Calm, dense operations console"**
+**Creative North Star: "Warm off-white, one strong accent, a dark alternative"**
 
-Dark blue graphite surfaces, cyan selection, restrained state colors, IBM Plex Sans and Mono, fine rules and dense readable rows. The interface follows the user's Linear-style dark operations-console direction: calm, dense, one accent color. Technical reviewers can inspect the same working evidence that operators use.
+Madrid shares a warm, readable product system across its public story and engineering workspaces. Off-white surfaces and deep green text carry the light appearance; green-black surfaces and pale ink carry the dark appearance. A green accent identifies action and selection, while semantic colors describe outcomes and the existing robot colors identify roles.
 
-Compact plain titles keep the working interface near the top. Agents are the protagonist and their shared city stays visible beside them on operational screens; reading and evaluation screens use the same material language without imitating the map layout. Color communicates state, selection or data. The confirmed anti-references are decorative heroes, oversized marketing headlines, split-color or gradient headline text, purple gradients, Inter-everywhere and nested cards.
+Work Sans gives headings a distinct voice, IBM Plex Sans carries explanations and controls, and IBM Plex Mono keeps source evidence legible. Rounded controls and softly raised panels support clear grouping without hiding dense tools. The approved landing has its own larger narrative scale; labs keep compact titles and direct access to work. The existing whole-body robots and in-place memory explorer retain their identity and interaction model.
 
 **Key Characteristics:**
-- Local IBM Plex fonts, tabular operational values and explicit technical identifiers.
-- Flat dark graphite surfaces separated by fine rules; cyan marks actions and selection.
-- Readable rows, plain labels, visible focus and progressive disclosure of evidence.
-- Runtime data remains inspectable; missing history and measurements remain explicit.
+
+- One shared token layer and shell, with persistent light and dark appearances.
+- Readable supporting text, compact engineering titles and a distinct public-story type scale.
+- Rounded controls, fine boundaries and restrained soft elevation.
+- Recorded evidence, illustrative motion and live state remain distinguishable.
+
+This record extracts the implemented system from `web/tokens.css`, `web/workspace.css`, `web/workspace.js`, the landing and domain styles. PRODUCT.md supplies product commitments; the landing surface brief owns its particular composition. No new brand metaphor or named doctrine is introduced here.
 
 ## Colors
 
-The dark ground reads as deep blue graphite, with pale ink and one cyan accent. Madrid's metric strip and operational panels use the ground color itself, avoiding the raised gray slabs of the superseded implementation. The frontmatter is normative; CSS custom properties in `web/tokens.css` are the implementation source. The sidecar's synthesized tonal ramps are palette previews, not additional implementation tokens.
+The palette uses warm neutral materials and a green action accent in both appearances. Frontmatter values are normative; `web/tokens.css` is the implementation source. Unprefixed colors are light values; each `dark-` token is the corresponding value under `:root[data-theme="dark"]`. Components continue to consume the same CSS variables after a theme change.
 
 ### Primary
 
-- **Signal cyan** (`accent`): primary run actions, the active global workspace, selected agent edges, observed curves and active routes.
-- **Deep cyan ink** (`accent-ink`): text on the filled primary action.
-- **Cyan selection surface** (`accent-soft`): selected rows, active chips and the illustrated lifecycle's active stage.
-- **Light signal teal** (`accent-hover`): primary-action hover feedback.
+- **Action green** (`accent`, `accent-hover`, `accent-ink`): primary actions, selected destinations, interactive links and their hover state. The light button has pale text; the dark button has deep green text.
+- **Soft green selection** (`accent-soft`, `selection`): selected controls, recorded-example banners and text selection. These fills do not replace a text or state label.
+
+### Secondary
+
+- **Positive green**, **negative red**, **warning ochre** and **information blue** (`positive`, `negative`, `warning`, `info`) have paired `-bg` surfaces in each appearance. Use the foreground and background together for statuses and evidence qualifications.
+- Existing robot role colors identify agents. They belong to the source-native model and role definitions, not to a new set of interchangeable brand accents.
 
 ### Neutral
 
-- **Blue graphite ground** (`bg`): page ground, global navigation and recessed code.
-- **Graphite surface** (`surface`): shared evidence panels, fields and table areas. Madrid's compact operational panels use `bg` instead.
-- **Raised graphite** (`raised`) and **hover graphite** (`hover`): disabled controls, selected view controls and hover response.
-- **Pale ink** (`ink`): main text. **Muted ink** (`muted`): labels and supporting evidence. **Faint ink** (`faint`): tertiary annotations and disabled text.
-- **Fine rule** (`line`): panel boundaries, rows and dividers. **Strong rule** (`strong-line`): field outlines and stronger technical boundaries.
+- **Warm ground** (`bg`) and **near-white surface** (`surface`) establish the light canvas. Their dark counterparts are green-black and forest surfaces.
+- **Raised** and **hover** surfaces separate secondary material and interactive response.
+- **Ink**, **muted** and **faint** text establish information hierarchy; **line** and **strong-line** establish dividers and control boundaries.
+- `map-ground`, `map-land`, `map-water`, `map-water-line`, `map-park`, `map-building`, `map-road`, `map-edge`, `map-route`, `map-label` describe the tokenized cartographic vocabulary. They do not change geography or imply that every retained map renderer consumes every token.
 
-The map-ground, map-chrome, map-rule and map-ink tokens record the recurring cartographic background and overlay materials from `web/style.css`. Madrid's working-fill, working-ink and working-line tokens describe its brighter active state pills; shared Restaurant chips retain their existing treatment. These component colors do not replace the global accent.
-
-Positive, negative, warning and information tokens represent outcomes, attention and assignment states. Pair them with visible text or symbols. Their distinct hues are semantic exceptions to the single-accent strategy.
-
-**The One Accent Rule.** Cyan identifies primary action, selection and observed activity. Positive, negative, warning and information colors carry operational meaning; they are not alternate brand accents.
+The sidecar's tonal ramps are synthesized palette previews only. They are not extra shipped tokens or permission to recolor retained data graphics.
 
 ## Typography
 
-**Body and title font:** IBM Plex Sans, with a generic sans-serif fallback.
-**Label/mono font:** IBM Plex Mono, with a generic monospace fallback.
+**Heading font:** Work Sans, with a sans-serif fallback.
+**Body font:** IBM Plex Sans, with a sans-serif fallback.
+**Evidence font:** IBM Plex Mono, with a monospace fallback.
 
-Both UI families are served locally from `web/fonts/` with their SIL OFL licenses; no external font service is required. Regular, Medium and SemiBold Sans files and one Regular Mono file are present. CSS weights above the supplied native weights resolve through the existing face declarations; they are not additional font assets. The OpenFreeMap style uses locally cached Noto Sans Regular glyphs for cartographic labels only. This is an explicit map typography exception; UI controls, selected-agent labels and overlays remain Plex. Most cartographic labels use 10px type, with larger place labels defined by the map style.
+These fonts are served locally. The body is readable at the shared body role, with small labels for controls and dense evidence. Tabular numerals stabilize metrics and simulation time. Source identifiers, traces and code use Mono. Reading prose retains a maximum width of 75ch where implemented; empty-state explanations use 65ch.
 
 ### Hierarchy
 
-The frontmatter records the shared title, operations-title, chapter-title, section, body, label, mono and metric roles. There is no display/hero role. Madrid's title is 25px/600 at full desktop width, 23px below 1400px and 22px below 850px. Shared page titles retain the 24px role; Architecture uses 20px, Traces uses 22px and Health uses 20px/600. Madrid's metric values use 23px/500, becoming 22px below 850px.
+The frontmatter captures the shared title, section, subsection, body, large body, small body, label, mono and stat roles. Titles use a tighter line height than prose. Domain pages retain their own compact title overrides rather than being forced to the shared title size: Operations, for example, uses a 25px title that reduces at narrower widths.
 
-Madrid's agent identity is 12px with 10px secondary detail at full width. Status pills use the operational-status role, and the compact ledger uses 11px text. Narrow mobile roster annotations reach 9px in the existing implementation; that is a page-specific density exception, not a recommended general body or label scale. Section headings commonly use 15px. Typography stays compact without flattening the hierarchy.
+The story-headline and story-section roles are explicit public-landing exceptions. The headline becomes 40px at both of its narrow breakpoints; supporting landing copy ranges from 18px to 25px. This approved story scale does not create a new default for technical pages.
 
-Body text is IBM Plex Sans. IDs, simulation times, trace metadata, code and narrow numerical evidence use IBM Plex Mono. Tabular numbers keep values stable as they update. Supporting labels are smaller than body text; technical annotation is not a new headline tier. Reading prose and trace summaries are capped at 75ch in their existing layouts.
-
-**The Compact Title Rule.** Start with a plain workspace title and the working interface. Do not add a display headline, decorative hero or slogan.
-
-### Agent Anatomy exception
-
-The Anatomy-only roles in the frontmatter record the repeated role and physical-part headings, plain-language summaries and two primary evidence values in web/agent-anatomy.css. Oxanium SemiBold is served locally from web/fonts/Oxanium-SemiBold.ttf under SIL OFL 1.1, with Plex as the fallback. Its angular forms connect the compact headings to the illustrated machine. This exception does not replace the shared title or body roles.
-
-Plex carries the code-topic subtitle, controls and explanation. The existing body-small role supplies the subtitle; the Anatomy summary role keeps the first explanation readable. The primary values use tabular Plex Mono and aligned value rows, including when a label wraps. Additional evidence keeps its existing compact treatment behind disclosure. The idle instruction and narrow component selectors also use the intentional 16px size; this is local reading and control legibility, not a new global body size.
-
-**The Anatomy Type Rule.** Use Oxanium only for Agent Anatomy's role and physical-part headings. Keep explanation and controls in Plex Sans and source values in Plex Mono; preserve the shared typography elsewhere.
+Agent Anatomy's role and physical-part headings retain the locally served Oxanium SemiBold role. Explanations and controls remain Plex Sans; source values remain Plex Mono. This preserves the existing robot inspector rather than replacing its identity with the landing style.
 
 ## Layout
 
-Use the established spacing rhythm in the frontmatter. The sticky global shell has a 44px header token at wider widths and a 56px token below 600px. The desktop shell uses 20px horizontal padding. Madrid's working content uses 12px side gutters, reducing to 10px below 850px; other workspaces retain their own larger gutters.
+The shared shell has a 72px minimum header height, flexible horizontal spacing and a single line of desktop destinations. At 1150px it reduces gaps; at 900px navigation moves into a menu; at 520px the wordmark and controls become more compact. The footer wraps and then stacks. Shared cards and panels use 24px padding, reducing to 20px at the narrowest shared breakpoint. The reusable spacing steps are recorded in the frontmatter.
 
-Madrid pairs its roster and map at a 45.5/54.5 ratio, expressed as 0.91/1.09 fractional columns with an 8px gap. Both panels use a shared height of clamp(360px, 45vh, 460px). A shallow four-part KPI band has an 80px minimum height, 10px by 20px metric padding and an 8px gap before the working panes. Keep actual agent comparisons and continuous geography together.
+The public Watch view places the map before the roster in a 1.8:1 two-column layout, with a 320px minimum roster and 20px gap. It stacks at 1000px with the map first. Engineering Operations preserves its denser roster/map layout, selected evidence and ledger. Its narrow map uses a 400px geographic region with the legend below in normal flow. Restaurants reveals its inspector beside the roster when selected, then stacks at 900px. Inventory, Health, Traces and Architecture retain their own evidence-oriented layouts and local scroll containers.
 
-The desktop roster uses a compact toolbar followed by Agent, Role, Status, Current task, Delivered and Rate/min columns. Rows have a 51px minimum height. The separate role column disappears below 1400px, while the narrowest layout also hides rate history. The current-visit history note remains explicit. The selected-evidence strip follows with an 88px minimum height, three evidence groups and trace/detail actions. The ledger follows at an 8px gap, using 11px text, 5px vertical header padding and 1px vertical cell padding; its scroll region is capped at 300px on desktop. Native viewport row count remains an evidence check, not a fabricated data requirement.
+The landing uses a continuous city field, left-side explanation, existing robots, a playback strip and connected order steps. Its content sections cap at 1400px. At 700px the story becomes a vertical sequence; playback changes to a small grid, order steps and outcomes stack, and technology items form two columns. These are surface-specific arrangements, not a mandatory page template.
 
-Madrid stacks at 850px with agents before the map. Its mobile map is a 400px high region; the collapsible legend sits in normal flow below it, so open and closed legend states do not cover the selected courier. The toolbar stays within the map's top-left working area, with zoom controls at the top-right. The selected summary reduces to identity/task while keeping trace access.
-
-Restaurants retains a 340px minimum roster, a 0.9/1.1 ratio, a 16px gap and stacks at 900px. The older Delivery grid workspace has been retired; Operations is the single delivery overview.
-
-Global navigation becomes a menu at 1080px, with three columns of links when opened and two below 600px. Its links stay ordinary anchors, and Escape restores focus to the menu button. Shared narrow controls have a 44px minimum target and text inputs use 16px type; Madrid's compact roster/map controls and other page-specific overrides are explicit exceptions, not a universal target-size promise.
-
-Architecture uses topic, reader and page-outline columns. The outline disappears at 1250px and the topic sidebar becomes a disclosure at 700px. Tables, code, rosters and expanded diagrams scroll within their own containers. Simulation and definition controls remain separate from the operational panes. Inventory, Health, Traces and Architecture keep their evidence-specific layouts.
+Agent Anatomy pairs the complete robot with an adjacent in-place inspector. The memory tabs, record groups, constraints and expanded references remain in that inspector. Dense tables and payloads scroll locally; disclosure reveals detail without removing the primary context.
 
 ## Elevation & Depth
 
-Ordinary panels and list rows are flat. Fine boundaries and restrained tonal changes describe containment. The selection edge is an inset marker, not a lifted card. Map tooltips and popups use the shared small ambient shadow (`0 8px 24px #0005`); courier markers retain a small legibility shadow (`0 2px 3px #0008`). Dialogs use a translucent dark backdrop rather than ornamental elevation. The sidecar records these values because the frontmatter component schema has no shadow field.
+Shared cards and panels have subtle ambient elevation; dropdowns, tooltips and drawers use the stronger shared shadow. Fine one-pixel boundaries still carry most grouping. The shared light shadow is `0 6px 22px #24351c0c`, and the raised shadow is `0 14px 40px #24351c18`; dark appearance supplies `0 6px 22px #0002` and `0 14px 40px #0005`. These extension values live in the sidecar because the frontmatter component schema has no shadow property.
 
-**The Flat Surface Rule.** Separate working areas with tonal changes and fine rules. Keep ordinary panels and rows shadowless; reserve the small ambient shadow for map overlays.
+The drawer's backdrop is translucent green (`#11251b66`). Retained robot scenes have their own dimensional lighting and dark scene fields; their geometry and lights are illustration material, not interchangeable card treatments. The landing's fading background behind text protects readability over geography; it is not gradient headline text.
 
 ## Shapes
 
-Controls and operational panels use restrained corners from the control radius. Shared small state chips use the chip radius. Madrid uses rounded 12px status pills without redundant state dots. Ledger pills are 104px wide with centered labels; roster pills stretch to the status column width. Session badges retain the smaller corner radius. Roster rows, tabs, reading frames and table geometry stay square where the implementation defines them that way. Use one-pixel rules for working boundaries. Circles belong to roster role symbols, map markers, clusters and numbered lifecycle steps; they are functional symbols rather than a decorative motif.
+The control and panel radii in the frontmatter define the shared form language. Pills have fully rounded ends, while small tooltip and menu-detail surfaces use the smaller overlay radius. Theme controls are circular. Evidence rows, code tables and inspector substructures retain square internal geometry where useful. Rounded containers do not require every internal fact to become a separate card.
 
-The unused larger-radius declaration in the CSS token file is not promoted into this documented component vocabulary. No future surface should inherit a radius merely because a dormant variable exists.
+SVG symbols provide the shared icon vocabulary. The Madrid wordmark uses the implemented geometric mark; existing role symbols and full robot silhouettes remain distinct from the shell icons. Preserve symbols with their accompanying label or accessible name.
 
 ## Components
 
 ### Buttons
 
-Primary run actions have a cyan fill, deep cyan text and a medium/semibold weight. Secondary controls use graphite surfaces and strong outlines. The frontmatter records their padding and shape; the shared desktop minimum height is 36px. Hover changes surface/border color, disabled actions use raised graphite and faint ink, and visible keyboard focus uses a 2px cyan outline with a 3px offset. Background and border transitions use 180ms with `cubic-bezier(.16,1,.3,1)`. Under reduced motion, transition duration is exactly 0s so map transforms do not retain transient stale geometry. The shared animation-duration override remains 0.01ms, and the illustrated lifecycle animation is disabled.
+Primary buttons use the accent fill and accent ink; secondary buttons use the surface with a strong outline; quiet buttons remove the resting fill and border. Shared controls have a 44px minimum height. The frontmatter records their padding and radius. Primary hover uses the accent-hover token; secondary hover uses the hover surface and ink border. Disabled controls use raised fill, faint text and line borders without an opacity wash.
+
+Keyboard focus uses a 3px accent outline with a 4px offset in the shared shell. Some retained inspector controls use a 2px local outline. Background and border transitions use 220ms with `cubic-bezier(.16,1,.3,1)`. Reduced motion sets transition duration to zero and limits CSS animations; it does not remove access to controls. Compact domain controls are existing overrides, not a universal 44px compliance claim.
 
 ### Inputs / Fields
 
-Plain outlined fields retain accessible labels. Shared forms use visible labels; Madrid's compact agent/order filters use visually hidden labels together with descriptive placeholder or selected-option text. Inputs, selects and textareas share the surface background, strong rule and control radius. Placeholder text is muted; disabled fields use the raised surface. Keep IDs, search labels and evidence context readable instead of replacing labels with icons.
-
-### Chips
-
-Small labels expose actual state. Neutral chips have a fine outline and muted text. Shared active chips use the soft accent surface with accent text; Madrid's active status pills use the dedicated working-state tokens, centered labels and rounded ends. Outcome colors are paired with readable status words. These chips are status indicators, not implied buttons.
-
-### Cards / Containers
-
-Use one panel boundary around a coherent working region. Separate its heading and rows with fine rules; leave ordinary panels shadowless. Shared panel-title and roster rows become compact on desktop. Madrid uses the ground color for its panels and metric band; a whole gray filled slab is no longer its panel treatment. Do not turn every metric, fact or nested evidence item into another card.
+Inputs, selects and textareas share a surface background, strong outline, control radius and a 44px minimum height. Placeholder text is muted; disabled fields use the raised surface. Visible labels and accessible names remain required. Checkboxes, radio buttons and sliders use the accent token. Dense roster filters retain local sizing; they do not redefine the shared body scale.
 
 ### Navigation
 
-The global shell contains six workspaces: Operations, Restaurants, Inventory, Health, Traces and Architecture. A cyan underline and cyan text identify the current workspace. Local view tabs retain their implementation-specific active border or raised selected state. A skip link reaches the main workspace; mobile disclosure preserves the same destinations and keyboard behavior.
+The Madrid home link precedes How it works, Watch it live and Meet the agents. The current primary destination has accent text and an underline. For engineers exposes the six existing workspaces and documentation search. The theme control persists the selected appearance in local storage, defaults to light and updates its accessible name. Watch it run remains the primary shared action.
 
-### Agent roster and selected evidence
+The narrow menu uses ordinary anchors and an expanded state. Escape closes menu/disclosure state and returns focus to its control; an outside click also closes it. The skip link reaches the main content or the Architecture reader. Engineering pages additionally expose a runtime/environment qualifier, while the public shell stays compact.
 
-The roster combines reusable SVG role symbols with actual identity, task, state and throughput. Madrid separates role, status, current task, delivered total and rate into comparison columns; narrower widths remove secondary columns without changing the data. Restaurants also exposes its technical ID separately. Selected rows use a soft cyan fill and a thin inset accent edge: 1px in Madrid, 2px in the shared Restaurant roster. A summary remains compact; detail opens on request. Empty and filtered states explain why no agents are visible.
+### Chips / Status
 
-Curves represent observed samples, not decoration. The shared helper requires at least two finite samples; roster history is limited to the current visit and records activity per simulated minute. A completed run without captured history says so. Totals and rates remain separately labeled.
+Shared pills use a fine border, rounded ends and compact readable text. The positive, negative, warning and information variants pair semantic foregrounds and backgrounds. State words remain visible. Retained rosters and ledger badges have domain-specific sizing; status is never inferred from hue alone.
 
-### Maps and diagrams
+### Cards / Containers
 
-Madrid uses a locally vendored OpenFreeMap vector basemap rendered by MapLibre through the Leaflet bridge. Real roads, land use, water and Spanish place labels fill the frame; the simulator's cached OpenStreetMap graph is a fine operational overlay. The checked-in manifest records 332 tiles, 36,512,766 bytes (36.51 MB), at source zoom levels 10–14. Higher view zooms overzoom that finite local coverage. Noto Sans Regular cartographic glyphs, renderer files, licenses and map style are local; attribution to OpenFreeMap, OpenMapTiles and OpenStreetMap remains visible.
+A shared card groups a coherent section using the panel radius, surface fill, fine rule and soft ambient shadow. Panels can retain domain-controlled padding. Metrics use stable numeric typography with a label and explanatory text. Roster selection adds an accent-soft fill and an inset selection edge; it does not imply a different entity identity.
 
-Dragging, mouse-wheel zoom, touch zoom and keyboard navigation are enabled from the initial view. Escape releases wheel input to page scrolling; the Scroll zoom toggle restores wheel zoom. Fit network and Locate agent reserve space below the toolbar; selection framing keeps real coordinates and genuine route lengths. Selected-label placement considers control geometry, and a ResizeObserver synchronizes Leaflet dimensions with the MapLibre camera before repositioning the label. These are implementation behaviors; the recorded review/capture evidence determines whether their specific states are verified.
+### Recorded evidence and playback
 
-Operations is the single geographic overview. Restaurants uses a searchable agent roster and adjacent inspector; Inventory uses a store selector and stock table. The retired fictional grid renderers are removed. On the Madrid map, symbols distinguish couriers, pickups and destinations; text and line styles distinguish planned and traveled routes. Do not replace synthetic service geometry with Madrid cartography or stretch a real route to imitate an illustrative comp.
+Recorded-example banners use the soft accent surface, a short provenance statement and the available example/own-run actions. Playback pairs a named play/pause control, labeled slider and simulation time. The landing loads checked-in replay data, redraws on appearance/size changes, pauses when offscreen or hidden, and starts still when reduced motion is requested. The user can explicitly operate playback. A failure state offers retry and a working view link.
 
-Eight source-backed D2 diagrams retain their existing graphite/teal palette and locally embedded IBM Plex fonts. Their hard-coded palette has not been regenerated to exactly match the new shared cyan tokens; this is a documented retained exception. The initial image shows the complete diagram within its frame; Expand provides readable inspection, pan and zoom, and Fit restores a complete overview. Architecture's four-stage lifecycle animation is finite and replayable, labeled as an illustration, and disabled under reduced motion.
+Actual recorded routes and attribution remain intact. The existing robots illustrate a role handoff; the outcome disclosure explicitly distinguishes that illustration from measured city evidence. Charts require observed samples, and absent history remains visible rather than becoming an invented curve.
+
+### Drawers, tooltips and inspection
+
+Advanced controls can open in a right-side native dialog, with a maximum width of 640px, a visible close button, a backdrop and focus restoration to the trigger. Tooltips provide technical terms on hover or keyboard focus. The complete robot inspector and memory explorer remain in place. They use local disclosure and source links rather than replacing detailed evidence with summary cards.
 
 ## Do's and Don'ts
 
 ### Do:
 
-- **Do** keep simulation setup separate from the operation view where that separation is implemented.
-- **Do** preserve distinct entity names, technical IDs and role labels when inspecting agents.
-- **Do** use SVG symbols with text labels and state descriptions; color alone must not carry meaning.
-- **Do** label the history window, units, simulation clock and session state; render curves only from observed samples.
-- **Do** keep unavailable metrics, synthetic fixtures, retained-evidence limits and stale-source caveats visible.
-- **Do** keep selected map markers, labels and actual route geometry clear of toolbar and legend controls.
-- **Do** retain keyboard focus, reduced-motion behavior, local overflow containers and mobile disclosure controls.
+- **Do** use the shared appearance tokens for text, controls, semantic states and surfaces.
+- **Do** pair status and role colors with readable labels or recognizable symbols.
+- **Do** retain actual robot models, role identities, recorded route geometry and source attribution.
+- **Do** label recorded examples, time windows, units, unavailable values and stale-source qualifications.
+- **Do** keep existing engineering controls and raw evidence reachable through progressive disclosure.
+- **Do** preserve visible keyboard focus, playback controls, reduced motion and local overflow for dense evidence.
 
 ### Don't:
 
-- **Don't** introduce oversized marketing headlines, split-color headlines, headline gradients or decorative hero sections.
-- **Don't** add purple gradients, Inter-everywhere, nested cards or ornamental dashboard effects.
-- **Don't** turn an empty history, unknown cost or unknown latency into a fabricated chart or zero.
-- **Don't** use a sparse graph overlay as a substitute for Madrid's continuous local basemap.
-- **Don't** substitute a role template name for the actual entity identity.
-- **Don't** shrink a diagram's detailed reading view merely to force every label into one viewport; provide a whole-diagram overview plus an expanded inspection view.
+- **Don't** apply the landing headline scale or story composition to engineering tools by default.
+- **Don't** add split-color headlines, gradient headline text or decorative slogans.
+- **Don't** present the illustrated robot handoff as measured activity, or a recorded simulation as live model performance.
+- **Don't** fabricate zeroes, curves, latency or cost figures when the source does not provide them.
+- **Don't** replace the source-native robots or real Madrid paths with invented mockup geometry.
+- **Don't** treat retained tiny labels, fixed legacy colors or a review defect as a reusable system token.

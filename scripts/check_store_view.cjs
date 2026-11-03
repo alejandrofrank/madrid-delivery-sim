@@ -12,7 +12,7 @@ const base=process.env.STORE_UI_BASE||'http://localhost:8010';
  let checking=page;
  const errors=[],requests=[];page.on('pageerror',e=>errors.push(e.message));page.on('request',r=>requests.push(r.url()));
  try{
-  await page.goto(base+'/');await page.locator('#store-demo').waitFor();
+  await page.goto(base+'/engineers/operations?live=1');await page.locator('#store-demo').waitFor();
   assert(!requests.some(r=>r.includes('/simready/')||r.includes('/three/')),'3D must stay lazy');
   await page.locator('#store-demo-chaos').check();
   // Give the inspection run time to show real motion on software GPUs. Its

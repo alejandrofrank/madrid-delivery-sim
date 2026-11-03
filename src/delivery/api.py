@@ -10,9 +10,10 @@ from typing import Any, Literal
 from uuid import UUID
 
 from fastapi import BackgroundTasks, FastAPI, HTTPException, Request
-from fastapi.responses import FileResponse, JSONResponse, RedirectResponse
+from fastapi.responses import FileResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
+from starlette.middleware.gzip import GZipMiddleware
 from starlette.responses import Response
 from starlette.types import Receive, Scope, Send
 
@@ -28,7 +29,9 @@ from delivery.lab import create_lab, export_slice, lab_snapshot
 from delivery.live_jobs import schedule
 from delivery.mcp_server import create_mcp_server
 from delivery.protocol_api import agent_directory, agent_names
+from delivery.recorded_api import create_recorded_router
 from delivery.simulation import Simulation, create_run, initialize, snapshot
+from delivery.site_pages import create_site_router
 from delivery.store_api import router as store_router
 from delivery.store_layout import StoreConfig
 from delivery.supply_api import router as supply_router
@@ -146,12 +149,6 @@ def inspect_city_agent(run: UUID, agent_id: str) -> dict[str, Any]:
     return result
 
 
-@app.get("/delivery-lab")
-def delivery_page() -> RedirectResponse:
-    # Grid-lab run IDs belong to a different engine; do not forward them to Madrid.
-    return RedirectResponse("/", status_code=308)
-
-
 def delivery_background(run: str, seconds: int) -> None:
     from delivery.delivery_flow import export_delivery
 
@@ -186,11 +183,6 @@ def delivery_evidence(run: UUID) -> FileResponse:
     if not path.is_file():
         raise HTTPException(404, "Evidence is available after the scenario completes")
     return FileResponse(path, media_type="application/json", filename=path.name)
-
-
-@app.get("/lab")
-def lab_page() -> FileResponse:
-    return FileResponse("web/lab.html")
 
 
 @app.get("/api/lab/catalogues")
@@ -376,16 +368,14 @@ def decision_trace(
     return {"events": events, "decisions": decisions}
 
 
-@app.get("/")
-def index() -> FileResponse:
-    return FileResponse("web/index.html")
-
-
 @app.get("/favicon.ico", include_in_schema=False)
 def favicon() -> None:
     raise HTTPException(status_code=404)
 
 
+app.add_middleware(GZipMiddleware, minimum_size=1000)
+app.include_router(create_site_router())
+app.include_router(create_recorded_router())
 app.include_router(supply_router)
 app.include_router(chaos_router)
 app.include_router(store_router)

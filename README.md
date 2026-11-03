@@ -1,11 +1,19 @@
 # madrid-delivery-sim
 
-Queue-driven delivery agents on Madrid streets, with Google ADK, real A2A endpoints, distributed traces, and auditable BigQuery run evidence.
+Nine agent roles coordinate a simulated Madrid grocery network: stock checks, picking, dispatch and delivery, with inspectable decisions when plans change.
 
-**[Meet the agents — interactive anatomy](http://localhost:8010/architecture)** ·
+**[How it works](http://localhost:8010/)** · **[Watch it live](http://localhost:8010/watch)** · **[Meet the agents](http://localhost:8010/agents)**
+
+[![Recorded Madrid network with moving couriers and the agent handoff](docs/media/product-story.png)](http://localhost:8010/)
+
+The landing plays a recorded shift immediately, without an API or model call.
+Watch opens the city replay; choose **Watch store replay** for the shelf-to-doorstep journey.
+All operator tools remain under **For engineers**. Select **Start your own run** to open the local controls.
+
+**[Meet the agents — interactive anatomy](http://localhost:8010/agents)** ·
 [Repository guide](docs/AGENT-ANATOMY.md)
 
-[![Shared 3D delivery scene with purpose-colored robots and interactive anatomy](docs/media/agent-anatomy.png)](http://localhost:8010/architecture)
+[![Shared 3D delivery scene with purpose-colored robots and interactive anatomy](docs/media/agent-anatomy.png)](http://localhost:8010/agents)
 
 Start with one order moving through the team, then click a robot. A short,
 skippable first-visit tour explains its job, tools, rules and recorded tests.
@@ -19,7 +27,7 @@ shown.
 
 Synthetic households order meals on Madrid's real street graph. Kitchens source
 ingredients, couriers deliver, and disruptions force the team to reconsider its
-plans. Open the **Architecture** workspace, follow the team journey, then inspect a robot.
+plans. Open **Meet the agents**, follow the team journey, then inspect a robot.
 
 | Agent | Its job |
 | --- | --- |
@@ -39,7 +47,7 @@ memory leaking across orders or roles. ADK proposes through granular tools;
 scoped SQL, durable queues and authenticated A2A boundaries enforce the contract.
 Routine policies can run without a model.
 
-**1,057 Python tests in the suite**, plus all **99 anatomy panels**
+**1,109 Python tests in the suite**, plus all **99 anatomy panels**
 checked in the browser ([verification workflow](https://github.com/alejandrofrank/madrid-delivery-sim/actions/workflows/ci.yml));
 **pass^5 = 1.000 across 72 held-out cases** (360 attempts), with an all-pass
 bootstrap interval of [1, 1] in the [release receipt](docs/evidence/heldout-release.json).
@@ -49,21 +57,18 @@ cohorts in **1,148–1,765 simulated seconds**, with zero lost orders. Recovery 
 delivery completion. These are dated offline checks, not live-model quality,
 production latency or real courier prices; all-pass fixtures do not prove certainty.
 
-![Live agent operations](docs/media/ui-demo.gif)
+![The recorded landing and three-step order flow](docs/media/product-flow.gif)
 
-The redesigned console spans six workspaces. Run `make setup` and open
-**[localhost:8010](http://localhost:8010/)**. This is the single development instance;
-the consolidated instance runs from the main checkout under the existing Compose
-project name. Keep one instance when switching a development checkout.
-The older 8021 UI preview has been stopped. Its UI changes were already merged
-into `main`; its files and data were preserved. [Before/after, verification and limits](docs/UI-REDESIGN.md).
-
-The GIF records actual local simulation activity. All default runs are free of
-cloud and model charges.
+Run `make setup` and open **[localhost:8010](http://localhost:8010/)**.
+Use this single development instance when switching checkouts; the retired 8021
+preview stays stopped. The GIF records the actual browser replay. Default
+examples make no paid model calls. [Shared components, routes, replay behavior
+and performance checks](docs/PRODUCT-UI.md).
 
 ## Shelf to doorstep
 
-Open **Operations → Start store demo** on [localhost:8010](http://localhost:8010/).
+Open **Watch it live → Watch store replay** on [localhost:8010/watch](http://localhost:8010/watch).
+For an editable local session, choose **Start your own run → Start store demo**.
 A real seeded basket is reserved, picked from shelves, packed and carried to the
 dock. The same order then travels across Madrid with its assigned courier.
 **Picker breakdown** interrupts the route; another picker must reach the stranded
@@ -101,7 +106,7 @@ Terraform). The replay was deployed to Cloud Run, checked over HTTP and in a
 browser, then removed. The dedicated project is currently off; the verified URL
 and restart/stop commands are in the [deployment runbook](docs/production/DEPLOYMENT.md).
 The public service plays sealed seeded shifts, accepts only reads, and needs no
-database or model calls. The existing UI and local instance remain unchanged.
+database or model calls. The same navigation and recorded defaults are available locally.
 
 ```mermaid
 flowchart LR
@@ -170,7 +175,7 @@ flowchart LR
 
 Start at the [Google stack demonstration guide](docs/GOOGLE-STACK.md), inspect
 [agent traces](http://localhost:8010/agent-traces), or browse the
-[architecture site](http://localhost:8010/architecture). Every default demo and
+[architecture site](http://localhost:8010/agents). Every default demo and
 CI check runs without paid model calls. [Public-readiness review](docs/PUBLIC-READINESS.md).
 
 ## Agent protocols
@@ -350,11 +355,11 @@ regression comparisons report `baseline_missing`; that is not a quality pass.
 ## Agent architecture and GCP client documentation
 
 All seven local workspaces share navigation, visual tokens, controls and mobile
-behaviour. The [shared design contract](docs/DESIGN-SYSTEM.md) records the design
+behaviour. The [shared design contract](docs/PRODUCT-UI.md) records the design
 sources, diagram conventions and content-versioning workflow for future changes.
 
-Open the local [Architecture website](http://localhost:8010/architecture) for a
-searchable, twenty-four-chapter engineering reference. It includes an interactive
+Open the local [Architecture website](http://localhost:8010/agents) for a
+searchable engineering reference. It includes an interactive
 component explorer, rendered diagrams, architecture decision records, the six
 capability evidence map and an allowlisted local code reader. Diagrams and search
 work without external services. The existing `/docs` remains the API reference.

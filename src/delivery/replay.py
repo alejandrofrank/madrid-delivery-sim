@@ -10,9 +10,10 @@ from pathlib import Path
 from typing import Any
 
 from fastapi import FastAPI, HTTPException, Request
-from fastapi.responses import FileResponse, JSONResponse
+from fastapi.responses import JSONResponse
 from fastapi.routing import APIRoute
 from fastapi.staticfiles import StaticFiles
+from starlette.middleware.gzip import GZipMiddleware
 
 
 class Recordings:
@@ -21,6 +22,7 @@ class Recordings:
         if manifest.get("schema_version") != 1 or not manifest.get("recordings"):
             raise ValueError("A reviewed replay manifest is required")
         self.shifts: dict[str, dict[str, Any]] = {}
+        self.sources: dict[str, dict[str, str]] = {}
         for entry in manifest["recordings"]:
             if not re.fullmatch(r"[a-z0-9-]+\.json\.gz", entry["file"]):
                 raise ValueError("Invalid recording filename")
@@ -44,6 +46,7 @@ class Recordings:
                     or identifier in self.shifts):
                 raise ValueError("Invalid recording frame sequence")
             self.shifts[identifier] = shift
+            self.sources[identifier] = {"file": entry["file"], "sha256": entry["sha256"]}
 
     def shift(self, run: str | None) -> dict[str, Any]:
         if run is None:
@@ -70,6 +73,8 @@ def create_replay_app(
     app = FastAPI(title="madrid-delivery-sim replay", docs_url=None, redoc_url=None,
                   openapi_url=None)
 
+    app.add_middleware(GZipMiddleware, minimum_size=1000)
+
     @app.middleware("http")
     async def read_only(request: Request, call_next: Any) -> Any:
         if request.method not in {"GET", "HEAD"}:
@@ -90,9 +95,13 @@ def create_replay_app(
         return {"mode": "replay", "read_only": True, "playback_seconds": 60,
                 "model_calls": False}
 
-    @app.get("/")
-    def index() -> FileResponse:
-        return FileResponse(web / "index.html")
+    from delivery.public_reference import create_public_reference
+    from delivery.recorded_api import create_recorded_router
+    from delivery.site_pages import create_site_router
+
+    app.include_router(create_site_router(web))
+    app.include_router(create_public_reference(web / "data/reference"))
+    app.include_router(create_recorded_router(lambda: recordings))
 
     @app.get("/api/world")
     def world() -> Any:

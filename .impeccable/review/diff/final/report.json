@@ -1,1187 +1,402 @@
 {
   "tool": "comp-diff",
   "version": 1,
-  "createdAt": "2026-10-29T16:54:10.949Z",
-  "label": "final",
-  "comp": ".impeccable/mocks/comp-agents-map.png",
-  "build": "docs/media/comparison/madrid-viewport.png",
+  "createdAt": "2026-11-03T01:03:20.948Z",
+  "label": "product-comp",
+  "comp": ".impeccable/mocks/product-map.png",
+  "build": ".impeccable/review/product-comp.png",
   "spec": ".impeccable/build/spec.json",
-  "compSize": "1536x1024",
-  "buildSize": "1536x1024",
+  "compSize": "1487x1058",
+  "buildSize": "1487x1058",
   "align": "top",
-  "overall": 0.578,
-  "verdict": "contradicted",
+  "overall": 0.6592,
+  "verdict": "drift",
   "scores": {
-    "overall": 0.578,
-    "structure": 0.6326,
-    "color": 0.6826,
-    "colorIntersection": 0.3954,
-    "paletteMatch": 0.8372,
-    "detail": 0.4199,
-    "detailRaw": 0.4303,
+    "overall": 0.6592,
+    "structure": 0.5431,
+    "color": 0.7827,
+    "colorIntersection": 0.6207,
+    "paletteMatch": 0.8699,
+    "detail": 0.5264,
+    "detailRaw": 0.5369,
     "detailAdded": 0.0208,
-    "bands": 0.54
+    "bands": 0.9455
   },
   "palette": {
     "comp": [
       {
-        "hex": "#091919",
-        "coverage": 0.714
+        "hex": "#f7f2e9",
+        "coverage": 0.8423
       },
       {
-        "hex": "#182535",
-        "coverage": 0.223
+        "hex": "#e2eac1",
+        "coverage": 0.0684
       },
       {
-        "hex": "#2c4049",
-        "coverage": 0.0433
+        "hex": "#d8cfc5",
+        "coverage": 0.0382
       },
       {
-        "hex": "#8e9eb2",
-        "coverage": 0.0068
+        "hex": "#0f1311",
+        "coverage": 0.024
       },
       {
-        "hex": "#566676",
-        "coverage": 0.0066
+        "hex": "#088440",
+        "coverage": 0.0183
       },
       {
-        "hex": "#214067",
-        "coverage": 0.0063
+        "hex": "#0e2b1d",
+        "coverage": 0.0089
       }
     ],
     "build": [
       {
-        "hex": "#181828",
-        "coverage": 0.5224
+        "hex": "#f2f0e5",
+        "coverage": 0.9491
       },
       {
-        "hex": "#0f1f1f",
-        "coverage": 0.4598
+        "hex": "#17271c",
+        "coverage": 0.0251
       },
       {
-        "hex": "#32424c",
+        "hex": "#087838",
         "coverage": 0.0126
       },
       {
-        "hex": "#183165",
-        "coverage": 0.002
+        "hex": "#cbc6c4",
+        "coverage": 0.0057
       },
       {
-        "hex": "#402828",
-        "coverage": 0.0018
+        "hex": "#6b7b72",
+        "coverage": 0.0043
       },
       {
-        "hex": "#e8e8f8",
-        "coverage": 0.0015
+        "hex": "#3c4f4c",
+        "coverage": 0.0032
       }
     ]
   },
   "regions": [
     {
-      "id": "navigation",
+      "id": "header",
       "x": 0,
       "y": 0,
       "w": 1,
-      "h": 0.0439,
+      "h": 0.0662,
       "kind": "chrome",
       "score": {
-        "overall": 0.8005,
-        "structure": 0.923,
-        "color": 0.9095,
-        "colorIntersection": 0.8372,
-        "paletteMatch": 0.9484,
-        "detail": 0.4004,
-        "detailRaw": 0.4161,
-        "detailAdded": 0.0313,
-        "bands": 1
-      },
-      "verdict": "match",
-      "inkBox": {
-        "comp": {
-          "x": 32,
-          "y": 16,
-          "w": 1472,
-          "h": 29
-        },
-        "build": {
-          "x": 26,
-          "y": 17,
-          "w": 1485,
-          "h": 19
-        }
-      }
-    },
-    {
-      "id": "page-title",
-      "x": 0.0189,
-      "y": 0.0605,
-      "w": 0.181,
-      "h": 0.0332,
-      "kind": "text",
-      "score": {
-        "overall": 0.5267,
-        "structure": 0.3943,
-        "color": 0.6953,
-        "colorIntersection": 0.5209,
-        "paletteMatch": 0.7892,
-        "detail": 0.5493,
-        "detailRaw": 0.5701,
+        "overall": 0.669,
+        "structure": 0.8438,
+        "color": 0.8422,
+        "colorIntersection": 0.7157,
+        "paletteMatch": 0.9103,
+        "detail": 0.5023,
+        "detailRaw": 0.5231,
         "detailAdded": 0.0417,
-        "bands": 0.7333
+        "bands": 0.25
       },
       "verdict": "drift",
       "inkBox": {
         "comp": {
-          "x": 3,
-          "y": 3,
-          "w": 268,
-          "h": 30
-        },
-        "build": {
-          "x": 0,
-          "y": 9,
-          "w": 278,
-          "h": 23
-        }
-      }
-    },
-    {
-      "id": "session-label",
-      "x": 0.2083,
-      "y": 0.0645,
-      "w": 0.1634,
-      "h": 0.0244,
-      "kind": "text",
-      "score": {
-        "overall": 0.6096,
-        "structure": 0.7355,
-        "color": 0.8392,
-        "colorIntersection": 0.7656,
-        "paletteMatch": 0.8789,
-        "detail": 0.2132,
-        "detailRaw": 0.3382,
-        "detailAdded": 0.25,
-        "bands": 0
-      },
-      "verdict": "drift",
-      "inkBox": {
-        "comp": {
-          "x": 0,
-          "y": 7,
-          "w": 191,
-          "h": 14
-        },
-        "build": {
-          "x": 0,
-          "y": 13,
-          "w": 217,
-          "h": 11
-        }
-      }
-    },
-    {
-      "id": "start-controls",
-      "x": 0.7799,
-      "y": 0.0596,
-      "w": 0.2116,
-      "h": 0.0342,
-      "kind": "control",
-      "score": {
-        "overall": 0.3747,
-        "structure": 0.3966,
-        "color": 0.3821,
-        "colorIntersection": 0.2945,
-        "paletteMatch": 0.4293,
-        "detail": 0.3124,
-        "detailRaw": 0.3906,
-        "detailAdded": 0.1563,
-        "bands": 0.4333
-      },
-      "verdict": "contradicted",
-      "inkBox": {
-        "comp": {
-          "x": 2,
-          "y": 0,
-          "w": 298,
-          "h": 35
-        },
-        "build": {
-          "x": 0,
-          "y": 15,
-          "w": 313,
-          "h": 9
-        }
-      }
-    },
-    {
-      "id": "orders-kpi",
-      "x": 0.0078,
-      "y": 0.1055,
-      "w": 0.2539,
-      "h": 0.0781,
-      "kind": "chrome",
-      "score": {
-        "overall": 0.5777,
-        "structure": 0.7078,
-        "color": 0.7549,
-        "colorIntersection": 0.4932,
-        "paletteMatch": 0.8958,
-        "detail": 0.1704,
-        "detailRaw": 0.3632,
-        "detailAdded": 0.3854,
-        "bands": 0.6571
-      },
-      "verdict": "drift",
-      "inkBox": {
-        "comp": {
-          "x": 27,
-          "y": 15,
-          "w": 335,
-          "h": 55
-        },
-        "build": {
-          "x": 12,
-          "y": 6,
-          "w": 249,
-          "h": 74
-        }
-      }
-    },
-    {
-      "id": "ontime-kpi",
-      "x": 0.2624,
-      "y": 0.1055,
-      "w": 0.2363,
-      "h": 0.0781,
-      "kind": "chrome",
-      "score": {
-        "overall": 0.5518,
-        "structure": 0.7685,
-        "color": 0.7715,
-        "colorIntersection": 0.5115,
-        "paletteMatch": 0.9114,
-        "detail": 0,
-        "detailRaw": 0.0735,
-        "detailAdded": 0.25,
-        "bands": 0.6
-      },
-      "verdict": "missing",
-      "inkBox": {
-        "comp": {
-          "x": 27,
-          "y": 16,
-          "w": 307,
-          "h": 54
-        },
-        "build": {
-          "x": 11,
-          "y": 56,
-          "w": 60,
-          "h": 24
-        }
-      }
-    },
-    {
-      "id": "cost-kpi",
-      "x": 0.4993,
-      "y": 0.1055,
-      "w": 0.2376,
-      "h": 0.0781,
-      "kind": "chrome",
-      "score": {
-        "overall": 0.5668,
-        "structure": 0.7495,
-        "color": 0.7621,
-        "colorIntersection": 0.5187,
-        "paletteMatch": 0.8931,
-        "detail": 0,
-        "detailRaw": 0.1365,
-        "detailAdded": 0.3021,
-        "bands": 0.76
-      },
-      "verdict": "missing",
-      "inkBox": {
-        "comp": {
-          "x": 32,
-          "y": 15,
-          "w": 310,
-          "h": 55
-        },
-        "build": {
-          "x": 18,
-          "y": 56,
-          "w": 77,
-          "h": 24
-        }
-      }
-    },
-    {
-      "id": "latency-kpi",
-      "x": 0.7376,
-      "y": 0.1055,
-      "w": 0.2546,
-      "h": 0.0781,
-      "kind": "chrome",
-      "score": {
-        "overall": 0.6073,
-        "structure": 0.7606,
-        "color": 0.7721,
-        "colorIntersection": 0.5443,
-        "paletteMatch": 0.8948,
-        "detail": 0.0723,
-        "detailRaw": 0.1816,
-        "detailAdded": 0.2188,
-        "bands": 0.8667
-      },
-      "verdict": "drift",
-      "inkBox": {
-        "comp": {
-          "x": 28,
-          "y": 15,
-          "w": 333,
-          "h": 55
-        },
-        "build": {
-          "x": 23,
-          "y": 56,
-          "w": 85,
-          "h": 24
-        }
-      }
-    },
-    {
-      "id": "agent-controls",
-      "x": 0.0078,
-      "y": 0.1924,
-      "w": 0.4466,
-      "h": 0.0479,
-      "kind": "control",
-      "score": {
-        "overall": 0.6456,
-        "structure": 0.8058,
-        "color": 0.7275,
-        "colorIntersection": 0.2981,
-        "paletteMatch": 0.9588,
-        "detail": 0.1416,
-        "detailRaw": 0.2353,
-        "detailAdded": 0.1875,
-        "bands": 0
-      },
-      "verdict": "drift",
-      "inkBox": {
-        "comp": {
-          "x": 17,
-          "y": 16,
-          "w": 542,
-          "h": 18
-        },
-        "build": {
-          "x": 30,
-          "y": 0,
-          "w": 544,
-          "h": 27
-        }
-      }
-    },
-    {
-      "id": "agent-columns",
-      "x": 0.0182,
-      "y": 0.2432,
-      "w": 0.4258,
-      "h": 0.0332,
-      "kind": "text",
-      "score": {
-        "overall": 0.6998,
-        "structure": 0.9293,
-        "color": 0.7885,
-        "colorIntersection": 0.5238,
-        "paletteMatch": 0.931,
-        "detail": 0,
-        "detailRaw": 0.083,
-        "detailAdded": 0.2917,
-        "bands": 0.38
-      },
-      "verdict": "missing",
-      "inkBox": {
-        "comp": {
-          "x": 0,
-          "y": 7,
-          "w": 636,
-          "h": 24
-        },
-        "build": {
-          "x": 0,
-          "y": 0,
-          "w": 652,
-          "h": 9
-        }
-      }
-    },
-    {
-      "id": "agent-row-1",
-      "x": 0.0085,
-      "y": 0.2793,
-      "w": 0.4453,
-      "h": 0.0508,
-      "kind": "control",
-      "score": {
-        "overall": 0.4861,
-        "structure": 0.7678,
-        "color": 0.354,
-        "colorIntersection": 0.0423,
-        "paletteMatch": 0.5219,
-        "detail": 0.0835,
-        "detailRaw": 0.1356,
-        "detailAdded": 0.1042,
-        "bands": 0.4
-      },
-      "verdict": "missing",
-      "inkBox": {
-        "comp": {
-          "x": 0,
-          "y": 0,
-          "w": 684,
-          "h": 49
-        },
-        "build": {
-          "x": 24,
-          "y": 0,
-          "w": 477,
-          "h": 49
-        }
-      }
-    },
-    {
-      "id": "agent-row-2",
-      "x": 0.0085,
-      "y": 0.3301,
-      "w": 0.4453,
-      "h": 0.0508,
-      "kind": "control",
-      "score": {
-        "overall": 0.5809,
-        "structure": 0.7779,
-        "color": 0.6291,
-        "colorIntersection": 0.0858,
-        "paletteMatch": 0.9216,
-        "detail": 0.0534,
-        "detailRaw": 0.2566,
-        "detailAdded": 0.4063,
-        "bands": 0.6667
-      },
-      "verdict": "drift",
-      "inkBox": {
-        "comp": {
-          "x": 9,
-          "y": 4,
-          "w": 659,
-          "h": 35
-        },
-        "build": {
-          "x": 24,
-          "y": 3,
-          "w": 622,
-          "h": 36
-        }
-      }
-    },
-    {
-      "id": "agent-row-3",
-      "x": 0.0085,
-      "y": 0.3809,
-      "w": 0.4453,
-      "h": 0.0508,
-      "kind": "control",
-      "score": {
-        "overall": 0.5828,
-        "structure": 0.7927,
-        "color": 0.6072,
-        "colorIntersection": 0.0789,
-        "paletteMatch": 0.8917,
-        "detail": 0.0677,
-        "detailRaw": 0.1666,
-        "detailAdded": 0.1979,
-        "bands": 0.4
-      },
-      "verdict": "drift",
-      "inkBox": {
-        "comp": {
-          "x": 9,
-          "y": 3,
-          "w": 659,
-          "h": 35
-        },
-        "build": {
-          "x": 24,
-          "y": 6,
-          "w": 622,
-          "h": 46
-        }
-      }
-    },
-    {
-      "id": "agent-row-4",
-      "x": 0.0085,
-      "y": 0.4316,
-      "w": 0.4453,
-      "h": 0.0508,
-      "kind": "control",
-      "score": {
-        "overall": 0.6075,
-        "structure": 0.8447,
-        "color": 0.6131,
-        "colorIntersection": 0.0667,
-        "paletteMatch": 0.9073,
-        "detail": 0.0641,
-        "detailRaw": 0.137,
-        "detailAdded": 0.1458,
-        "bands": 0.4
-      },
-      "verdict": "missing",
-      "inkBox": {
-        "comp": {
-          "x": 9,
-          "y": 4,
-          "w": 659,
-          "h": 34
-        },
-        "build": {
-          "x": 25,
-          "y": 0,
-          "w": 621,
-          "h": 52
-        }
-      }
-    },
-    {
-      "id": "agent-row-5",
-      "x": 0.0085,
-      "y": 0.4824,
-      "w": 0.4453,
-      "h": 0.0508,
-      "kind": "control",
-      "score": {
-        "overall": 0.5897,
-        "structure": 0.8209,
-        "color": 0.5812,
-        "colorIntersection": 0.0689,
-        "paletteMatch": 0.857,
-        "detail": 0.0843,
-        "detailRaw": 0.152,
-        "detailAdded": 0.1354,
-        "bands": 0.4
-      },
-      "verdict": "drift",
-      "inkBox": {
-        "comp": {
-          "x": 9,
-          "y": 5,
-          "w": 659,
-          "h": 34
-        },
-        "build": {
-          "x": 25,
-          "y": 0,
-          "w": 621,
-          "h": 52
-        }
-      }
-    },
-    {
-      "id": "agent-row-6",
-      "x": 0.0085,
-      "y": 0.5332,
-      "w": 0.4453,
-      "h": 0.0508,
-      "kind": "control",
-      "score": {
-        "overall": 0.5915,
-        "structure": 0.8151,
-        "color": 0.6058,
-        "colorIntersection": 0.0557,
-        "paletteMatch": 0.902,
-        "detail": 0.0635,
-        "detailRaw": 0.126,
-        "detailAdded": 0.125,
-        "bands": 0.4
-      },
-      "verdict": "missing",
-      "inkBox": {
-        "comp": {
-          "x": 9,
-          "y": 6,
-          "w": 659,
-          "h": 35
-        },
-        "build": {
-          "x": 25,
-          "y": 0,
-          "w": 621,
-          "h": 52
-        }
-      }
-    },
-    {
-      "id": "map",
-      "x": 0.4609,
-      "y": 0.1924,
-      "w": 0.5313,
-      "h": 0.4482,
-      "kind": "chrome",
-      "score": {
-        "overall": 0.4244,
-        "structure": 0.65,
-        "color": 0.5517,
-        "colorIntersection": 0.3525,
-        "paletteMatch": 0.659,
-        "detail": 0.2358,
-        "detailRaw": 0.241,
-        "detailAdded": 0.0104,
-        "bands": 0
-      },
-      "verdict": "drift",
-      "inkBox": {
-        "comp": {
-          "x": 0,
-          "y": 4,
-          "w": 808,
-          "h": 443
-        },
-        "build": {
-          "x": 0,
-          "y": 0,
-          "w": 798,
-          "h": 459
-        }
-      }
-    },
-    {
-      "id": "map-controls",
-      "x": 0.9609,
-      "y": 0.2002,
-      "w": 0.0273,
-      "h": 0.1035,
-      "kind": "control",
-      "score": {
-        "overall": 0.5857,
-        "structure": 0.7181,
-        "color": 0.7059,
-        "colorIntersection": 0.4762,
-        "paletteMatch": 0.8295,
-        "detail": 0.0776,
-        "detailRaw": 0.0932,
-        "detailAdded": 0.0313,
-        "bands": 0.4
-      },
-      "verdict": "missing",
-      "inkBox": {
-        "comp": {
-          "x": 0,
-          "y": 0,
-          "w": 41,
-          "h": 106
-        },
-        "build": {
-          "x": 0,
-          "y": 84,
-          "w": 13,
-          "h": 9
-        }
-      }
-    },
-    {
-      "id": "map-legend",
-      "x": 0.8802,
-      "y": 0.4912,
-      "w": 0.1048,
-      "h": 0.1357,
-      "kind": "chrome",
-      "score": {
-        "overall": 0.367,
-        "structure": 0.59,
-        "color": 0.4017,
-        "colorIntersection": 0.015,
-        "paletteMatch": 0.6099,
-        "detail": 0.0001,
-        "detailRaw": 0.0001,
-        "detailAdded": 0,
-        "bands": 0.4
-      },
-      "verdict": "missing",
-      "inkBox": {
-        "comp": {
-          "x": 0,
-          "y": 6,
-          "w": 137,
-          "h": 127
-        },
-        "build": null
-      }
-    },
-    {
-      "id": "map-selected",
-      "x": 0.7051,
-      "y": 0.3623,
-      "w": 0.0794,
-      "h": 0.042,
-      "kind": "control",
-      "score": {
-        "overall": 0.3113,
-        "structure": 0.3202,
-        "color": 0.3943,
-        "colorIntersection": 0.2474,
-        "paletteMatch": 0.4734,
-        "detail": 0.1463,
-        "detailRaw": 0.2088,
-        "detailAdded": 0.125,
-        "bands": 0.4
-      },
-      "verdict": "contradicted",
-      "inkBox": {
-        "comp": {
-          "x": 0,
-          "y": 0,
-          "w": 122,
-          "h": 43
-        },
-        "build": null
-      }
-    },
-    {
-      "id": "evidence",
-      "x": 0.0078,
-      "y": 0.6494,
-      "w": 0.9844,
-      "h": 0.0986,
-      "kind": "chrome",
-      "score": {
-        "overall": 0.5907,
-        "structure": 0.8697,
-        "color": 0.6833,
-        "colorIntersection": 0.176,
-        "paletteMatch": 0.9565,
-        "detail": 0.2219,
-        "detailRaw": 0.3157,
-        "detailAdded": 0.1875,
-        "bands": 0.4
-      },
-      "verdict": "drift",
-      "inkBox": {
-        "comp": {
-          "x": 16,
-          "y": 13,
-          "w": 1479,
-          "h": 88
-        },
-        "build": {
-          "x": 26,
-          "y": 0,
-          "w": 1461,
-          "h": 77
-        }
-      }
-    },
-    {
-      "id": "order-controls",
-      "x": 0.0078,
-      "y": 0.7568,
-      "w": 0.9844,
-      "h": 0.0449,
-      "kind": "control",
-      "score": {
-        "overall": 0.6523,
-        "structure": 0.8868,
-        "color": 0.6421,
-        "colorIntersection": 0.189,
-        "paletteMatch": 0.8861,
-        "detail": 0.1425,
-        "detailRaw": 0.2779,
-        "detailAdded": 0.2708,
-        "bands": 0
-      },
-      "verdict": "drift",
-      "inkBox": {
-        "comp": {
-          "x": 17,
-          "y": 15,
-          "w": 1469,
-          "h": 17
-        },
-        "build": {
-          "x": 25,
+          "x": 40,
           "y": 10,
-          "w": 1453,
-          "h": 13
-        }
-      }
-    },
-    {
-      "id": "order-columns",
-      "x": 0.0182,
-      "y": 0.8066,
-      "w": 0.9499,
-      "h": 0.0225,
-      "kind": "text",
-      "score": {
-        "overall": 0.6211,
-        "structure": 0.8805,
-        "color": 0.6812,
-        "colorIntersection": 0.2274,
-        "paletteMatch": 0.9256,
-        "detail": 0.0703,
-        "detailRaw": 0.1068,
-        "detailAdded": 0.0729,
-        "bands": 0
-      },
-      "verdict": "missing",
-      "inkBox": {
-        "comp": {
-          "x": 2,
-          "y": 5,
-          "w": 1362,
-          "h": 12
+          "w": 1423,
+          "h": 47
         },
         "build": {
-          "x": 32,
-          "y": 10,
-          "w": 1427,
-          "h": 13
-        }
-      }
-    },
-    {
-      "id": "order-row-1",
-      "x": 0.0182,
-      "y": 0.8311,
-      "w": 0.9609,
-      "h": 0.0234,
-      "kind": "control",
-      "score": {
-        "overall": 0.483,
-        "structure": 0.7836,
-        "color": 0.3573,
-        "colorIntersection": 0.0641,
-        "paletteMatch": 0.5151,
-        "detail": 0.0268,
-        "detailRaw": 0.0737,
-        "detailAdded": 0.0938,
-        "bands": 0
-      },
-      "verdict": "missing",
-      "inkBox": {
-        "comp": {
-          "x": 4,
-          "y": 1,
-          "w": 1461,
-          "h": 20
-        },
-        "build": {
-          "x": 9,
-          "y": 0,
-          "w": 1462,
-          "h": 21
-        }
-      }
-    },
-    {
-      "id": "order-row-2",
-      "x": 0.0182,
-      "y": 0.8545,
-      "w": 0.9609,
-      "h": 0.0234,
-      "kind": "control",
-      "score": {
-        "overall": 0.7041,
-        "structure": 0.8429,
-        "color": 0.8746,
-        "colorIntersection": 0.7756,
-        "paletteMatch": 0.9279,
-        "detail": 0.0932,
-        "detailRaw": 0.1296,
-        "detailAdded": 0.0729,
-        "bands": 0
-      },
-      "verdict": "missing",
-      "inkBox": {
-        "comp": {
-          "x": 4,
-          "y": 1,
-          "w": 1461,
-          "h": 20
-        },
-        "build": {
-          "x": 14,
-          "y": 18,
-          "w": 1266,
-          "h": 6
-        }
-      }
-    },
-    {
-      "id": "order-row-3",
-      "x": 0.0182,
-      "y": 0.8779,
-      "w": 0.9609,
-      "h": 0.0234,
-      "kind": "control",
-      "score": {
-        "overall": 0.6973,
-        "structure": 0.8211,
-        "color": 0.8671,
-        "colorIntersection": 0.7745,
-        "paletteMatch": 0.917,
-        "detail": 0.1215,
-        "detailRaw": 0.1371,
-        "detailAdded": 0.0313,
-        "bands": 0
-      },
-      "verdict": "missing",
-      "inkBox": {
-        "comp": {
-          "x": 5,
-          "y": 0,
-          "w": 1460,
-          "h": 21
-        },
-        "build": {
-          "x": 14,
-          "y": 0,
-          "w": 1266,
-          "h": 5
-        }
-      }
-    },
-    {
-      "id": "order-row-4",
-      "x": 0.0182,
-      "y": 0.9014,
-      "w": 0.9609,
-      "h": 0.0234,
-      "kind": "control",
-      "score": {
-        "overall": 0.4856,
-        "structure": 0.8222,
-        "color": 0.3302,
-        "colorIntersection": 0.0577,
-        "paletteMatch": 0.477,
-        "detail": 0,
-        "detailRaw": 0,
-        "detailAdded": 0,
-        "bands": 0.4
-      },
-      "verdict": "missing",
-      "inkBox": {
-        "comp": {
-          "x": 5,
-          "y": 1,
-          "w": 1460,
-          "h": 20
-        },
-        "build": null
-      }
-    },
-    {
-      "id": "order-row-5",
-      "x": 0.0182,
-      "y": 0.9248,
-      "w": 0.9609,
-      "h": 0.0234,
-      "kind": "control",
-      "score": {
-        "overall": 0.5402,
-        "structure": 0.8168,
-        "color": 0.3342,
-        "colorIntersection": 0.0364,
-        "paletteMatch": 0.4945,
-        "detail": 0.2782,
-        "detailRaw": 0.3095,
-        "detailAdded": 0.0625,
-        "bands": 1
-      },
-      "verdict": "contradicted",
-      "inkBox": {
-        "comp": {
-          "x": 5,
-          "y": 1,
-          "w": 1460,
-          "h": 21
-        },
-        "build": {
-          "x": 516,
-          "y": 5,
-          "w": 448,
-          "h": 13
-        }
-      }
-    },
-    {
-      "id": "order-row-6",
-      "x": 0.0182,
-      "y": 0.9482,
-      "w": 0.9609,
-      "h": 0.0234,
-      "kind": "control",
-      "score": {
-        "overall": 0.4803,
-        "structure": 0.8395,
-        "color": 0.2928,
-        "colorIntersection": 0.0146,
-        "paletteMatch": 0.4427,
-        "detail": 0,
-        "detailRaw": 0,
-        "detailAdded": 0,
-        "bands": 0.4
-      },
-      "verdict": "missing",
-      "inkBox": {
-        "comp": {
-          "x": 5,
-          "y": 2,
-          "w": 1460,
-          "h": 20
-        },
-        "build": null
-      }
-    },
-    {
-      "id": "titlebar",
-      "x": 0.0078,
-      "y": 0.0439,
-      "w": 0.9844,
-      "h": 0.0557,
-      "kind": "chrome",
-      "score": {
-        "overall": 0.6302,
-        "structure": 0.8313,
-        "color": 0.8606,
-        "colorIntersection": 0.8036,
-        "paletteMatch": 0.8913,
-        "detail": 0.3166,
-        "detailRaw": 0.4468,
-        "detailAdded": 0.2604,
-        "bands": 0.3
-      },
-      "verdict": "drift",
-      "inkBox": {
-        "comp": {
-          "x": 20,
-          "y": 0,
-          "w": 1466,
-          "h": 51
-        },
-        "build": {
-          "x": 14,
-          "y": 5,
-          "w": 1485,
+          "x": 46,
+          "y": 13,
+          "w": 1397,
           "h": 44
         }
       }
     },
     {
-      "id": "agent-table",
-      "x": 0.0078,
-      "y": 0.1924,
-      "w": 0.4466,
-      "h": 0.4482,
-      "kind": "chrome",
+      "id": "headline",
+      "x": 0.0336,
+      "y": 0.1134,
+      "w": 0.3228,
+      "h": 0.1607,
+      "kind": "text",
       "score": {
-        "overall": 0.5332,
-        "structure": 0.5266,
-        "color": 0.6453,
-        "colorIntersection": 0.1413,
-        "paletteMatch": 0.9167,
-        "detail": 0.3527,
-        "detailRaw": 0.4308,
+        "overall": 0.5224,
+        "structure": 0.344,
+        "color": 0.7756,
+        "colorIntersection": 0.5724,
+        "paletteMatch": 0.8851,
+        "detail": 0.4745,
+        "detailRaw": 0.5526,
         "detailAdded": 0.1563,
-        "bands": 0.6625
+        "bands": 0.8535
       },
       "verdict": "drift",
       "inkBox": {
         "comp": {
-          "x": 0,
-          "y": 16,
-          "w": 686,
-          "h": 374
+          "x": 1,
+          "y": 10,
+          "w": 479,
+          "h": 157
         },
         "build": {
-          "x": 13,
-          "y": 0,
-          "w": 659,
-          "h": 459
+          "x": 4,
+          "y": 14,
+          "w": 448,
+          "h": 156
         }
       }
     },
     {
-      "id": "orders-table",
-      "x": 0.0078,
-      "y": 0.7568,
-      "w": 0.9844,
-      "h": 0.2314,
+      "id": "summary",
+      "x": 0.0336,
+      "y": 0.2949,
+      "w": 0.3194,
+      "h": 0.0851,
+      "kind": "text",
+      "score": {
+        "overall": 0.4532,
+        "structure": 0.4197,
+        "color": 0.8331,
+        "colorIntersection": 0.6852,
+        "paletteMatch": 0.9128,
+        "detail": 0.1397,
+        "detailRaw": 0.3063,
+        "detailAdded": 0.3333,
+        "bands": 0.1417
+      },
+      "verdict": "contradicted",
+      "inkBox": {
+        "comp": {
+          "x": 2,
+          "y": 4,
+          "w": 413,
+          "h": 82
+        },
+        "build": {
+          "x": 2,
+          "y": 26,
+          "w": 473,
+          "h": 64
+        }
+      }
+    },
+    {
+      "id": "hero-actions",
+      "x": 0.0336,
+      "y": 0.4017,
+      "w": 0.3194,
+      "h": 0.0595,
+      "kind": "control",
+      "score": {
+        "overall": 0.4848,
+        "structure": 0.5704,
+        "color": 0.6099,
+        "colorIntersection": 0.3204,
+        "paletteMatch": 0.7658,
+        "detail": 0.0734,
+        "detailRaw": 0.1515,
+        "detailAdded": 0.1563,
+        "bands": 0
+      },
+      "verdict": "missing",
+      "inkBox": {
+        "comp": {
+          "x": 2,
+          "y": 1,
+          "w": 446,
+          "h": 59
+        },
+        "build": {
+          "x": 2,
+          "y": 29,
+          "w": 373,
+          "h": 34
+        }
+      }
+    },
+    {
+      "id": "recorded-map",
+      "x": 0,
+      "y": 0.0662,
+      "w": 1,
+      "h": 0.6938,
       "kind": "chrome",
       "score": {
-        "overall": 0.5078,
-        "structure": 0.7438,
-        "color": 0.7181,
-        "colorIntersection": 0.3435,
-        "paletteMatch": 0.9198,
-        "detail": 0.2718,
-        "detailRaw": 0.2874,
-        "detailAdded": 0.0313,
-        "bands": 0
+        "overall": 0.6318,
+        "structure": 0.5455,
+        "color": 0.7202,
+        "colorIntersection": 0.4894,
+        "paletteMatch": 0.8444,
+        "detail": 0.4946,
+        "detailRaw": 0.531,
+        "detailAdded": 0.0729,
+        "bands": 0.9143
       },
       "verdict": "drift",
       "inkBox": {
         "comp": {
-          "x": 17,
-          "y": 15,
-          "w": 1469,
-          "h": 203
+          "x": 52,
+          "y": 21,
+          "w": 1395,
+          "h": 678
         },
         "build": {
-          "x": 25,
+          "x": 52,
+          "y": 11,
+          "w": 1419,
+          "h": 716
+        }
+      }
+    },
+    {
+      "id": "robot-handoff",
+      "x": 0.4169,
+      "y": 0.5009,
+      "w": 0.2623,
+      "h": 0.1654,
+      "kind": "chrome",
+      "score": {
+        "overall": 0.3816,
+        "structure": 0.2473,
+        "color": 0.5253,
+        "colorIntersection": 0.2248,
+        "paletteMatch": 0.6871,
+        "detail": 0.417,
+        "detailRaw": 0.5837,
+        "detailAdded": 0.3333,
+        "bands": 0.3964
+      },
+      "verdict": "contradicted",
+      "inkBox": {
+        "comp": {
+          "x": 0,
+          "y": 0,
+          "w": 385,
+          "h": 159
+        },
+        "build": {
+          "x": 82,
+          "y": 0,
+          "w": 260,
+          "h": 167
+        }
+      }
+    },
+    {
+      "id": "playback",
+      "x": 0.0713,
+      "y": 0.6739,
+      "w": 0.8574,
+      "h": 0.051,
+      "kind": "control",
+      "score": {
+        "overall": 0.7367,
+        "structure": 0.8123,
+        "color": 0.8285,
+        "colorIntersection": 0.6904,
+        "paletteMatch": 0.9029,
+        "detail": 0.4059,
+        "detailRaw": 0.4268,
+        "detailAdded": 0.0417,
+        "bands": 0.7
+      },
+      "verdict": "drift",
+      "inkBox": {
+        "comp": {
+          "x": 30,
+          "y": 17,
+          "w": 1222,
+          "h": 21
+        },
+        "build": {
+          "x": 24,
+          "y": 17,
+          "w": 1234,
+          "h": 16
+        }
+      }
+    },
+    {
+      "id": "flow-heading",
+      "x": 0.0289,
+      "y": 0.7873,
+      "w": 0.4506,
+      "h": 0.0444,
+      "kind": "text",
+      "score": {
+        "overall": 0.542,
+        "structure": 0.5989,
+        "color": 0.6044,
+        "colorIntersection": 0.3864,
+        "paletteMatch": 0.7217,
+        "detail": 0.4538,
+        "detailRaw": 0.5423,
+        "detailAdded": 0.1771,
+        "bands": 0.2333
+      },
+      "verdict": "drift",
+      "inkBox": {
+        "comp": {
+          "x": 3,
+          "y": 4,
+          "w": 425,
+          "h": 34
+        },
+        "build": {
+          "x": 56,
           "y": 10,
-          "w": 1462,
-          "h": 180
+          "w": 409,
+          "h": 32
+        }
+      }
+    },
+    {
+      "id": "flow",
+      "x": 0.0235,
+      "y": 0.8478,
+      "w": 0.9523,
+      "h": 0.1352,
+      "kind": "chrome",
+      "score": {
+        "overall": 0.5602,
+        "structure": 0.6768,
+        "color": 0.8561,
+        "colorIntersection": 0.7668,
+        "paletteMatch": 0.9042,
+        "detail": 0.2384,
+        "detailRaw": 0.2801,
+        "detailAdded": 0.0833,
+        "bands": 0.3314
+      },
+      "verdict": "drift",
+      "inkBox": {
+        "comp": {
+          "x": 32,
+          "y": 20,
+          "w": 1373,
+          "h": 123
+        },
+        "build": {
+          "x": 88,
+          "y": 49,
+          "w": 1228,
+          "h": 80
         }
       }
     }
   ],
   "files": {
-    "sideBySide": "/mnt/c/Users/aleja/Documents/mds-ui/.impeccable/review/diff/final/side-by-side.png",
-    "heatmap": "/mnt/c/Users/aleja/Documents/mds-ui/.impeccable/review/diff/final/heatmap.png",
+    "sideBySide": "/mnt/wsl/docker-desktop-bind-mounts/Ubuntu/eb63c237aa77bbaee87aec10dad750a4965b278dd4b2234eed4f79ded36740ac/.impeccable/review/diff/final/side-by-side.png",
+    "heatmap": "/mnt/wsl/docker-desktop-bind-mounts/Ubuntu/eb63c237aa77bbaee87aec10dad750a4965b278dd4b2234eed4f79ded36740ac/.impeccable/review/diff/final/heatmap.png",
     "regionFiles": [
-      "/mnt/c/Users/aleja/Documents/mds-ui/.impeccable/review/diff/final/regions/navigation.png",
-      "/mnt/c/Users/aleja/Documents/mds-ui/.impeccable/review/diff/final/regions/page-title.png",
-      "/mnt/c/Users/aleja/Documents/mds-ui/.impeccable/review/diff/final/regions/session-label.png",
-      "/mnt/c/Users/aleja/Documents/mds-ui/.impeccable/review/diff/final/regions/start-controls.png",
-      "/mnt/c/Users/aleja/Documents/mds-ui/.impeccable/review/diff/final/regions/orders-kpi.png",
-      "/mnt/c/Users/aleja/Documents/mds-ui/.impeccable/review/diff/final/regions/ontime-kpi.png",
-      "/mnt/c/Users/aleja/Documents/mds-ui/.impeccable/review/diff/final/regions/cost-kpi.png",
-      "/mnt/c/Users/aleja/Documents/mds-ui/.impeccable/review/diff/final/regions/latency-kpi.png",
-      "/mnt/c/Users/aleja/Documents/mds-ui/.impeccable/review/diff/final/regions/agent-controls.png",
-      "/mnt/c/Users/aleja/Documents/mds-ui/.impeccable/review/diff/final/regions/agent-columns.png",
-      "/mnt/c/Users/aleja/Documents/mds-ui/.impeccable/review/diff/final/regions/agent-row-1.png",
-      "/mnt/c/Users/aleja/Documents/mds-ui/.impeccable/review/diff/final/regions/agent-row-2.png",
-      "/mnt/c/Users/aleja/Documents/mds-ui/.impeccable/review/diff/final/regions/agent-row-3.png",
-      "/mnt/c/Users/aleja/Documents/mds-ui/.impeccable/review/diff/final/regions/agent-row-4.png",
-      "/mnt/c/Users/aleja/Documents/mds-ui/.impeccable/review/diff/final/regions/agent-row-5.png",
-      "/mnt/c/Users/aleja/Documents/mds-ui/.impeccable/review/diff/final/regions/agent-row-6.png",
-      "/mnt/c/Users/aleja/Documents/mds-ui/.impeccable/review/diff/final/regions/map.png",
-      "/mnt/c/Users/aleja/Documents/mds-ui/.impeccable/review/diff/final/regions/map-controls.png",
-      "/mnt/c/Users/aleja/Documents/mds-ui/.impeccable/review/diff/final/regions/map-legend.png",
-      "/mnt/c/Users/aleja/Documents/mds-ui/.impeccable/review/diff/final/regions/map-selected.png",
-      "/mnt/c/Users/aleja/Documents/mds-ui/.impeccable/review/diff/final/regions/evidence.png",
-      "/mnt/c/Users/aleja/Documents/mds-ui/.impeccable/review/diff/final/regions/order-controls.png",
-      "/mnt/c/Users/aleja/Documents/mds-ui/.impeccable/review/diff/final/regions/order-columns.png",
-      "/mnt/c/Users/aleja/Documents/mds-ui/.impeccable/review/diff/final/regions/order-row-1.png",
-      "/mnt/c/Users/aleja/Documents/mds-ui/.impeccable/review/diff/final/regions/order-row-2.png",
-      "/mnt/c/Users/aleja/Documents/mds-ui/.impeccable/review/diff/final/regions/order-row-3.png",
-      "/mnt/c/Users/aleja/Documents/mds-ui/.impeccable/review/diff/final/regions/order-row-4.png",
-      "/mnt/c/Users/aleja/Documents/mds-ui/.impeccable/review/diff/final/regions/order-row-5.png",
-      "/mnt/c/Users/aleja/Documents/mds-ui/.impeccable/review/diff/final/regions/order-row-6.png",
-      "/mnt/c/Users/aleja/Documents/mds-ui/.impeccable/review/diff/final/regions/titlebar.png",
-      "/mnt/c/Users/aleja/Documents/mds-ui/.impeccable/review/diff/final/regions/agent-table.png",
-      "/mnt/c/Users/aleja/Documents/mds-ui/.impeccable/review/diff/final/regions/orders-table.png"
+      "/mnt/wsl/docker-desktop-bind-mounts/Ubuntu/eb63c237aa77bbaee87aec10dad750a4965b278dd4b2234eed4f79ded36740ac/.impeccable/review/diff/final/regions/header.png",
+      "/mnt/wsl/docker-desktop-bind-mounts/Ubuntu/eb63c237aa77bbaee87aec10dad750a4965b278dd4b2234eed4f79ded36740ac/.impeccable/review/diff/final/regions/headline.png",
+      "/mnt/wsl/docker-desktop-bind-mounts/Ubuntu/eb63c237aa77bbaee87aec10dad750a4965b278dd4b2234eed4f79ded36740ac/.impeccable/review/diff/final/regions/summary.png",
+      "/mnt/wsl/docker-desktop-bind-mounts/Ubuntu/eb63c237aa77bbaee87aec10dad750a4965b278dd4b2234eed4f79ded36740ac/.impeccable/review/diff/final/regions/hero-actions.png",
+      "/mnt/wsl/docker-desktop-bind-mounts/Ubuntu/eb63c237aa77bbaee87aec10dad750a4965b278dd4b2234eed4f79ded36740ac/.impeccable/review/diff/final/regions/recorded-map.png",
+      "/mnt/wsl/docker-desktop-bind-mounts/Ubuntu/eb63c237aa77bbaee87aec10dad750a4965b278dd4b2234eed4f79ded36740ac/.impeccable/review/diff/final/regions/robot-handoff.png",
+      "/mnt/wsl/docker-desktop-bind-mounts/Ubuntu/eb63c237aa77bbaee87aec10dad750a4965b278dd4b2234eed4f79ded36740ac/.impeccable/review/diff/final/regions/playback.png",
+      "/mnt/wsl/docker-desktop-bind-mounts/Ubuntu/eb63c237aa77bbaee87aec10dad750a4965b278dd4b2234eed4f79ded36740ac/.impeccable/review/diff/final/regions/flow-heading.png",
+      "/mnt/wsl/docker-desktop-bind-mounts/Ubuntu/eb63c237aa77bbaee87aec10dad750a4965b278dd4b2234eed4f79ded36740ac/.impeccable/review/diff/final/regions/flow.png"
     ]
   }
 }

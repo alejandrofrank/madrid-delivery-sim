@@ -1,0 +1,76 @@
+[
+  {
+    "id": "fulfillment",
+    "visual": {
+      "color": "#e9bc71",
+      "symbol": "pick",
+      "label": "Pick"
+    },
+    "badge": "Fulfillment",
+    "budget": {
+      "value": 0.0,
+      "unit": "USD / run",
+      "label": "Default model spending cap",
+      "note": "Configured limit, not money spent. Optional profiles have separate limits.",
+      "scale": 0.02,
+      "fraction": 0.0
+    },
+    "tool_badges": [
+      {
+        "id": "fulfillment.pick",
+        "description": "Pick a reserved basket once and signal readiness.",
+        "context": "Role tool",
+        "icon": "box"
+      },
+      {
+        "id": "fulfillment.read",
+        "description": "Inspect a reserved basket and its picking state.",
+        "context": "Role tool",
+        "icon": "search"
+      },
+      {
+        "id": "queue.publish",
+        "description": "Publish an allowed topic to a permitted recipient.",
+        "context": "Role tool",
+        "icon": "box"
+      }
+    ]
+  },
+  {
+    "id": "courier",
+    "visual": {
+      "color": "#23d8ce",
+      "symbol": "deliver",
+      "label": "Deliver"
+    },
+    "badge": "Courier",
+    "budget": {
+      "value": 0.0,
+      "unit": "USD / run",
+      "label": "Default model spending cap",
+      "note": "Configured limit, not money spent. Optional profiles have separate limits.",
+      "scale": 0.02,
+      "fraction": 0.0
+    },
+    "tool_badges": [
+      {
+        "id": "courier.accept",
+        "description": "Acknowledge this courier’s assignment.",
+        "context": "Role tool",
+        "icon": "box"
+      },
+      {
+        "id": "courier.read",
+        "description": "Read the briefing addressed to this courier.",
+        "context": "Role tool",
+        "icon": "search"
+      },
+      {
+        "id": "queue.publish",
+        "description": "Publish an allowed topic to a permitted recipient.",
+        "context": "Role tool",
+        "icon": "box"
+      }
+    ]
+  }
+]

@@ -21,6 +21,7 @@ def main() -> None:
         ("store-view.js", "store-3d.js"),
         ("agent-anatomy.js", "agent-anatomy-3d.js"),
         ("agent-story.js", "agent-delivery-scene.js"),
+        ("landing.js", "landing-robots.js"),
     ):
         controller = WEB / controller_name
         renderer = WEB / renderer_name

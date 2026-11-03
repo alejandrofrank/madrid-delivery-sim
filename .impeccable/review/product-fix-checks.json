@@ -1,0 +1,17 @@
+{
+  "orders": "one-line label at 390px and 1440px; original button retained",
+  "health": [
+    {
+      "theme": "light",
+      "contrast": 5.008310954186671,
+      "text": "rgb(134, 90, 9)",
+      "bg": "rgb(245, 233, 206)"
+    },
+    {
+      "theme": "dark",
+      "contrast": 7.080043664826917,
+      "text": "rgb(237, 204, 133)",
+      "bg": "rgb(68, 60, 36)"
+    }
+  ]
+}

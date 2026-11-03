@@ -1,7 +1,11 @@
 "use strict";
 const $ = id => document.getElementById(id);
 let live = null, evidence = null, runId = new URLSearchParams(location.search).get("run") || "", activeStore = "", polling = false;
-let catalogueChosen = false;
+const scenarioControls=document.querySelector('[aria-label="Scenario controls"]');
+const inventoryAdvanced=ProductUI.drawer('advanced-controls','Advanced inventory controls',scenarioControls);
+const advancedButton=ProductUI.button('Advanced');advancedButton.dataset.drawerOpen='advanced-controls';
+document.querySelector('.page-title').append(advancedButton);
+let catalogueChosen = false, recordedMode = !runId, exampleBanner = null;
 const productKey = p => `${p.source}:${p.listing_id}`;
 function el(tag, text, cls) {
   const node = document.createElement(tag);
@@ -63,7 +67,7 @@ function render() {
   if (live.run.status==="failed") { $("error").hidden=false; $("error").textContent=`Scenario failed: ${live.run.error}. State remains inspectable.`; }
 }
 async function poll() {
-  if(polling) return;
+  if(recordedMode || polling) return;
   polling=true;
   try {
     const requestedRun = runId;
@@ -96,6 +100,7 @@ $("start").onclick=async () => {
     const body = {seed:Number($("seed").value),catalogue:selection,playback_seconds:15};
     if (selection.startsWith("history:")) { body.catalogue="bakiano-history"; body.sample_date=selection.slice(8); }
     const result=await api("/api/lab/runs",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(body)});
+    recordedMode=false; exampleBanner?.remove();inventoryAdvanced.close();
     runId=result.id; live=null; evidence=null; activeStore="";
     $("checkpoint").replaceChildren(new Option("Live / final state","live"));
     await poll();
@@ -113,4 +118,18 @@ api("/api/lab/history").then(history => {
   const latest=[...history.days].reverse().find(day => day.status==="available");
   if (latest && !catalogueChosen) $("catalogue").value=`history:${latest.date}`;
 }).catch(() => {$("history-coverage").textContent="The local history manifest needs repair. The synthetic fixture remains available.";});
-poll(); setInterval(poll,500);
+async function loadRecordedInventory() {
+  try {
+    const payload=await ProductExamples.load('inventory');
+    live=payload.data; evidence=payload.data; runId=live.run.id;
+    $('checkpoint').replaceChildren(new Option('Final recorded state','live'), ...evidence.checkpoints.map((c,i)=>new Option(c.label,String(i))));
+    $('download').href='/static/data/examples/inventory.json';$('download').hidden=false;
+    exampleBanner=ProductExamples.banner('Inventory reservation, supply delay and worker recovery',async()=>{
+      inventoryAdvanced.showModal();$('start').focus();
+    });
+    render();
+  }catch(error){$('error').hidden=false;$('error').textContent=error.message;}
+}
+inventoryAdvanced.append($('history-coverage'));
+if(recordedMode)loadRecordedInventory();else poll();
+setInterval(poll,500);

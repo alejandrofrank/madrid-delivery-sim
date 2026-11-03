@@ -1,16 +1,10 @@
 /* Inventory lab: compact controls, stock evidence, and queue recovery. */
 :root {
   font-family: var(--ui-font);
-  font-size: 14px;
+  font-size:var(--ui-text-md);
   color: var(--ui-ink);
   background: var(--ui-bg);
-  color-scheme: dark;
-}
-* {
-  box-sizing: border-box;
-}
-body {
-  margin: 0;
+
 }
 main {
   max-width: 1600px;
@@ -24,45 +18,11 @@ h1 {
 }
 h2 {
   margin: 0 0 12px;
-  font-size: 15px;
+  font-size:var(--ui-text-lg);
 }
 p {
   color: var(--ui-muted);
   line-height: 1.55;
-}
-a {
-  color: inherit;
-  text-underline-offset: 3px;
-}
-button,
-select,
-input {
-  font: inherit;
-  padding: 8px 12px;
-  min-height: 36px;
-  border: 1px solid var(--ui-strong-line);
-  border-radius: var(--ui-radius);
-  background: var(--ui-surface);
-  color: inherit;
-}
-button {
-  cursor: pointer;
-}
-button:hover {
-  background: var(--ui-hover);
-  border-color: var(--ui-ink);
-}
-button:disabled {
-  opacity: 0.5;
-  cursor: wait;
-}
-button:focus-visible,
-select:focus-visible,
-input:focus-visible,
-a:focus-visible,
-summary:focus-visible {
-  outline: 2px solid var(--ui-accent);
-  outline-offset: 3px;
 }
 #start {
   background: var(--ui-ink);
@@ -78,16 +38,8 @@ label {
   gap: 8px;
   align-items: center;
   color: var(--ui-muted);
-  font-size: 12px;
+  font-size:var(--ui-text-sm);
   min-width: 0;
-}
-input {
-  width: 100px;
-  min-width: 0;
-}
-select {
-  min-width: 0;
-  max-width: 100%;
 }
 .controls {
   display: flex;
@@ -110,7 +62,7 @@ select {
 #clock,
 #status,
 #provenance {
-  font: 12px var(--ui-mono, ui-monospace, SFMono-Regular, Consolas, monospace);
+  font:var(--ui-text-sm) var(--ui-mono, ui-monospace, SFMono-Regular, Consolas, monospace);
   line-height: 1.6;
   color: var(--ui-muted);
   overflow-wrap: anywhere;
@@ -138,7 +90,7 @@ select {
 .metrics small {
   display: block;
   color: var(--ui-muted);
-  font-size: 12px;
+  font-size:var(--ui-text-sm);
 }
 .metrics strong {
   display: block;
@@ -179,7 +131,7 @@ table {
   width: 100%;
   min-width: 440px;
   margin: 16px 0;
-  font-size: 12px;
+  font-size:var(--ui-text-sm);
   font-variant-numeric: tabular-nums;
 }
 th,
@@ -192,7 +144,7 @@ td {
 th {
   white-space: nowrap;
   color: var(--ui-muted);
-  font: 12px var(--ui-mono, ui-monospace, SFMono-Regular, Consolas, monospace);
+  font:var(--ui-text-sm) var(--ui-mono, ui-monospace, SFMono-Regular, Consolas, monospace);
 }
 td:first-child {
   overflow-wrap: anywhere;
@@ -202,7 +154,7 @@ pre {
   white-space: pre-wrap;
   overflow-wrap: anywhere;
   padding: 12px;
-  font: 12px var(--ui-mono, ui-monospace, SFMono-Regular, Consolas, monospace);
+  font:var(--ui-text-sm) var(--ui-mono, ui-monospace, SFMono-Regular, Consolas, monospace);
   line-height: 1.6;
   background: var(--ui-raised);
   border: 1px solid var(--ui-line);
@@ -222,7 +174,7 @@ summary {
 }
 .record small {
   color: var(--ui-muted);
-  font-size: 12px;
+  font-size:var(--ui-text-sm);
 }
 .good {
   color: var(--ui-positive);
@@ -233,18 +185,15 @@ summary {
 }
 #error {
   padding: 12px 16px;
-  background: #352428;
-  border: 1px solid #784c4c;
+  background: var(--ui-negative-bg);
+  border: 1px solid var(--ui-negative);
   border-radius: var(--ui-radius);
 }
 footer {
   padding: 16px 0 0;
   color: var(--ui-muted);
-  font: 12px var(--ui-mono, ui-monospace, SFMono-Regular, Consolas, monospace);
+  font:var(--ui-text-sm) var(--ui-mono, ui-monospace, SFMono-Regular, Consolas, monospace);
   line-height: 1.6;
-}
-[hidden] {
-  display: none !important;
 }
 @media (max-width: 900px) {
   main {
@@ -304,11 +253,7 @@ footer {
   }
 }
 @media (prefers-reduced-motion: reduce) {
-  * {
-    scroll-behavior: auto !important;
-  }
 }
 
 .inventory-empty {padding:40px 24px;margin:16px 0;border:1px dashed var(--ui-strong-line);color:var(--muted);text-align:center}
 .workspace.inventory-stock {grid-template-columns:minmax(0,1fr)}
-[hidden] {display:none!important}

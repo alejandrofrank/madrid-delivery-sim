@@ -13,7 +13,7 @@ const base=arg('--url','http://127.0.0.1:8010'),runFile=arg('--runs','artifacts/
  async function check(name,work){await work();results.push({name,passed:true});console.log('PASS '+name);}
  await check('Retired Delivery links open Operations',async()=>{
   await page.goto(base+'/delivery-lab?run='+runs.flow);
-  assert.equal(new URL(page.url()).pathname,'/');
+  assert.equal(new URL(page.url()).pathname,'/watch');
   assert.equal(new URL(page.url()).search,'');
   assert.equal(await page.locator('#workspace-navigation a[href="/delivery-lab"]').count(),0);
  });

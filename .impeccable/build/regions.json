@@ -1,376 +1,107 @@
 {
   "regions": [
     {
-      "id": "navigation",
+      "id": "header",
       "kind": "chrome",
       "pixelBox": {
         "x": 0,
         "y": 0,
-        "w": 1536,
-        "h": 45
+        "w": 1487,
+        "h": 70
       },
-      "note": "Top shared navigation with brand, route links and runtime status."
+      "note": "Shared warm header, Madrid wordmark, three primary destinations, engineer menu, theme switch and watch action."
     },
     {
-      "id": "page-title",
+      "id": "headline",
       "kind": "text",
       "pixelBox": {
-        "x": 29,
-        "y": 62,
-        "w": 278,
-        "h": 34
+        "x": 50,
+        "y": 120,
+        "w": 480,
+        "h": 170
       },
-      "note": "Delivery operations page title."
+      "note": "9 AI agents run a Madrid grocery network"
     },
     {
-      "id": "session-label",
+      "id": "summary",
       "kind": "text",
       "pixelBox": {
-        "x": 320,
-        "y": 66,
-        "w": 251,
-        "h": 25
+        "x": 50,
+        "y": 312,
+        "w": 475,
+        "h": 90
       },
-      "note": "Illustrative synthetic session, a compact runtime status label."
+      "note": "They check stock, pick orders and get groceries to the doorstep\u2014even when plans change."
     },
     {
-      "id": "start-controls",
+      "id": "hero-actions",
       "kind": "control",
       "pixelBox": {
-        "x": 1198,
-        "y": 61,
-        "w": 325,
-        "h": 35
+        "x": 50,
+        "y": 425,
+        "w": 475,
+        "h": 63
       },
-      "note": "Start simulation and Configure buttons."
+      "note": "Watch it run and quieter Meet the agents."
     },
     {
-      "id": "orders-kpi",
+      "id": "recorded-map",
       "kind": "chrome",
       "pixelBox": {
-        "x": 12,
-        "y": 108,
-        "w": 390,
-        "h": 80
+        "x": 0,
+        "y": 70,
+        "w": 1487,
+        "h": 734
       },
-      "note": "Runtime metric and its history chart. Unavailable observations show No run yet."
-    },
-    {
-      "id": "ontime-kpi",
-      "kind": "chrome",
-      "pixelBox": {
-        "x": 403,
-        "y": 108,
-        "w": 363,
-        "h": 80
-      },
-      "note": "Runtime metric and its history chart. Unavailable observations show No run yet."
-    },
-    {
-      "id": "cost-kpi",
-      "kind": "chrome",
-      "pixelBox": {
-        "x": 767,
-        "y": 108,
-        "w": 365,
-        "h": 80
-      },
-      "note": "Runtime metric and its history chart. Unavailable observations show No run yet."
-    },
-    {
-      "id": "latency-kpi",
-      "kind": "chrome",
-      "pixelBox": {
-        "x": 1133,
-        "y": 108,
-        "w": 391,
-        "h": 80
-      },
-      "note": "Runtime metric and its history chart. Unavailable observations show No run yet."
-    },
-    {
-      "id": "agent-controls",
-      "kind": "control",
-      "pixelBox": {
-        "x": 12,
-        "y": 197,
-        "w": 686,
-        "h": 49
-      },
-      "note": "Agents heading with role, status and search filters."
-    },
-    {
-      "id": "agent-columns",
-      "kind": "text",
-      "pixelBox": {
-        "x": 28,
-        "y": 249,
-        "w": 654,
-        "h": 34
-      },
-      "note": "Agent, Role, Status, Current task, Throughput and History column labels."
-    },
-    {
-      "id": "agent-row-1",
-      "kind": "control",
-      "pixelBox": {
-        "x": 13,
-        "y": 286,
-        "w": 684,
-        "h": 52
-      },
-      "note": "Selectable runtime agent row: identity, role, state, task and observed throughput history.",
-      "reviewGroup": "agent-rows"
-    },
-    {
-      "id": "agent-row-2",
-      "kind": "control",
-      "pixelBox": {
-        "x": 13,
-        "y": 338,
-        "w": 684,
-        "h": 52
-      },
-      "note": "Selectable runtime agent row: identity, role, state, task and observed throughput history.",
-      "reviewGroup": "agent-rows"
-    },
-    {
-      "id": "agent-row-3",
-      "kind": "control",
-      "pixelBox": {
-        "x": 13,
-        "y": 390,
-        "w": 684,
-        "h": 52
-      },
-      "note": "Selectable runtime agent row: identity, role, state, task and observed throughput history.",
-      "reviewGroup": "agent-rows"
-    },
-    {
-      "id": "agent-row-4",
-      "kind": "control",
-      "pixelBox": {
-        "x": 13,
-        "y": 442,
-        "w": 684,
-        "h": 52
-      },
-      "note": "Selectable runtime agent row: identity, role, state, task and observed throughput history.",
-      "reviewGroup": "agent-rows"
-    },
-    {
-      "id": "agent-row-5",
-      "kind": "control",
-      "pixelBox": {
-        "x": 13,
-        "y": 494,
-        "w": 684,
-        "h": 52
-      },
-      "note": "Selectable runtime agent row: identity, role, state, task and observed throughput history.",
-      "reviewGroup": "agent-rows"
-    },
-    {
-      "id": "agent-row-6",
-      "kind": "control",
-      "pixelBox": {
-        "x": 13,
-        "y": 546,
-        "w": 684,
-        "h": 52
-      },
-      "note": "Selectable runtime agent row: identity, role, state, task and observed throughput history.",
-      "reviewGroup": "agent-rows"
-    },
-    {
-      "id": "map",
-      "kind": "chrome",
-      "pixelBox": {
-        "x": 708,
-        "y": 197,
-        "w": 816,
-        "h": 459
-      },
-      "note": "Interactive geographic data surface. Runtime street geometry, routes, agent positions, labels and controls; all driven by current simulator data.",
+      "note": "Interactive data visualization: actual recorded Madrid streets, store pins and moving couriers. User explicitly requires real replay data in place of the mockup's invented map labels.",
       "container": true,
       "codeDrawn": true
     },
     {
-      "id": "map-controls",
-      "kind": "control",
-      "pixelBox": {
-        "x": 1476,
-        "y": 205,
-        "w": 42,
-        "h": 106
-      },
-      "note": "Zoom and fit controls.",
-      "parentId": "map"
-    },
-    {
-      "id": "map-legend",
+      "id": "robot-handoff",
       "kind": "chrome",
       "pixelBox": {
-        "x": 1352,
-        "y": 503,
-        "w": 161,
-        "h": 139
+        "x": 620,
+        "y": 530,
+        "w": 390,
+        "h": 175
       },
-      "note": "Legend explains type symbols and observed versus planned routes.",
-      "parentId": "map"
+      "note": "Existing code-native 3D robots with purpose-colored lights passing an order, as explicitly requested; reuse real model geometry rather than the invented mockup robot shapes.",
+      "codeDrawn": true
     },
     {
-      "id": "map-selected",
+      "id": "playback",
       "kind": "control",
       "pixelBox": {
-        "x": 1083,
-        "y": 371,
-        "w": 122,
-        "h": 43
+        "x": 106,
+        "y": 713,
+        "w": 1275,
+        "h": 54
       },
-      "note": "Selected agent marker and name. Runtime position is selectable.",
-      "parentId": "map"
+      "note": "Recorded shift label, pause/play, simulation position and progress. Omit fictional sound and speed controls not backed by the recording."
     },
     {
-      "id": "evidence",
-      "kind": "chrome",
-      "pixelBox": {
-        "x": 12,
-        "y": 665,
-        "w": 1512,
-        "h": 101
-      },
-      "note": "Selected agent evidence strip with identity, state, task, last decision and trace link."
-    },
-    {
-      "id": "order-controls",
-      "kind": "control",
-      "pixelBox": {
-        "x": 12,
-        "y": 775,
-        "w": 1512,
-        "h": 46
-      },
-      "note": "Orders heading with state and restaurant filters, search and sorting."
-    },
-    {
-      "id": "order-columns",
+      "id": "flow-heading",
       "kind": "text",
       "pixelBox": {
-        "x": 28,
-        "y": 826,
-        "w": 1459,
-        "h": 23
+        "x": 43,
+        "y": 833,
+        "w": 670,
+        "h": 47
       },
-      "note": "Order book column headings."
+      "note": "How one order flows"
     },
     {
-      "id": "order-row-1",
-      "kind": "control",
-      "pixelBox": {
-        "x": 28,
-        "y": 851,
-        "w": 1476,
-        "h": 24
-      },
-      "note": "Inspectable runtime order row with its status, agent and latest decision.",
-      "reviewGroup": "order-rows"
-    },
-    {
-      "id": "order-row-2",
-      "kind": "control",
-      "pixelBox": {
-        "x": 28,
-        "y": 875,
-        "w": 1476,
-        "h": 24
-      },
-      "note": "Inspectable runtime order row with its status, agent and latest decision.",
-      "reviewGroup": "order-rows"
-    },
-    {
-      "id": "order-row-3",
-      "kind": "control",
-      "pixelBox": {
-        "x": 28,
-        "y": 899,
-        "w": 1476,
-        "h": 24
-      },
-      "note": "Inspectable runtime order row with its status, agent and latest decision.",
-      "reviewGroup": "order-rows"
-    },
-    {
-      "id": "order-row-4",
-      "kind": "control",
-      "pixelBox": {
-        "x": 28,
-        "y": 923,
-        "w": 1476,
-        "h": 24
-      },
-      "note": "Inspectable runtime order row with its status, agent and latest decision.",
-      "reviewGroup": "order-rows"
-    },
-    {
-      "id": "order-row-5",
-      "kind": "control",
-      "pixelBox": {
-        "x": 28,
-        "y": 947,
-        "w": 1476,
-        "h": 24
-      },
-      "note": "Inspectable runtime order row with its status, agent and latest decision.",
-      "reviewGroup": "order-rows"
-    },
-    {
-      "id": "order-row-6",
-      "kind": "control",
-      "pixelBox": {
-        "x": 28,
-        "y": 971,
-        "w": 1476,
-        "h": 24
-      },
-      "note": "Inspectable runtime order row with its status, agent and latest decision.",
-      "reviewGroup": "order-rows"
-    },
-    {
-      "id": "titlebar",
+      "id": "flow",
       "kind": "chrome",
       "pixelBox": {
-        "x": 12,
-        "y": 45,
-        "w": 1512,
-        "h": 57
+        "x": 35,
+        "y": 897,
+        "w": 1416,
+        "h": 143
       },
-      "container": true,
-      "note": "Page heading and simulation control layout."
-    },
-    {
-      "id": "agent-table",
-      "kind": "chrome",
-      "pixelBox": {
-        "x": 12,
-        "y": 197,
-        "w": 686,
-        "h": 459
-      },
-      "container": true,
-      "note": "Live agent table including column headings, selectable agent rows and blank unused rows."
-    },
-    {
-      "id": "orders-table",
-      "kind": "chrome",
-      "pixelBox": {
-        "x": 12,
-        "y": 775,
-        "w": 1512,
-        "h": 237
-      },
-      "container": true,
-      "note": "Live order table and filtering controls."
+      "note": "Three connected order, picking and courier steps. Plain responsibilities must match the real role manifests.",
+      "codeDrawn": true
     }
   ]
 }
