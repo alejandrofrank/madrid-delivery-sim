@@ -86,19 +86,25 @@
     a.dataset.source = path;
     return a;
   }
-  let generation = 0, disposeCurrent = null;
+  let generation = 0, disposeCurrent = null, pendingData = null;
+  function preload(){
+    if(!pendingData)pendingData=fetch("/api/agent-anatomy",{cache:"no-store",credentials:"same-origin"})
+      .then(response=>{if(!response.ok)throw new Error("Unavailable");return response.json();});
+    return pendingData;
+  }
   function unmount() { generation++; disposeCurrent?.(); disposeCurrent=null; }
   async function mount(host) {
     unmount(); const version=generation;
-    host.replaceChildren(node("p", "Loading agent definitions\u2026", "anatomy-status"));
+    host.replaceChildren(ProductUI.loading("Assembling the agent team"));
+    host.setAttribute("aria-busy","true");
     try {
-      const response=await fetch("/api/agent-anatomy", {cache:"no-store",credentials:"same-origin"});
-      if(!response.ok)throw new Error("Unavailable");
-      const data=await response.json();
+      const data=await preload();
+      host.removeAttribute("aria-busy");
       if(version!==generation||host.hidden)return;
       render(host,data,version);
     } catch {
       if(version!==generation)return;
+      pendingData=null;host.removeAttribute("aria-busy");
       const error=node("p","Agent definitions could not be loaded. Retry after the local service is ready.");
       error.setAttribute("role","alert");
       const retry=node("button","Retry agent definitions");retry.onclick=()=>mount(host);
@@ -339,5 +345,5 @@
       document.body.classList.remove("anatomy-topics-open","anatomy-reading");
     };
   }
-  window.AgentAnatomy={mount,unmount};
+  window.AgentAnatomy={mount,unmount,preload};
 })();

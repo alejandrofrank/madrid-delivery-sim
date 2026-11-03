@@ -45,7 +45,13 @@
     if(closer)closer.closest("dialog")?.close();
   });
   document.addEventListener("close",event=>{if(event.target.classList?.contains("ui-drawer"))trigger?.focus();},true);
-  window.ProductUI={make,icon,button,tooltip,drawer};
+  function loading(label="Opening the workspace",detail="Loading roles, tools and recorded evidence."){
+    const status=make("div",null,"ui-loading-scene");status.setAttribute("role","status");
+    const animation=make("div",null,"ui-loading-network");animation.setAttribute("aria-hidden","true");
+    for(const name of ["store","team","courier"]){const station=make("span");station.append(icon(name));animation.append(station);}
+    status.append(animation,make("strong",label),make("p",detail));return status;
+  }
+  window.ProductUI={make,icon,button,tooltip,drawer,loading};
   document.querySelectorAll("[data-term]").forEach(node=>node.replaceWith(tooltip(node.textContent,node.dataset.term)));
   document.querySelectorAll("[data-icon]").forEach(node=>node.replaceChildren(icon(node.dataset.icon)));
   let theme="light";try{theme=localStorage.getItem("mds-theme")==="dark"?"dark":"light";}catch{}
@@ -64,7 +70,7 @@
   const actions=make("div",null,"workspace-actions");
   const engineers=make("details",null,"workspace-engineers"),summary=make("summary","For engineers");
   summary.append(icon("chevron"));const links=make("nav",null,"workspace-engineer-links");links.setAttribute("aria-label","For engineers");
-  for(const [slug,label] of [["operations","Operations"],["restaurants","Restaurants"],["inventory","Inventory"],["health","Health"],["traces","Traces"],["architecture","Architecture chapters"]]){
+  for(const [slug,label] of [["restaurants","Restaurants"],["inventory","Inventory"],["health","Health"],["traces","Traces"],["architecture","Architecture chapters"]]){
     const link=make("a",label);link.href="/engineers/"+slug;if(location.pathname===link.getAttribute("href"))link.setAttribute("aria-current","page");links.append(link);
   }
   if(search)links.append(search);else {const link=make("a","Search the documentation");link.href="/engineers/architecture?search=1";links.append(link);}
