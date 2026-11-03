@@ -5,6 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "madrid-delivery-sim"
 version = "0.1.0"
+license = {file = "LICENSE"}
 description = "Queue-driven delivery agents on Madrid's real street graph"
 requires-python = ">=3.12,<3.14"
 dependencies = [

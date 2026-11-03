@@ -1,5 +1,16 @@
 # madrid-delivery-sim public-readiness review
 
+## Portfolio release recheck — November 3, 2026
+
+Gitleaks 8.30.1 scanned all local refs: 253 commits and 31.63 MB. All five
+candidates were reviewed: four source-file SHA-256 fingerprints and one
+synthetic queue deduplication key. **Zero confirmed credentials** were found.
+[Counts-only receipt](evidence/portfolio-public-readiness.json). No history was
+rewritten. This is pattern-scan evidence, not proof that every possible secret
+is absent. MIT licensing and third-party notices accompany the portfolio release.
+
+## Earlier cleanup — October 30, 2026
+
 On October 30, 2026, Gitleaks 8.30.1 scanned all local Git refs: 177 commits
 and 10.69 MB of historical changes. It reported three candidates, all verified
 as SHA-256 source-file fingerprints in the A2A evidence receipt, with **zero
@@ -7,7 +18,7 @@ confirmed credentials**. Each fingerprint matches the corresponding file at
 revision `3c61889`. The [counts-only receipt](evidence/public-readiness.json)
 records the exact findings and scanner image. Pattern scans cannot prove the
 absence of every possible secret. No history was rewritten; repository visibility
-remains private.
+remained private at that checkpoint.
 
 The working tree no longer contains the four full-repository snapshots under
 `artifacts/`, `codex_run.log`, the generated ChatGPT image, or the extra `.env.*`
@@ -58,7 +69,7 @@ docker run --rm --network none --read-only --cap-drop ALL \
   --report-format json --report-path /reports/history.json
 ```
 
-The first command should list only `.env.example`. The raw scan currently returns
-three fingerprint candidates; inspect new findings rather than broadly suppressing
+The first command should list only `.env.example`. The November 3 history scan returns
+five reviewed candidates; inspect new findings rather than broadly suppressing
 API-related files. If a real credential is found, report and revoke or rotate it;
 history rewriting requires separate approval.

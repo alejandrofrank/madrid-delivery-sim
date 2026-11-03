@@ -1,0 +1,15 @@
+{
+  "reviewed_local_date": "2026-11-03",
+  "reviewed_revision": "0f7568dc05383dc348bf97f893c7e13982080cfb",
+  "scanner": "Gitleaks 8.30.1",
+  "commits_scanned": 253,
+  "bytes_scanned": 31631312,
+  "candidates": 5,
+  "confirmed_credentials": 0,
+  "classifications": {
+    "source_file_sha256": 4,
+    "synthetic_queue_dedupe_key": 1
+  },
+  "history_rewritten": false,
+  "scope": "All local Git refs. Pattern scanning cannot prove the absence of every secret. Local ignored credentials were not mounted."
+}
