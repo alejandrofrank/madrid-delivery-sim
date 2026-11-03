@@ -13,6 +13,7 @@ from fastapi import FastAPI, HTTPException, Request
 from fastapi.responses import JSONResponse
 from fastapi.routing import APIRoute
 from fastapi.staticfiles import StaticFiles
+from starlette.middleware.gzip import GZipMiddleware
 
 
 class Recordings:
@@ -72,6 +73,8 @@ def create_replay_app(
     app = FastAPI(title="madrid-delivery-sim replay", docs_url=None, redoc_url=None,
                   openapi_url=None)
 
+    app.add_middleware(GZipMiddleware, minimum_size=1000)
+
     @app.middleware("http")
     async def read_only(request: Request, call_next: Any) -> Any:
         if request.method not in {"GET", "HEAD"}:
@@ -92,9 +95,13 @@ def create_replay_app(
         return {"mode": "replay", "read_only": True, "playback_seconds": 60,
                 "model_calls": False}
 
+    from delivery.public_reference import create_public_reference
+    from delivery.recorded_api import create_recorded_router
     from delivery.site_pages import create_site_router
 
     app.include_router(create_site_router(web))
+    app.include_router(create_public_reference(web / "data/reference"))
+    app.include_router(create_recorded_router(lambda: recordings))
 
     @app.get("/api/world")
     def world() -> Any:

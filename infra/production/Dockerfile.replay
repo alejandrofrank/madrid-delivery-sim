@@ -3,7 +3,7 @@ ENV PYTHONDONTWRITEBYTECODE=1 PYTHONUNBUFFERED=1 PYTHONPATH=/app/src DELIVERY_RU
 WORKDIR /app
 COPY infra/production/replay-requirements.lock /tmp/requirements.lock
 RUN pip install --no-cache-dir -r /tmp/requirements.lock && useradd -u 10001 -m replay
-COPY src/delivery/__init__.py src/delivery/production.py src/delivery/replay.py ./src/delivery/
+COPY src/delivery/__init__.py src/delivery/production.py src/delivery/replay.py src/delivery/site_pages.py src/delivery/recorded_api.py src/delivery/public_reference.py ./src/delivery/
 COPY data/replays ./data/replays
 COPY web ./web
 USER replay

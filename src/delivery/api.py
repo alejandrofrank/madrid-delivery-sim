@@ -13,6 +13,7 @@ from fastapi import BackgroundTasks, FastAPI, HTTPException, Request
 from fastapi.responses import FileResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
+from starlette.middleware.gzip import GZipMiddleware
 from starlette.responses import Response
 from starlette.types import Receive, Scope, Send
 
@@ -28,6 +29,7 @@ from delivery.lab import create_lab, export_slice, lab_snapshot
 from delivery.live_jobs import schedule
 from delivery.mcp_server import create_mcp_server
 from delivery.protocol_api import agent_directory, agent_names
+from delivery.recorded_api import create_recorded_router
 from delivery.simulation import Simulation, create_run, initialize, snapshot
 from delivery.site_pages import create_site_router
 from delivery.store_api import router as store_router
@@ -371,7 +373,9 @@ def favicon() -> None:
     raise HTTPException(status_code=404)
 
 
+app.add_middleware(GZipMiddleware, minimum_size=1000)
 app.include_router(create_site_router())
+app.include_router(create_recorded_router())
 app.include_router(supply_router)
 app.include_router(chaos_router)
 app.include_router(store_router)
