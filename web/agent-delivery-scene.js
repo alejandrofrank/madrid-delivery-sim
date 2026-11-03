@@ -1,7 +1,7 @@
 import * as THREE from './vendor/three/three.module.js';
 import {OrbitControls} from './vendor/three/OrbitControls.js';
 
-const positions={inventory:[-11,1.5],fulfillment:[-5,3.8],dispatcher:[2,1],courier:[5,7],judge:[10,-6],household:[13,3.2],restaurant:[-11,-7],market:[-4,-7],customer_service:[3,-7]};
+const positions={inventory:[-11,1.5],fulfillment:[-5,3.8],dispatcher:[2,1],courier:[5,7],judge:[10,-6],household:[14.4,3.2],restaurant:[-11,-7],market:[-4,-7],customer_service:[3,-7]};
 const v=(p,y=0)=>new THREE.Vector3(p[0],y,p[1]);
 export function createDeliveryScene(host,data,{onAgent,onFailure,createAgentModel}){
  const renderer=new THREE.WebGLRenderer({antialias:true,preserveDrawingBuffer:true,powerPreference:'low-power'});
@@ -18,7 +18,7 @@ export function createDeliveryScene(host,data,{onAgent,onFailure,createAgentMode
  const narrow=matchMedia('(max-width:700px)');
  function interactionMode(){controls.enabled=!narrow.matches;canvas.style.touchAction=narrow.matches?'pan-x pan-y':'none';}
  interactionMode();narrow.addEventListener('change',interactionMode);
- const resources=new Set(),models=new Map(),labels=new Map(),home=new Map(),boxBatches=new Map();
+ const resources=new Set(),models=new Map(),labels=new Map(),home=new Map(),boxBatches=new Map(),labelSizes=new Map();
  const material=(color,extra={})=>{const m=new THREE.MeshStandardMaterial({color,roughness:.65,metalness:.2,...extra});resources.add(m);return m;};
  const floor=material(0x364c55),wall=material(0x607783),edge=material(0x263d48),alloy=material(0xa9bdc6),black=material(0x14262f),road=material(0x1b2b35),wood=material(0xa78d64),white=material(0xc2d3d8);
  const cargo=[material(0x8baf8b),material(0xb6a073),material(0x8aa5b5)];
@@ -146,7 +146,7 @@ export function createDeliveryScene(host,data,{onAgent,onFailure,createAgentMode
  const key=new THREE.DirectionalLight(0xffefd7,3.8);key.position.set(-8,18,10);key.castShadow=true;key.shadow.mapSize.set(1024,1024);
  Object.assign(key.shadow.camera,{left:-22,right:22,top:20,bottom:-20,near:.1,far:80});key.shadow.normalBias=.08;scene.add(key);
  const fill=new THREE.DirectionalLight(0x8db9e3,1.5);fill.position.set(10,8,-8);scene.add(fill);
- let current=0,progress=0,playing=false,shown=true,visible=true,dirty=true,disposed=false,last=0,raf=0,hovered=null,frames=0,focusStep=null;
+ let current=0,progress=0,playing=false,shown=true,visible=true,dirty=true,disposed=false,raf=0,hovered=null,frames=0,focusStep=null;
  const target=new THREE.Vector3(0,.4,0);
  // Fit occupied geometry, not the empty upper corners of a giant bounding box.
  world.updateMatrixWorld(true);const fitPoints=[];
@@ -155,6 +155,7 @@ export function createDeliveryScene(host,data,{onAgent,onFailure,createAgentMode
  for(const model of models.values())fitPoints.push(model.root.position.clone().add(new THREE.Vector3(0,3.4,0)));
  function fit(){
   const w=host.clientWidth,h=host.clientHeight;if(!w||!h)return;
+  labelSizes.clear();
   const aspect=w/h;camera.left=-15;camera.right=15;camera.top=15/aspect;camera.bottom=-15/aspect;camera.updateProjectionMatrix();
   // Fit the shared physical bounds, not floating labels or a distant backdrop.
   camera.updateMatrixWorld();const projected=fitPoints.map(p=>p.clone().project(camera));
@@ -189,11 +190,16 @@ export function createDeliveryScene(host,data,{onAgent,onFailure,createAgentMode
   dirty=true;
  }
  function project(){
-  scene.updateMatrixWorld(true);camera.updateMatrixWorld();const bounds={};
+  scene.updateMatrixWorld(true);camera.updateMatrixWorld();const bounds={},occupied=[];
   for(const [id,model]of models){
    const p=model.root.position.clone().add(new THREE.Vector3(0,3.25,0)).project(camera);
-   const x=(p.x+1)/2*host.clientWidth,y=(1-p.y)/2*host.clientHeight;
-   labels.get(id).style.transform='translate('+x.toFixed(1)+'px,'+y.toFixed(1)+'px) translate(-50%,-100%)';
+   const x=(p.x+1)/2*host.clientWidth;let y=(1-p.y)/2*host.clientHeight;
+   const label=labels.get(id);
+   if(!labelSizes.has(id))labelSizes.set(id,[label.offsetWidth,label.offsetHeight]);
+   const [width,height]=labelSizes.get(id);
+   for(let attempt=0;attempt<5&&occupied.some(r=>x+width/2+5>r.left&&x-width/2-5<r.right&&y+5>r.top&&y-height-5<r.bottom);attempt++)y-=height+6;
+   occupied.push({left:x-width/2,right:x+width/2,top:y-height,bottom:y});
+   label.style.transform='translate('+x.toFixed(1)+'px,'+y.toFixed(1)+'px) translate(-50%,-100%)';
    const hit=model.root.position.clone().add(new THREE.Vector3(0,1.35,0)).project(camera);
    bounds[id]={x:(hit.x+1)/2,y:(1-hit.y)/2};
   }
@@ -240,16 +246,17 @@ export function createDeliveryScene(host,data,{onAgent,onFailure,createAgentMode
  function draw(now){
   if(disposed)return;raf=requestAnimationFrame(draw);
   if(dirty){const bounds=host.getBoundingClientRect();visible=bounds.width>0&&bounds.height>0&&bounds.bottom>0&&bounds.top<innerHeight;}
-  if(!shown||!visible||document.hidden||now-last<1000/30||!dirty)return;
-  last=now;project();renderer.render(scene,camera);dirty=false;frames++;
+  if(!shown||!visible||document.hidden||!dirty)return;
+  project();renderer.render(scene,camera);dirty=false;frames++;
   canvas.dataset.viewWidth=String(host.clientWidth);canvas.dataset.viewHeight=String(host.clientHeight);canvas.dataset.frames=String(frames);canvas.dataset.render=JSON.stringify({calls:renderer.info.render.calls,triangles:renderer.info.render.triangles});
-  canvas.dataset.visuals=JSON.stringify(data.agents.map(a=>({id:a.id,...a.visual})));
+
  }
  function dispose(){
   if(disposed)return;disposed=true;cancelAnimationFrame(raf);resize.disconnect();intersection.disconnect();narrow.removeEventListener("change",interactionMode);controls.dispose();canvas.removeEventListener('webglcontextlost',lost);
   for(const model of models.values())for(const item of model.resources)item.dispose();
   for(const item of resources)item.dispose();renderer.dispose();canvas.remove();labelLayer.remove();
  }
+ canvas.dataset.visuals=JSON.stringify(data.agents.map(a=>({id:a.id,...a.visual})));
  reset();setState(0,0,false);raf=requestAnimationFrame(draw);
  return {setState,highlight,reset,dispose,show(value){shown=value;dirty=true;if(value)fit();}};
 }

@@ -41,11 +41,19 @@ const {chromium}=require("playwright"),assert=require("node:assert/strict"),fs=r
   await page.goto("http://localhost:8010/agents",{waitUntil:"domcontentloaded"});
   await page.locator("#loading .ui-loading-network").waitFor();
   assert(await page.locator("#loading").isVisible());
+  assert(!(await page.locator(".sidebar").isVisible()),"Agent loading keeps the visitor layout");
   if(!process.env.CI)await page.screenshot({path:"artifacts/product-check/agents-loading.png"});
   await page.waitForSelector(".delivery-scene-canvas");
   await page.waitForFunction(()=>Number(document.querySelector(".delivery-scene-canvas").dataset.frames)>0);
   assert.equal(await page.locator(".delivery-scene-canvas").getAttribute("data-rooms"),"7");
   assert(await page.locator(".story-legend").isVisible());
+  await page.locator('.story-step[data-step="5"] button').click();
+  await page.waitForTimeout(100);
+  assert(await page.locator(".scene-role-label[data-agent]").evaluateAll(labels=>{
+    const boxes=labels.map(el=>el.getBoundingClientRect());
+    return boxes.every((a,i)=>boxes.slice(i+1).every(b=>a.right<=b.left||b.right<=a.left||a.bottom<=b.top||b.bottom<=a.top));
+  }),"Role labels stay distinct at the doorstep handoff");
+  await page.locator('.story-step[data-step="0"] button').click();await page.evaluate(()=>scrollTo(0,0));
   if(!process.env.CI)await page.screenshot({path:"artifacts/product-check/agents-rooms.png",fullPage:true});
   await page.setViewportSize({width:390,height:844});
   assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth));

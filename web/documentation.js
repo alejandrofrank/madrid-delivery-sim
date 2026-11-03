@@ -813,6 +813,7 @@ window.addEventListener("resize", () => {
   try {
     const openingAgents=location.pathname!=="/engineers/architecture"&&!new URLSearchParams(location.search).has("page");
     if(openingAgents){
+      document.body.classList.add("anatomy-mode");
       $("#loading").replaceChildren(...ProductUI.loading("Assembling the agent team").childNodes);
       window.AgentAnatomy.preload().catch(()=>{}); // Fetch alongside the chapter catalogue.
     }
