@@ -792,6 +792,11 @@
 @media (prefers-reduced-motion: reduce) {
 }
 :where(body[data-page="restaurants"]) .metric.metric-action {
+  display: grid;
+  justify-content: stretch;
+  justify-items: start;
+  align-content: start;
+  gap: 0;
   border: 0;
   border-right: 1px solid var(--line);
   border-radius: 0;

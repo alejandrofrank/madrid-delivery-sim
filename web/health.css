@@ -400,8 +400,9 @@
 :where(body[data-page="health"]) .badge.incomplete,
 :where(body[data-page="health"]) .badge.outdated,
 :where(body[data-page="health"]) .badge.stale {
-  background: #302a20;
-  border-color: #75613e;
+  color: var(--ui-warning);
+  background: var(--ui-warning-bg);
+  border-color: var(--ui-warning);
 }
 :where(body[data-page="health"]) .section-heading {
   display: flex;
