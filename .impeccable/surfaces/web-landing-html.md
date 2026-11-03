@@ -30,4 +30,7 @@ The roll assigned 5. User-pinned content, colors, cards and three-section naviga
 All six catalog challengers lose audience identification and product clarity here: civic prospectus, festival billing, alphabet weather, film processing, HyperCard and phosphor terminal. Kept disciplines respectively: restraint; clear hierarchy; causal motion; exact playback timing; reversible navigation; inspectable history. No borrowed costume, gradients or terminal chrome.
 
 ## Approval status
-Three composition previews are prepared under .impeccable/mocks/product-{map,journey,order}.png. All are unapproved; the structured layout-choice question is pending. No product page implementation has begun. The city-led map is recommended for immediate network activity and a lightweight first load. Use actual recorded routes and existing robot geometry; remove any repo-name text or invented map labels from generated mockups.
+The user approved the city-led map composition on 2026-11-03. Selected preview:
+.impeccable/mocks/product-map.png. Implement the actual recorded Madrid paths and
+existing purpose-colored robot models, preserving the user's requested navigation
+and removing any extra repository-name text introduced by image generation.

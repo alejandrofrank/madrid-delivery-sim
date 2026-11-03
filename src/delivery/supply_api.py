@@ -32,11 +32,6 @@ router = APIRouter()
 _LEASES: dict[tuple[str, str, int], Event] = CHANNEL_LEASES
 
 
-@router.get("/agent-traces")
-def model_evidence_page() -> FileResponse:
-    return FileResponse("web/agent-traces.html")
-
-
 @router.get("/api/supply/model-comparison")
 def model_comparison() -> FileResponse:
     """Fixed local operator artifact; no caller-selected paths or agent credentials."""
@@ -109,11 +104,6 @@ def channel(run: UUID, agent_id: str, authorization: str | None) -> LocalAgent:
         return authenticated_agent(str(run), agent_id, authorization[7:])
     except PermissionError:
         raise HTTPException(401, "Invalid, expired or wrong-scope agent channel") from None
-
-
-@router.get("/restaurant-lab")
-def restaurant_page() -> FileResponse:
-    return FileResponse("web/supply.html")
 
 
 @router.get("/api/supply/blueprint")

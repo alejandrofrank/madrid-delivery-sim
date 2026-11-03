@@ -10,7 +10,7 @@ from pathlib import Path
 from typing import Any
 
 from fastapi import FastAPI, HTTPException, Request
-from fastapi.responses import FileResponse, JSONResponse
+from fastapi.responses import JSONResponse
 from fastapi.routing import APIRoute
 from fastapi.staticfiles import StaticFiles
 
@@ -92,9 +92,9 @@ def create_replay_app(
         return {"mode": "replay", "read_only": True, "playback_seconds": 60,
                 "model_calls": False}
 
-    @app.get("/")
-    def index() -> FileResponse:
-        return FileResponse(web / "index.html")
+    from delivery.site_pages import create_site_router
+
+    app.include_router(create_site_router(web))
 
     @app.get("/api/world")
     def world() -> Any:

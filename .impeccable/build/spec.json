@@ -1,964 +1,160 @@
 {
   "tool": "comp-spec",
   "version": 1,
-  "createdAt": "2026-10-29T14:10:47.996Z",
-  "comp": ".impeccable/mocks/comp-agents-map.png",
+  "createdAt": "2026-11-03T00:04:54.561Z",
+  "comp": ".impeccable/mocks/product-map.png",
   "warnings": [
-    "region map: \"codeDrawn\": true set in the regions file (the painted-material refusal is overridden: code draws this region)",
-    "region map: \"container\": true set in the regions file (the region-size refusal is overridden: one undivided element)",
-    "region titlebar: \"container\": true set in the regions file (the region-size refusal is overridden: one undivided element)",
-    "region agent-table: \"container\": true set in the regions file (the region-size refusal is overridden: one undivided element)",
-    "region orders-table: \"container\": true set in the regions file (the region-size refusal is overridden: one undivided element)"
+    "region recorded-map: \"codeDrawn\": true set in the regions file (the painted-material refusal is overridden: code draws this region)",
+    "region recorded-map: \"container\": true set in the regions file (the region-size refusal is overridden: one undivided element)",
+    "region robot-handoff: \"codeDrawn\": true set in the regions file (the painted-material refusal is overridden: code draws this region)",
+    "region flow: \"codeDrawn\": true set in the regions file (the painted-material refusal is overridden: code draws this region)"
   ],
-  "uncoveredInkCells": [
-    "A7"
-  ],
+  "uncoveredInkCells": [],
   "compSize": {
-    "width": 1536,
-    "height": 1024
+    "width": 1487,
+    "height": 1058
   },
-  "aspect": 1.5,
+  "aspect": 1.4055,
   "orientation": "landscape",
   "palette": [
     {
-      "hex": "#091919",
-      "coverage": 0.7185
+      "hex": "#f7f2e9",
+      "coverage": 0.8499
     },
     {
-      "hex": "#182535",
-      "coverage": 0.2244
+      "hex": "#e2eac1",
+      "coverage": 0.069
     },
     {
-      "hex": "#2c4049",
-      "coverage": 0.0436
+      "hex": "#d8cfc5",
+      "coverage": 0.0385
     },
     {
-      "hex": "#8e9eb2",
-      "coverage": 0.0068
+      "hex": "#0f1311",
+      "coverage": 0.0242
     },
     {
-      "hex": "#566676",
-      "coverage": 0.0067
+      "hex": "#088440",
+      "coverage": 0.0184
     }
   ],
   "bands": [
     {
-      "y": 0.0353,
-      "strength": 0.2212
+      "y": 0.022,
+      "strength": 0.4238
     },
     {
-      "y": 0.0706,
-      "strength": 0.3406
+      "y": 0.044,
+      "strength": 0.3916
     },
     {
-      "y": 0.0941,
-      "strength": 0.3323
+      "y": 0.1319,
+      "strength": 0.4636
     },
     {
-      "y": 0.6941,
-      "strength": 0.3193
+      "y": 0.1648,
+      "strength": 0.4018
     },
     {
-      "y": 0.8353,
-      "strength": 0.2173
+      "y": 0.1868,
+      "strength": 0.4139
     },
     {
-      "y": 0.8824,
-      "strength": 0.2247
+      "y": 0.2198,
+      "strength": 0.2794
     },
     {
-      "y": 0.9176,
-      "strength": 0.2146
+      "y": 0.2418,
+      "strength": 0.2126
+    },
+    {
+      "y": 0.2747,
+      "strength": 0.2
+    },
+    {
+      "y": 0.3297,
+      "strength": 0.241
+    },
+    {
+      "y": 0.4066,
+      "strength": 0.3271
+    },
+    {
+      "y": 0.4615,
+      "strength": 0.3001
+    },
+    {
+      "y": 0.6923,
+      "strength": 0.7522
+    },
+    {
+      "y": 0.7253,
+      "strength": 0.3959
+    },
+    {
+      "y": 0.8022,
+      "strength": 0.5126
+    },
+    {
+      "y": 0.8242,
+      "strength": 0.4653
+    },
+    {
+      "y": 0.8901,
+      "strength": 0.6088
+    },
+    {
+      "y": 0.956,
+      "strength": 0.2491
+    },
+    {
+      "y": 0.978,
+      "strength": 0.2154
     }
   ],
   "regions": [
     {
-      "id": "navigation",
+      "id": "header",
       "kind": "chrome",
-      "note": "Top shared navigation with brand, route links and runtime status.",
+      "note": "Shared warm header, Madrid wordmark, three primary destinations, engineer menu, theme switch and watch action.",
       "grid": null,
       "box": {
         "x": 0,
         "y": 0,
         "w": 1,
-        "h": 0.0439
+        "h": 0.0662
       },
       "px": {
         "x": 0,
         "y": 0,
-        "w": 1536,
-        "h": 45
+        "w": 1487,
+        "h": 70
       },
-      "aspect": 34.1333,
+      "aspect": 21.2429,
       "palette": [
         {
-          "hex": "#081718",
-          "coverage": 0.9711
+          "hex": "#f8f7ea",
+          "coverage": 0.8975
         },
         {
-          "hex": "#a1b5c8",
-          "coverage": 0.0107
+          "hex": "#088743",
+          "coverage": 0.0691
         },
         {
-          "hex": "#4c5a6b",
-          "coverage": 0.0096
+          "hex": "#0a0f0b",
+          "coverage": 0.0172
         },
         {
-          "hex": "#2d3040",
-          "coverage": 0.0054
-        },
-        {
-          "hex": "#f3f3f3",
-          "coverage": 0.0032
-        }
-      ],
-      "detail": {
-        "energy": 20.5936
-      },
-      "medium": "semantic",
-      "plate": null,
-      "text": null,
-      "surface": {
-        "flat": false,
-        "rules": false
-      }
-    },
-    {
-      "id": "page-title",
-      "kind": "text",
-      "note": "Delivery operations page title.",
-      "grid": null,
-      "box": {
-        "x": 0.0189,
-        "y": 0.0605,
-        "w": 0.181,
-        "h": 0.0332
-      },
-      "px": {
-        "x": 29,
-        "y": 62,
-        "w": 278,
-        "h": 34
-      },
-      "aspect": 8.1765,
-      "palette": [
-        {
-          "hex": "#091518",
-          "coverage": 0.7275
-        },
-        {
-          "hex": "#f5f5f6",
-          "coverage": 0.2089
-        },
-        {
-          "hex": "#777d82",
-          "coverage": 0.0254
-        },
-        {
-          "hex": "#3d4949",
-          "coverage": 0.02
-        },
-        {
-          "hex": "#bec2c6",
-          "coverage": 0.0182
-        }
-      ],
-      "detail": {
-        "energy": 84.9377
-      },
-      "medium": "semantic",
-      "plate": null,
-      "text": null,
-      "surface": {
-        "flat": false,
-        "rules": false
-      },
-      "type": {
-        "comp": {
-          "lines": 1,
-          "glyphs": 18,
-          "capHeightPx": 23.2,
-          "inkIsDark": false,
-          "allCaps": false,
-          "advance": 0.6136,
-          "advTall": 0.3014,
-          "advX": 0.6244,
-          "gap": 0.1077,
-          "xRatio": 0.6954,
-          "stemW": 0.193,
-          "contrast": 1.1902,
-          "serif": 0.9517,
-          "densTall": 0.6427,
-          "densX": 0.6182,
-          "weight": 0.6427
-        },
-        "widthClass": "normal",
-        "weightClass": "bold",
-        "chosen": {
-          "family": "Alegreya Sans",
-          "weight": 700,
-          "fontSizePx": 33,
-          "source": "catalog",
-          "estimatedSize": true,
-          "stamp": "879d898c2722"
-        }
-      }
-    },
-    {
-      "id": "session-label",
-      "kind": "text",
-      "note": "Illustrative synthetic session, a compact runtime status label.",
-      "grid": null,
-      "box": {
-        "x": 0.2083,
-        "y": 0.0645,
-        "w": 0.1634,
-        "h": 0.0244
-      },
-      "px": {
-        "x": 320,
-        "y": 66,
-        "w": 251,
-        "h": 25
-      },
-      "aspect": 10.04,
-      "palette": [
-        {
-          "hex": "#081718",
-          "coverage": 0.9044
-        },
-        {
-          "hex": "#97aac1",
-          "coverage": 0.035
-        },
-        {
-          "hex": "#5f7089",
-          "coverage": 0.031
-        },
-        {
-          "hex": "#1f454a",
-          "coverage": 0.0188
-        },
-        {
-          "hex": "#28eee8",
-          "coverage": 0.0108
-        }
-      ],
-      "detail": {
-        "energy": 34.3953
-      },
-      "medium": "semantic",
-      "plate": null,
-      "text": null,
-      "surface": {
-        "flat": false,
-        "rules": false
-      },
-      "type": {
-        "comp": {
-          "lines": 1,
-          "glyphs": 27,
-          "capHeightPx": 10.1,
-          "inkIsDark": false,
-          "allCaps": false,
-          "advance": 0.5283,
-          "advTall": 0.3632,
-          "advX": 0.5778,
-          "gap": 0.066,
-          "xRatio": 0.7157,
-          "stemW": 0.1703,
-          "contrast": 1.2013,
-          "serif": 0.5954,
-          "densTall": 0.6061,
-          "densX": 0.5865,
-          "weight": 0.6061
-        },
-        "widthClass": "condensed",
-        "weightClass": "bold"
-      }
-    },
-    {
-      "id": "start-controls",
-      "kind": "control",
-      "note": "Start simulation and Configure buttons.",
-      "grid": null,
-      "box": {
-        "x": 0.7799,
-        "y": 0.0596,
-        "w": 0.2116,
-        "h": 0.0342
-      },
-      "px": {
-        "x": 1198,
-        "y": 61,
-        "w": 325,
-        "h": 35
-      },
-      "aspect": 9.2857,
-      "palette": [
-        {
-          "hex": "#0a171d",
-          "coverage": 0.4862
-        },
-        {
-          "hex": "#26e8d9",
-          "coverage": 0.3661
-        },
-        {
-          "hex": "#273643",
-          "coverage": 0.0804
-        },
-        {
-          "hex": "#158678",
-          "coverage": 0.0552
-        },
-        {
-          "hex": "#9aacbc",
-          "coverage": 0.0122
-        }
-      ],
-      "detail": {
-        "energy": 32.2252
-      },
-      "medium": "semantic",
-      "plate": null,
-      "text": null,
-      "surface": {
-        "flat": false,
-        "rules": false
-      }
-    },
-    {
-      "id": "orders-kpi",
-      "kind": "chrome",
-      "note": "Runtime metric and its history chart. Unavailable observations show No run yet.",
-      "grid": null,
-      "box": {
-        "x": 0.0078,
-        "y": 0.1055,
-        "w": 0.2539,
-        "h": 0.0781
-      },
-      "px": {
-        "x": 12,
-        "y": 108,
-        "w": 390,
-        "h": 80
-      },
-      "aspect": 4.875,
-      "palette": [
-        {
-          "hex": "#09181b",
-          "coverage": 0.9699
-        },
-        {
-          "hex": "#1f364b",
-          "coverage": 0.01
-        },
-        {
-          "hex": "#93a7c0",
-          "coverage": 0.01
-        },
-        {
-          "hex": "#bcd6ea",
-          "coverage": 0.0057
-        },
-        {
-          "hex": "#55657a",
-          "coverage": 0.0043
-        }
-      ],
-      "detail": {
-        "energy": 10.0037
-      },
-      "medium": "semantic",
-      "plate": null,
-      "text": null,
-      "surface": {
-        "flat": false,
-        "rules": false
-      }
-    },
-    {
-      "id": "ontime-kpi",
-      "kind": "chrome",
-      "note": "Runtime metric and its history chart. Unavailable observations show No run yet.",
-      "grid": null,
-      "box": {
-        "x": 0.2624,
-        "y": 0.1055,
-        "w": 0.2363,
-        "h": 0.0781
-      },
-      "px": {
-        "x": 403,
-        "y": 108,
-        "w": 363,
-        "h": 80
-      },
-      "aspect": 4.5375,
-      "palette": [
-        {
-          "hex": "#09181b",
-          "coverage": 0.9808
-        },
-        {
-          "hex": "#1d3545",
-          "coverage": 0.0059
-        },
-        {
-          "hex": "#565e71",
-          "coverage": 0.0047
-        },
-        {
-          "hex": "#9db3d3",
-          "coverage": 0.0043
-        },
-        {
-          "hex": "#98a8b2",
-          "coverage": 0.0043
-        }
-      ],
-      "detail": {
-        "energy": 10.9319
-      },
-      "medium": "semantic",
-      "plate": null,
-      "text": null,
-      "surface": {
-        "flat": false,
-        "rules": false
-      }
-    },
-    {
-      "id": "cost-kpi",
-      "kind": "chrome",
-      "note": "Runtime metric and its history chart. Unavailable observations show No run yet.",
-      "grid": null,
-      "box": {
-        "x": 0.4993,
-        "y": 0.1055,
-        "w": 0.2376,
-        "h": 0.0781
-      },
-      "px": {
-        "x": 767,
-        "y": 108,
-        "w": 365,
-        "h": 80
-      },
-      "aspect": 4.5625,
-      "palette": [
-        {
-          "hex": "#09181b",
-          "coverage": 0.9724
-        },
-        {
-          "hex": "#93a3b6",
-          "coverage": 0.0113
-        },
-        {
-          "hex": "#304457",
-          "coverage": 0.0083
-        },
-        {
-          "hex": "#5f768c",
-          "coverage": 0.004
-        },
-        {
-          "hex": "#1c2c48",
-          "coverage": 0.004
-        }
-      ],
-      "detail": {
-        "energy": 11.8153
-      },
-      "medium": "semantic",
-      "plate": null,
-      "text": null,
-      "surface": {
-        "flat": false,
-        "rules": false
-      }
-    },
-    {
-      "id": "latency-kpi",
-      "kind": "chrome",
-      "note": "Runtime metric and its history chart. Unavailable observations show No run yet.",
-      "grid": null,
-      "box": {
-        "x": 0.7376,
-        "y": 0.1055,
-        "w": 0.2546,
-        "h": 0.0781
-      },
-      "px": {
-        "x": 1133,
-        "y": 108,
-        "w": 391,
-        "h": 80
-      },
-      "aspect": 4.8875,
-      "palette": [
-        {
-          "hex": "#09181b",
-          "coverage": 0.9788
-        },
-        {
-          "hex": "#22374f",
-          "coverage": 0.008
-        },
-        {
-          "hex": "#8b9cb1",
-          "coverage": 0.0063
-        },
-        {
-          "hex": "#3d5367",
-          "coverage": 0.0046
-        },
-        {
-          "hex": "#bed8ee",
-          "coverage": 0.0023
-        }
-      ],
-      "detail": {
-        "energy": 10.8282
-      },
-      "medium": "semantic",
-      "plate": null,
-      "text": null,
-      "surface": {
-        "flat": false,
-        "rules": false
-      }
-    },
-    {
-      "id": "agent-controls",
-      "kind": "control",
-      "note": "Agents heading with role, status and search filters.",
-      "grid": null,
-      "box": {
-        "x": 0.0078,
-        "y": 0.1924,
-        "w": 0.4466,
-        "h": 0.0479
-      },
-      "px": {
-        "x": 12,
-        "y": 197,
-        "w": 686,
-        "h": 49
-      },
-      "aspect": 14,
-      "palette": [
-        {
-          "hex": "#081818",
-          "coverage": 0.8182
-        },
-        {
-          "hex": "#101626",
-          "coverage": 0.146
-        },
-        {
-          "hex": "#26313e",
-          "coverage": 0.0212
-        },
-        {
-          "hex": "#54616f",
-          "coverage": 0.0084
-        },
-        {
-          "hex": "#f2f2f3",
-          "coverage": 0.0063
-        }
-      ],
-      "detail": {
-        "energy": 14.1407
-      },
-      "medium": "semantic",
-      "plate": null,
-      "text": null,
-      "surface": {
-        "flat": false,
-        "rules": false
-      }
-    },
-    {
-      "id": "agent-columns",
-      "kind": "text",
-      "note": "Agent, Role, Status, Current task, Throughput and History column labels.",
-      "grid": null,
-      "box": {
-        "x": 0.0182,
-        "y": 0.2432,
-        "w": 0.4258,
-        "h": 0.0332
-      },
-      "px": {
-        "x": 28,
-        "y": 249,
-        "w": 654,
-        "h": 34
-      },
-      "aspect": 19.2353,
-      "palette": [
-        {
-          "hex": "#081719",
-          "coverage": 0.943
-        },
-        {
-          "hex": "#a1afbe",
-          "coverage": 0.0216
-        },
-        {
-          "hex": "#545e6f",
-          "coverage": 0.0158
-        },
-        {
-          "hex": "#29323f",
-          "coverage": 0.0154
-        },
-        {
-          "hex": "#75828f",
-          "coverage": 0.0042
-        }
-      ],
-      "detail": {
-        "energy": 19.1102
-      },
-      "medium": "semantic",
-      "plate": null,
-      "text": null,
-      "surface": {
-        "flat": false,
-        "rules": false
-      },
-      "type": {
-        "comp": {
-          "lines": 1,
-          "glyphs": 39,
-          "capHeightPx": 13.4,
-          "inkIsDark": false,
-          "allCaps": false,
-          "advance": 0.3724,
-          "advTall": null,
-          "advX": 0.3724,
-          "gap": 0.0745,
-          "xRatio": 0.4063,
-          "stemW": 0.1471,
-          "contrast": 1.1039,
-          "serif": 0.9976,
-          "densTall": null,
-          "densX": 0.728,
-          "weight": 0.728
-        },
-        "widthClass": "compressed",
-        "weightClass": "black"
-      }
-    },
-    {
-      "id": "agent-row-1",
-      "kind": "control",
-      "note": "Selectable runtime agent row: identity, role, state, task and observed throughput history.",
-      "grid": null,
-      "reviewGroup": "agent-rows",
-      "box": {
-        "x": 0.0085,
-        "y": 0.2793,
-        "w": 0.4453,
-        "h": 0.0508
-      },
-      "px": {
-        "x": 13,
-        "y": 286,
-        "w": 684,
-        "h": 52
-      },
-      "aspect": 13.1538,
-      "palette": [
-        {
-          "hex": "#082931",
-          "coverage": 0.8232
-        },
-        {
-          "hex": "#105e5c",
-          "coverage": 0.128
-        },
-        {
-          "hex": "#5d8a9c",
-          "coverage": 0.0314
-        },
-        {
-          "hex": "#3a5767",
-          "coverage": 0.011
-        },
-        {
-          "hex": "#e1eaee",
-          "coverage": 0.0064
-        }
-      ],
-      "detail": {
-        "energy": 23.9053
-      },
-      "medium": "semantic",
-      "plate": null,
-      "text": null,
-      "surface": {
-        "flat": false,
-        "rules": false
-      }
-    },
-    {
-      "id": "agent-row-2",
-      "kind": "control",
-      "note": "Selectable runtime agent row: identity, role, state, task and observed throughput history.",
-      "grid": null,
-      "reviewGroup": "agent-rows",
-      "box": {
-        "x": 0.0085,
-        "y": 0.3301,
-        "w": 0.4453,
-        "h": 0.0508
-      },
-      "px": {
-        "x": 13,
-        "y": 338,
-        "w": 684,
-        "h": 52
-      },
-      "aspect": 13.1538,
-      "palette": [
-        {
-          "hex": "#081818",
-          "coverage": 0.8877
-        },
-        {
-          "hex": "#142131",
-          "coverage": 0.0644
-        },
-        {
-          "hex": "#526171",
-          "coverage": 0.0317
-        },
-        {
-          "hex": "#b0c0d0",
-          "coverage": 0.0097
-        },
-        {
-          "hex": "#7a8a9c",
-          "coverage": 0.0065
-        }
-      ],
-      "detail": {
-        "energy": 17.8723
-      },
-      "medium": "semantic",
-      "plate": null,
-      "text": null,
-      "surface": {
-        "flat": false,
-        "rules": false
-      }
-    },
-    {
-      "id": "agent-row-3",
-      "kind": "control",
-      "note": "Selectable runtime agent row: identity, role, state, task and observed throughput history.",
-      "grid": null,
-      "reviewGroup": "agent-rows",
-      "box": {
-        "x": 0.0085,
-        "y": 0.3809,
-        "w": 0.4453,
-        "h": 0.0508
-      },
-      "px": {
-        "x": 13,
-        "y": 390,
-        "w": 684,
-        "h": 52
-      },
-      "aspect": 13.1538,
-      "palette": [
-        {
-          "hex": "#09191a",
-          "coverage": 0.8927
-        },
-        {
-          "hex": "#122b46",
-          "coverage": 0.0576
-        },
-        {
-          "hex": "#546375",
-          "coverage": 0.0317
-        },
-        {
-          "hex": "#e4e6ec",
-          "coverage": 0.0091
-        },
-        {
-          "hex": "#19558d",
-          "coverage": 0.0089
-        }
-      ],
-      "detail": {
-        "energy": 20.0331
-      },
-      "medium": "semantic",
-      "plate": null,
-      "text": null,
-      "surface": {
-        "flat": false,
-        "rules": false
-      }
-    },
-    {
-      "id": "agent-row-4",
-      "kind": "control",
-      "note": "Selectable runtime agent row: identity, role, state, task and observed throughput history.",
-      "grid": null,
-      "reviewGroup": "agent-rows",
-      "box": {
-        "x": 0.0085,
-        "y": 0.4316,
-        "w": 0.4453,
-        "h": 0.0508
-      },
-      "px": {
-        "x": 13,
-        "y": 442,
-        "w": 684,
-        "h": 52
-      },
-      "aspect": 13.1538,
-      "palette": [
-        {
-          "hex": "#09191a",
-          "coverage": 0.8948
-        },
-        {
-          "hex": "#0d2945",
-          "coverage": 0.0629
-        },
-        {
-          "hex": "#566578",
-          "coverage": 0.0304
-        },
-        {
-          "hex": "#143666",
-          "coverage": 0.007
-        },
-        {
-          "hex": "#9ba8c0",
-          "coverage": 0.0048
-        }
-      ],
-      "detail": {
-        "energy": 16.4522
-      },
-      "medium": "semantic",
-      "plate": null,
-      "text": null,
-      "surface": {
-        "flat": false,
-        "rules": false
-      }
-    },
-    {
-      "id": "agent-row-5",
-      "kind": "control",
-      "note": "Selectable runtime agent row: identity, role, state, task and observed throughput history.",
-      "grid": null,
-      "reviewGroup": "agent-rows",
-      "box": {
-        "x": 0.0085,
-        "y": 0.4824,
-        "w": 0.4453,
-        "h": 0.0508
-      },
-      "px": {
-        "x": 13,
-        "y": 494,
-        "w": 684,
-        "h": 52
-      },
-      "aspect": 13.1538,
-      "palette": [
-        {
-          "hex": "#091a1a",
-          "coverage": 0.9254
-        },
-        {
-          "hex": "#596879",
-          "coverage": 0.0304
-        },
-        {
-          "hex": "#083a31",
-          "coverage": 0.0264
-        },
-        {
-          "hex": "#a2b0c1",
-          "coverage": 0.0093
-        },
-        {
-          "hex": "#333a49",
-          "coverage": 0.0085
-        }
-      ],
-      "detail": {
-        "energy": 18.9468
-      },
-      "medium": "semantic",
-      "plate": null,
-      "text": null,
-      "surface": {
-        "flat": false,
-        "rules": false
-      }
-    },
-    {
-      "id": "agent-row-6",
-      "kind": "control",
-      "note": "Selectable runtime agent row: identity, role, state, task and observed throughput history.",
-      "grid": null,
-      "reviewGroup": "agent-rows",
-      "box": {
-        "x": 0.0085,
-        "y": 0.5332,
-        "w": 0.4453,
-        "h": 0.0508
-      },
-      "px": {
-        "x": 13,
-        "y": 546,
-        "w": 684,
-        "h": 52
-      },
-      "aspect": 13.1538,
-      "palette": [
-        {
-          "hex": "#09191a",
-          "coverage": 0.9169
-        },
-        {
-          "hex": "#566577",
-          "coverage": 0.0351
-        },
-        {
-          "hex": "#083831",
-          "coverage": 0.031
-        },
-        {
-          "hex": "#095444",
+          "hex": "#586359",
           "coverage": 0.0092
         },
         {
-          "hex": "#8d9db2",
-          "coverage": 0.0079
+          "hex": "#8d948e",
+          "coverage": 0.007
         }
       ],
       "detail": {
-        "energy": 19.5373
+        "energy": 38.428
       },
       "medium": "semantic",
       "plate": null,
@@ -969,153 +165,254 @@
       }
     },
     {
-      "id": "map",
+      "id": "headline",
+      "kind": "text",
+      "note": "9 AI agents run a Madrid grocery network",
+      "grid": null,
+      "box": {
+        "x": 0.0336,
+        "y": 0.1134,
+        "w": 0.3228,
+        "h": 0.1607
+      },
+      "px": {
+        "x": 50,
+        "y": 120,
+        "w": 480,
+        "h": 170
+      },
+      "aspect": 2.8235,
+      "palette": [
+        {
+          "hex": "#f7f5e9",
+          "coverage": 0.7217
+        },
+        {
+          "hex": "#092418",
+          "coverage": 0.1991
+        },
+        {
+          "hex": "#0a0a0a",
+          "coverage": 0.0342
+        },
+        {
+          "hex": "#aeb4ac",
+          "coverage": 0.0236
+        },
+        {
+          "hex": "#747f76",
+          "coverage": 0.0214
+        }
+      ],
+      "detail": {
+        "energy": 63.1357
+      },
+      "medium": "semantic",
+      "plate": null,
+      "text": null,
+      "surface": {
+        "flat": false,
+        "rules": false
+      },
+      "type": {
+        "comp": {
+          "lines": 3,
+          "glyphs": 33,
+          "capHeightPx": 41.1,
+          "inkIsDark": true,
+          "allCaps": false,
+          "advance": 0.7307,
+          "advTall": 0.7451,
+          "advX": 0.7241,
+          "gap": 0.0749,
+          "xRatio": 0.7403,
+          "stemW": 0.2462,
+          "contrast": 1.2885,
+          "serif": 0.9991,
+          "densTall": 0.6257,
+          "densX": 0.6643,
+          "weight": 0.6257
+        },
+        "widthClass": "wide",
+        "weightClass": "bold",
+        "chosen": {
+          "family": "Work Sans",
+          "weight": 700,
+          "fontSizePx": 59,
+          "source": "catalog",
+          "estimatedSize": true,
+          "stamp": "afabf107bf85"
+        }
+      }
+    },
+    {
+      "id": "summary",
+      "kind": "text",
+      "note": "They check stock, pick orders and get groceries to the doorstep—even when plans change.",
+      "grid": null,
+      "box": {
+        "x": 0.0336,
+        "y": 0.2949,
+        "w": 0.3194,
+        "h": 0.0851
+      },
+      "px": {
+        "x": 50,
+        "y": 312,
+        "w": 475,
+        "h": 90
+      },
+      "aspect": 5.2778,
+      "palette": [
+        {
+          "hex": "#f6f5e9",
+          "coverage": 0.8745
+        },
+        {
+          "hex": "#0e1110",
+          "coverage": 0.0522
+        },
+        {
+          "hex": "#7d837d",
+          "coverage": 0.028
+        },
+        {
+          "hex": "#b6bbb4",
+          "coverage": 0.0259
+        },
+        {
+          "hex": "#444746",
+          "coverage": 0.0195
+        }
+      ],
+      "detail": {
+        "energy": 63.8259
+      },
+      "medium": "semantic",
+      "plate": null,
+      "text": null,
+      "surface": {
+        "flat": false,
+        "rules": false
+      },
+      "type": {
+        "comp": {
+          "lines": 3,
+          "glyphs": 72,
+          "capHeightPx": 17.6,
+          "inkIsDark": true,
+          "allCaps": false,
+          "advance": 0.5974,
+          "advTall": 0.5956,
+          "advX": 0.6126,
+          "gap": 0.1418,
+          "xRatio": 0.7265,
+          "stemW": 0.1452,
+          "contrast": 1.0775,
+          "serif": 0.4846,
+          "densTall": 0.4465,
+          "densX": 0.5103,
+          "weight": 0.4465
+        },
+        "widthClass": "normal",
+        "weightClass": "regular"
+      }
+    },
+    {
+      "id": "hero-actions",
+      "kind": "control",
+      "note": "Watch it run and quieter Meet the agents.",
+      "grid": null,
+      "box": {
+        "x": 0.0336,
+        "y": 0.4017,
+        "w": 0.3194,
+        "h": 0.0595
+      },
+      "px": {
+        "x": 50,
+        "y": 425,
+        "w": 475,
+        "h": 63
+      },
+      "aspect": 7.5397,
+      "palette": [
+        {
+          "hex": "#f6f6ee",
+          "coverage": 0.511
+        },
+        {
+          "hex": "#088642",
+          "coverage": 0.374
+        },
+        {
+          "hex": "#dbcfc9",
+          "coverage": 0.0668
+        },
+        {
+          "hex": "#b9d7bf",
+          "coverage": 0.0255
+        },
+        {
+          "hex": "#0f100f",
+          "coverage": 0.0227
+        }
+      ],
+      "detail": {
+        "energy": 40.5795
+      },
+      "medium": "semantic",
+      "plate": null,
+      "text": null,
+      "surface": {
+        "flat": false,
+        "rules": false
+      }
+    },
+    {
+      "id": "recorded-map",
       "kind": "chrome",
-      "note": "Interactive geographic data surface. Runtime street geometry, routes, agent positions, labels and controls; all driven by current simulator data.",
+      "note": "Interactive data visualization: actual recorded Madrid streets, store pins and moving couriers. User explicitly requires real replay data in place of the mockup's invented map labels.",
       "grid": null,
       "codeDrawn": true,
       "container": true,
       "box": {
-        "x": 0.4609,
-        "y": 0.1924,
-        "w": 0.5313,
-        "h": 0.4482
+        "x": 0,
+        "y": 0.0662,
+        "w": 1,
+        "h": 0.6938
       },
       "px": {
-        "x": 708,
-        "y": 197,
-        "w": 816,
-        "h": 459
+        "x": 0,
+        "y": 70,
+        "w": 1487,
+        "h": 734
       },
-      "aspect": 1.7778,
+      "aspect": 2.0259,
       "palette": [
         {
-          "hex": "#1c2b36",
-          "coverage": 0.9376
+          "hex": "#f6efe5",
+          "coverage": 0.8186
         },
         {
-          "hex": "#273454",
-          "coverage": 0.0261
+          "hex": "#e2e9c1",
+          "coverage": 0.1008
         },
         {
-          "hex": "#314c53",
-          "coverage": 0.0153
+          "hex": "#d8ccc9",
+          "coverage": 0.0431
         },
         {
-          "hex": "#094173",
-          "coverage": 0.0142
+          "hex": "#121514",
+          "coverage": 0.0189
         },
         {
-          "hex": "#0b0b14",
-          "coverage": 0.0068
-        }
-      ],
-      "detail": {
-        "energy": 22.6021
-      },
-      "medium": "semantic",
-      "plate": null,
-      "text": null,
-      "surface": {
-        "flat": false,
-        "rules": false
-      }
-    },
-    {
-      "id": "map-controls",
-      "kind": "control",
-      "note": "Zoom and fit controls.",
-      "grid": null,
-      "parentId": "map",
-      "box": {
-        "x": 0.9609,
-        "y": 0.2002,
-        "w": 0.0273,
-        "h": 0.1035
-      },
-      "px": {
-        "x": 1476,
-        "y": 205,
-        "w": 42,
-        "h": 106
-      },
-      "aspect": 0.3962,
-      "palette": [
-        {
-          "hex": "#091818",
-          "coverage": 0.5686
-        },
-        {
-          "hex": "#192636",
-          "coverage": 0.3002
-        },
-        {
-          "hex": "#364550",
-          "coverage": 0.0934
-        },
-        {
-          "hex": "#eef4f7",
-          "coverage": 0.0298
-        },
-        {
-          "hex": "#9094a0",
-          "coverage": 0.008
-        }
-      ],
-      "detail": {
-        "energy": 5.8088
-      },
-      "medium": "semantic",
-      "plate": null,
-      "text": null,
-      "surface": {
-        "flat": false,
-        "rules": false
-      }
-    },
-    {
-      "id": "map-legend",
-      "kind": "chrome",
-      "note": "Legend explains type symbols and observed versus planned routes.",
-      "grid": null,
-      "parentId": "map",
-      "box": {
-        "x": 0.8802,
-        "y": 0.4912,
-        "w": 0.1048,
-        "h": 0.1357
-      },
-      "px": {
-        "x": 1352,
-        "y": 503,
-        "w": 161,
-        "h": 139
-      },
-      "aspect": 1.1583,
-      "palette": [
-        {
-          "hex": "#091719",
-          "coverage": 0.9037
-        },
-        {
-          "hex": "#2a3647",
-          "coverage": 0.0465
-        },
-        {
-          "hex": "#9dacc0",
-          "coverage": 0.0253
-        },
-        {
-          "hex": "#636f82",
+          "hex": "#0a843f",
           "coverage": 0.0187
-        },
-        {
-          "hex": "#3b9bf8",
-          "coverage": 0.0058
         }
       ],
       "detail": {
-        "energy": 21.8606
+        "energy": 33.9094
       },
       "medium": "semantic",
       "plate": null,
@@ -1123,102 +420,57 @@
       "surface": {
         "flat": false,
         "rules": false
-      }
-    },
-    {
-      "id": "map-selected",
-      "kind": "control",
-      "note": "Selected agent marker and name. Runtime position is selectable.",
-      "grid": null,
-      "parentId": "map",
-      "box": {
-        "x": 0.7051,
-        "y": 0.3623,
-        "w": 0.0794,
-        "h": 0.042
       },
-      "px": {
-        "x": 1083,
-        "y": 371,
-        "w": 122,
-        "h": 43
-      },
-      "aspect": 2.8372,
-      "palette": [
+      "flags": [
         {
-          "hex": "#132424",
-          "coverage": 0.4133
-        },
-        {
-          "hex": "#121c2c",
-          "coverage": 0.3676
-        },
-        {
-          "hex": "#1d7a77",
-          "coverage": 0.1105
-        },
-        {
-          "hex": "#43ece9",
-          "coverage": 0.0571
-        },
-        {
-          "hex": "#274757",
-          "coverage": 0.0514
+          "id": "painted-pixels",
+          "message": "Looks painted: 48 colours beyond its two main tones and soft shading across 44% of it. Drawn in code, this becomes a flat copy."
         }
-      ],
-      "detail": {
-        "energy": 34.4796
-      },
-      "medium": "semantic",
-      "plate": null,
-      "text": null,
-      "surface": {
-        "flat": false,
-        "rules": false
-      }
+      ]
     },
     {
-      "id": "evidence",
+      "id": "robot-handoff",
       "kind": "chrome",
-      "note": "Selected agent evidence strip with identity, state, task, last decision and trace link.",
+      "note": "Existing code-native 3D robots with purpose-colored lights passing an order, as explicitly requested; reuse real model geometry rather than the invented mockup robot shapes.",
       "grid": null,
+      "codeDrawn": true,
       "box": {
-        "x": 0.0078,
-        "y": 0.6494,
-        "w": 0.9844,
-        "h": 0.0986
+        "x": 0.4169,
+        "y": 0.5009,
+        "w": 0.2623,
+        "h": 0.1654
       },
       "px": {
-        "x": 12,
-        "y": 665,
-        "w": 1512,
-        "h": 101
+        "x": 620,
+        "y": 530,
+        "w": 390,
+        "h": 175
       },
-      "aspect": 14.9703,
+      "aspect": 2.2286,
       "palette": [
         {
-          "hex": "#081818",
-          "coverage": 0.866
+          "hex": "#e9ddd5",
+          "coverage": 0.7075
         },
         {
-          "hex": "#121b2b",
-          "coverage": 0.0996
+          "hex": "#211f1e",
+          "coverage": 0.0914
         },
         {
-          "hex": "#3a4555",
-          "coverage": 0.0117
+          "hex": "#a69f9e",
+          "coverage": 0.0878
         },
         {
-          "hex": "#b1c9e3",
-          "coverage": 0.0114
+          "hex": "#3f3831",
+          "coverage": 0.0654
         },
         {
-          "hex": "#707f92",
-          "coverage": 0.0112
+          "hex": "#bc8c5f",
+          "coverage": 0.0479
         }
       ],
       "detail": {
-        "energy": 21.7109
+        "energy": 29.316
       },
       "medium": "semantic",
       "plate": null,
@@ -1226,50 +478,56 @@
       "surface": {
         "flat": false,
         "rules": false
-      }
+      },
+      "flags": [
+        {
+          "id": "painted-pixels",
+          "message": "Looks painted: 69 colours beyond its two main tones and soft shading across 20% of it. Drawn in code, this becomes a flat copy."
+        }
+      ]
     },
     {
-      "id": "order-controls",
+      "id": "playback",
       "kind": "control",
-      "note": "Orders heading with state and restaurant filters, search and sorting.",
+      "note": "Recorded shift label, pause/play, simulation position and progress. Omit fictional sound and speed controls not backed by the recording.",
       "grid": null,
       "box": {
-        "x": 0.0078,
-        "y": 0.7568,
-        "w": 0.9844,
-        "h": 0.0449
+        "x": 0.0713,
+        "y": 0.6739,
+        "w": 0.8574,
+        "h": 0.051
       },
       "px": {
-        "x": 12,
-        "y": 775,
-        "w": 1512,
-        "h": 46
+        "x": 106,
+        "y": 713,
+        "w": 1275,
+        "h": 54
       },
-      "aspect": 32.8696,
+      "aspect": 23.6111,
       "palette": [
         {
-          "hex": "#081818",
-          "coverage": 0.8087
+          "hex": "#f7f7f4",
+          "coverage": 0.8753
         },
         {
-          "hex": "#151e2e",
-          "coverage": 0.171
+          "hex": "#d9ceca",
+          "coverage": 0.0605
         },
         {
-          "hex": "#28383e",
-          "coverage": 0.0112
+          "hex": "#087b3a",
+          "coverage": 0.0479
         },
         {
-          "hex": "#7e90a0",
-          "coverage": 0.0059
+          "hex": "#0a0a0a",
+          "coverage": 0.0111
         },
         {
-          "hex": "#475767",
-          "coverage": 0.0032
+          "hex": "#3a3a3a",
+          "coverage": 0.0052
         }
       ],
       "detail": {
-        "energy": 11.9671
+        "energy": 28.456
       },
       "medium": "semantic",
       "plate": null,
@@ -1280,47 +538,47 @@
       }
     },
     {
-      "id": "order-columns",
+      "id": "flow-heading",
       "kind": "text",
-      "note": "Order book column headings.",
+      "note": "How one order flows",
       "grid": null,
       "box": {
-        "x": 0.0182,
-        "y": 0.8066,
-        "w": 0.9499,
-        "h": 0.0225
+        "x": 0.0289,
+        "y": 0.7873,
+        "w": 0.4506,
+        "h": 0.0444
       },
       "px": {
-        "x": 28,
-        "y": 826,
-        "w": 1459,
-        "h": 23
+        "x": 43,
+        "y": 833,
+        "w": 670,
+        "h": 47
       },
-      "aspect": 63.4348,
+      "aspect": 14.2553,
       "palette": [
         {
-          "hex": "#081719",
-          "coverage": 0.9583
+          "hex": "#f8f7f0",
+          "coverage": 0.7944
         },
         {
-          "hex": "#abb8cb",
+          "hex": "#090f0b",
+          "coverage": 0.1501
+        },
+        {
+          "hex": "#91948f",
+          "coverage": 0.024
+        },
+        {
+          "hex": "#373936",
+          "coverage": 0.0161
+        },
+        {
+          "hex": "#c2c6be",
           "coverage": 0.0155
-        },
-        {
-          "hex": "#353d4e",
-          "coverage": 0.0132
-        },
-        {
-          "hex": "#778498",
-          "coverage": 0.0109
-        },
-        {
-          "hex": "#202040",
-          "coverage": 0.0021
         }
       ],
       "detail": {
-        "energy": 9.3982
+        "energy": 78.4309
       },
       "medium": "semantic",
       "plate": null,
@@ -1332,277 +590,69 @@
       "type": {
         "comp": {
           "lines": 1,
-          "glyphs": 52,
-          "capHeightPx": 8.4,
-          "inkIsDark": false,
+          "glyphs": 14,
+          "capHeightPx": 31.6,
+          "inkIsDark": true,
           "allCaps": false,
-          "advance": 0.6352,
-          "advTall": 0.6749,
-          "advX": 0.6352,
-          "gap": 0.0397,
-          "xRatio": 0.7382,
-          "stemW": 0.2154,
-          "contrast": 1.165,
-          "serif": 1.0716,
-          "densTall": 0.6205,
-          "densX": 0.641,
-          "weight": 0.6205
+          "advance": 0.7742,
+          "advTall": 0.7268,
+          "advX": 0.7742,
+          "gap": 0.0632,
+          "xRatio": 0.7115,
+          "stemW": 0.247,
+          "contrast": 1.2841,
+          "serif": 0.2398,
+          "densTall": 0.6081,
+          "densX": 0.6627,
+          "weight": 0.6081
         },
-        "widthClass": "normal",
+        "widthClass": "wide",
         "weightClass": "bold"
       }
     },
     {
-      "id": "order-row-1",
-      "kind": "control",
-      "note": "Inspectable runtime order row with its status, agent and latest decision.",
+      "id": "flow",
+      "kind": "chrome",
+      "note": "Three connected order, picking and courier steps. Plain responsibilities must match the real role manifests.",
       "grid": null,
-      "reviewGroup": "order-rows",
+      "codeDrawn": true,
       "box": {
-        "x": 0.0182,
-        "y": 0.8311,
-        "w": 0.9609,
-        "h": 0.0234
+        "x": 0.0235,
+        "y": 0.8478,
+        "w": 0.9523,
+        "h": 0.1352
       },
       "px": {
-        "x": 28,
-        "y": 851,
-        "w": 1476,
-        "h": 24
+        "x": 35,
+        "y": 897,
+        "w": 1416,
+        "h": 143
       },
-      "aspect": 61.5,
+      "aspect": 9.9021,
       "palette": [
         {
-          "hex": "#081818",
-          "coverage": 0.731
+          "hex": "#f7f6f3",
+          "coverage": 0.9217
         },
         {
-          "hex": "#121626",
-          "coverage": 0.1969
+          "hex": "#101010",
+          "coverage": 0.0383
         },
         {
-          "hex": "#0b3b34",
-          "coverage": 0.033
-        },
-        {
-          "hex": "#3b4957",
-          "coverage": 0.0201
-        },
-        {
-          "hex": "#768093",
-          "coverage": 0.019
-        }
-      ],
-      "detail": {
-        "energy": 14.2421
-      },
-      "medium": "semantic",
-      "plate": null,
-      "text": null,
-      "surface": {
-        "flat": false,
-        "rules": false
-      }
-    },
-    {
-      "id": "order-row-2",
-      "kind": "control",
-      "note": "Inspectable runtime order row with its status, agent and latest decision.",
-      "grid": null,
-      "reviewGroup": "order-rows",
-      "box": {
-        "x": 0.0182,
-        "y": 0.8545,
-        "w": 0.9609,
-        "h": 0.0234
-      },
-      "px": {
-        "x": 28,
-        "y": 875,
-        "w": 1476,
-        "h": 24
-      },
-      "aspect": 61.5,
-      "palette": [
-        {
-          "hex": "#081818",
-          "coverage": 0.6821
-        },
-        {
-          "hex": "#121828",
-          "coverage": 0.2347
-        },
-        {
-          "hex": "#162c48",
-          "coverage": 0.0421
-        },
-        {
-          "hex": "#8391a5",
-          "coverage": 0.0261
-        },
-        {
-          "hex": "#52596c",
-          "coverage": 0.015
-        }
-      ],
-      "detail": {
-        "energy": 14.0769
-      },
-      "medium": "semantic",
-      "plate": null,
-      "text": null,
-      "surface": {
-        "flat": false,
-        "rules": false
-      }
-    },
-    {
-      "id": "order-row-3",
-      "kind": "control",
-      "note": "Inspectable runtime order row with its status, agent and latest decision.",
-      "grid": null,
-      "reviewGroup": "order-rows",
-      "box": {
-        "x": 0.0182,
-        "y": 0.8779,
-        "w": 0.9609,
-        "h": 0.0234
-      },
-      "px": {
-        "x": 28,
-        "y": 899,
-        "w": 1476,
-        "h": 24
-      },
-      "aspect": 61.5,
-      "palette": [
-        {
-          "hex": "#081818",
-          "coverage": 0.6977
-        },
-        {
-          "hex": "#121828",
-          "coverage": 0.2323
-        },
-        {
-          "hex": "#0e2849",
-          "coverage": 0.0293
-        },
-        {
-          "hex": "#9aa6b6",
-          "coverage": 0.0279
-        },
-        {
-          "hex": "#5e697a",
-          "coverage": 0.0128
-        }
-      ],
-      "detail": {
-        "energy": 14.0167
-      },
-      "medium": "semantic",
-      "plate": null,
-      "text": null,
-      "surface": {
-        "flat": false,
-        "rules": false
-      }
-    },
-    {
-      "id": "order-row-4",
-      "kind": "control",
-      "note": "Inspectable runtime order row with its status, agent and latest decision.",
-      "grid": null,
-      "reviewGroup": "order-rows",
-      "box": {
-        "x": 0.0182,
-        "y": 0.9014,
-        "w": 0.9609,
-        "h": 0.0234
-      },
-      "px": {
-        "x": 28,
-        "y": 923,
-        "w": 1476,
-        "h": 24
-      },
-      "aspect": 61.5,
-      "palette": [
-        {
-          "hex": "#09171a",
-          "coverage": 0.9026
-        },
-        {
-          "hex": "#372b19",
-          "coverage": 0.0429
-        },
-        {
-          "hex": "#9ca9b9",
-          "coverage": 0.0262
-        },
-        {
-          "hex": "#3d4b57",
-          "coverage": 0.0151
-        },
-        {
-          "hex": "#6c7889",
-          "coverage": 0.0132
-        }
-      ],
-      "detail": {
-        "energy": 14.0389
-      },
-      "medium": "semantic",
-      "plate": null,
-      "text": null,
-      "surface": {
-        "flat": false,
-        "rules": false
-      }
-    },
-    {
-      "id": "order-row-5",
-      "kind": "control",
-      "note": "Inspectable runtime order row with its status, agent and latest decision.",
-      "grid": null,
-      "reviewGroup": "order-rows",
-      "box": {
-        "x": 0.0182,
-        "y": 0.9248,
-        "w": 0.9609,
-        "h": 0.0234
-      },
-      "px": {
-        "x": 28,
-        "y": 947,
-        "w": 1476,
-        "h": 24
-      },
-      "aspect": 61.5,
-      "palette": [
-        {
-          "hex": "#09181b",
-          "coverage": 0.9281
-        },
-        {
-          "hex": "#0d3c37",
-          "coverage": 0.0254
-        },
-        {
-          "hex": "#4a5463",
-          "coverage": 0.0194
-        },
-        {
-          "hex": "#b0bbcb",
+          "hex": "#097739",
           "coverage": 0.0165
         },
         {
-          "hex": "#252f41",
-          "coverage": 0.0105
+          "hex": "#505050",
+          "coverage": 0.0146
+        },
+        {
+          "hex": "#c4c3c1",
+          "coverage": 0.0088
         }
       ],
       "detail": {
-        "energy": 13.2492
+        "energy": 46.5635
       },
       "medium": "semantic",
       "plate": null,
@@ -1610,220 +660,12 @@
       "surface": {
         "flat": false,
         "rules": false
-      }
-    },
-    {
-      "id": "order-row-6",
-      "kind": "control",
-      "note": "Inspectable runtime order row with its status, agent and latest decision.",
-      "grid": null,
-      "reviewGroup": "order-rows",
-      "box": {
-        "x": 0.0182,
-        "y": 0.9482,
-        "w": 0.9609,
-        "h": 0.0234
-      },
-      "px": {
-        "x": 28,
-        "y": 971,
-        "w": 1476,
-        "h": 24
-      },
-      "aspect": 61.5,
-      "palette": [
-        {
-          "hex": "#081819",
-          "coverage": 0.9265
-        },
-        {
-          "hex": "#093e35",
-          "coverage": 0.0254
-        },
-        {
-          "hex": "#8995aa",
-          "coverage": 0.016
-        },
-        {
-          "hex": "#3b4355",
-          "coverage": 0.016
-        },
-        {
-          "hex": "#bec7d6",
-          "coverage": 0.016
-        }
-      ],
-      "detail": {
-        "energy": 13.5218
-      },
-      "medium": "semantic",
-      "plate": null,
-      "text": null,
-      "surface": {
-        "flat": false,
-        "rules": false
-      }
-    },
-    {
-      "id": "titlebar",
-      "kind": "chrome",
-      "note": "Page heading and simulation control layout.",
-      "grid": null,
-      "container": true,
-      "box": {
-        "x": 0.0078,
-        "y": 0.0439,
-        "w": 0.9844,
-        "h": 0.0557
-      },
-      "px": {
-        "x": 12,
-        "y": 45,
-        "w": 1512,
-        "h": 57
-      },
-      "aspect": 26.5263,
-      "palette": [
-        {
-          "hex": "#091818",
-          "coverage": 0.8557
-        },
-        {
-          "hex": "#0f1424",
-          "coverage": 0.0672
-        },
-        {
-          "hex": "#23e8d9",
-          "coverage": 0.0497
-        },
-        {
-          "hex": "#f7f7f7",
-          "coverage": 0.0223
-        },
-        {
-          "hex": "#707681",
-          "coverage": 0.0051
-        }
-      ],
-      "detail": {
-        "energy": 33.4946
-      },
-      "medium": "semantic",
-      "plate": null,
-      "text": null,
-      "surface": {
-        "flat": true,
-        "rules": true
-      }
-    },
-    {
-      "id": "agent-table",
-      "kind": "chrome",
-      "note": "Live agent table including column headings, selectable agent rows and blank unused rows.",
-      "grid": null,
-      "container": true,
-      "box": {
-        "x": 0.0078,
-        "y": 0.1924,
-        "w": 0.4466,
-        "h": 0.4482
-      },
-      "px": {
-        "x": 12,
-        "y": 197,
-        "w": 686,
-        "h": 459
-      },
-      "aspect": 1.4946,
-      "palette": [
-        {
-          "hex": "#091a1b",
-          "coverage": 0.9372
-        },
-        {
-          "hex": "#566576",
-          "coverage": 0.0209
-        },
-        {
-          "hex": "#0b3734",
-          "coverage": 0.0183
-        },
-        {
-          "hex": "#172d46",
-          "coverage": 0.0172
-        },
-        {
-          "hex": "#7590a2",
-          "coverage": 0.0064
-        }
-      ],
-      "detail": {
-        "energy": 17.2385
-      },
-      "medium": "semantic",
-      "plate": null,
-      "text": null,
-      "surface": {
-        "flat": false,
-        "rules": true
-      }
-    },
-    {
-      "id": "orders-table",
-      "kind": "chrome",
-      "note": "Live order table and filtering controls.",
-      "grid": null,
-      "container": true,
-      "box": {
-        "x": 0.0078,
-        "y": 0.7568,
-        "w": 0.9844,
-        "h": 0.2314
-      },
-      "px": {
-        "x": 12,
-        "y": 775,
-        "w": 1512,
-        "h": 237
-      },
-      "aspect": 6.3797,
-      "palette": [
-        {
-          "hex": "#09181a",
-          "coverage": 0.9537
-        },
-        {
-          "hex": "#1f3146",
-          "coverage": 0.0169
-        },
-        {
-          "hex": "#a2afc0",
-          "coverage": 0.0147
-        },
-        {
-          "hex": "#113834",
-          "coverage": 0.0079
-        },
-        {
-          "hex": "#535c6a",
-          "coverage": 0.0068
-        }
-      ],
-      "detail": {
-        "energy": 18.0472
-      },
-      "medium": "semantic",
-      "plate": null,
-      "text": null,
-      "surface": {
-        "flat": true,
-        "rules": true
       }
     }
   ],
-  "compSha256": "79cae25a5b44e40aa5f1122aafe242879a2783791fed81e5435b170834d92e48",
+  "compSha256": "c6934d72dcac21a037b64794d15628c256d566523417129eb01d55b24325ccc8",
   "regionsSource": {
     "path": ".impeccable/build/regions.json",
-    "sha256": "abb91886f4f63f9758367d01b113ff8f948563c3ddf569555e450538f9bdc17b"
+    "sha256": "b6e1464a3385deaabd6746027088d31405d9ba639f5c0842bdcd027f35405faa"
   }
 }

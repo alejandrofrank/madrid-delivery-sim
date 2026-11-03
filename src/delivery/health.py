@@ -10,7 +10,6 @@ from uuid import UUID
 
 import redis
 from fastapi import APIRouter, HTTPException
-from fastapi.responses import FileResponse
 from pydantic import AwareDatetime, BaseModel, Field, ValidationError, model_validator
 
 from delivery.config import settings
@@ -291,11 +290,6 @@ def judge_evidence(current: str) -> dict[str, Any]:
         }
     except (OSError, ValueError, KeyError, TypeError):
         return {"available": False, "freshness": "unavailable", "rows": []}
-
-
-@router.get("/health", include_in_schema=False)
-def health_page() -> FileResponse:
-    return FileResponse(ROOT / "web/health.html")
 
 
 def scenario_evidence(current: str) -> dict[str, Any]:
