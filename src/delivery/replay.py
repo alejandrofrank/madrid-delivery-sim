@@ -23,6 +23,7 @@ class Recordings:
             raise ValueError("A reviewed replay manifest is required")
         self.shifts: dict[str, dict[str, Any]] = {}
         self.sources: dict[str, dict[str, str]] = {}
+        self._motion: dict[str, dict[str, Any]] = {}
         for entry in manifest["recordings"]:
             if not re.fullmatch(r"[a-z0-9-]+\.json\.gz", entry["file"]):
                 raise ValueError("Invalid recording filename")
@@ -54,6 +55,38 @@ class Recordings:
         if run not in self.shifts:
             raise HTTPException(404, "Unknown recorded shift")
         return self.shifts[run]
+
+    def motion(self, run: str | None) -> dict[str, Any]:
+        """Small, immutable lookahead: only recorded positions and street routes."""
+        shift = self.shift(run)
+        identifier = shift["frames"][0]["run"]["id"]
+        if identifier not in self._motion:
+            routes: list[Any] = []
+            references: dict[str, int] = {}
+            ids = [c["id"] for c in shift["frames"][0]["couriers"]]
+            frames = []
+            for frame in shift["frames"]:
+                by_id = {c["id"]: c for c in frame["couriers"]}
+                positions = []
+                for courier_id in ids:
+                    courier = by_id[courier_id]
+                    route = courier.get("route") or courier.get("reposition_route")
+                    reference = -1
+                    if route and courier["status"] in {
+                        "to_pickup", "delivering", "repositioning"
+                    }:
+                        key = json.dumps(route["points"], separators=(",", ":"))
+                        if key not in references:
+                            references[key] = len(routes)
+                            routes.append(route["points"])
+                        reference = references[key]
+                    positions.append([courier["lon"], courier["lat"], reference])
+                frames.append({"time": frame["run"]["sim_time"], "positions": positions})
+            self._motion[identifier] = {
+                "run": identifier, "duration": shift["frames"][-1]["run"]["duration"],
+                "couriers": ids, "routes": routes, "frames": frames,
+            }
+        return self._motion[identifier]
 
     def frame(self, run: str | None, seconds: float) -> dict[str, Any]:
         if not math.isfinite(seconds) or not 0 <= seconds <= 60:

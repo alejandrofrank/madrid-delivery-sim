@@ -20,6 +20,8 @@ let state = null, selected = null, runId = new URLSearchParams(location.search).
 let tab = "decisions", pollTask = null, pollCount = 0, traceBusy = false;
 let runtime = {mode:"local"}, replayStarted = performance.now();
 let recordedCity = !runId && !new URLSearchParams(location.search).has("live"), liveRuntime = null, exampleBanner = null, storeRecording = null;
+let replayMotion=null, replayMotionRun=null;
+const motionCache=new Map();
 let replayPaused=matchMedia("(prefers-reduced-motion: reduce)").matches, replayPosition=12, replayControls=null;
 function replaySeconds(){return replayPaused?replayPosition:Math.min(60,Math.max(0,(performance.now()-replayStarted)/1000));}
 function updatePlayback(){
@@ -34,9 +36,9 @@ function setupPlayback(){
  const {make,button}=ProductUI;
  replayControls=make("section",null,"ui-replay-controls");replayControls.setAttribute("aria-label","Recorded shift playback");
  const toggle=button("Pause replay"),slider=make("input"),time=make("output");
- slider.type="range";slider.min="0";slider.max="60";slider.step="1";slider.setAttribute("aria-label","Replay position in seconds");
- toggle.onclick=()=>{const seconds=replaySeconds();replayPosition=seconds>=60?0:seconds;replayPaused=seconds>=60?false:!replayPaused;replayStarted=performance.now()-replayPosition*1000;updatePlayback();poll();};
- slider.oninput=()=>{replayPosition=Number(slider.value);replayStarted=performance.now()-replayPosition*1000;observations=[];lastObservationTime=-1;updatePlayback();poll();};
+ slider.type="range";slider.min="0";slider.max="60";slider.step="any";slider.setAttribute("aria-label","Replay position in seconds");
+ toggle.onclick=()=>{const seconds=replaySeconds();replayPosition=seconds>=60?0:seconds;replayPaused=seconds>=60?false:!replayPaused;replayStarted=performance.now()-replayPosition*1000;updatePlayback();if(state?.run)renderCouriers();poll();};
+ slider.oninput=()=>{replayPosition=Number(slider.value);replayStarted=performance.now()-replayPosition*1000;observations=[];lastObservationTime=-1;updatePlayback();if(state?.run)renderCouriers();poll();};
  replayControls.append(toggle,slider,time);document.querySelector(".console-heading").after(replayControls);updatePlayback();
 }
 const narrowMap = matchMedia("(max-width:850px)");
@@ -189,7 +191,7 @@ async function api(path, options) {
   }
   if(runtime.mode==="replay" && (path.startsWith("/api/state") || /\/trace\?|\/chaos$/.test(path))) {
     const url=new URL(path,location.origin);
-    url.searchParams.set("t",String(Math.floor(replaySeconds())));
+    url.searchParams.set("t",String(replaySeconds()));
     path=url.pathname+url.search;
   }
   if(recordedCity && (!options?.method || options.method==="GET") && /^\/api\/(state|runs|world|roads)(\?|\/|$)/.test(path))
@@ -300,7 +302,7 @@ function selectedMapBounds() {
   };
   for (const point of activeRoute(courier)?.points || []) include(point[1], point[0]);
   if (courier) {
-    const [lat, lon] = courierPosition(courier, displayClock.time(performance.now()));
+    const [lat, lon] = positionFor(courier);
     include(lat, lon);
   }
   if (order) include(order.lat, order.lon);
@@ -391,10 +393,10 @@ function renderCouriers() {
     const shape=Ops.icon(c.mode,"marker-symbol").replace('viewBox="0 0 24 24"','viewBox="-5 -5 34 34"').replace('fill="none"','style="color:'+color+'" fill="none"').replace('stroke-width="1.5"','stroke-width="1.6"');
     const svg=shape.replace(">",'><circle cx="12" cy="12" r="16" fill="#10232e" stroke="'+(isSelected?"#e7edf0":color)+'" stroke-width="'+(isSelected?2:1)+'"/>');
     const icon=L.divIcon({className:"courier-icon"+(isSelected?" selected":""),iconSize:[30,30],iconAnchor:[15,15],html:svg});
-    const location=courierPosition(c,sim);
+    const location=positionFor(c,sim);
     let marker=courierMarkers.get(c.id);
     if(!marker){marker=L.marker(location,{icon,title:c.id,keyboard:true});marker.on("click",()=>choose("courier",c.id));courierMarkers.set(c.id,marker);}
-    else marker.setIcon(icon).setLatLng(location);
+    else {if(marker.options.icon.options.html!==svg||marker.options.icon.options.className!==icon.options.className)marker.setIcon(icon);marker.setLatLng(location);}
     marker.setZIndexOffset(isSelected?1000:0);
     const last=lastDecision("courier",c.id);
     marker.unbindTooltip();
@@ -402,7 +404,7 @@ function renderCouriers() {
     const content='<div class="map-agent-card"><strong>'+escape(c.id)+'</strong><p>'+escape(c.fleet_name||"Bakiano")+' · '+escape(c.operator||"regular")+'</p><p>'+escape(human(c.status))+' · '+escape(c.mode)+'</p><p>Task: '+escape(courierTask(c))+'</p><p>Last decision: '+escape(last?human(last.action):"None recorded")+'</p><a href="'+agentTraceLink(c.id)+'">Open agent trace</a></div>';
     if(marker.getPopup())marker.setPopupContent(content);else marker.bindPopup(content,{minWidth:220,autoPan:false});
     const point=map.project(location,map.getZoom());
-    const group=map.getZoom()<13.5&&!isSelected?groups.find(group=>!group.selected&&group.point.distanceTo(point)<38):null;
+    const group=map.getZoom()<13.5&&!isSelected&&status!=="working"?groups.find(group=>!group.selected&&group.items.every(item=>agentStatus(item.c)!=="working")&&group.point.distanceTo(point)<38):null;
     if(group)group.items.push({c,marker,location});
     else groups.push({point,selected:isSelected,items:[{c,marker,location}]});
   }
@@ -502,11 +504,35 @@ function renderDecisions() {
   const rows = selected ? traceRows : state?.decisions || [];
   $("decisions").innerHTML = rows.map(d=>`<article class="decision"><div class="decision-top"><span>${escape(d.agent)}</span><time>${clock(d.sim_time)}</time></div><strong>${escape(human(d.action))}</strong><p>${escape(d.detail.message?.text || d.detail.rule || d.detail.reply || (d.detail.on_time !== undefined ? (d.detail.on_time?"Delivered within promised window":"Delivered after promised window") : d.detail.store || "State transition recorded"))}</p><code>${escape(d.order_id || "")}${d.courier_id?` / ${escape(d.courier_id)}`:""}</code><details><summary>Inspect recorded evidence</summary><pre>${escape(JSON.stringify(d.detail,null,2))}</pre></details></article>`).join("") || '<p class="empty">No decisions recorded for this selection yet.</p>';
 }
+function positionFor(courier,sim=displayClock.time(performance.now())) {
+  return runtime.mode==="replay"&&replayMotion
+    ? replayMotion.position(courier.id,replaySeconds())||[courier.lat,courier.lon]
+    : courierPosition(courier,sim);
+}
+async function prepareReplayMotion(id) {
+  if(runtime.mode!=="replay"||replayMotionRun===id)return;
+  if(storeRecording){
+    replayMotion=CourierMotion.createReplayMotion(CourierMotion.motionFromStates(storeRecording.frames.map(f=>f.city)));
+  }else{
+    if(!motionCache.has(id)){
+      const response=await fetch("/api/recorded/motion?run="+encodeURIComponent(id));
+      if(!response.ok)throw Error("The replay routes could not load. Please retry.");
+      motionCache.set(id,CourierMotion.createReplayMotion(await response.json()));
+    }
+    replayMotion=motionCache.get(id);
+  }
+  replayMotionRun=id;
+  // Loading is outside presentation time; start only once routes are available.
+  replayStarted=performance.now()-replayPosition*1000;
+}
 function animate() {
-  if(!document.hidden && !reducedMotion.matches && state?.run?.status==="running" && state.run.wall_seconds>0) {
-    const sim=displayClock.time(performance.now());
-    for(const c of state.couriers)
-      courierMarkers.get(c.id)?.setLatLng(courierPosition(c,sim));
+  if(!document.hidden){
+    if(runtime.mode==="replay")updatePlayback();
+    const moving=runtime.mode==="replay"?!replayPaused:!reducedMotion.matches&&state?.run?.status==="running";
+    if(moving&&state?.run&&state.run.wall_seconds>0){
+      const sim=displayClock.time(performance.now());
+      for(const c of state.couriers)courierMarkers.get(c.id)?.setLatLng(positionFor(c,sim));
+    }
   }
   requestAnimationFrame(animate);
 }
@@ -516,10 +542,10 @@ function poll() {
   return pollTask;
 }
 async function readState() {
-  const requestedRun=runId;
+  const requestedRun=runId,requestedPlayback=replayStarted;
   try {
     const next=await api(`/api/state${runId?`?run=${runId}`:""}`);
-    if(runId!==requestedRun)return;
+    if(runId!==requestedRun||(runtime.mode==="replay"&&requestedPlayback!==replayStarted))return;
     if(next.run?.id!==state?.run?.id) {
       traceRows=[];
       $("agent-fleet").value="all";
@@ -528,6 +554,8 @@ async function readState() {
       const courier=next.couriers?.find(c=>["to_pickup","delivering","repositioning"].includes(c.status))||next.couriers?.[0];
       selected=courier?{kind:"courier",id:courier.id}:null;
     }
+    await prepareReplayMotion(next.run?.id);
+    if(runId!==requestedRun)return;
     state=next;
     displayClock.accept(runtime.mode==="replay"&&state.run?{...state.run,id:state.run.id+":"+replayStarted,status:replayPaused?"paused":state.run.status}:state.run, performance.now());
     updatePlayback();
@@ -548,7 +576,7 @@ async function initialize() {
       replayPosition=12;replayStarted=performance.now()-12000;
       exampleBanner=ProductExamples.banner("A two-hour Madrid shift with five disruptions",async()=>{
         if(liveRuntime.mode==="replay"){exampleBanner.label("Live runs need an authorized workspace. Open For engineers → Architecture for setup.");return;}
-        recordedCity=false;storeRecording=null;runtime=liveRuntime;runId="";delete document.body.dataset.runtime;
+        recordedCity=false;storeRecording=null;replayMotion=null;replayMotionRun=null;runtime=liveRuntime;runId="";delete document.body.dataset.runtime;
         for(const id of ["seed","duration","dispatch-strategy","reposition-policy","chaos-mode"])$(id).disabled=false;
         $("start").textContent="Start day";exampleBanner.remove();await refreshRuns();await poll();setConsoleView("simulation");
       });

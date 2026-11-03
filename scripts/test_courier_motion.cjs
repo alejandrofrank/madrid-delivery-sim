@@ -68,3 +68,33 @@ test("courier labels carry mode and stable numeric identity", () => {
   assert.equal(markerLabel({id: "retiro-03", mode: "moto"}), "M03");
   assert.equal(markerLabel({id: "vallecas-05", mode: "van"}), "V05");
 });
+
+const {createReplayMotion,motionFromStates}=require("../web/courier_motion.js");
+test("recorded route lookahead is continuous across assignment, completion and every snapshot",()=>{
+  const fs=require("node:fs"),zlib=require("node:zlib"),path=require("node:path");
+  const manifest=JSON.parse(fs.readFileSync(path.join(__dirname,"../data/replays/manifest.json")));
+  for(const recording of manifest.recordings){
+    const shift=JSON.parse(zlib.gunzipSync(fs.readFileSync(path.join(__dirname,"../data/replays",recording.file))));
+    const data=motionFromStates(shift.frames),motion=createReplayMotion(data);
+    for(const frame of shift.frames){
+      const seconds=frame.run.sim_time/data.duration*60;
+      for(const c of frame.couriers){
+        const at=motion.position(c.id,seconds),before=motion.position(c.id,seconds-.00001),after=motion.position(c.id,seconds+.00001);
+        assert.deepEqual(at,courierPosition(c,frame.run.sim_time),"Exact recorded position: "+c.id);
+        const metres=p=>Math.hypot((p[0]-at[0])*111000,(p[1]-at[1])*85000);
+        assert(metres(before)<.2&&metres(after)<.2,"No boundary teleport: "+c.id+" at "+seconds);
+      }
+    }
+    assert.deepEqual(motion.position(data.couriers[0],-1),motion.position(data.couriers[0],0));
+    assert.deepEqual(motion.position(data.couriers[0],61),motion.position(data.couriers[0],60));
+  }
+});
+test("lookahead follows street bends and preserves preparation waits",()=>{
+  const frames=[0,60,120].map(time=>({run:{sim_time:time,duration:120},couriers:[{
+    id:"bike",status:"delivering",lat:40.4,lon:-3.7,route
+  }]}));
+  const motion=createReplayMotion(motionFromStates(frames));
+  for(const sim of [0,15,30,45,60,75,90,105,120])
+    assert.deepEqual(motion.position("bike",sim/2),pointAt(route,sim));
+  assert.deepEqual(motion.position("bike",20),motion.position("bike",40),"Waits never become drifting motion");
+});
