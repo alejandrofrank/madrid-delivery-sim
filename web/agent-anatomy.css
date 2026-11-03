@@ -73,7 +73,7 @@
 .anatomy-team-toolbar>div{display:flex;gap:8px}
 .anatomy-team-toolbar button{font-size:var(--ui-text-sm);min-height:36px;background:transparent}
 .story-caption{color:var(--ui-muted);font-size:var(--ui-text-sm)}
-.delivery-scene{height:clamp(390px,60svh,700px);position:relative;overflow:hidden;isolation:isolate}
+.delivery-scene{height:clamp(520px,68svh,840px);border-radius:var(--ui-radius-lg);background:#0c151c;position:relative;overflow:hidden;isolation:isolate}
 .delivery-scene-canvas{display:block;width:100%;height:100%;cursor:grab;touch-action:pan-y}
 .delivery-scene-canvas:focus-visible{outline:2px solid var(--ui-accent);outline-offset:-4px}
 .delivery-scene-labels{position:absolute;inset:0;pointer-events:none}
@@ -96,9 +96,9 @@
 .story-legend{display:flex;flex-wrap:wrap;gap:20px 32px;margin:18px 0 8px;font-size:var(--ui-text-sm)}
 .story-legend dt{display:flex;align-items:center;gap:8px;color:var(--ui-ink)}
 .story-legend dd{margin:5px 0 0;color:var(--ui-muted)}
-.story-legend-line{display:inline-block;width:32px;border-top:1px solid var(--ui-strong-line)}
-.story-legend-line[data-kind="a2a"]{border-top:1px dashed var(--ui-info)}
-.story-legend-line[data-kind="review"]{border-top:1px dotted var(--ui-muted)}
+.story-legend-line{display:inline-block;width:32px;border-top:4px solid #329b77}
+.story-legend-line[data-kind="a2a"]{border-top:4px dashed #427fbd}
+.story-legend-line[data-kind="review"]{border-top:4px dotted #9365bf}
 .story-handoffs{padding-left:20px;line-height:1.8;margin:12px 0}
 .story-note{font-size:var(--ui-text-sm);color:var(--ui-muted);line-height:1.6}
 .scene-fallback-note{font-size:var(--ui-text-sm);color:var(--ui-muted);margin:20px 0}
@@ -109,13 +109,13 @@
 #agent-anatomy .scene-plan .is-owner{border-color:var(--ui-ink)}
 @media(max-width:1000px){.scene-role-label{font-size:var(--ui-text-xs);padding:3px 5px}.story-roles{gap:2px}}
 @media(max-width:700px){
- .delivery-scene{height:360px;margin-inline:-12px}
- .delivery-scene.is-fallback{height:auto;min-height:360px;margin-inline:0}
- .scene-role-label:not(.is-owner):not(.is-hovered){display:none}
+ .delivery-scene{height:550px;min-width:940px;margin-inline:0}
+ .delivery-scene.is-fallback{height:auto;min-height:360px;min-width:0;margin-inline:0}
+ .scene-role-label{font-size:12px}
  .anatomy-team-toolbar{align-items:flex-start;margin:12px 0 0}
  .anatomy-team-toolbar>div{gap:4px}
  .anatomy-team-toolbar button{min-height:44px;padding:8px}
- .story-reset{display:none}
+ .story-reset{display:inline-block}
  .story-caption{max-width:22ch}
  .anatomy-flow{grid-template-columns:repeat(3,minmax(0,1fr))}
  #agent-anatomy .story-step button{font-size:var(--ui-text-sm);padding:9px 6px;gap:6px}
@@ -279,3 +279,13 @@
 .anatomy-options{position:relative}
 .anatomy-option-items{position:absolute;right:0;top:100%;z-index:20;min-width:160px;padding:8px;display:grid;gap:6px;background:var(--ui-surface);border:1px solid var(--ui-line)}
 .anatomy-option-items button{width:100%;text-align:left}
+
+.delivery-scene-viewport{max-width:100%;overflow-x:auto;border-radius:var(--ui-radius-lg);scrollbar-color:var(--ui-accent) var(--ui-raised)}
+.scene-mobile-hint{display:none;color:var(--ui-muted);font-size:var(--ui-text-sm)}
+.story-communication{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap;margin:8px 0 16px}
+.story-communication p{margin:0;color:var(--ui-muted);font-size:var(--ui-text-sm)}
+.story-legend{justify-content:space-between;padding:0 8px}
+.story-legend>div{flex:1;min-width:180px}
+.story-legend dd{font-size:var(--ui-text-xs);max-width:38ch}
+.scene-controller{font-size:11px;border-style:dashed;background:#163346;color:#cdeaff}
+@media(max-width:700px){.scene-mobile-hint{display:block}.story-communication{gap:4px}.story-legend{display:flex;gap:8px;justify-content:flex-start}.story-legend>div{flex:none;min-width:0}.story-legend dd{display:none}.story-legend-line{width:20px}}

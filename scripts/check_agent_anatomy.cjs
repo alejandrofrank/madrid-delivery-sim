@@ -148,6 +148,9 @@ async function capture(page,path){
   assert.deepEqual(JSON.parse(await teamCanvas.getAttribute('data-visuals')),data.agents.map(a=>({id:a.id,...a.visual})));
   const teamRender=JSON.parse(await teamCanvas.getAttribute('data-render'));
   assert(teamRender.calls<650&&teamRender.triangles<300000,JSON.stringify(teamRender));
+  assert.equal(await teamCanvas.getAttribute('data-rooms'),'7');
+  assert(await page.locator('.story-legend').isVisible());
+  assert(await page.locator('.scene-controller').isVisible());
   for(const agent of data.agents){
    const button=page.locator('.story-role-button[data-agent="'+agent.id+'"]');
    assert.equal(await button.evaluate(el=>el.style.getPropertyValue('--role-color')),agent.visual.color);
@@ -167,7 +170,7 @@ async function capture(page,path){
   await page.locator('#story-play').click();
   await page.waitForFunction(()=>document.querySelector('#story-play').textContent==='Replay order',{},{timeout:22000});
   assert.equal(await teamCanvas.getAttribute('data-step'),'5');
-  assert.deepEqual(JSON.parse(await teamCanvas.getAttribute('data-parcel')),[9,.12,-.5]);
+  assert.deepEqual(JSON.parse(await teamCanvas.getAttribute('data-parcel')),[12,.7,3.3]);
   const botBounds=JSON.parse(await teamCanvas.getAttribute('data-agents'));
   const sceneBox=await teamCanvas.boundingBox(),target=botBounds.courier;
   await page.mouse.click(sceneBox.x+target.x*sceneBox.width,sceneBox.y+target.y*sceneBox.height);

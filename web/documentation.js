@@ -573,6 +573,7 @@ async function showPage(id, resetScroll = false) {
   $("#agent-anatomy").hidden = currentPage.id !== "agent-anatomy";
   const version = ++renderVersion;
   $("#error").hidden = true;
+  $("#loading").hidden = true;
   $("#document").hidden = false;
   document.title = `${currentPage.title} · madrid-delivery-sim`;
   $("#breadcrumb-topic").textContent = currentPage.group;
@@ -810,6 +811,12 @@ window.addEventListener("resize", () => {
 
 (async () => {
   try {
+    const openingAgents=location.pathname!=="/engineers/architecture"&&!new URLSearchParams(location.search).has("page");
+    if(openingAgents){
+      document.body.classList.add("anatomy-mode");
+      $("#loading").replaceChildren(...ProductUI.loading("Assembling the agent team").childNodes);
+      window.AgentAnatomy.preload().catch(()=>{}); // Fetch alongside the chapter catalogue.
+    }
     catalogue = await getJSON("/api/documentation");
     buildNavigation();
     await showPage(

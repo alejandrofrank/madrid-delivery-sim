@@ -9,8 +9,10 @@ window.AgentStory=(()=>{
   const replay=make('button',reduced.matches?'Next step':'Play order');replay.id='story-play';
   const reset=make('button','Reset scene');reset.className='story-reset';
   const actions=make('div');actions.append(reset,replay);tools.append(caption,actions);section.append(tools);
-  const place=make('div',undefined,'delivery-scene');section.append(place);
-  const loading=make('p','Loading the delivery scene…','scene-loading');place.append(loading);
+  const viewport=make('div',undefined,'delivery-scene-viewport');viewport.tabIndex=0;viewport.setAttribute('aria-label','Agent workspaces. Scroll sideways on a small screen.');
+  const place=make('div',undefined,'delivery-scene');viewport.append(place);section.append(viewport);
+  const mobileHint=make('p','Swipe sideways to explore the rooms.','scene-mobile-hint');section.append(mobileHint);
+  const loading=ProductUI.loading('Building the shared workspace','Placing the robots and their work areas.');place.append(loading);
   const flow=make('ol',undefined,'anatomy-flow');flow.setAttribute('aria-label','Order journey');
   const steps=data.story.steps.map((step,index)=>{
    const li=make('li',undefined,'story-step');li.dataset.step=index;
@@ -36,7 +38,10 @@ window.AgentStory=(()=>{
   }
   const handoffs=make('ol',undefined,'story-handoffs');
   for(const step of data.story.steps.filter(s=>s.handoff)){const li=make('li');li.append(make('strong',step.label+': '),document.createTextNode(step.handoff));handoffs.append(li);}
-  explanation.append(legend,handoffs,make('p',data.story.note,'story-note'));section.append(explanation);host.append(section);
+  const communication=make('div',undefined,'story-communication');communication.append(make('strong','One bag. Separate messages.'),make('p','Blue requests go through the controller. Green tracks carry the bag; purple dots carry review evidence.'));
+  section.insertBefore(communication,viewport);
+  section.insertBefore(legend,flow);
+  explanation.append(make('p','Each work handoff is recorded in a durable queue so it can be retried. The green track shows the physical bag, not the queue.'),handoffs,make('p',data.story.note,'story-note'));section.append(explanation);host.append(section);
   let current=0,progress=0,playing=false,shown=false,disposed=false,scene=null,raf=0,last=0,factory=null,loadingScene=false,fallback=null;
   function open(id){pause();choose(id,buttons.get(id));}
   function drawState(){scene?.setState(current,progress,playing);if(fallback){fallback.dataset.step=String(current);fallback.querySelectorAll('[data-agent]').forEach(el=>el.classList.toggle('is-owner',el.dataset.agent===data.story.steps[current].agent));}}
@@ -59,7 +64,7 @@ window.AgentStory=(()=>{
    if(playing){pause();return;}if(current===steps.length-1){current=0;progress=0;}else if(progress>=1){progress=0;}
    playing=true;last=0;update();raf=requestAnimationFrame(tick);
   };
-  reset.onclick=()=>scene?.reset();
+  reset.onclick=()=>{scene?.reset();viewport.scrollTo({left:0,behavior:'instant'});};
   function flatScene(){
    scene=null;place.replaceChildren();place.classList.add('is-fallback');reset.hidden=true;
    const message=make('p','3D is unavailable. Explore the same team on this floor plan.','scene-fallback-note');place.append(message);
@@ -73,7 +78,7 @@ window.AgentStory=(()=>{
   async function loadScene(){
    if(!factory||loadingScene||scene||disposed)return;loadingScene=true;
    try{
-    const {createDeliveryScene}=await import('./agent-delivery-scene.js?v=9cabc4df7325');
+    const {createDeliveryScene}=await import('./agent-delivery-scene.js?v=9fa99a7cc090');
     if(disposed)return;
     scene=createDeliveryScene(place,data,{createAgentModel:factory,onAgent:open,onFailure:flatScene});
     loading.remove();scene.show(shown);drawState();

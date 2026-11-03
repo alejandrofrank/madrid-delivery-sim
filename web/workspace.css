@@ -117,3 +117,16 @@ body[data-page="baseline"][data-audience="visitor"] .fleet-total,body[data-page=
 .ui-replay-controls input{flex:1;min-width:70px;padding:0;accent-color:var(--ui-accent)}
 .ui-replay-controls output{font-variant-numeric:tabular-nums;font-size:var(--ui-text-sm);white-space:nowrap}
 body[data-audience="visitor"] .order-ref{display:none}
+
+/* Reserved scene space and a quiet network pulse while real data is loading. */
+.ui-loading-scene{min-height:clamp(320px,55svh,560px);display:flex;flex-direction:column;justify-content:center;align-items:center;gap:12px;text-align:center;padding:32px;background:var(--ui-surface);border:1px solid var(--ui-line);border-radius:var(--ui-radius-lg);color:var(--ui-ink)}
+.ui-loading-scene[hidden]{display:none}
+.ui-loading-scene p{margin:0;color:var(--ui-muted);max-width:36ch}
+.ui-loading-network{position:relative;display:flex;align-items:center;gap:48px;margin-bottom:20px;color:var(--ui-accent)}
+.ui-loading-network:before{content:"";position:absolute;inset:50% 10px auto;border-top:2px dashed var(--ui-strong-line)}
+.ui-loading-network>span{position:relative;display:grid;place-items:center;width:58px;height:58px;border:1px solid var(--ui-strong-line);border-radius:var(--ui-radius);background:var(--ui-surface);animation:workspace-arrive 1.8s ease-in-out infinite}
+.ui-loading-network>span:nth-child(2){animation-delay:.3s}.ui-loading-network>span:nth-child(3){animation-delay:.6s}
+.ui-loading-network .ui-icon{width:28px;height:28px}
+.delivery-scene>.ui-loading-scene{position:absolute;inset:0;min-height:0;z-index:2}
+@keyframes workspace-arrive{0%,70%,100%{transform:translateY(0);border-color:var(--ui-strong-line)}35%{transform:translateY(-8px);border-color:var(--ui-accent);background:var(--ui-accent-soft)}}
+@media(prefers-reduced-motion:reduce){.ui-loading-network>span{animation:none}}

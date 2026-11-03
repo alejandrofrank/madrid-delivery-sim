@@ -7,7 +7,7 @@ Nine agent roles coordinate a simulated Madrid grocery network: stock checks, pi
 [![Recorded Madrid network with moving couriers and the agent handoff](docs/media/product-story.png)](http://localhost:8010/)
 
 The landing plays a recorded shift immediately, without an API or model call.
-Watch opens the city replay; choose **Watch store replay** for the shelf-to-doorstep journey.
+Watch opens the city replay; choose **Watch store replay** for the shelf-to-doorstep journey. Courier positions and the playback bar move continuously from buffered recorded routes, independently of state refreshes.
 All operator tools remain under **For engineers**. Select **Start your own run** to open the local controls.
 
 **[Meet the agents — interactive anatomy](http://localhost:8010/agents)** ·
@@ -246,7 +246,7 @@ References: [A2A specification](https://a2a-protocol.org/latest/specification/),
 
 ## Chaos mode
 
-Open **Chaos → Start 60 second demo** in Operations. The scenario in
+Open **Watch it live → Advanced → Chaos** to start a 60 second demo. The scenario in
 [`config/scenarios/chaos-demo.json`](config/scenarios/chaos-demo.json) schedules rain,
 a Metro strike, a kitchen outage, a courier failure and a district demand surge over
 two simulated hours. The clock targets 60 wall seconds; a slower machine may take
@@ -488,14 +488,14 @@ courier fleets, orders, delivery performance and chaos controls. Simulation setu
 is under **Simulation & diagnostics** on the same page.
 
 The older **Delivery** workspace and its fictional grid-city UI have been retired.
-`/delivery-lab` redirects to Operations. Its separate run IDs are not forwarded to
+`/delivery-lab` redirects to Watch it live. Its separate run IDs are not forwarded to
 the Madrid engine. The [running-city backend](docs/RUNNING-CITY.md), delivery APIs,
 CLI regression scenarios and retained evidence remain available for testing;
 Health links legacy delivery runs directly to their recorded JSON evidence.
 Restaurants and Inventory also retire their fictional grid maps: select agents
 from the restaurant roster and stores from the inventory selector. Stock,
 reservations, run inspection and replay evidence remain available. The real
-Madrid street map in Operations is the single geographic overview.
+Madrid street map in Watch it live is the single geographic overview. Legacy Operations links redirect there.
 
 The [restaurant supply lab](http://localhost:8010/restaurant-lab) adds scheduled
 household meal calls, seven restaurants, nearby ingredient markets, reservations,

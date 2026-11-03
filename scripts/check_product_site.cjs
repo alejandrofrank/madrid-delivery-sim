@@ -29,8 +29,8 @@ const base=arg('--url','http://127.0.0.1:8010'),out=arg('--output','artifacts/pr
   const fallback=await browser.newPage();await fallback.route('**/landing-robots.js*',r=>r.abort());await fallback.goto(base+'/');await fallback.waitForFunction(()=>document.getElementById('story-handoff').hidden);assert(await fallback.locator('#story-canvas').isVisible());checks.push('robot asset failure leaves the recorded map usable');await fallback.close();
   await page.setViewportSize({width:1440,height:1000});
   for(const path of ['/watch','/agents','/engineers/operations','/engineers/restaurants','/engineers/inventory','/engineers/health','/engineers/traces','/engineers/architecture']){
-   await page.goto(base+path);await page.waitForSelector('.workspace-header');assert.equal(await page.locator('#workspace-navigation a').count(),3);assert.equal(await page.locator('.workspace-environment').count(),path.startsWith('/engineers/')?1:0);
-   assert.equal(await page.locator('.workspace-engineer-links a[href="/engineers/inventory"]').count(),1);
+   await page.goto(base+path);await page.waitForSelector('.workspace-header');assert.equal(await page.locator('#workspace-navigation a').count(),3);assert.equal(await page.locator('.workspace-environment').count(),new URL(page.url()).pathname.startsWith('/engineers/')?1:0);
+   assert.equal(await page.locator('.workspace-engineer-links a[href="/engineers/inventory"]').count(),1);assert.equal(await page.getByRole('link',{name:'Operations',exact:true}).count(),0);
   }
   checks.push('every workspace keeps the shared header and environment stays in engineer pages');assert.deepEqual(errors,[]);
   await fs.writeFile(out+'/results.json',JSON.stringify({passed:true,checks},null,2));console.log(checks.map(x=>'PASS '+x).join('\n'));

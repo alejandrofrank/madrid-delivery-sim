@@ -271,7 +271,7 @@ Agent Anatomy's role and physical-part headings retain the locally served Oxaniu
 
 The shared shell has a 72px minimum header height, flexible horizontal spacing and a single line of desktop destinations. At 1150px it reduces gaps; at 900px navigation moves into a menu; at 520px the wordmark and controls become more compact. The footer wraps and then stacks. Shared cards and panels use 24px padding, reducing to 20px at the narrowest shared breakpoint. The reusable spacing steps are recorded in the frontmatter.
 
-The public Watch view places the map before the roster in a 1.8:1 two-column layout, with a 320px minimum roster and 20px gap. It stacks at 1000px with the map first. Engineering Operations preserves its denser roster/map layout, selected evidence and ledger. Its narrow map uses a 400px geographic region with the legend below in normal flow. Restaurants reveals its inspector beside the roster when selected, then stacks at 900px. Inventory, Health, Traces and Architecture retain their own evidence-oriented layouts and local scroll containers.
+The public Watch view places the map before the roster in a 1.8:1 two-column layout, with a 320px minimum roster and 20px gap. It stacks at 1000px with the map first. The former Operations URL redirects to Watch; run controls remain in Advanced, with selected evidence and the ledger on that same page. Its narrow map uses a 400px geographic region with the legend below in normal flow. Restaurants reveals its inspector beside the roster when selected, then stacks at 900px. Inventory, Health, Traces and Architecture retain their own evidence-oriented layouts and local scroll containers.
 
 The landing uses a continuous city field, left-side explanation, existing robots, a playback strip and connected order steps. Its content sections cap at 1400px. At 700px the story becomes a vertical sequence; playback changes to a small grid, order steps and outcomes stack, and technology items form two columns. These are surface-specific arrangements, not a mandatory page template.
 
@@ -303,7 +303,7 @@ Inputs, selects and textareas share a surface background, strong outline, contro
 
 ### Navigation
 
-The Madrid home link precedes How it works, Watch it live and Meet the agents. The current primary destination has accent text and an underline. For engineers exposes the six existing workspaces and documentation search. The theme control persists the selected appearance in local storage, defaults to light and updates its accessible name. Watch it run remains the primary shared action.
+The Madrid home link precedes How it works, Watch it live and Meet the agents. The current primary destination has accent text and an underline. For engineers exposes the five specialist workspaces and documentation search. The theme control persists the selected appearance in local storage, defaults to light and updates its accessible name. Watch it run remains the primary shared action.
 
 The narrow menu uses ordinary anchors and an expanded state. Escape closes menu/disclosure state and returns focus to its control; an outside click also closes it. The skip link reaches the main content or the Architecture reader. Engineering pages additionally expose a runtime/environment qualifier, while the public shell stays compact.
 
@@ -344,3 +344,11 @@ Advanced controls can open in a right-side native dialog, with a maximum width o
 - **Don't** fabricate zeroes, curves, latency or cost figures when the source does not provide them.
 - **Don't** replace the source-native robots or real Madrid paths with invented mockup geometry.
 - **Don't** treat retained tiny labels, fixed legacy colors or a review defect as a reusable system token.
+
+The agent team now occupies distinct cutaway workspaces around a loading court.
+Room openings preserve sightlines and the delivery path. The visible path and
+moving token share one curve; solid green handoffs, dashed blue requests and
+dotted purple review evidence remain distinct in an always-visible legend.
+On phones the scene scrolls horizontally within its own viewport to preserve
+robot size, while named role controls remain below. Loading reserves scene
+space and shows a restrained network pulse, with a still reduced-motion state.

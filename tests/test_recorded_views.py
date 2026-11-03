@@ -62,3 +62,29 @@ def test_public_reference_matches_manifests_and_reviewed_sources() -> None:
     exports = runpy.run_path("scripts/build_public_reference.py")["exports"]()
     for name, expected in exports.items():
         assert json.loads(Path("web/data/reference", name).read_text()) == expected, name
+
+
+def test_motion_lookahead_is_read_only_bounded_and_matches_recorded_routes(
+    client: TestClient,
+) -> None:
+    from delivery.recorded_api import recordings
+
+    response = client.get("/api/recorded/motion")
+    assert response.status_code == 200
+    motion = response.json()
+    shift = recordings().shift(motion["run"])
+    assert len(motion["frames"]) == len(shift["frames"])
+    assert motion["duration"] == shift["frames"][-1]["run"]["duration"]
+    assert len(response.content) < 2_000_000
+    assert set(motion) == {"run", "duration", "couriers", "routes", "frames"}
+    for frame, recorded in zip(motion["frames"], shift["frames"], strict=True):
+        assert frame["time"] == recorded["run"]["sim_time"]
+        by_id = {c["id"]: c for c in recorded["couriers"]}
+        for identifier, position in zip(motion["couriers"], frame["positions"], strict=True):
+            courier = by_id[identifier]
+            assert position[:2] == [courier["lon"], courier["lat"]]
+            if position[2] >= 0:
+                route = courier.get("route") or courier["reposition_route"]
+                assert motion["routes"][position[2]] == route["points"]
+    assert client.get("/api/recorded/motion?run=unknown").status_code == 404
+    assert client.post("/api/recorded/motion", json={}).status_code == 405

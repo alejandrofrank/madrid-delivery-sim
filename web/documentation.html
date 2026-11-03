@@ -12,9 +12,9 @@
     <title>Architecture · madrid-delivery-sim</title>
     <link rel="icon" href="data:," />
     <link rel="stylesheet" href="/static/documentation.css?v=4c092a66a301" />
-    <link rel="stylesheet" href="/static/agent-anatomy.css?v=ec92490a5469" />
-    <link rel="stylesheet" href="/static/workspace.css?v=ec7ca4040fca" />
-    <script defer src="/static/workspace.js?v=74d9a3fdbe66"></script>
+    <link rel="stylesheet" href="/static/agent-anatomy.css?v=beea56533810" />
+    <link rel="stylesheet" href="/static/workspace.css?v=3057776fec3e" />
+    <script defer src="/static/workspace.js?v=eb2f76291f08"></script>
     <script
       defer
       src="/static/vendor/documentation/marked.umd.js?v=9eb730d2362a"
@@ -25,16 +25,16 @@
     ></script>
     <script defer src="/static/agent-memory.js?v=1688dcf36e31"></script>
     <script defer src="/static/agent-role-symbols.js?v=d91e34bd4490"></script>
-    <script defer src="/static/agent-story.js?v=0768cc773ea5"></script>
-    <script defer src="/static/agent-anatomy.js?v=70d5460218aa"></script>
-    <script defer src="/static/documentation.js?v=7713ce9c01ee"></script>
+    <script defer src="/static/agent-story.js?v=c73b4065b1f6"></script>
+    <script defer src="/static/agent-anatomy.js?v=0bb806b01acf"></script>
+    <script defer src="/static/documentation.js?v=d2596e897e1e"></script>
   </head>
   <body data-page="architecture">
     <div id="workspace-shell">
       <button id="open-search" class="search-trigger" aria-haspopup="dialog">
         <span>Search chapters</span><kbd>Ctrl K</kbd></button
       ><noscript
-        ><nav class="workspace-noscript" aria-label="Workspaces"><a href="/">How it works</a><a href="/watch">Watch it live</a><a href="/agents">Meet the agents</a><a href="/engineers/operations">For engineers</a></nav></noscript
+        ><nav class="workspace-noscript" aria-label="Workspaces"><a href="/">How it works</a><a href="/watch">Watch it live</a><a href="/agents">Meet the agents</a><a href="/engineers/architecture">For engineers</a></nav></noscript
       >
     </div>
 
@@ -58,8 +58,10 @@
         </div>
       </aside>
       <main id="reader" tabindex="-1">
-        <div id="loading" class="loading" role="status">
-          Loading the engineering reference…
+        <div id="loading" class="ui-loading-scene" role="status" aria-busy="true">
+          <div class="ui-loading-network" aria-hidden="true"><span>01</span><span>02</span><span>03</span></div>
+          <strong>Opening the workspace</strong>
+          <p>Loading roles, tools and recorded evidence.</p>
         </div>
         <p id="error" role="alert" hidden></p>
         <div id="document" hidden>

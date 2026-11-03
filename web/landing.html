@@ -4,8 +4,9 @@
   <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="description" content="Follow nine AI agents as they check stock, pick groceries and deliver across Madrid. Watch a recorded shift, then inspect how every agent works.">
   <title>Madrid — groceries, coordinated by agents</title>
-  <link rel="stylesheet" href="/static/tokens.css?v=ba0ffa807ed3"><link rel="stylesheet" href="/static/workspace.css?v=ec7ca4040fca"><link rel="stylesheet" href="/static/landing.css?v=511f7b264d5a">
-  <script src="/static/workspace.js?v=74d9a3fdbe66" defer></script><script src="/static/agent-role-symbols.js?v=d91e34bd4490" defer></script><script type="module" src="/static/landing.js?v=efeac15d6d8c"></script>
+  <link rel="stylesheet" href="/static/tokens.css?v=ba0ffa807ed3"><link rel="stylesheet" href="/static/workspace.css?v=3057776fec3e"><link rel="stylesheet" href="/static/landing.css?v=511f7b264d5a">
+  <script src="/static/workspace.js?v=eb2f76291f08" defer></script><script src="/static/agent-role-symbols.js?v=d91e34bd4490" defer></script><script defer src="/static/courier_motion.js?v=896bb508fd0c"></script>
+    <script type="module" src="/static/landing.js?v=8536899d14a9"></script>
 </head>
 <body data-page="story">
 <div id="workspace-shell"></div>
@@ -27,7 +28,7 @@
     <div class="story-playback" aria-label="Recorded shift playback">
       <span class="story-recorded"><span class="ui-status-dot"></span>Recorded shift</span>
       <button id="story-pause" class="ui-icon-button" type="button" aria-label="Pause recorded shift" aria-pressed="false"><span data-icon="pause"></span></button>
-      <label class="sr-only" for="story-progress">Position in the two-hour recorded shift</label><input id="story-progress" type="range" min="0" max="7200" value="1440" step="1">
+      <label class="sr-only" for="story-progress">Position in the two-hour recorded shift</label><input id="story-progress" type="range" min="0" max="7200" value="1440" step="any">
       <span id="story-time">24 min / 2 hours</span><a href="#recorded-results" class="story-results-link">See results <span data-icon="arrow"></span></a>
     </div>
     <a class="story-attribution" href="https://www.openstreetmap.org/copyright">Map data © OpenStreetMap contributors</a>

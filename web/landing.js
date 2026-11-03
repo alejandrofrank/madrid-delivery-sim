@@ -1,9 +1,9 @@
-import {courierPosition, frameAt} from './story-playback.js';
+import {frameAt} from './story-playback.js';
 
 const canvas=document.getElementById('story-canvas'),ctx=canvas.getContext('2d');
 const progress=document.getElementById('story-progress'),pause=document.getElementById('story-pause');
 const reduced=matchMedia('(prefers-reduced-motion: reduce)');
-let data,clock=1440,playing=!reduced.matches,visible=true,last=0,raf=0,robots=null;
+let data,motion,clock=1440,playing=!reduced.matches,visible=true,last=0,raf=0,robots=null;
 let width=0,height=0,dpr=1,project,backdrop,palette,routeLayer,cachedFrame=null,routeBuilds=0,draws=0;
 const css=name=>getComputedStyle(document.documentElement).getPropertyValue(name).trim();
 const line=(context,points)=>{points.forEach((p,i)=>{const [x,y]=project(p);i?context.lineTo(x,y):context.moveTo(x,y);});};
@@ -45,7 +45,8 @@ function draw(){
   frame.couriers.forEach((state,index)=>{
     if(state[2]===4||state[2]===5)return;
     const moving=state[3]>=0;
-    active.push({point:project(courierPosition(data,state,clock)),moving,index});
+    const position=motion.position(data.couriers[index].id,clock/data.clock.duration*60);
+    active.push({point:project([position[1],position[0]]),moving,index});
   });
   for(const order of data.orders){
     if(order.site==null||clock<order.created||clock>order.created+200)continue;
@@ -56,7 +57,7 @@ function draw(){
   for(const {point:[x,y],moving} of active){
     ctx.beginPath();ctx.arc(x,y,moving?5.8:3.2,0,Math.PI*2);ctx.fillStyle=moving?palette.accent:palette.surface;ctx.fill();ctx.strokeStyle=moving?palette.surface:palette.muted;ctx.lineWidth=moving?1.8:1.2;ctx.stroke();
   }
-  progress.value=String(Math.round(clock));const label=Math.floor(clock/60)+' min / 2 hours';
+  progress.value=String(clock);const label=Math.floor(clock/60)+' min / 2 hours';
   if(document.getElementById('story-time').textContent!==label)document.getElementById('story-time').textContent=label;
   robots?.setTime(clock/data.clock.duration*data.clock.playback_seconds);
   canvas.dataset.simTime=String(Math.round(clock));canvas.dataset.routeBuilds=String(routeBuilds);canvas.dataset.draws=String(draws);
@@ -77,6 +78,8 @@ async function load(){
   const failure=document.getElementById('story-map-fallback');failure.hidden=true;
   try{
     const response=await fetch('/static/data/story-replay.json');if(!response.ok)throw Error('Recording unavailable');data=await response.json();
+    motion=CourierMotion.createReplayMotion({duration:data.clock.duration,couriers:data.couriers.map(c=>c.id),routes:data.routes,
+      frames:data.frames.map(f=>({time:f.time,positions:f.couriers.map(c=>[c[0],c[1],c[3]])}))});
     const o=data.outcomes;document.getElementById('story-on-time').textContent=o.on_time+' / '+o.delivered;document.getElementById('story-recovered').textContent=o.resolved_disruptions+' / '+o.disruptions;document.getElementById('story-cost').textContent=new Intl.NumberFormat('en-IE',{style:'currency',currency:'EUR'}).format(o.cost_per_delivery_eur);
     fit();syncButton();schedule();
     try{const [{createLandingRobots},roleResponse]=await Promise.all([import('./landing-robots.js?v=270144a26eff'),fetch('/static/data/story-agents.json')]);if(!roleResponse.ok)throw Error('Roles unavailable');robots=createLandingRobots(document.getElementById('story-robots'),await roleResponse.json());draw();}catch{document.getElementById('story-handoff').hidden=true;}

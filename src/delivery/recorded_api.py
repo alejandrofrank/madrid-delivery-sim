@@ -30,6 +30,10 @@ def create_recorded_router(source: Callable[[], Recordings] = recordings) -> API
         return [{**shift["frames"][-1]["run"], "title": shift["title"]}
                 for shift in source().shifts.values()]
 
+    @router.get("/motion")
+    def motion(run: str | None = None) -> dict[str, Any]:
+        return source().motion(run)
+
     @router.get("/state")
     def state(run: str | None = None, t: float = 0) -> dict[str, Any]:
         return source().frame(run, t)

@@ -7,7 +7,6 @@ from fastapi.responses import FileResponse, RedirectResponse, Response
 PAGES = {
     "/watch": "index.html",
     "/agents": "documentation.html",
-    "/engineers/operations": "index.html",
     "/engineers/restaurants": "supply.html",
     "/engineers/inventory": "lab.html",
     "/engineers/health": "health.html",
@@ -15,6 +14,7 @@ PAGES = {
     "/engineers/architecture": "documentation.html",
 }
 LEGACY = {
+    "/engineers/operations": "/watch",
     "/restaurant-lab": "/engineers/restaurants",
     "/lab": "/engineers/inventory",
     "/health": "/engineers/health",
