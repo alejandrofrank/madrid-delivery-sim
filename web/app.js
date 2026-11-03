@@ -13,7 +13,7 @@ map.zoomControl.setPosition("topright");
 L.control.scale({imperial:false,position:"bottomleft",maxWidth:90}).addTo(map);
 const roads = L.layerGroup().addTo(map), hubs = L.layerGroup().addTo(map);
 const stores = L.layerGroup().addTo(map), ordersLayer = L.layerGroup().addTo(map);
-const courierMarkers = new Map();
+const courierMarkers = new Map(), replayClusters = new Map();
 const {createDisplayClock, courierPosition} = CourierMotion;
 const displayClock = createDisplayClock();
 let state = null, selected = null, runId = new URLSearchParams(location.search).get("run") || "", traceRows = [];
@@ -382,7 +382,7 @@ function renderMetrics() {
   if (run.status === "failed") error(`Run stopped: ${run.error}. The state is preserved; resume from the CLI.`);
 }
 function renderCouriers() {
-  clusterLayer.clearLayers();
+  clusterLayer.clearLayers();replayClusters.clear();
   const visible=fleetCouriers(),visibleIds=new Set(visible.map(c=>c.id));
   for(const [id,marker] of courierMarkers){if(!visibleIds.has(id))map.removeLayer(marker);}
   const sim = displayClock.time(performance.now());
@@ -404,7 +404,7 @@ function renderCouriers() {
     const content='<div class="map-agent-card"><strong>'+escape(c.id)+'</strong><p>'+escape(c.fleet_name||"Bakiano")+' · '+escape(c.operator||"regular")+'</p><p>'+escape(human(c.status))+' · '+escape(c.mode)+'</p><p>Task: '+escape(courierTask(c))+'</p><p>Last decision: '+escape(last?human(last.action):"None recorded")+'</p><a href="'+agentTraceLink(c.id)+'">Open agent trace</a></div>';
     if(marker.getPopup())marker.setPopupContent(content);else marker.bindPopup(content,{minWidth:220,autoPan:false});
     const point=map.project(location,map.getZoom());
-    const group=map.getZoom()<13.5&&!isSelected&&status!=="working"?groups.find(group=>!group.selected&&group.items.every(item=>agentStatus(item.c)!=="working")&&group.point.distanceTo(point)<38):null;
+    const group=map.getZoom()<13.5&&!isSelected&&status!=="working"&&!replayMoving(c.id)?groups.find(group=>!group.selected&&group.items.every(item=>agentStatus(item.c)!=="working"&&!replayMoving(item.c.id))&&group.point.distanceTo(point)<38):null;
     if(group)group.items.push({c,marker,location});
     else groups.push({point,selected:isSelected,items:[{c,marker,location}]});
   }
@@ -413,7 +413,8 @@ function renderCouriers() {
     group.forEach(({marker})=>map.removeLayer(marker));
     const lat=group.reduce((n,{location})=>n+location[0],0)/group.length,lon=group.reduce((n,{location})=>n+location[1],0)/group.length;
     const icon=L.divIcon({className:"cluster-marker",html:String(group.length),iconSize:[30,30]});
-    L.marker([lat,lon],{icon,title:group.length+" agents. Zoom to inspect.",keyboard:true}).on("click",()=>map.setView([lat,lon],Math.min(17,map.getZoom()+1),{animate:!reducedMotion.matches})).addTo(clusterLayer);
+    const cluster=L.marker([lat,lon],{icon,title:group.length+" agents. Zoom to inspect.",keyboard:true}).on("click",()=>map.setView([lat,lon],Math.min(17,map.getZoom()+1),{animate:!reducedMotion.matches})).addTo(clusterLayer);
+    if(runtime.mode==="replay"){const entry={cluster,items:group};for(const item of group)replayClusters.set(item.c.id,entry);}
   }
   placeSelectedLabel();
 }
@@ -504,6 +505,11 @@ function renderDecisions() {
   const rows = selected ? traceRows : state?.decisions || [];
   $("decisions").innerHTML = rows.map(d=>`<article class="decision"><div class="decision-top"><span>${escape(d.agent)}</span><time>${clock(d.sim_time)}</time></div><strong>${escape(human(d.action))}</strong><p>${escape(d.detail.message?.text || d.detail.rule || d.detail.reply || (d.detail.on_time !== undefined ? (d.detail.on_time?"Delivered within promised window":"Delivered after promised window") : d.detail.store || "State transition recorded"))}</p><code>${escape(d.order_id || "")}${d.courier_id?` / ${escape(d.courier_id)}`:""}</code><details><summary>Inspect recorded evidence</summary><pre>${escape(JSON.stringify(d.detail,null,2))}</pre></details></article>`).join("") || '<p class="empty">No decisions recorded for this selection yet.</p>';
 }
+function replayMoving(id) {
+  if(runtime.mode!=="replay"||!replayMotion)return false;
+  const seconds=replaySeconds(),a=replayMotion.position(id,seconds-.05),b=replayMotion.position(id,seconds+.05);
+  return a&&b&&Math.abs(a[0]-b[0])+Math.abs(a[1]-b[1])>1e-9;
+}
 function positionFor(courier,sim=displayClock.time(performance.now())) {
   return runtime.mode==="replay"&&replayMotion
     ? replayMotion.position(courier.id,replaySeconds())||[courier.lat,courier.lon]
@@ -531,7 +537,16 @@ function animate() {
     const moving=runtime.mode==="replay"?!replayPaused:!reducedMotion.matches&&state?.run?.status==="running";
     if(moving&&state?.run&&state.run.wall_seconds>0){
       const sim=displayClock.time(performance.now());
-      for(const c of state.couriers)courierMarkers.get(c.id)?.setLatLng(positionFor(c,sim));
+      for(const c of state.couriers){
+        courierMarkers.get(c.id)?.setLatLng(positionFor(c,sim));
+        const group=replayClusters.get(c.id);
+        if(group&&replayMoving(c.id)){
+          // A newly assigned courier must leave its idle cluster immediately,
+          // even when the next status snapshot is delayed.
+          clusterLayer.removeLayer(group.cluster);
+          for(const item of group.items){item.marker.addTo(map);replayClusters.delete(item.c.id);}
+        }
+      }
     }
   }
   requestAnimationFrame(animate);

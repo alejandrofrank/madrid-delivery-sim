@@ -14,14 +14,15 @@ const {chromium}=require("playwright"),assert=require("node:assert/strict"),fs=r
   await page.route("**/api/recorded/state?**",async route=>{await new Promise(r=>setTimeout(r,1500));await route.continue().catch(()=>{});});
   const id=await page.evaluate(()=>{
    const ranked=state.couriers.map(c=>{const a=replayMotion.position(c.id,20),b=replayMotion.position(c.id,22);return [c.id,Math.hypot(a[0]-b[0],a[1]-b[1])];}).sort((a,b)=>b[1]-a[1]);
-   return ranked[0][0];
+   const starting=ranked.find(([id,distance])=>distance>0&&state.couriers.find(c=>c.id===id).status==="idle");
+   return starting?.[0]||ranked[0][0];
   });
   await page.getByRole("button",{name:"Play replay",exact:true}).click();
   const samples=await page.evaluate(id=>new Promise(resolve=>{
    const values=[],start=performance.now();
    function sample(now){
     const p=courierMarkers.get(id).getLatLng();
-    values.push({time:now,lat:p.lat,lon:p.lng,slider:Number(document.querySelector(".ui-replay-controls input").value)});
+    values.push({time:now,lat:p.lat,lon:p.lng,visible:!!courierMarkers.get(id).getElement(),slider:Number(document.querySelector(".ui-replay-controls input").value)});
     if(now-start<2600)requestAnimationFrame(sample);else resolve(values);
    }
    requestAnimationFrame(sample);
@@ -29,7 +30,8 @@ const {chromium}=require("playwright"),assert=require("node:assert/strict"),fs=r
   assert(samples.length>20,"Enough visible frames to assess movement");
   const positions=new Set(samples.map(p=>p.lat.toFixed(8)+":"+p.lon.toFixed(8)));
   const times=new Set(samples.map(p=>p.slider.toFixed(3)));
-  assert(positions.size>samples.length*.8,"Couriers move between HTTP snapshots");
+  assert(positions.size>20,"Couriers move between HTTP snapshots");
+  assert(samples.every((p,i)=>!i||p.lat===samples[i-1].lat&&p.lon===samples[i-1].lon||p.visible),"Newly moving couriers leave idle clusters without waiting for status refresh");
   assert(times.size>samples.length*.8,"The slider moves between whole seconds");
   assert(samples.some(p=>p.slider%1>.1&&p.slider%1<.9),"Presentation time is fractional");
   await page.getByRole("button",{name:"Pause replay",exact:true}).click();
