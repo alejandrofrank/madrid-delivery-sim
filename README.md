@@ -1,8 +1,19 @@
 # madrid-delivery-sim
 
+**Multi-agent systems for Google Cloud (GCP).** An MIT-licensed engineering
+portfolio project built with Google ADK, A2A and an on-demand Cloud Run deployment.
+
+**[Watch the demo on my portfolio](https://me.alejandrofranks.workers.dev/projects/madrid-delivery-sim)**
+· **[How it works on GCP](docs/GCP-CASE-STUDY.md)** · **[Run it yourself](#run-it-yourself)**
+
+The portfolio contains recorded demos and documentation. There is no public live
+simulation to operate or pay for. Clone the source to explore the full interface
+locally, or use your own Google Cloud project for an explicitly enabled deployment.
+
+
 Nine agent roles coordinate a simulated Madrid grocery network: stock checks, picking, dispatch and delivery, with inspectable decisions when plans change.
 
-**[How it works](http://localhost:8010/)** · **[Watch it live](http://localhost:8010/watch)** · **[Meet the agents](http://localhost:8010/agents)**
+**Local interface after setup:** [How it works](http://localhost:8010/) · **[Watch it live](http://localhost:8010/watch)** · **[Meet the agents](http://localhost:8010/agents)**
 
 [![Recorded Madrid network with moving couriers and the agent handoff](docs/media/product-story.png)](http://localhost:8010/)
 
@@ -47,7 +58,7 @@ memory leaking across orders or roles. ADK proposes through granular tools;
 scoped SQL, durable queues and authenticated A2A boundaries enforce the contract.
 Routine policies can run without a model.
 
-**1,109 Python tests in the suite**, plus all **99 anatomy panels**
+**1,110 Python tests in the suite**, plus all **99 anatomy panels**
 checked in the browser ([verification workflow](https://github.com/alejandrofrank/madrid-delivery-sim/actions/workflows/ci.yml));
 **pass^5 = 1.000 across 72 held-out cases** (360 attempts), with an all-pass
 bootstrap interval of [1, 1] in the [release receipt](docs/evidence/heldout-release.json).
@@ -99,9 +110,36 @@ Assets: NVIDIA SimReady, converted by
 simplified for the browser. Full source hashes and modifications are in
 [the asset manifest](web/vendor/simready/manifest.json).
 
+## Run it yourself
+
+Use Bash, Git, GNU Make and Docker Compose v2 with Docker running. The Docker
+image supplies Python and the pinned simulation dependencies; no API key or cloud
+account is needed for the default demo.
+
+```bash
+git clone https://github.com/alejandrofrank/madrid-delivery-sim.git
+cd madrid-delivery-sim
+make setup
+# Open http://localhost:8010
+```
+
+Use `make test` for the Python suite, `make check` for lint/type checks, and
+`make down` to stop the local stack. The recorded view is immediately available;
+start a new seeded run from the local interface when you want to change inputs.
+Full browser/eval verification is documented in the
+[CI workflow](.github/workflows/ci.yml).
+
+For GCP, start with the [case study](docs/GCP-CASE-STUDY.md), then follow the
+[deployment runbook](docs/production/DEPLOYMENT.md). Supply your own project,
+billing and identities. Leave paid inference and the unqualified private tier
+disabled until you explicitly configure and validate them.
+
+Original code is [MIT licensed](LICENSE). Maps, models, fonts and dependencies
+retain their [third-party terms](THIRD-PARTY-NOTICES.md).
+
 ## On-demand Google Cloud
 
-Public demo link: **available only during a demo session** (`replay_url` from
+The portfolio uses recordings. The optional Cloud Run replay is **available only during a demo session** (`replay_url` from
 Terraform). The replay was deployed to Cloud Run, checked over HTTP and in a
 browser, then removed. The dedicated project is currently off; the verified URL
 and restart/stop commands are in the [deployment runbook](docs/production/DEPLOYMENT.md).
