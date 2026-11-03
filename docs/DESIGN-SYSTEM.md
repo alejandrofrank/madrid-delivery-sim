@@ -1,4 +1,6 @@
-# Shared workspace design
+# Earlier console design (historical)
+
+This chapter records the previous dark console and its map/diagram implementation. Its navigation, palette and layout measurements are historical. The current shared interface is documented in [Product interface](PRODUCT-UI.md), [DESIGN.md](../DESIGN.md) and `web/tokens.css`; those sources take precedence for new work.
 
 The six local workspaces share the dark operations system defined in [DESIGN.md](../DESIGN.md). Its frontmatter is the normative portable token record; [the design sidecar](../.impeccable/design.json) adds component specimens, focus behavior, motion, elevation and responsive metadata. This file describes how that system fits the existing application.
 

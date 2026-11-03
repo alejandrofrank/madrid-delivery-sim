@@ -1,0 +1,8 @@
+{
+  "kind": "browser-recording",
+  "origin": "scripts/capture_product_media.cjs; actual localhost:8010 browser frames",
+  "frames": 31,
+  "no_generated_ui": true,
+  "captured_at": "2026-11-03",
+  "sha256": "a1bb19ce8ad73bf66665856c2813cb81e48ce1b4ed782ddcae199fcc0e71fd94"
+}

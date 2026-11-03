@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "reviewed_at": "2026-10-29",
+  "reviewed_at": "2026-11-03",
   "pages": [
     {
       "id": "agent-anatomy",
@@ -9,6 +9,14 @@
       "file": "docs/AGENT-ANATOMY.md",
       "summary": "Inspect the machines: mission, tools, memory, guardrails and measured evidence.",
       "status": "Generated from real contracts"
+    },
+    {
+      "id": "product-interface",
+      "title": "Using the product",
+      "group": "Start here",
+      "file": "docs/PRODUCT-UI.md",
+      "summary": "The recorded story, agent explorer, shared controls and engineering workspaces.",
+      "status": "Implemented"
     },
     {
       "id": "overview",
