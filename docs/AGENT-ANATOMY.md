@@ -77,7 +77,7 @@ a dark-store order; the household robot models meal customers separately. A floo
 controller-routed A2A request. Dotted review evidence leaves the delivered parcel
 at the doorstep. **How agents communicate** explains the protocol legend. The judge reviews recovery decisions,
 rather than approving every successful delivery. **Play order** runs one finite
-journey; reduced motion offers **Next step** instead. On phones a single scene overview sits above six manual steps and nine named
+journey; reduced motion offers **Next step** instead. On phones a horizontally scrollable scene keeps the rooms and robots legible above six manual steps and nine named
 role buttons. Meal-specific agents and customer service have their own stations
 and remain inspectable alongside the main store flow. On the scene canvas,
 arrows orbit and Home resets the viewpoint. Every role is also keyboard-accessible
@@ -283,3 +283,12 @@ component reader stay beside the robot; source links open inspectable dialogs.
 - [src/delivery/typed_memory.py](../src/delivery/typed_memory.py)
 - [tests/test_semantic_memory.py](../tests/test_semantic_memory.py)
 <!-- anatomy-sources:end -->
+
+
+The shared setting has separate cutaway rooms for the kitchen, supplier, stock,
+packing, dispatch, support and review, with a delivery court and a household
+across the street. The front and side entrances stay open along the bag's route.
+Blue dashed requests pass through the controller/router; purple dotted evidence
+goes to review while the bag remains at the doorstep. These are an illustrated
+explanation of the protocol boundaries, not a live trace. Tracks and moving
+tokens use the same cached curves, so their paths agree.

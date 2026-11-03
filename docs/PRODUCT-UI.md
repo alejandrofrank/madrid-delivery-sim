@@ -1,7 +1,7 @@
 # Product interface
 
 The visitor's route is **How it works → Watch it live → Meet the agents**.
-The shared **For engineers** menu retains Operations, Restaurants, Inventory,
+The shared **For engineers** menu retains Restaurants, Inventory,
 Health, Traces, architecture chapters and search. Old URLs redirect with their
 run, order, agent and chapter parameters; the retired delivery grid opens Watch.
 
@@ -83,3 +83,30 @@ python3 scripts/version_web_assets.py --write
 
 Product marks are unmodified official assets. Source URLs and SHA-256 receipts
 are in [the brand asset manifest](../web/vendor/brands/sources.json).
+
+
+## Continuous replay and workspace loading
+
+Watch it live is the single city destination. Old `/engineers/operations`
+bookmarks redirect there with their run/query parameters intact; Advanced
+contains the existing run controls.
+
+Before city playback starts, `/api/recorded/motion` supplies a bounded,
+read-only timeline of courier positions and deduplicated street routes. A
+presentation clock samples those routes on each animation frame. Both ends of
+each interval are known, including assignments in the following snapshot.
+Recorded street bends and preparation waits remain intact; interpolation joins
+recorded positions where no intervening route was captured. The once-per-second
+state request refreshes evidence and metrics, not marker positions or the slider.
+Moving couriers stay individually visible instead of joining static clusters.
+The in-process store recording uses the same sampler. Live simulation timing
+keeps its bounded extrapolation clock.
+
+The shared `ProductUI.loading` status reserves scene space and animates a small
+network while real data loads. Reduced motion uses a still network. Agent and
+chapter requests start together; failures keep a retry action. The team scene
+uses separate cutaway workspaces, instanced architecture, and cached curves for
+both visible paths and moving objects. Green is the bag/handoff path, blue is a
+controller-routed agent request, and purple is review evidence. The always-visible
+legend explains these distinctions. Phones retain readable robots in a locally
+scrollable panorama; the page itself does not overflow.

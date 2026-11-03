@@ -410,8 +410,8 @@ def order_story(agents: list[dict[str, Any]]) -> dict[str, Any]:
         "legend": [
             {
                 "kind": "event",
-                "label": "Queued handoff",
-                "detail": "Work is recorded so it can be retried.",
+                "label": "Parcel route",
+                "detail": "The bag moves from stock to packing, then to the doorstep.",
             },
             {
                 "kind": "a2a",
