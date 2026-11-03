@@ -78,7 +78,7 @@ window.AgentStory=(()=>{
   async function loadScene(){
    if(!factory||loadingScene||scene||disposed)return;loadingScene=true;
    try{
-    const {createDeliveryScene}=await import('./agent-delivery-scene.js?v=4e9320835a21');
+    const {createDeliveryScene}=await import('./agent-delivery-scene.js?v=9fa99a7cc090');
     if(disposed)return;
     scene=createDeliveryScene(place,data,{createAgentModel:factory,onAgent:open,onFailure:flatScene});
     loading.remove();scene.show(shown);drawState();

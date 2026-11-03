@@ -204,7 +204,11 @@ export function createDeliveryScene(host,data,{onAgent,onFailure,createAgentMode
    bounds[id]={x:(hit.x+1)/2,y:(1-hit.y)/2};
   }
   const router=v([-.4,-2.5],.9).project(camera);
-  controllerLabel.style.transform='translate('+((router.x+1)/2*host.clientWidth).toFixed(1)+'px,'+((1-router.y)/2*host.clientHeight).toFixed(1)+'px) translate(-50%,-100%)';
+  const routerX=(router.x+1)/2*host.clientWidth;let routerY=(1-router.y)/2*host.clientHeight;
+  if(!labelSizes.has('router'))labelSizes.set('router',[controllerLabel.offsetWidth,controllerLabel.offsetHeight]);
+  const [routerWidth,routerHeight]=labelSizes.get('router');
+  while(occupied.some(r=>routerX+routerWidth/2+5>r.left&&routerX-routerWidth/2-5<r.right&&routerY+5>r.top&&routerY-routerHeight-5<r.bottom))routerY-=routerHeight+6;
+  controllerLabel.style.transform='translate('+routerX.toFixed(1)+'px,'+routerY.toFixed(1)+'px) translate(-50%,-100%)';
   canvas.dataset.agents=JSON.stringify(bounds);
   if(focusStep!==null){
     if(narrow.matches){

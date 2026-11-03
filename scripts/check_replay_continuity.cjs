@@ -48,12 +48,12 @@ const {chromium}=require("playwright"),assert=require("node:assert/strict"),fs=r
   assert.equal(await page.locator(".delivery-scene-canvas").getAttribute("data-rooms"),"7");
   assert(await page.locator(".story-legend").isVisible());
   await page.locator('.story-step[data-step="5"] button').click();
-  await page.waitForTimeout(100);
-  assert(await page.locator(".scene-role-label[data-agent]").evaluateAll(labels=>{
+  await page.setViewportSize({width:1265,height:712});await page.waitForTimeout(100);
+  assert(await page.locator(".scene-role-label").evaluateAll(labels=>{
     const boxes=labels.map(el=>el.getBoundingClientRect());
     return boxes.every((a,i)=>boxes.slice(i+1).every(b=>a.right<=b.left||b.right<=a.left||a.bottom<=b.top||b.bottom<=a.top));
   }),"Role labels stay distinct at the doorstep handoff");
-  await page.locator('.story-step[data-step="0"] button').click();await page.evaluate(()=>scrollTo(0,0));
+  await page.setViewportSize({width:1440,height:1000});await page.locator('.story-step[data-step="0"] button').click();await page.evaluate(()=>scrollTo(0,0));
   if(!process.env.CI)await page.screenshot({path:"artifacts/product-check/agents-rooms.png",fullPage:true});
   await page.setViewportSize({width:390,height:844});
   assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth));
